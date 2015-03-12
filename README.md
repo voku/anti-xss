@@ -1,3 +1,6 @@
+[![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg)](https://coveralls.io/r/voku/anti-xss)
+
+
 AntiXSS - Library
 =============
 
