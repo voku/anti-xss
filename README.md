@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
 [![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg)](https://coveralls.io/r/voku/anti-xss)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/anti-xss/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/anti-xss/?branch=master)
 
 
 AntiXSS - Library
