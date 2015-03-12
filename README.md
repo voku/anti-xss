@@ -6,11 +6,17 @@ Usage:
 
 Example 1:
 
-    // TODO
+    $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
+    $harmless_string = $this->security->xss_clean($harm_string);
+    
+    // Hello, i try to alert&#40;'Hack'&#41;; your site
 
 Example 2:
 
-    // TODO
+    $harm_string = "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>";
+    $harmless_string = $this->security->xss_clean($harm_string);
+        
+    // <IMG >
 
 Unit Test:
 ==========
