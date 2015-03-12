@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
 [![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg)](https://coveralls.io/r/voku/anti-xss)
 
 
