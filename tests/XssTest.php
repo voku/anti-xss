@@ -63,6 +63,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
   public function testXssClean()
   {
     $testArray = array(
+      "onAttribute=\"bar\"" => "\"bar\"",
       "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
       "<BR SIZE=\"&{alert('XSS')}\">" => "<BR SIZE=\"&{alert&#40;'XSS'&#41;}\">", // & JavaScript includes
       "<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">" => "&lt;LINK REL=\"stylesheet\" HREF=\"alert&#40;'XSS'&#41;;\"&gt;", // STYLE sheet

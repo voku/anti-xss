@@ -39,6 +39,8 @@ class AntiXSS
    */
   protected $_never_allowed_str = array();
 
+  protected $_never_allowed_str_afterwards = array();
+
   /**
    * List of never allowed regex replacements
    *
@@ -65,14 +67,143 @@ class AntiXSS
   {
     $this->_never_allowed_str = array(
         'document.cookie' => $this->_replacement,
-        'document.write'  => $this->_replacement,
-        '.parentNode'     => $this->_replacement,
-        '.innerHTML'      => $this->_replacement,
-        '-moz-binding'    => $this->_replacement,
-        '<!--'            => '&lt;!--',
-        '-->'             => '--&gt;',
-        '<![CDATA['       => '&lt;![CDATA[',
-        '<comment>'       => '&lt;comment&gt;'
+        'document.write' => $this->_replacement,
+        '.parentNode' => $this->_replacement,
+        '.innerHTML' => $this->_replacement,
+        '-moz-binding' => $this->_replacement,
+        '<!--' => '&lt;!--',
+        '-->' => '--&gt;',
+        '<![CDATA[' => '&lt;![CDATA[',
+        '<comment>' => '&lt;comment&gt;',
+    );
+
+    $this->_never_allowed_str_afterwards = array(
+        'FSCommand=' => $this->_replacement,
+        'onAbort=' => $this->_replacement,
+        'onActivate=' => $this->_replacement,
+        'onAttribute=' => $this->_replacement,
+        'onAfterPrint=' => $this->_replacement,
+        'onAfterUpdate=' => $this->_replacement,
+        'onBeforeActivate=' => $this->_replacement,
+        'onBeforeCopy=' => $this->_replacement,
+        'onBeforeCut=' => $this->_replacement,
+        'onBeforeDeactivate=' => $this->_replacement,
+        'onBeforeEditFocus=' => $this->_replacement,
+        'onBeforePaste=' => $this->_replacement,
+        'onBeforePrint=' => $this->_replacement,
+        'onBeforeUnload=' => $this->_replacement,
+        'onBegin=' => $this->_replacement,
+        'onBlur=' => $this->_replacement,
+        'onBounce=' => $this->_replacement,
+        'onCanPlay=' => $this->_replacement,
+        'onCanPlayThrough=' => $this->_replacement,
+        'onCueChange=' => $this->_replacement,
+        'onCellChange=' => $this->_replacement,
+        'onChange=' => $this->_replacement,
+        'onClick=' => $this->_replacement,
+        'onContextMenu=' => $this->_replacement,
+        'onControlSelect=' => $this->_replacement,
+        'onCopy=' => $this->_replacement,
+        'onCut=' => $this->_replacement,
+        'onDataAvailable=' => $this->_replacement,
+        'onDataSetChanged=' => $this->_replacement,
+        'onDataSetComplete=' => $this->_replacement,
+        'onDblClick=' => $this->_replacement,
+        'onDeactivate=' => $this->_replacement,
+        'onDrag=' => $this->_replacement,
+        'onDragEnd=' => $this->_replacement,
+        'onDragLeave=' => $this->_replacement,
+        'onDragEnter=' => $this->_replacement,
+        'onDragOver=' => $this->_replacement,
+        'onDragDrop=' => $this->_replacement,
+        'onDrop=' => $this->_replacement,
+        'onDurationChange=' => $this->_replacement,
+        'onEmptied=' => $this->_replacement,
+        'onEnd=' => $this->_replacement,
+        'onEnded=' => $this->_replacement,
+        'onError=' => $this->_replacement,
+        'onErrorUpdate=' => $this->_replacement,
+        'onFilterChange=' => $this->_replacement,
+        'onFinish=' => $this->_replacement,
+        'onFocus=' => $this->_replacement,
+        'onFocusIn=' => $this->_replacement,
+        'onFocusOut=' => $this->_replacement,
+        'onHashChange=' => $this->_replacement,
+        'onHelp=' => $this->_replacement,
+        'onInput=' => $this->_replacement,
+        'onInvalid=' => $this->_replacement,
+        'onKeyDown=' => $this->_replacement,
+        'onKeyPress=' => $this->_replacement,
+        'onKeyUp=' => $this->_replacement,
+        'onLayoutComplete=' => $this->_replacement,
+        'onLoad=' => $this->_replacement,
+        'onLoadStart=' => $this->_replacement,
+        'onLoadedData=' => $this->_replacement,
+        'onLoadedMetaData=' => $this->_replacement,
+        'onLoseCapture=' => $this->_replacement,
+        'onMediaComplete=' => $this->_replacement,
+        'onMediaError=' => $this->_replacement,
+        'onMouseDown=' => $this->_replacement,
+        'onMouseEnter=' => $this->_replacement,
+        'onMouseLeave=' => $this->_replacement,
+        'onMouseMove=' => $this->_replacement,
+        'onMouseOut=' => $this->_replacement,
+        'onMouseOver=' => $this->_replacement,
+        'onMouseUp=' => $this->_replacement,
+        'onMouseWheel=' => $this->_replacement,
+        'onMove=' => $this->_replacement,
+        'onMoveEnd=' => $this->_replacement,
+        'onMoveStart=' => $this->_replacement,
+        'onOutOfSync=' => $this->_replacement,
+        'onPageHide=' => $this->_replacement,
+        'onPageShow=' => $this->_replacement,
+        'onPaste=' => $this->_replacement,
+        'onPause=' => $this->_replacement,
+        'onPlay=' => $this->_replacement,
+        'onPlaying=' => $this->_replacement,
+        'onProgress=' => $this->_replacement,
+        'onPropertyChange=' => $this->_replacement,
+        'onPopState=' => $this->_replacement,
+        'onRateChange=' => $this->_replacement,
+        'onReadyStateChange=' => $this->_replacement,
+        'onRepeat=' => $this->_replacement,
+        'onReset=' => $this->_replacement,
+        'onResize=' => $this->_replacement,
+        'onResizeEnd=' => $this->_replacement,
+        'onResizeStart=' => $this->_replacement,
+        'onResume=' => $this->_replacement,
+        'onReverse=' => $this->_replacement,
+        'onRowsEnter=' => $this->_replacement,
+        'onRowExit=' => $this->_replacement,
+        'onRowDelete=' => $this->_replacement,
+        'onRowInserted=' => $this->_replacement,
+        'onScroll=' => $this->_replacement,
+        'onSeek=' => $this->_replacement,
+        'onSeeked=' => $this->_replacement,
+        'onSeeking=' => $this->_replacement,
+        'onSelect=' => $this->_replacement,
+        'onSelectionChange=' => $this->_replacement,
+        'onSelectStart=' => $this->_replacement,
+        'onSearch=' => $this->_replacement,
+        'onStalled=' => $this->_replacement,
+        'onStorage=' => $this->_replacement,
+        'onMessage=' => $this->_replacement,
+        'onStart=' => $this->_replacement,
+        'onStop=' => $this->_replacement,
+        'onShow=' => $this->_replacement,
+        'onSyncRestored=' => $this->_replacement,
+        'onSubmit=' => $this->_replacement,
+        'onSuspend=' => $this->_replacement,
+        'onTimeError=' => $this->_replacement,
+        'onTimeUpdate=' => $this->_replacement,
+        'onTrackChange=' => $this->_replacement,
+        'onToggle=' => $this->_replacement,
+        'onUnload=' => $this->_replacement,
+        'onURLFlip=' => $this->_replacement,
+        'onVolumeChange=' => $this->_replacement,
+        'onWaiting=' => $this->_replacement,
+        'onWheel=' => $this->_replacement,
+        'seekSegmentTime=' => $this->_replacement,
     );
   }
 
@@ -154,6 +285,7 @@ class AntiXSS
 
     // Remove Invisible Characters Again!
     $str = UTF8::remove_invisible_characters($str);
+    $str = UTF8::clean($str, true, true, false);
 
     /*
      * Convert all tabs to spaces
@@ -315,9 +447,13 @@ class AntiXSS
     );
 
     // Final clean up
+
     // This adds a bit of extra precaution in case
     // something got through the above filters
     $str = $this->_do_never_allowed($str);
+
+    // clean-up also some string, also if there is no html-tag
+    $str = UTF8::str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
 
     /*
      * Images are Handled in a Special Way
@@ -337,8 +473,6 @@ class AntiXSS
 
   /**
    * Do Never Allowed
-   *
-   * @used-by  Security::xss_clean()
    *
    * @param  string
    *
@@ -422,8 +556,6 @@ class AntiXSS
    * Callback method for xss_clean() to remove whitespace from
    * things like 'j a v a s c r i p t'.
    *
-   * @used-by  Security::xss_clean()
-   *
    * @param  array $matches
    *
    * @return  string
@@ -437,8 +569,6 @@ class AntiXSS
    * Sanitize Naughty HTML
    *
    * Callback method for xss_clean() to remove naughty HTML elements.
-   *
-   * @used-by  Security::xss_clean()
    *
    * @param  array $matches
    *
@@ -467,8 +597,6 @@ class AntiXSS
    * This limits the PCRE backtracks, making it more performance friendly
    * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
    * PHP 5.2+ on link-heavy strings.
-   *
-   * @used-by  Security::xss_clean()
    *
    * @param  array $match
    *
@@ -499,9 +627,6 @@ class AntiXSS
    *
    * Filters tag attributes for consistency and safety.
    *
-   * @used-by  Security::_js_img_removal()
-   * @used-by  Security::_js_link_removal()
-   *
    * @param  string $str
    *
    * @return  string
@@ -526,8 +651,6 @@ class AntiXSS
    * This limits the PCRE backtracks, making it more performance friendly
    * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
    * PHP 5.2+ on image tag heavy strings.
-   *
-   * @used-by  Security::xss_clean()
    *
    * @param  array $match
    *
@@ -556,8 +679,6 @@ class AntiXSS
   /**
    * Attribute Conversion
    *
-   * @used-by  Security::xss_clean()
-   *
    * @param  array $match
    *
    * @return  string
@@ -579,8 +700,6 @@ class AntiXSS
 
   /**
    * HTML Entity Decode Callback
-   *
-   * @used-by  Security::xss_clean()
    *
    * @param  array $match
    *
@@ -605,7 +724,6 @@ class AntiXSS
    *
    * Generates the XSS hash if needed and returns it.
    *
-   * @see    Security::$_xss_hash
    * @return  string  XSS hash
    */
   public function xss_hash()
