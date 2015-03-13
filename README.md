@@ -7,6 +7,18 @@
 AntiXSS - Library
 =============
 
+"Cross-site scripting (XSS) is a type of computer security vulnerability typically found in Web applications. XSS enables 
+attackers to inject client-side script into Web pages viewed by other users. A cross-site scripting vulnerability may be 
+used by attackers to bypass access controls such as the same origin policy. Cross-site scripting carried out on websites 
+accounted for roughly 84% of all security vulnerabilities documented by Symantec as of 2007." - http://en.wikipedia.org/wiki/Cross-site_scripting
+
+NOTES:
+======
+1) use [filter_input()](http://php.net/manual/de/function.filter-input.php) - don't use GLOBAL-Array (e.g. $_SEESION, $_GET, $_POST) directly
+2) use [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
+3) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
+4) READ THIS -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+
 Usage:
 ======
 
@@ -23,6 +35,13 @@ Example 2:
     $harmless_string = $this->security->xss_clean($harm_string);
         
     // <IMG >
+    
+Example 3:
+
+    $harm_string = "<XSS STYLE=\"behavior: url(xss.htc);\">";
+    $harmless_string = $this->security->xss_clean($harm_string);
+        
+    //
 
 Unit Test:
 ==========
