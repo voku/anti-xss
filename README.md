@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
-[![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg)](https://coveralls.io/r/voku/anti-xss)
+[![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg?branch=master)](https://coveralls.io/r/voku/anti-xss?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/anti-xss/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/anti-xss/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484/mini.png)](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484)
 
