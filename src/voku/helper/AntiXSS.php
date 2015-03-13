@@ -116,6 +116,7 @@ class AntiXSS
 
     // Remove Invisible Characters
     $str = UTF8::remove_invisible_characters($str);
+    $str = UTF8::clean($str, true, true, false);
 
     /*
      * URL Decode
@@ -378,13 +379,17 @@ class AntiXSS
    */
   public function remove_evil_attributes($str, $is_image)
   {
+    // https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Event_Handlers
+
     $evil_attributes = array(
         'on\w*',
         'style',
         'xmlns',
         'formaction',
         'form',
-        'xlink:href'
+        'xlink:href',
+        'seekSegmentTime',
+        'FSCommand'
     );
 
     if ($is_image === true) {
