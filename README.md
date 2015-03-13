@@ -15,8 +15,11 @@ accounted for roughly 84% of all security vulnerabilities documented by Symantec
 NOTES:
 ======
 1) use [filter_input()](http://php.net/manual/de/function.filter-input.php) - don't use GLOBAL-Array (e.g. $_SEESION, $_GET, $_POST) directly
+
 2) use [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
+
 3) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
+
 4) READ THIS -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
 
 Usage:
