@@ -245,8 +245,7 @@ class AntiXSS
       return $str;
     }
 
-    // Remove Invisible Characters
-    $str = UTF8::remove_invisible_characters($str);
+    // removes all non-UTF-8 characters
     $str = UTF8::clean($str, true, true, false);
 
     /*
@@ -283,8 +282,7 @@ class AntiXSS
         ), $str
     );
 
-    // Remove Invisible Characters Again!
-    $str = UTF8::remove_invisible_characters($str);
+    // removes all non-UTF-8 characters, again
     $str = UTF8::clean($str, true, true, false);
 
     /*
