@@ -473,6 +473,7 @@ class AntiXSS
    * Do Never Allowed
    *
    * @param  string
+   * @param string $str
    *
    * @return  string
    */
@@ -737,7 +738,7 @@ class AntiXSS
   /**
    * set the replacement-string for not allowed strings
    *
-   * @param $string
+   * @param string $string
    */
   public function setReplacement($string)
   {
