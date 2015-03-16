@@ -248,19 +248,6 @@ class AntiXSS
     // removes all non-UTF-8 characters
     $str = UTF8::clean($str, true, true, false);
 
-    /*
-     * URL Decode
-     *
-     * Just in case stuff like this is submitted:
-     *
-     * <a href="http://%77%77%77%2E%67%6F%6F%67%6C%65%2E%63%6F%6D">Google</a>
-     *
-     * Note: Use rawurldecode() so it does not remove plus signs
-     */
-    do {
-      $str = rawurldecode($str);
-    }
-    while (preg_match('/%[0-9a-f]{2,}/i', $str));
 
     /*
      * Convert character entities to ASCII
@@ -710,12 +697,17 @@ class AntiXSS
     // 901119URL5918AMP18930PROTECT8198
     $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
 
-    // Decode, then un-protect URL GET vars
-    return str_replace(
-        $this->xss_hash(),
-        '&',
-        UTF8::html_entity_decode($match, null, 'UTF-8')
-    );
+    if (strstr($match, $this->xss_hash()) !== false) {
+      // Decode, then un-protect URL GET vars
+      return str_replace(
+          $this->xss_hash(),
+          '&',
+          UTF8::html_entity_decode($match, null, 'UTF-8')
+      );
+    } else {
+      // Decode
+      return UTF8::urldecode($match);
+    }
   }
 
   /**
