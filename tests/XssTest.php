@@ -60,6 +60,11 @@ class XssTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse($xss_clean_return);
   }
 
+  public function test_xss_hash()
+  {
+    $this->assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->security->xss_hash()) === 1);
+  }
+
   public function testXssClean()
   {
     // \v (vertical whitespace) isn't working on travis-ci ?
@@ -566,7 +571,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       // DRUPAL-SA-2008-006: Invalid UTF-8, these only work as reflected XSS with
       // Internet Explorer 6.
         array(
-            "<p arg=\"\xe0\">\" style=\"background-image: url(javascript:alert(0));\"\xe0<p>",
+            "<p arg=\"\xe0\">\" style=\"background-image: url(j\xe0avascript:alert(0));\"\xe0<p>",
             '<p arg="">" style="background-image: url(alert&#40;0&#41;);"<p>',
             'style',
             'HTML filter -- invalid UTF-8.',
