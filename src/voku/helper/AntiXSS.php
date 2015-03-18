@@ -248,7 +248,6 @@ class AntiXSS
     // removes all non-UTF-8 characters
     $str = UTF8::clean($str, true, true, false);
 
-
     /*
      * Convert character entities to ASCII
      *
@@ -270,7 +269,11 @@ class AntiXSS
     );
 
     // removes all non-UTF-8 characters, again
+    // && remove NULL characters (ignored by some browsers).
     $str = UTF8::clean($str, true, true, false);
+
+    // remove Netscape 4 JS entities.
+    $str = preg_replace('%&\s*\{[^}]*(\}\s*;?|$)%', '', $str);
 
     /*
      * Convert all tabs to spaces

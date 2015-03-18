@@ -67,7 +67,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     $testArray = array(
       "onAttribute=\"bar\"" => "\"bar\"",
       "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
-      "<BR SIZE=\"&{alert('XSS')}\">" => "<BR SIZE=\"&{alert&#40;'XSS'&#41;}\">", // & JavaScript includes
+      "<BR SIZE=\"&{alert('XSS')}\">" => "<BR SIZE=\"\">", // & JavaScript includes
       "<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">" => "&lt;LINK REL=\"stylesheet\" HREF=\"alert&#40;'XSS'&#41;;\"&gt;", // STYLE sheet
       "<STYLE>BODY{-moz-binding:url(\"http://ha.ckers.org/xssmoz.xml#xss\")}</STYLE>" => "&lt;STYLE&gt;BODY{:url(\"http://ha.ckers.org/xssmoz.xml#xss\")}&lt;/STYLE&gt;", // Remote style sheet
       "<STYLE>@im\\port'\\jaasc\ript:alert(\"XSS\")';</STYLE>" => "&lt;STYLE&gt;@im\port'\jaasc\ript:alert&#40;\"XSS\"&#41;';&lt;/STYLE&gt;", // STYLE tags with broken up JavaScript for XSS
@@ -246,4 +246,344 @@ class XssTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->remove_evil_attributes('<foo>onOutsideOfTag=test</foo>', false));
     $this->assertEquals('onNoTagAtAll = true', $this->security->remove_evil_attributes('onNoTagAtAll = true', false));
   }
+
+  /**
+   * all tests from drupal
+   */
+  public function testXss() {
+
+    $cases = array(
+      // Tag stripping, different ways to work around removal of HTML tags.
+        array(
+            '<script>alert(0)</script>',
+            'alert&#40;0&#41;',
+            'script',
+            'HTML tag stripping -- simple script without special characters.',
+        ),
+        array(
+            '<script src="http://www.example.com" />',
+            '',
+            'script',
+            'HTML tag stripping -- empty script with source.',
+        ),
+        array(
+            '<ScRipt sRc=http://www.example.com/>',
+            '',
+            'script',
+            'HTML tag stripping evasion -- varying case.',
+        ),
+        array(
+            "<script\nsrc\n=\nhttp://www.example.com/\n>",
+            '',
+            'script',
+            'HTML tag stripping evasion -- multiline tag.',
+        ),
+        array(
+            '<script/a src=http://www.example.com/a.js></script>',
+            '',
+            'script',
+            'HTML tag stripping evasion -- non whitespace character after tag name.',
+        ),
+        array(
+            '<script/src=http://www.example.com/a.js></script>',
+            '',
+            'script',
+            'HTML tag stripping evasion -- no space between tag and attribute.',
+        ),
+      // Null between < and tag name works at least with IE6.
+        array(
+            "<\0scr\0ipt>alert(0)</script>",
+            'alert&#40;0&#41;',
+            'ipt',
+            'HTML tag stripping evasion -- breaking HTML with nulls.',
+        ),
+        array(
+            "<scrscriptipt src=http://www.example.com/a.js>",
+            '<scrscriptipt src=http://www.example.com/a.js>',
+            'script',
+            'HTML tag stripping evasion -- filter just removing "script".',
+        ),
+        array(
+            '<<script>alert(0);//<</script>',
+            '&lt;alert&#40;0&#41;;//&lt;',
+            'script',
+            'HTML tag stripping evasion -- double opening brackets.',
+        ),
+        array(
+            '<script src=http://www.example.com/a.js?<b>',
+            '',
+            'script',
+            'HTML tag stripping evasion -- no closing tag.',
+        ),
+      // DRUPAL-SA-2008-047: This doesn't seem exploitable, but the filter should
+      // work consistently.
+        array(
+            '<script>>',
+            '>',
+            'script',
+            'HTML tag stripping evasion -- double closing tag.',
+        ),
+        array(
+            '<script src=//www.example.com/.a>',
+            '',
+            'script',
+            'HTML tag stripping evasion -- no scheme or ending slash.',
+        ),
+        array(
+            '<script src=http://www.example.com/.a',
+            '&lt;script src=http://www.example.com/.a',
+            'script',
+            'HTML tag stripping evasion -- no closing bracket.',
+        ),
+        array(
+            '<script src=http://www.example.com/ <',
+            '&lt;script src=http://www.example.com/ &lt;',
+            'script',
+            'HTML tag stripping evasion -- opening instead of closing bracket.',
+        ),
+        array(
+            '<nosuchtag attribute="newScriptInjectionVector">',
+            '<nosuchtag attribute="newScriptInjectionVector">',
+            'nosuchtag',
+            'HTML tag stripping evasion -- unknown tag.',
+        ),
+        array(
+            '<t:set attributeName="innerHTML" to="&lt;script defer&gt;alert(0)&lt;/script&gt;">',
+            '<t:set attributeName="innerHTML" to="alert&#40;0&#41;">',
+            't:set',
+            'HTML tag stripping evasion -- colon in the tag name (namespaces\' tricks).',
+        ),
+        array(
+            '<img """><script>alert(0)</script>',
+            '<img """><>',
+            'script',
+            'HTML tag stripping evasion -- a malformed image tag.',
+            array('img'),
+        ),
+        array(
+            '<blockquote><script>alert(0)</script></blockquote>',
+            '<blockquote>alert&#40;0&#41;</blockquote>',
+            'script',
+            'HTML tag stripping evasion -- script in a blockqoute.',
+            array('blockquote'),
+        ),
+        array(
+            "<!--[if true]><script>alert(0)</script><![endif]-->",
+            '&lt;!--[if true]>alert&#40;0&#41;<![endif]--&gt;',
+            'script',
+            'HTML tag stripping evasion -- script within a comment.',
+        ),
+      // Dangerous attributes removal.
+        array(
+            '<p onmouseover="http://www.example.com/">',
+            '<p >',
+            'onmouseover',
+            'HTML filter attributes removal -- events, no evasion.',
+            array('p'),
+        ),
+        array(
+            '<li style="list-style-image: url(javascript:alert(0))">',
+            '<li -image: url(alert&#40;0&#41;)">',
+            'style',
+            'HTML filter attributes removal -- style, no evasion.',
+            array('li'),
+        ),
+        array(
+            '<img onerror   =alert(0)>',
+            '<img >',
+            'onerror',
+            'HTML filter attributes removal evasion -- spaces before equals sign.',
+            array('img'),
+        ),
+        array(
+            '<img onabort!#$%&()*~+-_.,:;?@[/|\]^`=alert(0)>',
+            '<img >',
+            'onabort',
+            'HTML filter attributes removal evasion -- non alphanumeric characters before equals sign.',
+            array('img'),
+        ),
+        array(
+            '<img oNmediAError=alert(0)>',
+            '<img >',
+            'onmediaerror',
+            'HTML filter attributes removal evasion -- varying case.',
+            array('img'),
+        ),
+      // Works at least with IE6.
+        array(
+            "<img o\0nfocus\0=alert(0)>",
+            '<img >',
+            'focus',
+            'HTML filter attributes removal evasion -- breaking with nulls.',
+            array('img'),
+        ),
+      // Only whitelisted scheme names allowed in attributes.
+        array(
+            '<img src="javascript:alert(0)">',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing -- no evasion.',
+            array('img'),
+        ),
+        array(
+            '<img src=javascript:alert(0)>',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- no quotes.',
+            array('img'),
+        ),
+      // A bit like CVE-2006-0070.
+        array(
+            '<img src="javascript:confirm(0)">',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- no alert ;)',
+            array('img'),
+        ),
+        array(
+            '<img src=`javascript:alert(0)`>',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- grave accents.',
+            array('img'),
+        ),
+        array(
+            '<img dynsrc="javascript:alert(0)">',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing -- rare attribute.',
+            array('img'),
+        ),
+        array(
+            '<table background="javascript:alert(0)">',
+            '<table background="alert&#40;0&#41;">',
+            'javascript',
+            'HTML scheme clearing -- another tag.',
+            array('table'),
+        ),
+        array(
+            '<base href="javascript:alert(0);//">',
+            '&lt;base href="alert&#40;0&#41;;//"&gt;',
+            'javascript',
+            'HTML scheme clearing -- one more attribute and tag.',
+            array('base'),
+        ),
+        array(
+            '<img src="jaVaSCriPt:alert(0)">',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- varying case.',
+            array('img'),
+        ),
+        array(
+            '<img src=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#48;&#41;>',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- UTF-8 decimal encoding.',
+            array('img'),
+        ),
+        array(
+            '<img src=&#00000106&#0000097&#00000118&#0000097&#00000115&#0000099&#00000114&#00000105&#00000112&#00000116&#0000058&#0000097&#00000108&#00000101&#00000114&#00000116&#0000040&#0000048&#0000041>',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- long UTF-8 encoding.',
+            array('img'),
+        ),
+        array(
+            '<img src=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x30&#x29>',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- UTF-8 hex encoding.',
+            array('img'),
+        ),
+        array(
+            "<img src=\"jav\tascript:alert(0)\">",
+            '<img >',
+            'script',
+            'HTML scheme clearing evasion -- an embedded tab.',
+            array('img'),
+        ),
+        array(
+            '<img src="jav&#x09;ascript:alert(0)">',
+            '<img >',
+            'script',
+            'HTML scheme clearing evasion -- an encoded, embedded tab.',
+            array('img'),
+        ),
+        array(
+            '<img src="jav&#x000000A;ascript:alert(0)">',
+            '<img >',
+            'script',
+            'HTML scheme clearing evasion -- an encoded, embedded newline.',
+            array('img'),
+        ),
+      // With &#xD; this test would fail, but the entity gets turned into
+      // &amp;#xD;, so it's OK.
+        array(
+            '<img src="jav&#x0D;ascript:alert(0)">',
+            '<img >',
+            'script',
+            'HTML scheme clearing evasion -- an encoded, embedded carriage return.',
+            array('img'),
+        ),
+        array(
+            "<img src=\"\n\n\nj\na\nva\ns\ncript:alert(0)\">",
+            '<img >',
+            'cript',
+            'HTML scheme clearing evasion -- broken into many lines.',
+            array('img'),
+        ),
+        array(
+            "<img src=\"jav\0a\0\0cript:alert(0)\">",
+            '<img >',
+            'cript',
+            'HTML scheme clearing evasion -- embedded nulls.',
+            array('img'),
+        ),
+        array(
+            '<img src="vbscript:msgbox(0)">',
+            '<img src="msgbox(0)">',
+            'vbscript',
+            'HTML scheme clearing evasion -- another scheme.',
+            array('img'),
+        ),
+        array(
+            '<img src="nosuchscheme:notice(0)">',
+            '<img src="nosuchscheme:notice(0)">',
+            'nosuchscheme',
+            'HTML scheme clearing evasion -- unknown scheme.',
+            array('img'),
+        ),
+      // Netscape 4.x javascript entities.
+        array(
+            '<br size="&{alert(0)}">',
+            '<br size="">',
+            'alert',
+            'Netscape 4.x javascript entities.',
+            array('br'),
+        ),
+      // DRUPAL-SA-2008-006: Invalid UTF-8, these only work as reflected XSS with
+      // Internet Explorer 6.
+        array(
+            "<p arg=\"\xe0\">\" style=\"background-image: url(javascript:alert(0));\"\xe0<p>",
+            '<p arg="">" style="background-image: url(alert&#40;0&#41;);"<p>',
+            'style',
+            'HTML filter -- invalid UTF-8.',
+            array('p'),
+        ),
+        array(
+            '<img src=" &#14;  javascript:alert(0)">',
+            '<img >',
+            'javascript',
+            'HTML scheme clearing evasion -- spaces and metacharacters before scheme.',
+            array('img'),
+        ),
+    );
+
+    foreach ($cases as $caseArray) {
+      $this->assertEquals($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
+    }
+  }
+
+
 }
