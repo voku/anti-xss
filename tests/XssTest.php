@@ -82,6 +82,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       "<IMG SRC=\"jav	ascript:alert('XSS');\">" => "<IMG >",
       "<IMG SRC=\"jav&#x09;ascript:alert('XSS');\">" => "<IMG >",
       "<IMG SRC=\"jav&#x0A;ascript:alert('XSS');\">" => "<IMG >",
+      "<test lall=&amp;amp;#039;jav&#x0A;ascript:alert(\\&amp;amp;#039;XSS\\&amp;amp;#039;);&amp;amp;#039;>" => "<test lall=&#039;alert&#40;\\&#039;XSS\\&#039;&#41;;&#039;>",
       "<IMG SRC\n=\n\"\nj\na\nv\n&#x0A;a\ns\nc\nr\ni\np\nt\n:\na\nl\ne\nr\nt\n(\n'\nX\nS\nS\n'\n)\n;\">" => "<IMG SRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n;\">",
       "<IMG SRC=java�script:alert('XSS')>" => "<IMG >",
       "<DIV STYLE=\"background-image:\\0075\\0072\\006C\\0028'\\006a\\0061\\0076\\0061\\0073\\0063\\0072\\0069\\0070\\0074\\003a\\0061\\006c\\0065\\0072\\0074\\0028\\0027\\0058\\0053\\0053\\0027\\0029'\\0029\">" => "<DIV >",
