@@ -571,7 +571,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       // DRUPAL-SA-2008-006: Invalid UTF-8, these only work as reflected XSS with
       // Internet Explorer 6.
         array(
-            "<p arg=\"\xe0\">\" style=\"background-image: url(j\xe0avascript:alert(0));\"\xe0<p>",
+            "<p arg=\"\xe0\">\" style=\"background-image: url(j\xe0avas\xc2\xa0cript:alert(0));\"\xe0<p>",
             '<p arg="">" style="background-image: url(alert&#40;0&#41;);"<p>',
             'style',
             'HTML filter -- invalid UTF-8.',
