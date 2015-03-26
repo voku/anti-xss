@@ -2,6 +2,10 @@
 [![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg?branch=master)](https://coveralls.io/r/voku/anti-xss?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/anti-xss/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/anti-xss/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484/mini.png)](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484)
+[![Reference Status](https://www.versioneye.com/php/voku:anti-xss/reference_badge.svg?style=flat)](https://www.versioneye.com/php/voku:anti-xss/references)
+[![Dependency Status](https://www.versioneye.com/php/voku:anti-xss/dev-master/badge.svg)](https://www.versioneye.com/php/voku:anti-xss/dev-master)
+[![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads.svg)](https://packagist.org/packages/voku/anti-xss)
+[![License](https://poser.pugx.org/voku/anti-xss/license.svg)](https://packagist.org/packages/voku/anti-xss)
 
 
 AntiXSS - Library
@@ -20,7 +24,9 @@ NOTES:
 
 3) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
 
-4) READ THIS -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+4) READ THIS TEXT -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+
+5) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project)
 
 Usage:
 ======
