@@ -261,12 +261,17 @@ class AntiXSS
             '_convert_attribute'
         ), $str
     );
-    $str = preg_replace_callback(
-        '/<\w+.*/si', array(
-            $this,
-            '_decode_entity'
-        ), $str
-    );
+
+    if (preg_match('/<\w+.*/si', $str, $matches) === 1) {
+      $str = preg_replace_callback(
+          '/<\w+.*/si', array(
+              $this,
+              '_decode_entity'
+          ), $str
+      );
+    } else {
+      $str = UTF8::urldecode($str);
+    }
 
     // removes all non-UTF-8 characters, again
     // && remove NULL characters (ignored by some browsers).
@@ -278,7 +283,7 @@ class AntiXSS
     /*
      * Convert all tabs to spaces
      *
-     * This prevents strings like this: ja	vascript
+     * This prevents strings like this: "ja	vascript"
      * NOTE: we deal with spaces between characters later.
      * NOTE: preg_replace was found to be amazingly slow here on
      * large blocks of data, so we use str_replace.
