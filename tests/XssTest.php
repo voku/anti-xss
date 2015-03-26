@@ -71,6 +71,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $testArray = array(
       "onAttribute=\"bar\"" => "\"bar\"",
+      "onAttribute=\"<script>alert('bar')</script>\"" => "\"alert&#40;'bar'&#41;\"",
       "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
       "<BR SIZE=\"&{alert('XSS')}\">" => "<BR SIZE=\"\">", // & JavaScript includes
       "<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">" => "&lt;LINK REL=\"stylesheet\" HREF=\"alert&#40;'XSS'&#41;;\"&gt;", // STYLE sheet
