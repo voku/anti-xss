@@ -17,36 +17,6 @@ class AntiXSS
 {
 
   /**
-   * XSS Hash
-   *
-   * Random Hash for protecting URLs.
-   *
-   * @var  string
-   */
-  protected $_xss_hash;
-
-  /**
-   * the replacement-string for not allowed strings
-   *
-   * @var string
-   */
-  protected $_replacement = '';
-
-  /**
-   * List of never allowed strings
-   *
-   * @var  array
-   */
-  protected $_never_allowed_str = array();
-
-  /**
-   * List of never allowed strings, afterwards
-   *
-   * @var array
-   */
-  protected $_never_allowed_str_afterwards = array();
-
-  /**
    * List of never allowed regex replacements
    *
    * @var  array
@@ -67,6 +37,34 @@ class AntiXSS
       'Redirect\s+30\d',
       "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
   );
+
+  /**
+   * XSS Hash - random Hash for protecting URLs.
+   *
+   * @var  string
+   */
+  protected $_xss_hash;
+
+  /**
+   * the replacement-string for not allowed strings
+   *
+   * @var string
+   */
+  protected $_replacement = '';
+
+  /**
+   * list of never allowed strings
+   *
+   * @var  array
+   */
+  protected $_never_allowed_str = array();
+
+  /**
+   * list of never allowed strings, afterwards
+   *
+   * @var array
+   */
+  protected $_never_allowed_str_afterwards = array();
 
   /**
    * __construct()
@@ -240,7 +238,9 @@ class AntiXSS
    * @param  string|string[] $str      Input data
    * @param  bool            $is_image Whether the input is an image
    *
-   * @return  string
+   * @return  string|string[]|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
+   *                                   string: will return a string, if the input is a string
+   *                                   array: will return a array, if the input is a array
    */
   public function xss_clean($str, $is_image = false)
   {
@@ -264,17 +264,17 @@ class AntiXSS
      */
     $str = preg_replace_callback(
         "/[^a-z0-9>]+[a-z0-9]+=([\'\"]).*?\\1/si", array(
-        $this,
-        '_convert_attribute',
-    ), $str
+            $this,
+            '_convert_attribute',
+        ), $str
     );
 
     if (preg_match('/<\w+.*/si', $str, $matches) === 1) {
       $str = preg_replace_callback(
           '/<\w+.*/si', array(
-          $this,
-          '_decode_entity',
-      ), $str
+              $this,
+              '_decode_entity',
+          ), $str
       );
     } else {
       $str = UTF8::urldecode($str);
@@ -384,19 +384,19 @@ class AntiXSS
 
       if (preg_match('/<a/i', $str)) {
         $str = preg_replace_callback(
-            '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#si', array(
-            $this,
-            '_js_link_removal',
-        ), $str
+            '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i', array(
+                $this,
+                '_js_link_removal',
+            ), $str
         );
       }
 
       if (preg_match('/<img/i', $str)) {
         $str = preg_replace_callback(
-            '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#si', array(
-            $this,
-            '_js_img_removal',
-        ), $str
+            '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i', array(
+                $this,
+                '_js_img_removal',
+            ), $str
         );
       }
 
@@ -455,10 +455,13 @@ class AntiXSS
     $str = UTF8::str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
 
     /*
-     * Images are Handled in a Special Way
-     * - Essentially, we want to know that after all of the character
+     * images are Handled in a special way
+     *
+     * Essentially, we want to know that after all of the character
      * conversion is done whether any unwanted, likely XSS, code was found.
+     *
      * If not, we return TRUE, as the image is clean.
+     *
      * However, if the string post-conversion does not matched the
      * string post-removal of XSS, then it fails, as there was unwanted XSS
      * code found and removed/changed during processing.
@@ -570,7 +573,7 @@ class AntiXSS
    */
   protected function _compact_exploded_words($matches)
   {
-    return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
+    return preg_replace('/\s+/', '', $matches[1]) . $matches[2];
   }
 
   /**
@@ -598,39 +601,6 @@ class AntiXSS
   }
 
   /**
-   * JS Link Removal
-   *
-   * Callback method for xss_clean() to sanitize links.
-   *
-   * This limits the PCRE backtracks, making it more performance friendly
-   * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
-   * PHP 5.2+ on link-heavy strings.
-   *
-   * @param  array $match
-   *
-   * @return  string
-   */
-  protected function _js_link_removal($match)
-  {
-    return str_replace(
-        $match[1],
-        preg_replace(
-            '#href=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si',
-            '',
-            $this->_filter_attributes(
-                str_replace(
-                    array(
-                        '<',
-                        '>',
-                    ), '', $match[1]
-                )
-            )
-        ),
-        $match[0]
-    );
-  }
-
-  /**
    * Filter Attributes
    *
    * Filters tag attributes for consistency and safety.
@@ -642,7 +612,7 @@ class AntiXSS
   protected function _filter_attributes($str)
   {
     $out = '';
-    if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches)) {
+    if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#i', $str, $matches)) {
       foreach ($matches[0] as $match) {
         $out .= preg_replace('#/\*.*?\*/#s', '', $match);
       }
@@ -666,10 +636,46 @@ class AntiXSS
    */
   protected function _js_img_removal($match)
   {
+    return $this->_js_removal($match, 'src');
+  }
+
+  /**
+   * JS Link Removal
+   *
+   * Callback method for xss_clean() to sanitize links.
+   *
+   * This limits the PCRE backtracks, making it more performance friendly
+   * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
+   * PHP 5.2+ on link-heavy strings.
+   *
+   * @param  array $match
+   *
+   * @return  string
+   */
+  protected function _js_link_removal($match)
+  {
+    return $this->_js_removal($match, 'href');
+  }
+
+  /**
+   * JS Removal
+   *
+   * Callback method for xss_clean() to sanitize tags.
+   *
+   * This limits the PCRE backtracks, making it more performance friendly
+   * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
+   * PHP 5.2+ on image tag heavy strings.
+   *
+   * @param  array $match
+   *
+   * @return  string
+   */
+  protected function _js_removal($match, $search)
+  {
     return str_replace(
         $match[1],
         preg_replace(
-            '#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
+            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
             '',
             $this->_filter_attributes(
                 str_replace(

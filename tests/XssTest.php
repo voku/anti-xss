@@ -20,7 +20,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $harmless_string = $this->security->xss_clean($harm_string);
 
-    $this->assertEquals("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
+    self::assertEquals("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
   }
 
   public function test_xss_clean_string_array()
@@ -36,10 +36,10 @@ class XssTest extends PHPUnit_Framework_TestCase {
     $harmless_strings = $this->security->xss_clean($harm_strings);
     $this->security->setReplacement('');
 
-    $this->assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[0]);
-    $this->assertEquals("Simple clean string", $harmless_strings[1]);
-    $this->assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[2]);
-    $this->assertEquals("<a href=\"http://test.com?param1=\">test</a>", $harmless_strings[3]);
+    self::assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[0]);
+    self::assertEquals("Simple clean string", $harmless_strings[1]);
+    self::assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[2]);
+    self::assertEquals("<a href=\"http://test.com?param1=\">test</a>", $harmless_strings[3]);
   }
 
   public function test_xss_clean_image_valid()
@@ -48,7 +48,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $xss_clean_return = $this->security->xss_clean($harm_string, TRUE);
 
-    $this->assertTrue($xss_clean_return);
+    self::assertTrue($xss_clean_return);
   }
 
   public function test_xss_clean_image_invalid()
@@ -57,12 +57,12 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $xss_clean_return = $this->security->xss_clean($harm_string, TRUE);
 
-    $this->assertFalse($xss_clean_return);
+    self::assertFalse($xss_clean_return);
   }
 
   public function test_xss_hash()
   {
-    $this->assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->security->xss_hash()) === 1);
+    self::assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->security->xss_hash()) === 1);
   }
 
   public function testXssClean()
@@ -139,8 +139,8 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $before => $after) {
-      $this->assertEquals($after, $this->security->xss_clean($before));
-    }
+      self::assertEquals($after, $this->security->xss_clean($before));
+     }
   }
 
   public function testJavaScriptCleaning()
@@ -245,8 +245,18 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $test) {
-      $this->assertEquals("<img >", $this->security->xss_clean($test));
+      self::assertEquals("<img >", $this->security->xss_clean($test));
     }
+
+    foreach ($testArray as $test) {
+      self::assertEquals(false, $this->security->xss_clean($test, true));
+    }
+
+    self::assertEquals('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="foo">'));
+    self::assertEquals(true, $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', true));
+
+    self::assertEquals('<img \'>', $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">'));
+    self::assertEquals(false, $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">', true));
   }
 
   public function test_xss_clean_entity_double_encoded()
@@ -261,31 +271,31 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $before => $after) {
-      $this->assertEquals($after, $this->security->xss_clean($before));
+      self::assertEquals($after, $this->security->xss_clean($before));
     }
   }
 
   public function test_xss_clean_js_img_removal()
   {
     $input = '<img src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    $this->assertEquals('<img >', $this->security->xss_clean($input));
+    self::assertEquals('<img >', $this->security->xss_clean($input));
   }
 
   public function test_xss_clean_sanitize_naughty_html()
   {
     $input = '<blink>';
-    $this->assertEquals('&lt;blink&gt;', $this->security->xss_clean($input));
+    self::assertEquals('&lt;blink&gt;', $this->security->xss_clean($input));
   }
 
   public function test_remove_evil_attributes()
   {
-    $this->assertEquals('onAttribute="bar"', $this->security->remove_evil_attributes('onAttribute="bar"', false));
-    $this->assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttribute="bar">', false));
-    $this->assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttributeNoQuotes=bar>', false));
-    $this->assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttributeWithSpaces = bar>', false));
-    $this->assertEquals('<foo prefixOnAttribute="bar">', $this->security->remove_evil_attributes('<foo prefixOnAttribute="bar">', false));
-    $this->assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->remove_evil_attributes('<foo>onOutsideOfTag=test</foo>', false));
-    $this->assertEquals('onNoTagAtAll = true', $this->security->remove_evil_attributes('onNoTagAtAll = true', false));
+    self::assertEquals('onAttribute="bar"', $this->security->remove_evil_attributes('onAttribute="bar"', false));
+    self::assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttribute="bar">', false));
+    self::assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttributeNoQuotes=bar>', false));
+    self::assertEquals('<foo >', $this->security->remove_evil_attributes('<foo onAttributeWithSpaces = bar>', false));
+    self::assertEquals('<foo prefixOnAttribute="bar">', $this->security->remove_evil_attributes('<foo prefixOnAttribute="bar">', false));
+    self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->remove_evil_attributes('<foo>onOutsideOfTag=test</foo>', false));
+    self::assertEquals('onNoTagAtAll = true', $this->security->remove_evil_attributes('onNoTagAtAll = true', false));
   }
 
   /**
@@ -622,7 +632,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($cases as $caseArray) {
-      $this->assertEquals($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
+      self::assertEquals($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
     }
   }
 
