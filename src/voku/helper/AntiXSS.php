@@ -667,6 +667,7 @@ class AntiXSS
    * PHP 5.2+ on image tag heavy strings.
    *
    * @param  array $match
+   * @param string $search
    *
    * @return  string
    */
