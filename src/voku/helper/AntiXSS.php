@@ -482,7 +482,7 @@ class AntiXSS
    */
   protected function _do_never_allowed($str)
   {
-    $str = str_replace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
+    $str = UTF8::str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
 
     foreach (self::$_never_allowed_regex as $regex) {
       $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
@@ -672,7 +672,7 @@ class AntiXSS
    */
   protected function _js_removal($match, $search)
   {
-    return str_replace(
+    return UTF8::str_ireplace(
         $match[1],
         preg_replace(
             '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
