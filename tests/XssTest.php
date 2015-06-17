@@ -122,7 +122,6 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<FRAMESET><FRAME SRC="javascript:alert(\'XSS\');"></FRAMESET>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
       '<TABLE BACKGROUND="javascript:alert(\'XSS\')">' => '<TABLE BACKGROUND="alert&#40;\'XSS\'&#41;">',
       '<DIV STYLE="background-image: url(javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
-      '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
       '<DIV STYLE="width: expression(alert(\'XSS\'));">' => '<DIV  alert&#40;\'XSS\'&#41;);">',
       '<STYLE>@im\port\'\ja\vasc\ript:alert("XSS")\';</STYLE>' => '&lt;STYLE&gt;@im\port\'\ja\vasc\ript:alert&#40;"XSS"&#41;\';&lt;/STYLE&gt;',
       '<IMG STYLE="xss:expr/*XSS*/ession(alert(\'XSS\'))">' => '<IMG >',
@@ -227,10 +226,12 @@ class XssTest extends PHPUnit_Framework_TestCase {
     if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG \'>',
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
       );
     } else {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
       );
     }
 
