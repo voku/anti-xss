@@ -89,7 +89,6 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<IMG SRC="jav	ascript:alert(\'XSS\');">' => '<IMG \'>',
       '<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">' => '<IMG \'>',
       '<IMG SRC="jav&#x0A;ascript:alert(\'XSS\');">' => '<IMG \'>',
-      '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG \'>',
       '<IMG SRC=" &#14;  javascript:alert(\'XSS\');">' => '<IMG \'>',
       '<IMG%0aSRC%0a=%0a"%0aj%0aa%0av%0aa%0as%0ac%0ar%0ai%0ap%0at%0a:%0aa%0al%0ae%0ar%0at%0a(%0a\'%0aX%0aS%0aS%0a\'%0a)%0a"%0a>' => "<IMG\nSRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n\"\n>",
       '<IMG SRC=java%00script:alert(\"XSS\")>' => '<IMG >',
@@ -222,6 +221,22 @@ class XssTest extends PHPUnit_Framework_TestCase {
     foreach ($testArray as $before => $after) {
       self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
      }
+
+    // test for php < OR > 5.3
+
+    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+      $testArray = array(
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG \'>',
+      );
+    } else {
+      $testArray = array(
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
+      );
+    }
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
   }
 
   public function testJavaScriptCleaning()
