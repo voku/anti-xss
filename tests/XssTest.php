@@ -349,11 +349,17 @@ class XssTest extends PHPUnit_Framework_TestCase {
       self::assertEquals(false, $this->security->xss_clean($test, true));
     }
 
-    self::assertEquals('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="foo">'));
-    self::assertEquals(true, $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', true));
+    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
+    self::assertEquals('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
 
-    self::assertEquals('<img \'>', $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">'));
-    self::assertEquals(false, $this->security->xss_clean('<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">', true));
+    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
+    self::assertEquals(true, $this->security->xss_clean($testString, true));
+
+    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
+    self::assertEquals('<img \'>', $this->security->xss_clean($testString));
+
+    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
+    self::assertEquals(false, $this->security->xss_clean($testString, true));
   }
 
   public function test_xss_clean_entity_double_encoded()

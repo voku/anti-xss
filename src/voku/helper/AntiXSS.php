@@ -235,18 +235,18 @@ class AntiXSS
    *    vulnerabilities along with a few other hacks I've
    *    harvested from examining vulnerabilities in other programs.
    *
-   * @param  string|string[] $str      Input data
-   * @param  bool            $is_image Whether the input is an image
+   * @param  string|array $str      input data
+   * @param  bool         $is_image whether the input is an image
    *
-   * @return  string|string[]|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
-   *                                   string: will return a string, if the input is a string
-   *                                   array: will return a array, if the input is a array
+   * @return  string|array|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
+   *                                string: will return a string, if the input is a string
+   *                                array: will return a array, if the input is a array
    */
   public function xss_clean($str, $is_image = false)
   {
     if (is_array($str)) {
-      while (list($key) = each($str)) {
-        $str[$key] = $this->xss_clean($str[$key]);
+      foreach ($str as &$value) {
+        $value = $this->xss_clean($value);
       }
 
       return $str;
@@ -298,7 +298,9 @@ class AntiXSS
     $str = str_replace("\t", ' ', $str);
 
     // capture converted string for later comparison
-    $converted_string = $str;
+    if ($is_image === true) {
+      $converted_string = $str;
+    }
 
     // remove Strings that are never allowed
     $str = $this->_do_never_allowed($str);
@@ -358,7 +360,7 @@ class AntiXSS
       $word = implode('\s*', UTF8::str_split($word)) . '\s*';
 
       // We only want to do this when it is followed by a non-word character
-      // That way valid stuff like "dealer to" does not become "dealerto"
+      // That way valid stuff like "dealer to" does not become "dealerto".
       $str = preg_replace_callback(
           '#(' . UTF8::substr($word, 0, -3) . ')(\W)#is', array(
           $this,
@@ -407,7 +409,7 @@ class AntiXSS
 
     unset($original);
 
-    // Remove evil attributes such as style, onclick and xmlns
+    // Remove evil attributes such as style, onclick and xmlns.
     $str = $this->remove_evil_attributes($str, $is_image);
 
     /*
@@ -467,6 +469,7 @@ class AntiXSS
      * code found and removed/changed during processing.
      */
     if ($is_image === true) {
+      /** @noinspection PhpUndefinedVariableInspection */
       return ($str === $converted_string);
     }
 
@@ -601,27 +604,6 @@ class AntiXSS
   }
 
   /**
-   * Filter Attributes
-   *
-   * Filters tag attributes for consistency and safety.
-   *
-   * @param  string $str
-   *
-   * @return  string
-   */
-  protected function _filter_attributes($str)
-  {
-    $out = '';
-    if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#i', $str, $matches)) {
-      foreach ($matches[0] as $match) {
-        $out .= preg_replace('#/\*.*?\*/#s', '', $match);
-      }
-    }
-
-    return $out;
-  }
-
-  /**
    * JS Image Removal
    *
    * Callback method for xss_clean() to sanitize image tags.
@@ -637,24 +619,6 @@ class AntiXSS
   protected function _js_img_removal($match)
   {
     return $this->_js_removal($match, 'src');
-  }
-
-  /**
-   * JS Link Removal
-   *
-   * Callback method for xss_clean() to sanitize links.
-   *
-   * This limits the PCRE backtracks, making it more performance friendly
-   * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
-   * PHP 5.2+ on link-heavy strings.
-   *
-   * @param  array $match
-   *
-   * @return  string
-   */
-  protected function _js_link_removal($match)
-  {
-    return $this->_js_removal($match, 'href');
   }
 
   /**
@@ -689,6 +653,45 @@ class AntiXSS
         ),
         $match[0]
     );
+  }
+
+  /**
+   * Filter Attributes
+   *
+   * Filters tag attributes for consistency and safety.
+   *
+   * @param  string $str
+   *
+   * @return  string
+   */
+  protected function _filter_attributes($str)
+  {
+    $out = '';
+    if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#i', $str, $matches)) {
+      foreach ($matches[0] as $match) {
+        $out .= preg_replace('#/\*.*?\*/#s', '', $match);
+      }
+    }
+
+    return $out;
+  }
+
+  /**
+   * JS Link Removal
+   *
+   * Callback method for xss_clean() to sanitize links.
+   *
+   * This limits the PCRE backtracks, making it more performance friendly
+   * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
+   * PHP 5.2+ on link-heavy strings.
+   *
+   * @param  array $match
+   *
+   * @return  string
+   */
+  protected function _js_link_removal($match)
+  {
+    return $this->_js_removal($match, 'href');
   }
 
   /**
