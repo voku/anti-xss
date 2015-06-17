@@ -4,6 +4,10 @@ use voku\helper\AntiXSS;
 
 class XssTest extends PHPUnit_Framework_TestCase {
 
+  // INFO: here you can find some more tests
+  //
+  // http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
+
   /**
    * @var $security AntiXSS
    */
@@ -70,6 +74,82 @@ class XssTest extends PHPUnit_Framework_TestCase {
     // \v (vertical whitespace) isn't working on travis-ci ?
 
     $testArray = array(
+      '<SCRIPT>alert(\'XSS\');</SCRIPT>' => 'alert&#40;\'XSS\'&#41;;',
+      '\'\';!--"<XSS>=&{()}' => '\'\';!--"=',
+      '<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>' => '',
+      '<IMG SRC="javascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC=javascript:alert(\'XSS\')>' => '<IMG >',
+      '<IMG SRC=JaVaScRiPt:alert(\'XSS\')>' => '<IMG >',
+      '<IMG SRC=javascript:alert(&quot;XSS&quot;)>' => '<IMG >',
+      '<IMG SRC=`javascript:alert("RSnake says, \'XSS\'")`>' => '<IMG >',
+      '<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>' => '<IMG >',
+      'SRC=&#10<IMG 6;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>' => 'SRC=&#10<IMG >',
+      '<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>' => '<IMG >',
+      '<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>' => '<IMG >',
+      '<IMG SRC="jav	ascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC="jav&#x0A;ascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC=" &#14;  javascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG%0aSRC%0a=%0a"%0aj%0aa%0av%0aa%0as%0ac%0ar%0ai%0ap%0at%0a:%0aa%0al%0ae%0ar%0at%0a(%0a\'%0aX%0aS%0aS%0a\'%0a)%0a"%0a>' => "<IMG\nSRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n\"\n>",
+      '<IMG SRC=java%00script:alert(\"XSS\")>' => '<IMG >',
+      '<SCR%00IPT>alert(\"XSS\")</SCR%00IPT>' => 'alert&#40;\"XSS\"&#41;',
+      '<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '',
+      '<SCRIPT SRC=http://ha.ckers.org/xss.js?<B>' => '',
+      '<IMG SRC="javascript:alert(\'XSS\')"' => '<IMG \'',
+      '<SCRIPT>a=/XSS/' => 'a=/XSS/',
+      '\";alert(\'XSS\');//' => '\";alert&#40;\'XSS\'&#41;;//',
+      '<INPUT TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">' => '&lt;INPUT TYPE="IMAGE" SRC="alert&#40;\'XSS\'&#41;;"&gt;',
+      '<BODY BACKGROUND="javascript:alert(\'XSS\')">' => '&lt;BODY BACKGROUND="alert&#40;\'XSS\'&#41;"&gt;',
+      '<BODY ONLOAD=alert(\'XSS\')>' => '&lt;BODY &gt;',
+      '<IMG DYNSRC="javascript:alert(\'XSS\')">' => '<IMG >',
+      '<IMG LOWSRC="javascript:alert(\'XSS\')">' => '<IMG >',
+      '<BGSOUND SRC="javascript:alert(\'XSS\');">' => '<IMG >',
+      '<BR SIZE="&{alert(\'XSS\')}">' => '',
+      '<LAYER SRC="http://ha.ckers.org/scriptlet.html"></LAYER>' => '&lt;LAYER SRC="http://ha.ckers.org/scriptlet.html"&gt;&lt;/LAYER>',
+      '<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
+      '<LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
+      '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
+      '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
+      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '',
+      '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG SRC=\'msgbox("XSS")\'>',
+      '<IMG SRC="mocha:[code]">' => '<IMG [>',
+      '<IMG SRC="livescript:[code]">' => '<IMG [>',
+      '<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0;url=PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
+      '<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0;url=PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
+      '<META HTTP-EQUIV="Link" Content="<javascript:alert(\'XSS\')>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;alert&#40;\'XSS\'&#41;>; REL=stylesheet">',
+      '<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=alert&#40;\'XSS\'&#41;;"&gt;',
+      '<IFRAME SRC="javascript:alert(\'XSS\');"></IFRAME>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
+      '<FRAMESET><FRAME SRC="javascript:alert(\'XSS\');"></FRAMESET>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
+      '<TABLE BACKGROUND="javascript:alert(\'XSS\')">' => '<TABLE BACKGROUND="alert&#40;\'XSS\'&#41;">',
+      '<DIV STYLE="background-image: url(javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
+      '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
+      '<DIV STYLE="width: expression(alert(\'XSS\'));">' => '<DIV  alert&#40;\'XSS\'&#41;);">',
+      '<STYLE>@im\port\'\ja\vasc\ript:alert("XSS")\';</STYLE>' => '&lt;STYLE&gt;@im\port\'\ja\vasc\ript:alert&#40;"XSS"&#41;\';&lt;/STYLE&gt;',
+      '<IMG STYLE="xss:expr/*XSS*/ession(alert(\'XSS\'))">' => '<IMG >',
+      '<XSS STYLE="xss:expression(alert(\'XSS\'))">' => '',
+      'exp/*<XSS STYLE=\'no\xss:noxss("*//*");' => 'exp/*&lt;XSS ',
+      '<STYLE TYPE="text/javascript">alert(\'XSS\');</STYLE>' => '&lt;STYLE TYPE="text/javascript"&gt;alert&#40;\'XSS\'&#41;;&lt;/STYLE&gt;',
+      '<STYLE>.XSS{background-image:url("javascript:alert(\'XSS\')");}</STYLE><A CLASS=XSS></A>' => '&lt;STYLE TYPE="text/javascript"&gt;alert&#40;\'XSS\'&#41;;&lt;/STYLE&gt;',
+      '<STYLE type="text/css">BODY{background:url("javascript:alert(\'XSS\')")}</STYLE>' => '&lt;STYLE type="text/css"&gt;BODY{background:url("alert&#40;\'XSS\'&#41;")}&lt;/STYLE&gt;',
+      '<BASE HREF="javascript:alert(\'XSS\');//">' => '&lt;BASE HREF="alert&#40;\'XSS\'&#41;;//"&gt;',
+      '<OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"></OBJECT>' => '&lt;OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"&gt;&lt;/OBJECT>',
+      '<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(\'XSS\')></OBJECT>' => '&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=alert&#40;\'XSS\'&#41;>&lt;/OBJECT&gt;',
+      'getURL("javascript:alert(\'XSS\')")' => 'getURL("alert&#40;\'XSS\'&#41;")',
+      'a="get";' => 'a="get";',
+      '<!--<value><![CDATA[<XML ID=I><X><C><![CDATA[<IMG SRC="javas<![CDATA[cript:alert(\'XSS\');">' => '&lt;!--<value>&lt;![CDATA[&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG \'>',
+      '<XML SRC="http://ha.ckers.org/xsstest.xml" ID=I></XML>' => '&lt;XML SRC="http://ha.ckers.org/xsstest.xml" ID=I&gt;&lt;/XML>',
+      '<HTML><BODY>' => '&lt;HTML&gt;&lt;BODY>',
+      '<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>' => '',
+      '<!--#exec cmd="/bin/echo \'<SCRIPT SRC\'"--><!--#exec cmd="/bin/echo \'=http://ha.ckers.org/xss.js></SCRIPT>\'"-->' => '&lt;!--#exec cmd="/bin/echo \'\'"--&gt;',
+      '<? echo(\'<SCR)\';' => '&lt;? echo(\'<SCR)\';',
+      '<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(\'XSS\')&lt;/SCRIPT&gt;">' => '&lt;META HTTP-EQUIV="Set-Cookie" Content="USERID=alert&#40;\'XSS\'&#41;"&gt;',
+      '<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(\'XSS\');+ADw-/SCRIPT+AD4-' => '&lt;HEAD&gt;&lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> &lt;/HEAD&gt; ADw-SCRIPT AD4-alert&#40;\'XSS\'&#41;; ADw-/SCRIPT AD4-',
+      '<SCRIPT a=">" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT a=">" \'\' SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" \'\' SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT "a=\'>\'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '\'" SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT a=`>` SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '` SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '',
       "onAttribute=\"bar\"" => "\"bar\"",
       "onAttribute=\"<script>alert('bar')</script>\"" => "\"alert&#40;'bar'&#41;\"",
       "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
@@ -81,11 +161,8 @@ class XssTest extends PHPUnit_Framework_TestCase {
       "<XSS STYLE=\"behavior: url(xss.htc);\">" => "", // Local htc file
       "¼script¾alert(¢XSS¢)¼/script¾" => "¼script¾alert&#40;¢XSS¢&#41;¼/script¾", // US-ASCII encoding
       "<IMG defang_SRC=javascript:alert\(&quot;XSS&quot;\)>" => "<IMG >", // IMG
-      "<IMG SRC=javascript:alert(&quot;XSS&quot;)>" => "<IMG >",
       "<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>" => "<IMG >",
       "<img src =x onerror=confirm(document.cookie);>" => "<img >",
-      "<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>" => "<IMG >",
-      "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>" => "<IMG >",
       "<IMG SRC=\"jav	ascript:alert('XSS');\">" => "<IMG >",
       "<IMG SRC=\"jav&#x09;ascript:alert('XSS');\">" => "<IMG >",
       "<IMG SRC=\"jav&#x09;ascript:alert&rpar;'XSS'&rpar;;\">" => "<IMG >",
@@ -143,7 +220,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before));
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
      }
   }
 
