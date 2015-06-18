@@ -374,9 +374,9 @@ class AntiXSS
   /**
    * decode the html-tags via "UTF8::html_entity_decode" or the string via "UTF8::urldecode"
    *
-   * @param $str
+   * @param string $str
    *
-   * @return mixed|string
+   * @return string
    */
   protected function decode_string($str)
   {
@@ -534,9 +534,9 @@ class AntiXSS
    * @return  string
    */
   /**
-   * @param $str
+   * @param string $str
    *
-   * @return mixed
+   * @return string
    */
   protected function _do_never_allowed_afterwards($str)
   {
