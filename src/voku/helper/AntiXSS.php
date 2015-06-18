@@ -262,6 +262,9 @@ class AntiXSS
     // decode the string
     $str = $this->decode_string($str);
 
+    // and again... removes all non-UTF-8 characters
+    $str = UTF8::clean($str, true, true, false);
+
     // capture converted string for later comparison
     if ($is_image === true) {
       $converted_string = $str;
