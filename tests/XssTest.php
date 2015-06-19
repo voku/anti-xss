@@ -18,6 +18,27 @@ class XssTest extends PHPUnit_Framework_TestCase {
     $this->security = new AntiXSS();
   }
 
+  public function test_no_xss()
+  {
+    $testArray = array(
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">' => '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;',
+      '<meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" />' => '&lt;meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" /&gt;',
+      '<style type="text/css">html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}</style>' => '&lt;style type="text/css"&gt;html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}&lt;/style&gt;',
+      '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>' => '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>',
+      '<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/>' => '&lt;link href="//fonts.googleapis.com/css?family=Open Sans" rel="stylesheet" type="text/css"/&gt;',
+      '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>' => '',
+      '<!--[if lt IE 9]><script src="http://moelleken.org/vendor/bower/nwmatcher/src/nwmatcher.js"></script><![endif]-->' => '&lt;!--[if lt IE 9]><![endif]--&gt;',
+      '<a href="http://suckup.de/about" target="_blank">About</a>' => '<a href="http://suckup.de/about" target="_blank">About</a>',
+      "<a href='http://suckup.de/about' target='_blank'>About</a>" => "<a href='http://suckup.de/about' target='_blank'>About</a>",
+      '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>' => '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>',
+      '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>' => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
+  }
+
   public function test_xss_clean()
   {
     $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
@@ -77,7 +98,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<SCRIPT>alert(\'XSS\');</SCRIPT>' => 'alert&#40;\'XSS\'&#41;;',
       '\'\';!--"<XSS>=&{()}' => '\'\';!--"=',
       '<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>' => '',
-      '<IMG SRC="javascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC="javascript:alert(\'XSS\');">' => '<IMG >',
       '<IMG SRC=javascript:alert(\'XSS\')>' => '<IMG >',
       '<IMG SRC=JaVaScRiPt:alert(\'XSS\')>' => '<IMG >',
       '<IMG SRC=javascript:alert(&quot;XSS&quot;)>' => '<IMG >',
@@ -86,16 +107,16 @@ class XssTest extends PHPUnit_Framework_TestCase {
       'SRC=&#10<IMG 6;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>' => 'SRC=&#10<IMG >',
       '<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>' => '<IMG >',
       '<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>' => '<IMG >',
-      '<IMG SRC="jav	ascript:alert(\'XSS\');">' => '<IMG \'>',
-      '<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">' => '<IMG \'>',
-      '<IMG SRC="jav&#x0A;ascript:alert(\'XSS\');">' => '<IMG \'>',
-      '<IMG SRC=" &#14;  javascript:alert(\'XSS\');">' => '<IMG \'>',
+      '<IMG SRC="jav	ascript:alert(\'XSS\');">' => '<IMG >',
+      '<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">' => '<IMG >',
+      '<IMG SRC="jav&#x0A;ascript:alert(\'XSS\');">' => '<IMG >',
+      '<IMG SRC=" &#14;  javascript:alert(\'XSS\');">' => '<IMG >',
       '<IMG%0aSRC%0a=%0a"%0aj%0aa%0av%0aa%0as%0ac%0ar%0ai%0ap%0at%0a:%0aa%0al%0ae%0ar%0at%0a(%0a\'%0aX%0aS%0aS%0a\'%0a)%0a"%0a>' => "<IMG\nSRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n\"\n>",
       '<IMG SRC=java%00script:alert(\"XSS\")>' => '<IMG >',
       '<SCR%00IPT>alert(\"XSS\")</SCR%00IPT>' => 'alert&#40;\"XSS\"&#41;',
       '<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '',
       '<SCRIPT SRC=http://ha.ckers.org/xss.js?<B>' => '',
-      '<IMG SRC="javascript:alert(\'XSS\')"' => '<IMG \'',
+      '<IMG SRC="javascript:alert(\'XSS\')"' => '<IMG ',
       '<SCRIPT>a=/XSS/' => 'a=/XSS/',
       '\";alert(\'XSS\');//' => '\";alert&#40;\'XSS\'&#41;;//',
       '<INPUT TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">' => '&lt;INPUT TYPE="IMAGE" SRC="alert&#40;\'XSS\'&#41;;"&gt;',
@@ -135,7 +156,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(\'XSS\')></OBJECT>' => '&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=alert&#40;\'XSS\'&#41;>&lt;/OBJECT&gt;',
       'getURL("javascript:alert(\'XSS\')")' => 'getURL("alert&#40;\'XSS\'&#41;")',
       'a="get";' => 'a="get";',
-      '<!--<value><![CDATA[<XML ID=I><X><C><![CDATA[<IMG SRC="javas<![CDATA[cript:alert(\'XSS\');">' => '&lt;!--<value>&lt;![CDATA[&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG \'>',
+      '<!--<value><![CDATA[<XML ID=I><X><C><![CDATA[<IMG SRC="javas<![CDATA[cript:alert(\'XSS\');">' => '&lt;!--<value>&lt;![CDATA[&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG >',
       '<XML SRC="http://ha.ckers.org/xsstest.xml" ID=I></XML>' => '&lt;XML SRC="http://ha.ckers.org/xsstest.xml" ID=I&gt;&lt;/XML>',
       '<HTML><BODY>' => '&lt;HTML&gt;&lt;BODY>',
       '<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>' => '',
@@ -225,7 +246,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
       $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG \'>',
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
       );
     } else {
@@ -234,6 +255,20 @@ class XssTest extends PHPUnit_Framework_TestCase {
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
       );
     }
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
+  }
+
+  public function testSvgXss()
+  {
+    $testArray = array(
+      '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"><polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/><script type="text/javascript">alert(\'This app is probably vulnerable to XSS attacks!\');</script></svg>' => '&lt;?xml version="1.0" standalone="no"?&gt;<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">&lt;svg version="1.1" baseProfile="full" &gt;&lt;polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/>alert&#40;\'This app is probably vulnerable to XSS attacks!\'&#41;;&lt;/svg&gt;',
+      'http://vulnerabledomain.com/xss.php?x=%3Csvg%3E%3Cuse%20height=200%20width=200%20xlink:href=%27http://vulnerabledomain.com/xss.php?x=%3Csvg%20id%3D%22rectangle%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20width%3D%22100%22%20height%3D%22100%22%3E%3Ca%20xlink%3Ahref%3D%22javascript%3Aalert%28location%29%22%3E%3Crect%20class%3D%22blue%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20%2F%3E%3C%2Fa%3E%3C%2Fsvg%3E%23rectangle%27/%3E%3C/svg%3E' => 'http://vulnerabledomain.com/xss.php?x=&lt;svg&gt;&lt;use height=200 width=200  id="rectangle" :xlink="http://www.w3.org/1999/xlink"    width="100" height="100"><a ><rect class="blue" x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;#rectangle\'/>&lt;/svg&gt;',
+      '<svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"><a xlink:href="javascript:alert(location)"><rect x="0" y="0" width="100" height="100" /></a></svg>' => '&lt;svg id="rectangle" :xlink="http://www.w3.org/1999/xlink"width="100" height="100"&gt;&lt;a ><rect x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;',
+      '<svg><use xlink:href="data:image/svg+xml;base64,PHN2ZyBpZD0icmVjdGFuZ2xlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiAgICB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg0KIDxmb3JlaWduT2JqZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNTAiDQogICAgICAgICAgICAgICAgICAgcmVxdWlyZWRFeHRlbnNpb25zPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj4NCgk8ZW1iZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiIHNyYz0iamF2YXNjcmlwdDphbGVydChsb2NhdGlvbikiIC8+DQogICAgPC9mb3JlaWduT2JqZWN0Pg0KPC9zdmc+#rectangle" /></svg>' => '&lt;svg&gt;&lt;use  PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg0KIDxmb3JlaWduT2JqZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNTAiDQogICAgICAgICAgICAgICAgICAgcmVxdWlyZWRFeHRlbnNpb25zPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj4NCgk8ZW1iZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiIHNyYz0iamF2YXNjcmlwdDphbGVydChsb2NhdGlvbikiIC8 DQogICAgPC9mb3JlaWduT2JqZWN0Pg0KPC9zdmc #rectangle" />&lt;/svg&gt;',
+    );
 
     foreach ($testArray as $before => $after) {
       self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
@@ -356,7 +391,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     self::assertEquals(true, $this->security->xss_clean($testString, true));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals('<img \'>', $this->security->xss_clean($testString));
+    self::assertEquals('<img >', $this->security->xss_clean($testString));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
     self::assertEquals(false, $this->security->xss_clean($testString, true));
@@ -368,7 +403,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     self::assertEquals(false, $this->security->xss_clean($testString, true));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals('<img \'>', $this->security->xss_clean($testString));
+    self::assertEquals('<img >', $this->security->xss_clean($testString));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
     self::assertEquals(false, $this->security->xss_clean($testString, true));
@@ -394,6 +429,27 @@ class XssTest extends PHPUnit_Framework_TestCase {
   {
     $input = '<img src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
     self::assertEquals('<img >', $this->security->xss_clean($input));
+  }
+
+  public function test_xss_clean_js_a_removal()
+  {
+    $input = '<a src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
+    self::assertEquals('<a src="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input));
+  }
+
+  public function test_xss_clean_js_div_removal()
+  {
+    $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
+    self::assertEquals('<div test="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input));
+
+    $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
+    self::assertEquals('<div test="confirm&#40;1&#41;">Clickhere</div>', $this->security->xss_clean($input));
+
+    $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
+    self::assertEquals('<div >Clickhere</div>', $this->security->xss_clean($input));
+
+    $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
+    self::assertEquals('<div >Clickhere', $this->security->xss_clean($input));
   }
 
   public function test_xss_clean_sanitize_naughty_html()

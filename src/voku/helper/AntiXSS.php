@@ -273,7 +273,7 @@ class AntiXSS
     // remove Strings that are never allowed
     $str = $this->_do_never_allowed($str);
 
-    // Mmake php tags safe for displaying
+    // make php tags safe for displaying
     $str = $this->make_php_tags_safe($str, $is_image);
 
     // corrects words before the browser will do it
@@ -709,7 +709,7 @@ class AntiXSS
     return UTF8::str_ireplace(
         $match[1],
         preg_replace(
-            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
+            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
             '',
             $this->_filter_attributes(
                 str_replace(
