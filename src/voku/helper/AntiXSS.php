@@ -608,15 +608,17 @@ class AntiXSS
       unset($evil_attributes[array_search('xmlns', $evil_attributes, true)]);
     }
 
+    $evil_attributes_string = implode('|', $evil_attributes);
+
     do {
       $count = $temp_count = 0;
 
       // replace occurrences of illegal attribute strings with quotes (042 and 047 are octal quotes)
-      $str = preg_replace('/(<[^>]+)(?<!\w)(' . implode('|', $evil_attributes) . ')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', '$1' . $this->_replacement, $str, -1, $temp_count);
+      $str = preg_replace('/(<[^>]+)(?<!\w)(' . $evil_attributes_string . ')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', '$1' . $this->_replacement, $str, -1, $temp_count);
       $count += $temp_count;
 
       // find occurrences of illegal attribute strings without quotes
-      $str = preg_replace('/(<[^>]+)(?<!\w)(' . implode('|', $evil_attributes) . ')\s*=\s*([^\s>]*)/is', '$1' . $this->_replacement, $str, -1, $temp_count);
+      $str = preg_replace('/(<[^>]+)(?<!\w)(' . $evil_attributes_string . ')\s*=\s*([^\s>]*)/is', '$1' . $this->_replacement, $str, -1, $temp_count);
       $count += $temp_count;
     } while ($count);
 

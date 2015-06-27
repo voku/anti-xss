@@ -95,6 +95,11 @@ class XssTest extends PHPUnit_Framework_TestCase {
     // \v (vertical whitespace) isn't working on travis-ci ?
 
     $testArray = array(
+      '<a onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
+      '<a onmouseover=alert(document.cookie)>xxs</a>' => '<a >xxs</a>',
+      '<a onerror="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
+      '<a onerror=`alert(document.cookie)`>xxs</a>' => '<a >xxs</a>',
+      '<a href=http://foo.bar STYLE=xss:expression(alert("XSS"))>xxs style</a>' => '<a >xxs style</a>',
       '<SCRIPT>alert(\'XSS\');</SCRIPT>' => 'alert&#40;\'XSS\'&#41;;',
       '\'\';!--"<XSS>=&{()}' => '\'\';!--"=',
       '<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>' => '',
