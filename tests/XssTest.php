@@ -1,6 +1,7 @@
 <?php
 
 use voku\helper\AntiXSS;
+use voku\helper\UTF8;
 
 class XssTest extends PHPUnit_Framework_TestCase {
 
@@ -264,6 +265,14 @@ class XssTest extends PHPUnit_Framework_TestCase {
     foreach ($testArray as $before => $after) {
       self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
+  }
+
+  public function testSvgXssFile()
+  {
+    $testString = UTF8::file_get_contents(__DIR__ . '/xss_v1.svg');
+    $resultString = UTF8::file_get_contents(__DIR__ . '/xss_v1_clean.svg');
+
+    self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
 
   public function testSvgXss()
