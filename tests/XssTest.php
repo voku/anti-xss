@@ -250,7 +250,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     // test for php < OR > 5.3
 
-    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+    if (version_compare(PHP_VERSION, '5.4.0') >= 0 && !defined('HHVM_VERSION')) {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
