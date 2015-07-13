@@ -372,7 +372,7 @@ class AntiXSS
   }
 
   /**
-   * decode the html-tags via "UTF8::html_entity_decode" or the string via "UTF8::urldecode"
+   * decode the html-tags via "UTF8::html_entity_decode()" or the string via "UTF8::urldecode()"
    *
    * @param string $str
    *
@@ -779,11 +779,13 @@ class AntiXSS
     $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
 
     if (strpos($match, $this->xss_hash()) !== false) {
+      $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
+
       // decode, then un-protect URL GET vars
       return str_replace(
           $this->xss_hash(),
           '&',
-          UTF8::html_entity_decode($match)
+          UTF8::html_entity_decode($match, $flags)
       );
     } else {
       // decode
