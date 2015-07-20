@@ -164,7 +164,6 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
       '<LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
       '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
-      '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
       '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV  alert&#40;\'XSS\'&#41;);">lall</div>',
       '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
       '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '',
