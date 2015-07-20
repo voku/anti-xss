@@ -22,22 +22,36 @@ class AntiXSS
    * @var  array
    */
   protected static $_never_allowed_regex = array(
+      // default javascript
       'javascript\s*:',
+      // default javascript
       '(document|(document\.)?window)\.(location|on\w*)',
-      'expression\s*(\(|&\#40;)',
-      // CSS and IE
+      // Java: jar-protocol is an XSS hazard
+      'jar\s*:',
+      // Mac (will not run the script, but open it in AppleScript Editor)
+      'applescript\s*:',
+      // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
       'vbscript\s*:',
       // IE, surprise!
       'wscript\s*:',
       // IE
       'jscript\s*:',
-      // IE
+      // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
       'vbs\s*:',
-      // IE
+      // https://html5sec.org/#behavior
+      'behavior\s:',
+      // ?
       'Redirect\s+30\d',
+      // data-attribute + base64
       "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
       // remove Netscape 4 JS entities
       '&\s*\{[^}]*(\}\s*;?|$)',
+      // old IE, old Netscape
+      'expression\s*(\(|&\#40;)',
+      // old Netscape
+      'mocha\s*:',
+      // old Netscape
+      'livescript\s*:',
   );
 
   /**
@@ -711,7 +725,7 @@ class AntiXSS
     return UTF8::str_ireplace(
         $match[1],
         preg_replace(
-            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
+            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
             '',
             $this->_filter_attributes(
                 str_replace(

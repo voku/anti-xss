@@ -7,7 +7,8 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
   // INFO: here you can find some more tests
   //
-  // http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
+  // - http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
+  // - http://htmlpurifier.org/live/smoketests/xssAttacks.php
 
   /**
    * @var $security AntiXSS
@@ -96,6 +97,32 @@ class XssTest extends PHPUnit_Framework_TestCase {
     // \v (vertical whitespace) isn't working on travis-ci ?
 
     $testArray = array(
+      '<div BACKGROUND="mocha:alert(\'XSS\')">
+        <!-- image:xss -->
+        <IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
+        <IMG SRC="jav&#x09;ascript:alert(\'XSS\');">
+        <!-- file:xss -->
+        <script SRC="http://absynth.de/x.js"></script>
+        <layer SRC="http://absynth.de/x.js"></layer>
+        <!-- style:xss -->
+        <LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">
+        <DIV STYLE="background-image: url(javascript:alert(\'XSS\')">
+          <div style=background-image:expression(alert(\'XSS\'));">lall</div>
+        </div>
+      </div>' => '<div BACKGROUND="alert&#40;\'XSS\'&#41;">
+        &lt;!-- image:xss --&gt;
+        <IMG >
+        <>
+        & SRC="http://absynth.de/x.js">&lt;/layer&gt;
+        &lt;!-- style:xss --&gt;
+        &lt;LINK REL="stylesheet" HREF="alert&#40;\'XSS\'&#41;;"&gt;
+        <DIV =background-image:alert&#40;\'XSS\'&#41;);">lall</div>
+        </div>
+      </div>',
+      '<div id="b" style="font-family:a/**/ression(alert(1))(\'\\\')exp\\\')">aa</div>' => '<div id="b" >aa</div>', // IE | 2014: http://wooyun.org/bugs/wooyun-2014-068564
+      '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
+      '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
+      '<a href="applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>' => '<a href="//com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>',
       '<a onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
       '<a onmouseover=alert(document.cookie)>xxs</a>' => '<a >xxs</a>',
       '<a onerror="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
@@ -132,15 +159,18 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<IMG LOWSRC="javascript:alert(\'XSS\')">' => '<IMG >',
       '<BGSOUND SRC="javascript:alert(\'XSS\');">' => '<IMG >',
       '<BR SIZE="&{alert(\'XSS\')}">' => '',
+      '<DIV STYLE="width:' . "\n" . 'expression(alert(\'XSS\'));">' => '<DIV ' . "\n" . 'alert&#40;\'XSS\'&#41;);">',
       '<LAYER SRC="http://ha.ckers.org/scriptlet.html"></LAYER>' => '&lt;LAYER SRC="http://ha.ckers.org/scriptlet.html"&gt;&lt;/LAYER>',
       '<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
       '<LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
       '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
+      '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
+      '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV  alert&#40;\'XSS\'&#41;);">lall</div>',
       '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
       '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '',
       '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG SRC=\'msgbox("XSS")\'>',
-      '<IMG SRC="mocha:[code]">' => '<IMG [>',
-      '<IMG SRC="livescript:[code]">' => '<IMG [>',
+      '<IMG SRC="mocha:[code]">' => '<IMG SRC="[code]">',
+      '<IMG SRC="livescript:[code]">' => '<IMG SRC="[code]">',
       '<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0;url=PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
       '<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0;url=PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
       '<META HTTP-EQUIV="Link" Content="<javascript:alert(\'XSS\')>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;alert&#40;\'XSS\'&#41;>; REL=stylesheet">',
@@ -158,12 +188,18 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<STYLE>.XSS{background-image:url("javascript:alert(\'XSS\')");}</STYLE><A CLASS=XSS></A>' => '&lt;STYLE TYPE="text/javascript"&gt;alert&#40;\'XSS\'&#41;;&lt;/STYLE&gt;',
       '<STYLE type="text/css">BODY{background:url("javascript:alert(\'XSS\')")}</STYLE>' => '&lt;STYLE type="text/css"&gt;BODY{background:url("alert&#40;\'XSS\'&#41;")}&lt;/STYLE&gt;',
       '<BASE HREF="javascript:alert(\'XSS\');//">' => '&lt;BASE HREF="alert&#40;\'XSS\'&#41;;//"&gt;',
+      '<object allowscriptaccess="always" data="test.swf"></object>' => '&lt;object allowscriptaccess="always" data="test.swf"&gt;&lt;/object>',
       '<OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"></OBJECT>' => '&lt;OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"&gt;&lt;/OBJECT>',
       '<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(\'XSS\')></OBJECT>' => '&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=alert&#40;\'XSS\'&#41;>&lt;/OBJECT&gt;',
       'getURL("javascript:alert(\'XSS\')")' => 'getURL("alert&#40;\'XSS\'&#41;")',
       'a="get";' => 'a="get";',
+      '<EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
+org/xss.swf" AllowScriptAccess="always"></EMBED>' => '&lt;EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
+org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
+      '<EMBED SRC="data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI+YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==" type="image/svg+xml" AllowScriptAccess="always"></EMBED>' => '&lt;EMBED SRC=PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==" type="image/svg xml" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<!--<value><![CDATA[<XML ID=I><X><C><![CDATA[<IMG SRC="javas<![CDATA[cript:alert(\'XSS\');">' => '&lt;!--<value>&lt;![CDATA[&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG >',
       '<XML SRC="http://ha.ckers.org/xsstest.xml" ID=I></XML>' => '&lt;XML SRC="http://ha.ckers.org/xsstest.xml" ID=I&gt;&lt;/XML>',
+      '<XML ID="xss"><I><B><IMG SRC="javas<!-- -->cript:alert(\'XSS\')"></B></I></XML>' => '&lt;XML ID="xss"&gt;&lt;I><B><MG ></></>&lt;/XML&gt;',
       '<HTML><BODY>' => '&lt;HTML&gt;&lt;BODY>',
       '<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>' => '',
       '<!--#exec cmd="/bin/echo \'<SCRIPT SRC\'"--><!--#exec cmd="/bin/echo \'=http://ha.ckers.org/xss.js></SCRIPT>\'"-->' => '&lt;!--#exec cmd="/bin/echo \'\'"--&gt;',
