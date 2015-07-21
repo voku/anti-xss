@@ -402,7 +402,7 @@ class AntiXSS
         ), $str
       );
     } else {
-      $str = UTF8::urldecode($str);
+      $str = UTF8::urldecode($str, false);
     }
 
     return $str;
