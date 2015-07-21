@@ -1,6 +1,7 @@
 * text=auto
 
 /tests export-ignore
+/.editorconfig export-ignore
 /.scrutinizer.yml export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
