@@ -9,7 +9,7 @@
   ],
   "type": "library",
   "homepage": "https://github.com/voku/anti-xss",
-  "license": "CC-BY-3.0",
+  "license": "MIT",
   "authors": [
     {
       "name": "EllisLab Dev Team",
