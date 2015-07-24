@@ -528,7 +528,7 @@ class AntiXSS
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
       $str = preg_replace_callback(
-        '#(' . UTF8::substr($word, 0, -3) . ')(\W)#is', array(
+        '#(' . substr($word, 0, -3) . ')(\W)#is', array(
           $this,
           '_compact_exploded_words',
         ), $str
@@ -554,7 +554,7 @@ class AntiXSS
    */
   protected function _do_never_allowed_afterwards($str)
   {
-    $str = UTF8::str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
+    $str = str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
 
     return (string) $str;
   }
@@ -568,7 +568,7 @@ class AntiXSS
    */
   protected function _do_never_allowed($str)
   {
-    $str = UTF8::str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
+    $str = str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
 
     foreach (self::$_never_allowed_regex as $regex) {
       $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
@@ -803,7 +803,7 @@ class AntiXSS
       );
     } else {
       // decode
-      return UTF8::urldecode($match);
+      return UTF8::urldecode($match, false);
     }
   }
 
