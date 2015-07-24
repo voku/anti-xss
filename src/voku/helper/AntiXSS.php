@@ -523,7 +523,7 @@ class AntiXSS
     );
 
     foreach ($words as $word) {
-      $word = implode('\s*', UTF8::str_split($word)) . '\s*';
+      $word = implode('\s*', str_split($word)) . '\s*';
 
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
