@@ -130,6 +130,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
         <DIV =background-image:alert&#40;\'XSS\'&#41;);">lall</div>
         </div>
       </div>',
+      '"><a href="JAVASCRIPT:%E2%80%A8alert`1`">CLICKME' => '"><a href=" alert`1`">CLICKME', // NoScript XSS filter bypass | 2015: https://twitter.com/0x6D6172696F/status/623081477002014720?s=02
       '<div id="b" style="font-family:a/**/ression(alert(1))(\'\\\')exp\\\')">aa</div>' => '<div id="b" >aa</div>', // IE | 2014: http://wooyun.org/bugs/wooyun-2014-068564
       '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
       '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
