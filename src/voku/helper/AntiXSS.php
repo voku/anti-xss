@@ -226,6 +226,8 @@ class AntiXSS
         'onWaiting='          => $this->_replacement,
         'onWheel='            => $this->_replacement,
         'seekSegmentTime='    => $this->_replacement,
+        '0;url='              => $this->_replacement,
+        'userid='             => $this->_replacement
     );
   }
 
@@ -681,10 +683,12 @@ class AntiXSS
                array(
                    '>',
                    '<',
-               ), array(
+               ),
+               array(
                    '&gt;',
                    '&lt;',
-               ), $matches[4]
+               ),
+               $matches[4]
            );
   }
 
@@ -722,22 +726,17 @@ class AntiXSS
    */
   protected function _js_removal($match, $search)
   {
-    return UTF8::str_ireplace(
-        $match[1],
-        preg_replace(
-            '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
-            '',
-            $this->_filter_attributes(
-                str_replace(
-                    array(
-                        '<',
-                        '>',
-                    ), '', $match[1]
-                )
-            )
-        ),
-        $match[0]
+    if (!$match[0]) {
+      return '';
+    }
+
+    $replacer = preg_replace(
+        '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
+        '',
+        $this->_filter_attributes(str_replace(array('<', '>',), '', $match[1]))
     );
+
+    return str_ireplace($match[1], $replacer, $match[0]);
   }
 
   /**
@@ -751,6 +750,10 @@ class AntiXSS
    */
   protected function _filter_attributes($str)
   {
+    if ($str === '') {
+      return '';
+    }
+
     $out = '';
     if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#i', $str, $matches)) {
       foreach ($matches[0] as $match) {
