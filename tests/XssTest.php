@@ -130,6 +130,8 @@ class XssTest extends PHPUnit_Framework_TestCase {
         <DIV =background-image:alert&#40;\'XSS\'&#41;);">lall</div>
         </div>
       </div>',
+      '<!DOCTYPE foo [<!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>', // XXE injection | http://phpsecurity.readthedocs.org/en/latest/Injection-Attacks.html#xml-injection
+      '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>', // XXE injection | 2015: http://blog.portswigger.net/2015/05/burp-suite-now-reports-blind-xxe.html
       "<iframe name=alert(1) src=\"//somedomain?x=',__defineSetter__('x',eval),x=name,'\"></iframe>" => '&lt;iframe name=alert&#40;1&#41; src="//somedomain?x=\',__defineSetter__(\'x\',eval),x=name,\'"&gt;&lt;/iframe>',
       "<script>x = '',__defineSetter__('x',alert),x=1,'';</script>" => 'x = \'\',__defineSetter__(\'x\',alert),x=1,\'\';', // NoScript XSS filter bypass | 2015: http://blog.portswigger.net/2015/07/noscript-xss-filter-bypass.html
       '"><a href="JAVASCRIPT:%E2%80%A8alert`1`">CLICKME' => '"><a href=" alert`1`">CLICKME', // NoScript XSS filter bypass | 2015: https://twitter.com/0x6D6172696F/status/623081477002014720?s=02

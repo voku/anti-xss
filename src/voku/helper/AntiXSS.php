@@ -96,6 +96,7 @@ class AntiXSS
         '<!--'            => '&lt;!--',
         '-->'             => '--&gt;',
         '<![CDATA['       => '&lt;![CDATA[',
+        '<!ENTITY'        => '&lt;!ENTITY',
         '<comment>'       => '&lt;comment&gt;',
     );
 
