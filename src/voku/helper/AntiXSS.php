@@ -573,9 +573,8 @@ class AntiXSS
   {
     $str = str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
 
-    foreach (self::$_never_allowed_regex as $regex) {
-      $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
-    }
+    $regex = implode('|', self::$_never_allowed_regex);
+    $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
 
     return (string) $str;
   }

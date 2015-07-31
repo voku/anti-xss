@@ -314,8 +314,10 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       );
     }
 
-    foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    for ($i = 0; $i < 100; $i++) {
+      foreach ($testArray as $before => $after) {
+        self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      }
     }
   }
 
