@@ -130,6 +130,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
         <DIV =background-image:alert&#40;\'XSS\'&#41;);">lall</div>
         </div>
       </div>',
+      'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body =\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
       '<!DOCTYPE foo [<!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>', // XXE injection | http://phpsecurity.readthedocs.org/en/latest/Injection-Attacks.html#xml-injection
       '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>', // XXE injection | 2015: http://blog.portswigger.net/2015/05/burp-suite-now-reports-blind-xxe.html
       "<iframe name=alert(1) src=\"//somedomain?x=',__defineSetter__('x',eval),x=name,'\"></iframe>" => '&lt;iframe name=alert&#40;1&#41; src="//somedomain?x=\',__defineSetter__(\'x\',eval),x=name,\'"&gt;&lt;/iframe>',
