@@ -130,6 +130,15 @@ class XssTest extends PHPUnit_Framework_TestCase {
         <DIV =background-image:alert&#40;\'XSS\'&#41;);">lall</div>
         </div>
       </div>',
+      '<img/src=">" onerror=alert(1)>
+      <button/a=">" autofocus onfocus=alert&#40;1&#40;></button>
+      <button a=">" autofocus onfocus=alert&#40;1&#40;>' => '<img/>" >
+      <>" ></>
+      <>" >', // autofocus trick | https://html5sec.org/#7
+      'Location: https://www.google.com%3a443%2fcse%2ftools%2fcreate_onthefly%3b%3c%2ftextarea%3e%3csvg%2fonload%3dalert%28document%2edomain%29%3e%3b%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f' => 'Location: https://www.google.com:443/cse/tools/create_onthefly;&lt;/textarea&gt;&lt;svg/>;/../../../../../../../../../../../../../../', // Google XSS in IE | 2015: http://blog.bentkowski.info/2015/04/xss-via-host-header-cse.html
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D"/></feImage> </svg>' => '&lt;svg :xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to=PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
+      '<a target="_blank" href="data:text/html;BASE64youdummy,PHNjcmlwdD5hbGVydCh3aW5kb3cub3BlbmVyLmRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5pbm5lckhUTUwpPC9zY3JpcHQ+">clickme in firefox</a><a/\'\'\' target="_blank" href=data:text/html;;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuYm9keS5pbm5lckhUTUwpPC9zY3JpcHQ+>firefox11</a>' => '<a target="_blank">clickme in firefox</a><a/\'\'\' target="_blank">firefox11</a>', // data: URI with base64 encoding bypass exploiting Firefox | 2012: https://bugzilla.mozilla.org/show_bug.cgi?id=255107
+      'http://securitee.tk/files/chrome_xss.php?a=<script>void(\'&b=\');alert(1);</script>' => 'http://securitee.tk/files/chrome_xss.php?a=void(\'&b=\');alert&#40;1&#41;;', // Bypassing Chrome’s Anti-XSS filter | 2012: http://blog.securitee.org/?p=37
       'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body =\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
       '<!DOCTYPE foo [<!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>', // XXE injection | http://phpsecurity.readthedocs.org/en/latest/Injection-Attacks.html#xml-injection
       '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>' => '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>', // XXE injection | 2015: http://blog.portswigger.net/2015/05/burp-suite-now-reports-blind-xxe.html
