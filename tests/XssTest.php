@@ -230,7 +230,16 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<!--#exec cmd="/bin/echo \'<SCRIPT SRC\'"--><!--#exec cmd="/bin/echo \'=http://ha.ckers.org/xss.js></SCRIPT>\'"-->' => '&lt;!--#exec cmd="/bin/echo \'\'"--&gt;',
       '<? echo(\'<SCR)\';' => '&lt;? echo(\'<SCR)\';',
       '<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(\'XSS\')&lt;/SCRIPT&gt;">' => '&lt;META HTTP-EQUIV="Set-Cookie" Content="alert&#40;\'XSS\'&#41;"&gt;',
-      '<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(\'XSS\');+ADw-/SCRIPT+AD4-' => '&lt;HEAD&gt;&lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> &lt;/HEAD&gt; ADw-SCRIPT AD4-alert&#40;\'XSS\'&#41;; ADw-/SCRIPT AD4-',
+      '<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(\'XSS\');+ADw-/SCRIPT+AD4-' => '&lt;HEAD&gt;&lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> &lt;/HEAD&gt; ADw-SCRIPT AD4-alert&#40;\'XSS\'&#41;; ADw-/SCRIPT AD4-', // UTF-7
+      '<img src="http://test.de/[0xE0]">
+      ... foo ...
+      ... bar ...
+      " onerror="alert(\'XSS\')"
+      <div>lall</div>' => '<img src="http://test.de/[0xE0]">
+      ... foo ...
+      ... bar ...
+      " "alert&#40;\'XSS\'&#41;"
+      <div>lall</div>',
       '<SCRIPT a=">" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT a=">" \'\' SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" \'\' SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT "a=\'>\'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '\'" SRC="http://ha.ckers.org/xss.js">',
