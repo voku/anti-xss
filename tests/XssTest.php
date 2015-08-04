@@ -9,6 +9,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
   //
   // - http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
   // - http://htmlpurifier.org/live/smoketests/xssAttacks.php
+  // - http://hackingforsecurity.blogspot.de/2013/11/xss-cheat-sheet-huge-list.html
 
   /**
    * @var $security AntiXSS
@@ -240,6 +241,13 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       ... bar ...
       " "alert&#40;\'XSS\'&#41;"
       <div>lall</div>',
+      '<script>+-+-1-+-+alert(1)</script>' => ' - -1- - alert&#40;1&#41;',
+      '<body/onload=&lt;!--&gt;&#10alert(1)>' => "&lt;body/\nalert&#40;1&#41;&gt;",
+      '<a aa aaa aaaa aaaaa aaaaaa aaaaaaa aaaaaaaa  aaaaaaaaa aaaaaaaaaa  href=j&#97v&#97script&#x3A;&#97lert(1)>ClickMe' => '<a >ClickMe',
+      '<--`<img/src=` onerror=alert(1)> --!>' => '<--`<img/> --!>',
+      '<script/src=&#100&#97&#116&#97:text/&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x000070&#x074,&#x0061;&#x06c;&#x0065;&#x00000072;&#x00074;(1)></script> ​' => '  ',
+      '<meta charset="x-imap4-modified-utf7">&<script&S1&TS&1>alert&A7&(1)&R&UA;&&<&A9&11/script&X&>' => '&lt;meta charset="x-imap4-modified-utf7"&gt;&alert&A7&(1)&R&UA;&&<&A9&11/script&X&>',
+      '<div id=”3″><meta charset=”x-imap4-modified-utf7″>&<script&S1&TS&1>alert&A7&(1)&R&UA;&&<&A9&11/script&X&>//[“‘`–>]]>]</div>' => '<div id=”3″>&lt;meta charset=”x-imap4-modified-utf7″&gt;&alert&A7&(1)&R&UA;&&<&A9&11/script&X&>//[“‘`–>]]>]</div>',
       '<SCRIPT a=">" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT a=">" \'\' SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" \'\' SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT "a=\'>\'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '\'" SRC="http://ha.ckers.org/xss.js">',
@@ -311,7 +319,6 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       "http://www.amazon.com/gp/daily/ref=\"/><script>alert('XSS $4.99 S&amp;H')</script>" => "http://www.amazon.com/gp/daily/ref=\"/>alert&#40;'XSS $4.99 S&H'&#41;",
       "http://bilderdienst.bundestag.de/archives/btgpict/search/_%27-document.write%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/" => "http://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
       "https://bilderdienst.bundestag.de/archives/btgpict/search/_%27-dOcumEnt.wRite%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/" => "https://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
-
     );
 
     foreach ($testArray as $before => $after) {
@@ -353,6 +360,40 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
     $resultString = UTF8::file_get_contents(__DIR__ . '/xss_v1_clean.svg');
 
     self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+  }
+
+  public function testScriptEncoding()
+  {
+    // https://www.owasp.org/index.php/Testing_for_Cross_site_scripting#Black_Box_testing_and_example
+
+    $testArray = array(
+        '<script src=http://www.example.com/malicious-code.js></script>' => '',
+        '%3cscript src=http://www.example.com/malicious-code.js%3e%3c/script%3e' => '',
+        "\x3cscript src=http://www.example.com/malicious-code.js\x3e\x3c/script\x3e" => '',
+        "'`\"><\x3Cscript>javascript:alert(1)</script>'`\"><\x00script>javascript:alert(1)</script>" => "'`\">&lt;alert&#40;1&#41;'`\"&gt;alert&#40;1&#41;",
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
+  }
+
+  public function testOnError()
+  {
+    $testArray = array(
+        '<img src=1 href=1 onerror="javascript:alert(1)"></img>' => '<img  ></img>',
+        '<audio src=1 href=1 onerror="javascript:alert(1)"></audio>' => '&lt;audio src=1 href=1 &gt;&lt;/audio>',
+        '<video src=1 href=1 onerror="javascript:alert(1)"></video>' => '&lt;video src=1 href=1 &gt;&lt;/video>',
+        '<body src=1 href=1 onerror="javascript:alert(1)"></body>' => '&lt;body src=1 href=1 &gt;&lt;/body>',
+        '<image src=1 href=1 onerror="javascript:alert(1)"></image>' => '<image src=1 href=1 ></image>',
+        '<object src=1 href=1 onerror="javascript:alert(1)"></object>' => '&lt;object src=1 href=1 &gt;&lt;/object>',
+        '<script src=1 href=1 onerror="javascript:alert(1)"></script>' => '',
+        '<svg onResize svg onResize="javascript:javascript:alert(1)"></svg onResize>' => '&lt;svg onResize svg &gt;',
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
   }
 
   public function testSvgXss()
