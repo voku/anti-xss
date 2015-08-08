@@ -236,6 +236,8 @@ class AntiXSS
         'ev:handler='         => $this->_replacement,
         'ev:event='           => $this->_replacement,
         '0;url='              => $this->_replacement,
+        'href="javascript'    => $this->_replacement, // only for php 5.3
+        '&apos;script'        => $this->_replacement, // only for php 5.3
     );
   }
 
