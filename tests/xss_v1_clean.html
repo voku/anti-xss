@@ -119,13 +119,13 @@ exp/*<A ="xss:document.vulnerable=true)">
 
 <XML ID=I><X><C><![CDATA[<IMG >]]</></></><></>
 
-< ID="xss"><I><B><MG ></></></XML><SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"></SPAN>
+< ID="xss"><I><B><MG ></></></XML><SPAN "#xss" "B" "HTML"></SPAN>
 
 <?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"><?import namespace="t" implementation="#default#time2">< attributeName="innerHTML" to="XSSdocument.vulnerable=true">
 
 <!-- div -->
 
-<div datafld="b" dataformatas="html" datasrc="#X"></div>
+<div "b" "html" "#X"></div>
 
 <DIV ="background-image: url(document.vulnerable=true;)">XSS</DIV>
   <DIV ="background-image: url(document.vulnerable=true;);">XSS</div>

@@ -97,6 +97,8 @@ class AntiXSS
         '-->'             => '--&gt;',
         '<![CDATA['       => '&lt;![CDATA[',
         '<!ENTITY'        => '&lt;!ENTITY',
+        '<!DOCTYPE'       => '&lt;!DOCTYPE',
+        '<!ATTLIST'       => '&lt;!ATTLIST',
         '<comment>'       => '&lt;comment&gt;',
     );
 
@@ -227,8 +229,13 @@ class AntiXSS
         'onWaiting='          => $this->_replacement,
         'onWheel='            => $this->_replacement,
         'seekSegmentTime='    => $this->_replacement,
+        'userid='             => $this->_replacement,
+        'datasrc='            => $this->_replacement,
+        'datafld='            => $this->_replacement,
+        'dataformatas='       => $this->_replacement,
+        'ev:handler='         => $this->_replacement,
+        'ev:event='           => $this->_replacement,
         '0;url='              => $this->_replacement,
-        'userid='             => $this->_replacement
     );
   }
 
