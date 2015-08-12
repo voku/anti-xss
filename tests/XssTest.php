@@ -338,7 +338,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
-          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a &colon; src=/&sol;Ð.pw&nvgt;/script&nvgt;&apos;">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href=" src=/&sol;Ð.pw&nvgt;/script&nvgt;&apos;">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
       );
     }
 

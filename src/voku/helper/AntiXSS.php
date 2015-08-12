@@ -842,7 +842,7 @@ class AntiXSS
           '&#9;'      => "\n",
       );
 
-      return strtr($return, $entities);
+      return UTF8::str_ireplace(array_keys($entities), array_values($entities), $return);
     }
   }
 
