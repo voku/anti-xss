@@ -807,12 +807,34 @@ class AntiXSS
     if (strpos($match, $this->xss_hash()) !== false) {
       $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
 
-      // decode, then un-protect URL GET vars
-      return str_replace(
-          $this->xss_hash(),
-          '&',
-          UTF8::html_entity_decode($match, $flags)
-      );
+      // decode
+      $string = UTF8::html_entity_decode($match, $flags);
+
+      // only for old php
+      if ($flags === ENT_QUOTES) {
+        $entities = array(
+            '&colon;'   => ':',
+            '&#x0003A;' => ':',
+            '&#58;'     => ':',
+            '&lpar;'    => '(',
+            '&#x00028;' => '(',
+            '&#40;'     => '(',
+            '&rpar;'    => ')',
+            '&#x00029;' => ')',
+            '&#41;'     => ')',
+            '&newline;' => "\n",
+            '&#x0000A;' => "\n",
+            '&#10;'     => "\n",
+            '&tab;'     => "\t",
+            '&#x00009;' => "\n",
+            '&#9;'      => "\n",
+        );
+        $string = strtr($string, $entities);
+      }
+
+      // un-protect URL GET vars
+      return str_replace($this->xss_hash(), '&', $string);
+
     } else {
       // decode
       return UTF8::urldecode($match, false);
