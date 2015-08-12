@@ -64,21 +64,20 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
   public function test_xss_clean_string_array()
   {
-    $harm_strings = array(
-        "Hello, i try to <script>alert('Hack');</script> your site",
-        "Simple clean string",
-        "Hello, i try to <script>alert('Hack');</script> your site",
-        "<a href=\"http://test.com?param1=\"+onMouseOver%3D\"alert%281%29%3B&step=2&param12=A\">test</a>"
+    $harmStrings = array(
+        "Hello, i try to <script>alert('Hack');</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site",
+        "Simple clean string" => "Simple clean string",
+        "Hello, i try to <script>alert('Hack')</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;[removed] your site",
+        "<a href=\"http://test.com?param1=\"+onMouseOver%3D\"alert%281%29%3B&step=2&param12=A\">test</a>" => "<a href=\"http://test.com?param1=\">test</a>",
+        "<a href=\"http://test.com?param1=lall&colon=foo;\">test</a>" => '<a href="http://test.com?param1=lall&colon=foo;">test</a>',
+        "<a href=\"http://test.com?param1=lall&colon;=foo;\">test</a>" => '<a href="http://test.com?param1=lall:=foo;">test</a>',
     );
 
     $this->security->setReplacement('[removed]');
-    $harmless_strings = $this->security->xss_clean($harm_strings);
+    foreach ($harmStrings as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
     $this->security->setReplacement('');
-
-    self::assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[0]);
-    self::assertEquals("Simple clean string", $harmless_strings[1]);
-    self::assertEquals("Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site", $harmless_strings[2]);
-    self::assertEquals("<a href=\"http://test.com?param1=\">test</a>", $harmless_strings[3]);
   }
 
   public function test_xss_clean_image_valid()

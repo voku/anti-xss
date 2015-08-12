@@ -810,34 +810,39 @@ class AntiXSS
       // decode
       $string = UTF8::html_entity_decode($match, $flags);
 
-      // only for old php
-      if ($flags === ENT_QUOTES) {
-        $entities = array(
-            '&colon;'   => ':',
-            '&#x0003A;' => ':',
-            '&#58;'     => ':',
-            '&lpar;'    => '(',
-            '&#x00028;' => '(',
-            '&#40;'     => '(',
-            '&rpar;'    => ')',
-            '&#x00029;' => ')',
-            '&#41;'     => ')',
-            '&newline;' => "\n",
-            '&#x0000A;' => "\n",
-            '&#10;'     => "\n",
-            '&tab;'     => "\t",
-            '&#x00009;' => "\n",
-            '&#9;'      => "\n",
-        );
-        $string = strtr($string, $entities);
-      }
-
       // un-protect URL GET vars
-      return str_replace($this->xss_hash(), '&', $string);
+      $return = str_replace($this->xss_hash(), '&', $string);
 
     } else {
       // decode
-      return UTF8::urldecode($match, false);
+      $return = UTF8::urldecode($match, false);
+    }
+
+    if (Bootup::is_php('5.4')) {
+      return $return;
+
+    } else {
+
+      // only for old php
+      $entities = array(
+          '&colon;'   => ':',
+          '&#x0003A;' => ':',
+          '&#58;'     => ':',
+          '&lpar;'    => '(',
+          '&#x00028;' => '(',
+          '&#40;'     => '(',
+          '&rpar;'    => ')',
+          '&#x00029;' => ')',
+          '&#41;'     => ')',
+          '&newline;' => "\n",
+          '&#x0000A;' => "\n",
+          '&#10;'     => "\n",
+          '&tab;'     => "\t",
+          '&#x00009;' => "\n",
+          '&#9;'      => "\n",
+      );
+
+      return strtr($return, $entities);
     }
   }
 
