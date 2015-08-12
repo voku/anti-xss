@@ -824,6 +824,8 @@ class AntiXSS
     } else {
 
       // only for old php
+      //
+      // link: http://dev.w3.org/html5/html-author/charref
       $entities = array(
           '&colon;'   => ':',
           '&#x0003A;' => ':',
