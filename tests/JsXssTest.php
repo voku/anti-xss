@@ -185,7 +185,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     // HTML5新增实体编码 冒号&colon; 换行&NewLine;
     self::assertEquals('<a />', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
-    self::assertEquals('<a />',$this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
+    self::assertEquals('<a />', $this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
     self::assertEquals("<a href=\"a\nb\">", $this->security->xss_clean('<a href="a&NewLine;b">'));
     self::assertEquals('<a href="a&NewLineb">', $this->security->xss_clean('<a href="a&NewLineb">'));
     self::assertEquals('<a >', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
