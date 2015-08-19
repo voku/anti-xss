@@ -805,7 +805,12 @@ class AntiXSS
     $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
 
     if (strpos($match, $this->xss_hash()) !== false) {
-      $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
+
+      if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
+        $flags = ENT_COMPAT | ENT_HTML5;
+      } else {
+        $flags = ENT_COMPAT;
+      }
 
       // decode
       $string = UTF8::html_entity_decode($match, $flags);
@@ -818,7 +823,7 @@ class AntiXSS
       $return = UTF8::urldecode($match, false);
     }
 
-    if (Bootup::is_php('5.4')) {
+    if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
       return $return;
 
     } else {
