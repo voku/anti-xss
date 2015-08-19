@@ -9,3 +9,4 @@ enabled:
 
 disabled:
   - indentation
+  - braces
