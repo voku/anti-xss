@@ -6,3 +6,6 @@ enabled:
   - self_accessor
   - single_quote
   - ordered_use
+
+disabled:
+  - indentation
