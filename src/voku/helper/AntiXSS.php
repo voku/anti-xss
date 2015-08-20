@@ -406,8 +406,8 @@ class AntiXSS
   /**
    * make php-tags safe
    *
-   * @param $str
-   * @param $is_image
+   * @param string $str
+   * @param boolean $is_image
    *
    * @return string
    */
@@ -860,7 +860,7 @@ class AntiXSS
   /**
    * @param $str
    *
-   * @return mixed|string
+   * @return string
    */
   protected function _entity_decode($str)
   {
