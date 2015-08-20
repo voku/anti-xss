@@ -403,6 +403,10 @@ class AntiXSS
     return (string)$str;
   }
 
+  /**
+   * @param string $str
+   * @param boolean $is_image
+   */
   public function make_php_tags_safe($str, $is_image)
   {
     if ($is_image === true) {
@@ -633,6 +637,9 @@ class AntiXSS
     return (string)$str;
   }
 
+  /**
+   * @param string $str
+   */
   public function sanitize_naughty_javascript($str)
   {
     $str = preg_replace(
