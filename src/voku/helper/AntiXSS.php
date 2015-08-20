@@ -403,8 +403,14 @@ class AntiXSS
     return (string)$str;
   }
 
-  /**
-   * make php-tags safe
+  /*
+   * Makes PHP tags safe
+   *
+   * Note: XML tags are inadvertently replaced too:
+   *
+   * <?xml
+   *
+   * But it doesn't seem to pose a problem.
    *
    * @param string $str
    * @param boolean $is_image
@@ -434,21 +440,16 @@ class AntiXSS
     return (string)$str;
   }
 
-  /*
-   * Makes PHP tags safe
+  /**
+   * Compact any exploded words
    *
-   * Note: XML tags are inadvertently replaced too:
-   *
-   * <?xml
-   *
-   * But it doesn't seem to pose a problem.
+   * This corrects words like:  j a v a s c r i p t
+   * These words are compacted back to their correct state.
    *
    * @param string $str
-   * @param boolean $is_image
    *
    * @return string
    */
-
   public function compact_exploded_javascript($str)
   {
     $words = array(
@@ -539,17 +540,6 @@ class AntiXSS
 
     return (string)$str;
   }
-
-  /*
-   * Compact any exploded words
-   *
-   * This corrects words like:  j a v a s c r i p t
-   * These words are compacted back to their correct state.
-   *
-   * @param string $str
-   *
-   * @return string
-   */
 
   /**
    * Remove Evil HTML Attributes (like event handlers and style)
