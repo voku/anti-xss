@@ -883,7 +883,10 @@ class AntiXSS
             '&#9;'      => "\n",
         );
 
-        $entities = array_merge($entities, array_map('strtolower', get_html_translation_table(HTML_ENTITIES, $flags)));
+        $entities = array_merge(
+            $entities,
+            array_map('strtolower', array_flip(get_html_translation_table(HTML_ENTITIES, $flags)))
+        );
       }
 
       $replace = array();
