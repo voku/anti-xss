@@ -230,9 +230,9 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
   {
     $security = $this->getSecurity();
 
-    $return = $security->xss_clean(['test', '123', ['abc']]);
+    $return = $security->xss_clean(array('test', '123', array('abc')));
 
-    $this->assertSame(['test', '123', ['abc']], $return);
+    $this->assertSame(array('test', '123', array('abc')), $return);
   }
 
   protected function getSecurity()
