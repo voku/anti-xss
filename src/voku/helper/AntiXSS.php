@@ -914,7 +914,7 @@ class AntiXSS
       }
 
       if (count($replace) > 0) {
-        $str = str_ireplace(array_values($replace), array_keys($replace), $str);
+        $str = str_ireplace(array_keys($replace), array_values($replace), $str);
       }
     }
 
