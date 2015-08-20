@@ -325,7 +325,13 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
 
     // test for php < OR > 5.3
 
-    if (Bootup::is_php('5.4.0') === true || defined('HHVM_VERSION') === true) {
+    if (defined('HHVM_VERSION') === true) {
+      $testArray = array(
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+      );
+    } elseif (Bootup::is_php('5.4.0') === true) {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
