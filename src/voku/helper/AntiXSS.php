@@ -864,7 +864,12 @@ class AntiXSS
   {
     if ($this->_xss_hash === null) {
       $rand = Bootup::get_random_bytes(16);
-      $this->_xss_hash = (!$rand) ? md5(uniqid(mt_rand(), true)) : bin2hex($rand);
+
+      if (!$rand) {
+        $this->_xss_hash = md5(uniqid(mt_rand(), true));
+      } else {
+        $this->_xss_hash = bin2hex($rand);
+      }
     }
 
     return $this->_xss_hash;
