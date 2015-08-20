@@ -832,7 +832,7 @@ class AntiXSS
     }
 
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
-    if (preg_match_all('/&[a-z]{2,}/i', $str, $matches)) {
+    if (preg_match_all('/&[a-z]{2,}?([a-z;])?/i', $str, $matches)) {
 
       if (null === $entities) {
         // link: http://dev.w3.org/html5/html-author/charref
@@ -857,7 +857,7 @@ class AntiXSS
         $entities = array_merge($entities, array_map('strtolower', get_html_translation_table(HTML_ENTITIES, $flags)));
       }
 
-      $replace = [];
+      $replace = array();
       $matches = array_unique(array_map('strtolower', $matches[0]));
       foreach ($matches as &$match) {
         if (($char = array_search($match . ';', $entities, true)) !== false) {
