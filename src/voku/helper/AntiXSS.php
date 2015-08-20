@@ -865,7 +865,7 @@ class AntiXSS
     }
 
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
-    if (preg_match_all('/&[a-z]{2,}?([a-z;])?/i', $str, $matches)) {
+    if (preg_match_all('/&[a-z]{2,}(?![a-z;])/i', $str, $matches)) {
 
       if (null === $entities) {
         // link: http://dev.w3.org/html5/html-author/charref
