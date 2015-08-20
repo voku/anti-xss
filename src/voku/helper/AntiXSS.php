@@ -404,8 +404,12 @@ class AntiXSS
   }
 
   /**
-   * @param string $str
-   * @param boolean $is_image
+   * make php-tags safe
+   *
+   * @param $str
+   * @param $is_image
+   *
+   * @return string
    */
   public function make_php_tags_safe($str, $is_image)
   {
@@ -638,7 +642,11 @@ class AntiXSS
   }
 
   /**
+   * Sanitize naughty JavaScript elements
+   *
    * @param string $str
+   *
+   * @return string
    */
   public function sanitize_naughty_javascript($str)
   {
