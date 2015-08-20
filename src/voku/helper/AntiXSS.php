@@ -800,57 +800,76 @@ class AntiXSS
    */
   protected function _decode_entity($match)
   {
+    $hash = $this->xss_hash();
+
     // protect GET variables in URLs
     // 901119URL5918AMP18930PROTECT8198
-    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
+    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $hash . '\\1=\\2', $match[0]);
 
-    if (strpos($match, $this->xss_hash()) !== false) {
+    // un-protect URL GET vars
+    return str_replace($this->xss_hash(), '&', $this->_entity_decode($match));
+  }
 
-      if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
-        $flags = ENT_COMPAT | ENT_HTML5;
-      } else {
-        $flags = ENT_COMPAT;
-      }
-
-      // decode
-      $string = UTF8::html_entity_decode($match, $flags);
-
-      // un-protect URL GET vars
-      $return = str_replace($this->xss_hash(), '&', $string);
-
-    } else {
-      // decode
-      $return = UTF8::urldecode($match, false);
-    }
+  /**
+   * @param $str
+   *
+   * @return mixed|string
+   */
+  protected function _entity_decode($str) {
+    static $entities;
 
     if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
-      return $return;
-
+      $flags = ENT_COMPAT | ENT_HTML5;
     } else {
-
-      // only for old php
-      //
-      // link: http://dev.w3.org/html5/html-author/charref
-      $entities = array(
-          '&colon;'   => ':',
-          '&#x0003A;' => ':',
-          '&#58;'     => ':',
-          '&lpar;'    => '(',
-          '&#x00028;' => '(',
-          '&#40;'     => '(',
-          '&rpar;'    => ')',
-          '&#x00029;' => ')',
-          '&#41;'     => ')',
-          '&newline;' => "\n",
-          '&#x0000A;' => "\n",
-          '&#10;'     => "\n",
-          '&tab;'     => "\t",
-          '&#x00009;' => "\n",
-          '&#9;'      => "\n",
-      );
-
-      return UTF8::str_ireplace(array_keys($entities), array_values($entities), $return);
+      $flags = ENT_COMPAT;
     }
+
+    // decode
+    if (strpos($str, $this->xss_hash()) !== false) {
+      $str = UTF8::html_entity_decode($str, $flags);
+    } else {
+      $str = UTF8::urldecode($str, false);
+    }
+
+    // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
+    if (preg_match_all('/&[a-z]{2,}(?![a-z;])/i', $str, $matches)) {
+
+      if (null === $entities) {
+        // link: http://dev.w3.org/html5/html-author/charref
+        $entities = array(
+            '&colon;'   => ':',
+            '&#x0003A;' => ':',
+            '&#58;'     => ':',
+            '&lpar;'    => '(',
+            '&#x00028;' => '(',
+            '&#40;'     => '(',
+            '&rpar;'    => ')',
+            '&#x00029;' => ')',
+            '&#41;'     => ')',
+            '&newline;' => "\n",
+            '&#x0000A;' => "\n",
+            '&#10;'     => "\n",
+            '&tab;'     => "\t",
+            '&#x00009;' => "\n",
+            '&#9;'      => "\n",
+        );
+
+        $entities = array_merge($entities, array_map('strtolower', get_html_translation_table(HTML_ENTITIES, $flags)));
+      }
+
+      $replace = [];
+      $matches = array_unique(array_map('strtolower', $matches[0]));
+      foreach ($matches as &$match) {
+        if (($char = array_search($match . ';', $entities, true)) !== false) {
+          $replace[$match] = $char;
+        }
+      }
+      unset($match);
+
+      $str = UTF8::str_ireplace(array_keys($replace), array_values($replace), $str);
+    }
+
+    return $str;
   }
 
   /**
