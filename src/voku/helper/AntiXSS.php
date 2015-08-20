@@ -868,8 +868,15 @@ class AntiXSS
 
     $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
 
+    // decode
+    if (strpos($str, $this->xss_hash()) !== false) {
+      $str = UTF8::html_entity_decode($str, $flags);
+    } else {
+      $str = UTF8::urldecode($str, false);
+    }
+
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
-    if (preg_match_all('/&[a-z]{2,}(?![a-z;])/i', $str, $matches)) {
+    if (preg_match_all('/&[a-z]{2,}[;]{0}/i', $str, $matches)) {
 
       if (null === $entities) {
         // link: http://dev.w3.org/html5/html-author/charref
@@ -899,21 +906,16 @@ class AntiXSS
 
       $replace = array();
       $matches = array_unique(array_map('strtolower', $matches[0]));
-      foreach ($matches as &$match) {
-        if (($char = array_search($match . ';', $entities, true)) !== false) {
-          $replace[$match] = $char;
+      foreach ($matches as $match) {
+        $match .= ';';
+        if (array_key_exists($match, $entities) === true) {
+          $replace[$match] = $entities[$match];
         }
       }
-      unset($match);
 
-      $str = UTF8::str_ireplace(array_keys($replace), array_values($replace), $str);
-    }
-
-    // decode
-    if (strpos($str, $this->xss_hash()) !== false) {
-      $str = UTF8::html_entity_decode($str, $flags);
-    } else {
-      $str = UTF8::urldecode($str, false);
+      if (count($replace) > 0) {
+        $str = str_ireplace(array_values($replace), array_keys($replace), $str);
+      }
     }
 
     return $str;
