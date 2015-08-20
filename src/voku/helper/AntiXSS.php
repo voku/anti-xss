@@ -853,13 +853,6 @@ class AntiXSS
 
     $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
 
-    // decode
-    if (strpos($str, $this->xss_hash()) !== false) {
-      $str = UTF8::html_entity_decode($str, $flags);
-    } else {
-      $str = UTF8::urldecode($str, false);
-    }
-
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
     if (preg_match_all('/&[a-z]{2,}(?![a-z;])/i', $str, $matches)) {
 
@@ -899,6 +892,13 @@ class AntiXSS
       unset($match);
 
       $str = UTF8::str_ireplace(array_keys($replace), array_values($replace), $str);
+    }
+
+    // decode
+    if (strpos($str, $this->xss_hash()) !== false) {
+      $str = UTF8::html_entity_decode($str, $flags);
+    } else {
+      $str = UTF8::urldecode($str, false);
     }
 
     return $str;
