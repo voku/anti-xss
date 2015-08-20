@@ -1,0 +1,3 @@
+test:
+  override:
+    - vendor/bin/phpunit --configuration phpunit.xml
