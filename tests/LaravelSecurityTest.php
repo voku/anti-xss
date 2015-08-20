@@ -226,6 +226,11 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
     $this->assertSame($output, $return);
   }
 
+  protected function getSecurity()
+  {
+    return new AntiXSS();
+  }
+
   public function testCleanArray()
   {
     $security = $this->getSecurity();
@@ -233,10 +238,5 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
     $return = $security->xss_clean(array('test', '123', array('abc')));
 
     $this->assertSame(array('test', '123', array('abc')), $return);
-  }
-
-  protected function getSecurity()
-  {
-    return new AntiXSS();
   }
 }

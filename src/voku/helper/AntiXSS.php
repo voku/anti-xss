@@ -22,36 +22,36 @@ class AntiXSS
    * @var  array
    */
   protected static $_never_allowed_regex = array(
-      // default javascript
-      'javascript\s*:',
-      // default javascript
-      '(document|(document\.)?window)\.(location|on\w*)',
-      // Java: jar-protocol is an XSS hazard
-      'jar\s*:',
-      // Mac (will not run the script, but open it in AppleScript Editor)
-      'applescript\s*:',
-      // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
-      'vbscript\s*:',
-      // IE, surprise!
-      'wscript\s*:',
-      // IE
-      'jscript\s*:',
-      // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
-      'vbs\s*:',
-      // https://html5sec.org/#behavior
-      'behavior\s:',
-      // ?
-      'Redirect\s+30\d',
-      // data-attribute + base64
-      "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
-      // remove Netscape 4 JS entities
-      '&\s*\{[^}]*(\}\s*;?|$)',
-      // old IE, old Netscape
-      'expression\s*(\(|&\#40;)',
-      // old Netscape
-      'mocha\s*:',
-      // old Netscape
-      'livescript\s*:',
+    // default javascript
+    'javascript\s*:',
+    // default javascript
+    '(document|(document\.)?window)\.(location|on\w*)',
+    // Java: jar-protocol is an XSS hazard
+    'jar\s*:',
+    // Mac (will not run the script, but open it in AppleScript Editor)
+    'applescript\s*:',
+    // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
+    'vbscript\s*:',
+    // IE, surprise!
+    'wscript\s*:',
+    // IE
+    'jscript\s*:',
+    // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
+    'vbs\s*:',
+    // https://html5sec.org/#behavior
+    'behavior\s:',
+    // ?
+    'Redirect\s+30\d',
+    // data-attribute + base64
+    "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
+    // remove Netscape 4 JS entities
+    '&\s*\{[^}]*(\}\s*;?|$)',
+    // old IE, old Netscape
+    'expression\s*(\(|&\#40;)',
+    // old Netscape
+    'mocha\s*:',
+    // old Netscape
+    'livescript\s*:',
   );
 
   /**
@@ -360,42 +360,6 @@ class AntiXSS
    *
    * @return string
    */
-  public function sanitize_naughty_javascript($str)
-  {
-    $str = preg_replace(
-        '#(alert|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*?)\)#si',
-        '\\1\\2&#40;\\3&#41;',
-        $str
-    );
-
-    return (string) $str;
-  }
-
-  /**
-   * Sanitize naughty HTML elements
-   *
-   * If a tag containing any of the words in the list
-   * below is found, the tag gets converted to entities.
-   *
-   * So this: <blink>
-   * Becomes: &lt;blink&gt;
-   *
-   * @param string $str
-   *
-   * @return string
-   */
-  public function sanitize_naughty_html($str)
-  {
-    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss';
-    $str = preg_replace_callback(
-      '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is', array(
-        $this,
-        '_sanitize_naughty_html',
-      ), $str
-    );
-
-    return (string) $str;
-  }
 
   /**
    * decode the html-tags via "UTF8::html_entity_decode()" or the string via "UTF8::urldecode()"
@@ -408,16 +372,58 @@ class AntiXSS
   {
     if (preg_match('/<\w+.*/si', $str, $matches) === 1) {
       $str = preg_replace_callback(
-        '/<\w+.*/si', array(
-          $this,
-          '_decode_entity',
-        ), $str
+          '/<\w+.*/si',
+          array(
+              $this,
+              '_decode_entity',
+          ),
+          $str
       );
     } else {
       $str = UTF8::urldecode($str, false);
     }
 
     return $str;
+  }
+
+  /**
+   * Do Never Allowed
+   *
+   * @param string $str
+   *
+   * @return  string
+   */
+  protected function _do_never_allowed($str)
+  {
+    $str = str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
+
+    $regex = implode('|', self::$_never_allowed_regex);
+    $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
+
+    return (string)$str;
+  }
+
+  public function make_php_tags_safe($str, $is_image)
+  {
+    if ($is_image === true) {
+      // Images have a tendency to have the PHP short opening and
+      // closing tags every so often so we skip those and only
+      // do the long opening tags.
+      $str = preg_replace('/<\?(php)/i', '&lt;?\\1', $str);
+    } else {
+      $str = str_replace(
+          array(
+              '<?',
+              '?>',
+          ),
+          array(
+              '&lt;?',
+              '?&gt;',
+          ), $str
+      );
+    }
+
+    return (string)$str;
   }
 
   /*
@@ -434,85 +440,7 @@ class AntiXSS
    *
    * @return string
    */
-  public function make_php_tags_safe($str, $is_image)
-  {
-    if ($is_image === true) {
-      // Images have a tendency to have the PHP short opening and
-      // closing tags every so often so we skip those and only
-      // do the long opening tags.
-      $str = preg_replace('/<\?(php)/i', '&lt;?\\1', $str);
-    } else {
-      $str = str_replace(
-          array(
-              '<?',
-              '?>',
-          ), array(
-              '&lt;?',
-              '?&gt;',
-          ), $str
-      );
-    }
 
-    return (string) $str;
-  }
-
-  /*
-   * Remove disallowed Javascript in links or img tags
-   * We used to do some version comparisons and use of stripos(),
-   * but it is dog slow compared to these simplified non-capturing
-   * preg_match(), especially if the pattern exists in the string
-   *
-   * Note: It was reported that not only space characters, but all in
-   * the following pattern can be parsed as separators between a tag name
-   * and its attributes: [\d\s"\'`;,\/\=\(\x00\x0B\x09\x0C]
-   * ... however, remove_invisible_characters() above already strips the
-   * hex-encoded ones, so we'll skip them below.
-   *
-   * @param string $str
-   *
-   * @return string
-   */
-  public function remove_disallowed_javascript($str)
-  {
-    do {
-      $original = $str;
-
-      if (preg_match('/<a/i', $str)) {
-        $str = preg_replace_callback(
-          '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i', array(
-            $this,
-            '_js_link_removal',
-          ), $str
-        );
-      }
-
-      if (preg_match('/<img/i', $str)) {
-        $str = preg_replace_callback(
-          '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i', array(
-            $this,
-            '_js_img_removal',
-          ), $str
-        );
-      }
-
-      if (preg_match('/script|xss/i', $str)) {
-        $str = preg_replace('#</*(?:script|xss).*?>#si', $this->_replacement, $str);
-      }
-    } while ($original !== $str);
-
-    return (string) $str;
-  }
-
-  /*
-   * Compact any exploded words
-   *
-   * This corrects words like:  j a v a s c r i p t
-   * These words are compacted back to their correct state.
-   *
-   * @param string $str
-   *
-   * @return string
-   */
   public function compact_exploded_javascript($str)
   {
     $words = array(
@@ -540,53 +468,80 @@ class AntiXSS
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
       $str = preg_replace_callback(
-        '#(' . substr($word, 0, -3) . ')(\W)#is', array(
-          $this,
-          '_compact_exploded_words',
-        ), $str
+          '#(' . substr($word, 0, -3) . ')(\W)#is',
+          array(
+              $this,
+              '_compact_exploded_words',
+          ),
+          $str
       );
     }
 
-    return (string) $str;
+    return (string)$str;
   }
 
-  /**
-   * Do Never Allowed Afterwards
+  /*
+   * Remove disallowed Javascript in links or img tags
+   * We used to do some version comparisons and use of stripos(),
+   * but it is dog slow compared to these simplified non-capturing
+   * preg_match(), especially if the pattern exists in the string
    *
-   * clean-up also some string, also if there is no html-tag
+   * Note: It was reported that not only space characters, but all in
+   * the following pattern can be parsed as separators between a tag name
+   * and its attributes: [\d\s"\'`;,\/\=\(\x00\x0B\x09\x0C]
+   * ... however, remove_invisible_characters() above already strips the
+   * hex-encoded ones, so we'll skip them below.
    *
-   * @param string $str
-   *
-   * @return  string
-   */
-  /**
    * @param string $str
    *
    * @return string
    */
-  protected function _do_never_allowed_afterwards($str)
-  {
-    $str = str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
 
-    return (string) $str;
+  public function remove_disallowed_javascript($str)
+  {
+    do {
+      $original = $str;
+
+      if (preg_match('/<a/i', $str)) {
+        $str = preg_replace_callback(
+            '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i',
+            array(
+                $this,
+                '_js_link_removal',
+            ),
+            $str
+        );
+      }
+
+      if (preg_match('/<img/i', $str)) {
+        $str = preg_replace_callback(
+            '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
+            array(
+                $this,
+                '_js_img_removal',
+            ),
+            $str
+        );
+      }
+
+      if (preg_match('/script|xss/i', $str)) {
+        $str = preg_replace('#</*(?:script|xss).*?>#si', $this->_replacement, $str);
+      }
+    } while ($original !== $str);
+
+    return (string)$str;
   }
 
-  /**
-   * Do Never Allowed
+  /*
+   * Compact any exploded words
+   *
+   * This corrects words like:  j a v a s c r i p t
+   * These words are compacted back to their correct state.
    *
    * @param string $str
    *
-   * @return  string
+   * @return string
    */
-  protected function _do_never_allowed($str)
-  {
-    $str = str_ireplace(array_keys($this->_never_allowed_str), $this->_never_allowed_str, $str);
-
-    $regex = implode('|', self::$_never_allowed_regex);
-    $str = preg_replace('#' . $regex . '#is', $this->_replacement, $str);
-
-    return (string) $str;
-  }
 
   /**
    * Remove Evil HTML Attributes (like event handlers and style)
@@ -647,7 +602,62 @@ class AntiXSS
       $count += $temp_count;
     } while ($count);
 
-    return (string) $str;
+    return (string)$str;
+  }
+
+  /**
+   * Sanitize naughty HTML elements
+   *
+   * If a tag containing any of the words in the list
+   * below is found, the tag gets converted to entities.
+   *
+   * So this: <blink>
+   * Becomes: &lt;blink&gt;
+   *
+   * @param string $str
+   *
+   * @return string
+   */
+  public function sanitize_naughty_html($str)
+  {
+    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss';
+    $str = preg_replace_callback(
+        '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is',
+        array(
+            $this,
+            '_sanitize_naughty_html',
+        ),
+        $str
+    );
+
+    return (string)$str;
+  }
+
+  public function sanitize_naughty_javascript($str)
+  {
+    $str = preg_replace(
+        '#(alert|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*?)\)#si',
+        '\\1\\2&#40;\\3&#41;',
+        $str
+    );
+
+    return (string)$str;
+  }
+
+  /**
+   * Do Never Allowed Afterwards
+   *
+   * clean-up also some string, also if there is no html-tag
+   *
+   * @param string $str
+   *
+   * @return  string
+   */
+  protected function _do_never_allowed_afterwards($str)
+  {
+    $str = str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
+
+    return (string)$str;
   }
 
   /**
@@ -657,7 +667,7 @@ class AntiXSS
    */
   public function setReplacement($string)
   {
-    $this->_replacement = (string) $string;
+    $this->_replacement = (string)$string;
   }
 
   /**
@@ -811,11 +821,34 @@ class AntiXSS
   }
 
   /**
+   * XSS Hash
+   *
+   * Generates the XSS hash if needed and returns it.
+   *
+   * @return  string  XSS hash
+   */
+  public function xss_hash()
+  {
+    if ($this->_xss_hash === null) {
+      $rand = Bootup::get_random_bytes(16);
+
+      if (!$rand) {
+        $this->_xss_hash = md5(uniqid(mt_rand(), true));
+      } else {
+        $this->_xss_hash = bin2hex($rand);
+      }
+    }
+
+    return $this->_xss_hash;
+  }
+
+  /**
    * @param $str
    *
    * @return mixed|string
    */
-  protected function _entity_decode($str) {
+  protected function _entity_decode($str)
+  {
     static $entities;
 
     if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
@@ -870,28 +903,6 @@ class AntiXSS
     }
 
     return $str;
-  }
-
-  /**
-   * XSS Hash
-   *
-   * Generates the XSS hash if needed and returns it.
-   *
-   * @return  string  XSS hash
-   */
-  public function xss_hash()
-  {
-    if ($this->_xss_hash === null) {
-      $rand = Bootup::get_random_bytes(16);
-
-      if (!$rand) {
-        $this->_xss_hash = md5(uniqid(mt_rand(), true));
-      } else {
-        $this->_xss_hash = bin2hex($rand);
-      }
-    }
-
-    return $this->_xss_hash;
   }
 
 }

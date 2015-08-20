@@ -99,54 +99,53 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertEquals('<hr>', $this->security->xss_clean('<hr>'));
     // 增加白名单标签及属性
     self::assertEquals('<ooxx yy="ok" cc="no">uu</ooxx>', $this->security->xss_clean('<ooxx yy="ok" cc="no">uu</ooxx>'));
-    
 
     self::assertEquals('>">\'>alert&#40;String.fromCharCode(88,83,83&#41;)', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
-  
+
     self::assertEquals(';!--"=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
-  
+
     self::assertEquals('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\');">'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(\'XSS\')>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=JaVaScRiPt:alert(\'XSS\')>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=`javascript:alert("RSnake says, \'XSS\'")`>'));
-  
+
     self::assertEquals('<IMG """><>>', $this->security->xss_clean('<IMG """><SCRIPT>alert("XSS")</SCRIPT>">'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC="jav ascript:alert(\'XSS\');">'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC="jav\nascript:alert(\'XSS\');">'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=java\0script:alert(\"XSS\")>'));
-  
+
     self::assertEquals('<IMG >', $this->security->xss_clean('<IMG SRC=" &#14;  javascript:alert(\'XSS\');">'));
-  
+
     self::assertEquals('', $this->security->xss_clean('<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'));
-  
+
     self::assertEquals('&lt;BODY onload!#$%&()*~ -_.,:;?@[/|\]^`=alert&#40;"XSS"&#41;&gt;', $this->security->xss_clean('<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>'));
-  
+
     self::assertEquals('&lt;alert&#40;"XSS"&#41;;//&lt;', $this->security->xss_clean('<<SCRIPT>alert("XSS");//<</SCRIPT>'));
-  
+
     self::assertEquals('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js?< B >'));
-  
+
     self::assertEquals('&lt;SCRIPT SRC=//ha.ckers.org/.j', $this->security->xss_clean('<SCRIPT SRC=//ha.ckers.org/.j'));
-  
+
     self::assertEquals('<IMG ', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
-  
+
     self::assertEquals('&lt;iframe src=http://ha.ckers.org/scriptlet.html &lt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
 
     // 过滤 javascript:
