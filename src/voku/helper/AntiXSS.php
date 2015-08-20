@@ -881,6 +881,10 @@ class AntiXSS
       if (null === $entities) {
         // link: http://dev.w3.org/html5/html-author/charref
         $entities = array(
+            '&#x00000;' => '',
+            '&#0;'      => '',
+            '&#x00001;' => '',
+            '&#1;'      => '',
             '&colon;'   => ':',
             '&#x0003A;' => ':',
             '&#58;'     => ':',

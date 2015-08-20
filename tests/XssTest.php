@@ -1,7 +1,6 @@
 <?php
 
 use voku\helper\AntiXSS;
-use voku\helper\Bootup;
 use voku\helper\UTF8;
 
 class XssTest extends PHPUnit_Framework_TestCase {
@@ -195,7 +194,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
       '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV  alert&#40;\'XSS\'&#41;);">lall</div>',
       '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
-      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '',
+      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}&lt;/STYLE&gt;',
       '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG SRC=\'msgbox("XSS")\'>',
       '<IMG SRC="mocha:[code]">' => '<IMG SRC="[code]">',
       '<IMG SRC="livescript:[code]">' => '<IMG SRC="[code]">',
@@ -254,13 +253,12 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<SCRIPT a=">" \'\' SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" \'\' SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT "a=\'>\'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '\'" SRC="http://ha.ckers.org/xss.js">',
       '<SCRIPT a=`>` SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '` SRC="http://ha.ckers.org/xss.js">',
-      '<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '',
       'onAttribute="bar"' => '"bar"',
       "onAttribute=\"<script>alert('bar')</script>\"" => "\"alert&#40;'bar'&#41;\"",
       "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
       "<BR SIZE=\"&{alert('XSS')}\">" => '<BR SIZE="">', // & JavaScript includes
       "<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">" => "&lt;LINK REL=\"stylesheet\" HREF=\"alert&#40;'XSS'&#41;;\"&gt;", // STYLE sheet
-      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}&lt;/STYLE&gt;', // Remote style sheet
+      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</styel>foo' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}</styel>foo', // Remote style sheet
       "<STYLE>@im\\port'\\jaasc\ript:alert(\"XSS\")';</STYLE>" => "&lt;STYLE&gt;@im\port'\jaasc\ript:alert&#40;\"XSS\"&#41;';&lt;/STYLE&gt;", // STYLE tags with broken up JavaScript for XSS
       "<XSS STYLE=\"xss:expression_r(alert('XSS'))\">" => '', // Anonymous HTML with STYLE attribute
       '<XSS STYLE="behavior: url(xss.htc);">' => '', // Local htc file
