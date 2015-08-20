@@ -851,11 +851,7 @@ class AntiXSS
   {
     static $entities;
 
-    if (Bootup::is_php('5.4') === true || defined('HHVM_VERSION') === true) {
-      $flags = ENT_COMPAT | ENT_HTML5;
-    } else {
-      $flags = ENT_COMPAT;
-    }
+    $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
 
     // decode
     if (strpos($str, $this->xss_hash()) !== false) {
