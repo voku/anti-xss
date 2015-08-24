@@ -387,7 +387,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
           'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>',
           // https://twitter.com/0x6D6172696F/status/629754114084175872
           '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >&lt;/iframe&gt;',
-          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >\'">CLICK</a>',
+          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >CLICK</a>',
       );
     } else {
       $testArray = array(
