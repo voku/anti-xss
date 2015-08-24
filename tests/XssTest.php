@@ -173,8 +173,6 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<picture><source srcset="x"><img onerror="alert(1)"></picture>' => '<picture><source srcset="x"><img ></picture>',
       '<picture><img srcset="x" onerror="alert(1)"></picture>' => '<picture><img srcset="x" ></picture>',
       '<img srcset=",,,,,x" onerror="alert(1)">' => '<img srcset=",,,,,x" >',
-      '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
-      '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >⃒\'">CLICK</a>',
       '<table background="javascript:alert(1)"></table>' => '<table background="alert&#40;1&#41;"></table>',
       '<comment><img src="</comment><img src=x onerror=alert(1)//">' => '&lt;comment&gt;< >< >',
       '<![><img src="]><img src=x onerror=alert(1)//">' => '<![>< >< >', // up to Opera 11.52, FF 3.6.28
@@ -382,23 +380,22 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
 
     // test for php < OR > 5.3
 
-    if (defined('HHVM_VERSION') === true) {
+    if (Bootup::is_php('5.4.0') !== true || defined('HHVM_VERSION')) {
       $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
-          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
-          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
-      );
-    } elseif (Bootup::is_php('5.4.0') === true) {
-      $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
-          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
-          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a >⃒⃒\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">'                                                                            => '<IMG >',
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">'                                                      => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>',
+          // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >&lt;/iframe&gt;',
+          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >\'">CLICK</a>',
       );
     } else {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
-          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
-          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a >⃒⃒\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
+          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >⃒\'">CLICK</a>',
       );
     }
 
