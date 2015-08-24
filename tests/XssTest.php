@@ -151,6 +151,57 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<div id="b" style="font-family:a/**/ression(alert(1))(\'\\\')exp\\\')">aa</div>' => '<div id="b" >aa</div>', // IE | 2014: http://wooyun.org/bugs/wooyun-2014-068564
       '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
       '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
+      '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>' => 'alert&#40;1&#41;', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17
+      '<​script>alert `1`</script>' => '&lt; script&gt;alert `1`',
+      '<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>' => '&lt;form id="test"&gt;&lt;/form>&lt;button action="alert&#40;1&#41;"&gt;X&lt;/button&gt;',
+      '<input onfocus=write(1) autofocus>' => '&lt;input  autofocus&gt;',
+      '<input onblur=write(1) autofocus><input autofocus>' => '&lt;input  autofocus&gt;&lt;input autofocus>',
+      '<video poster=javascript:alert(1)//></video>' => '&lt;video poster=alert&#40;1&#41;//&gt;&lt;/video>',
+      '<body onscroll=alert(1)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>' => '&lt;body &gt;&lt;br><br><br><br><br><br>...<br><br><br><br>&lt;input autofocus&gt;',
+      '<form id=test onforminput=alert(1)><input></form><button form=test onformchange=alert(2)>X</button>' => '&lt;form id=test &gt;&lt;input>&lt;/form&gt;&lt;button  >X&lt;/button&gt;',
+      '<video><source onerror="alert(1)">' => '&lt;video&gt;&lt;source >',
+      '<video onerror="alert(1)"><source></source></video>' => '&lt;video &gt;&lt;source></source>&lt;/video&gt;',
+      '<form><button formaction="javascript:alert(1)">X</button>' => '&lt;form&gt;&lt;button >X&lt;/button&gt;',
+      '<body oninput=alert(1)><input autofocus>' => '&lt;body &gt;&lt;input autofocus>',
+      '<math href="javascript:alert(1)">CLICKME</math>' => '&lt;math href="alert&#40;1&#41;"&gt;CLICKME&lt;/math&gt;',
+      '<math> <!-- up to FF 13 --> <maction actiontype="statusline#http://google.com" xlink:href="javascript:alert(2)">CLICKME</maction>  <!-- FF 14+ --> <maction actiontype="statusline" xlink:href="javascript:alert(3)">CLICKME<mtext>http://http://google.com</mtext></maction> </math>' => '&lt;math&gt; &lt;!-- up to FF 13 --&gt; <maction actiontype="statusline#http://google.com" ="alert&#40;3&#41;">CLICKME<mtext>http://http://google.com</mtext></maction> &lt;/math&gt;',
+      '<​img[a][b]src=x[d]onerror[c]=[e]"alert(1)">' => '< img[a][b]src=x[d]onerror[c]=[e]"alert&#40;1&#41;">',
+      '<a href="[a]java[b]script[c]:alert(1)">XXX</a>' => '<a >XXX</a>',
+      '<form action="" method="post"> <input name="username" value="admin" /> <input name="password" type="password" value="secret" /> <input name="injected" value="injected" dirname="password" /> <input type="submit"> </form>' => '&lt;form action="" method="post"&gt; &lt;input name="username" value="admin" /&gt; &lt;input name="password" type="password" value="secret" /&gt; &lt;input name="injected" value="injected" dirname="password" /&gt; &lt;input type="submit"&gt; &lt;/form&gt;',
+      '<link rel="import" href="test.svg" />' => '&lt;link rel="import" href="test.svg" /&gt;',
+      '<iframe srcdoc="&lt;img src&equals;x:x onerror&equals;alert&lpar;1&rpar;&gt;" />' => '&lt;iframe srcdoc="&lt;img >" />',
+      '<picture><source srcset="x"><img onerror="alert(1)"></picture>' => '<picture><source srcset="x"><img ></picture>',
+      '<picture><img srcset="x" onerror="alert(1)"></picture>' => '<picture><img srcset="x" ></picture>',
+      '<img srcset=",,,,,x" onerror="alert(1)">' => '<img srcset=",,,,,x" >',
+      '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
+      '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >⃒\'">CLICK</a>',
+      '<table background="javascript:alert(1)"></table>' => '<table background="alert&#40;1&#41;"></table>',
+      '<comment><img src="</comment><img src=x onerror=alert(1)//">' => '&lt;comment&gt;< >< >',
+      '<![><img src="]><img src=x onerror=alert(1)//">' => '<![>< >< >', // up to Opera 11.52, FF 3.6.28
+      '<svg><![CDATA[><image xlink:href="]]><img src=xx:x onerror=alert(2)//"></svg>' => '&lt;svg&gt;&lt;![CDATA[><image ><img ></>', // IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+
+      '<img src onerror /" \'"= alt=alert(1)//">' => '<img >',
+      '<style><img src="</style><img src=x onerror=alert(1)//">' => '&lt;style&gt;&lt; >< >',
+      '<head><base href="javascript://"/></head><body><a href="/. /,alert(1)//#">XXX</a></body>' => '&lt;head&gt;&lt;base href="//"/>&lt;/head&gt;&lt;body><a >XXX</a>&lt;/body&gt;',
+      '<SCRIPT FOR=document EVENT=onreadystatechange>alert(1)</SCRIPT>' => 'alert&#40;1&#41;',
+      '<OBJECT CLASSID="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83"><PARAM NAME="DataURL" VALUE="javascript:alert(1)"></OBJECT>' => '&lt;OBJECT CLASSID="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83"&gt;&lt;PARAM NAME="DataURL" VALUE="alert&#40;1&#41;">&lt;/OBJECT&gt;',
+      '<object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="></object>' => '&lt;object data=PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="&gt;&lt;/object>',
+      '<embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="></embed>' => '&lt;embed src=PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="&gt;&lt;/embed>',
+      '<b <script>alert(1)//</script>0</script></b>' => '<b alert&#40;1&#41;//0</b>',
+      '<// style=x:expression\28write(1)\29>' => '<// >', // IE7
+      '<style>*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}</style>' => '&lt;style&gt;*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}&lt;/style&gt;', // IE6
+      '<div style="background:url(test5.svg)">PRESS ENTER</div>' => '<div >PRESS ENTER</div>', // Up to Opera 12.x
+      '<?xml-stylesheet type="text/css"?><root style="x:expression(write(1))"/>' => '&lt;?xml-stylesheet type="text/css"?&gt;<root >', // IE7
+      '<?xml-stylesheet type="text/css" href="data:,*%7bx:expression(write(2));%7d"?>' => '&lt;?xml-stylesheet type="text/css" href="data:,*{x:write(2));}"?&gt;', // IE8 -> IE10
+      '<x xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load" ev:handler="javascript:alert(1)//#x"/>' => '<x xmlns:ev="http://www.w3.org/2001/xml-events" "load" "alert&#40;1&#41;//#x"/>',
+      '<iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"></iframe>' => '&lt;iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"&gt;&lt;/iframe>',
+      '<!-- `<img/src=xx:xx onerror=alert(1)//--!>' => '&lt;!-- `<img/>',
+      '<title onpropertychange=alert(1)></title><title title=></title>' => '&lt;title &gt;&lt;/title>&lt;title title=&gt;&lt;/title>',
+      '<​iframe src="data:text/html,&lt;iframe src=\'data:text/html,%26lt;iframe onload=alert(1)&gt;\'&gt;"></iframe>' => '&lt; iframe src="data:text/html,&lt;iframe src=\'data:text/html,&lt;iframe &gt;\'>">&lt;/iframe&gt;',
+      '<!--<img src="--><​img src=x onerror=alert(1)//">' => '&lt;!--<img >',
+      '<​frameset onload=alert(1)>' => '&lt; frameset &gt;',
+      '<​body oninput=alert(1)><​input autofocus>' => '&lt; body &gt;&lt; input autofocus>',
+      '<​video poster=javascript:alert(1)//></video>' => '&lt; video poster=alert&#40;1&#41;//&gt;&lt;/video>',
+      '<a style="-o-link:\'javascript:alert(1)\';-o-link-source:current">X</a>' => '<a >X</a>',
       '<a href="applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>' => '<a href="//com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>',
       '<a onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
       '<a onmouseover=alert(document.cookie)>xxs</a>' => '<a >xxs</a>',
@@ -192,7 +243,9 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<LAYER SRC="http://ha.ckers.org/scriptlet.html"></LAYER>' => '&lt;LAYER SRC="http://ha.ckers.org/scriptlet.html"&gt;&lt;/LAYER>',
       '<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
       '<LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
+      '<link rel=stylesheet href=data:,*%7bx:expression(write(1))%7d' => '&lt;link rel=stylesheet href=data:,*{x:write(1))}',
       '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
+      '<style>p[foo=bar{}*{-o-link:\'javascript:alert(1)\'}{}*{-o-link-source:current}*{background:red}]{background:green};</style>' => '&lt;style&gt;p[foo=bar{}*{-o-link:\'alert&#40;1&#41;\'}{}*{-o-link-source:current}*{background:red}]{background:green};&lt;/style&gt;',
       '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV  alert&#40;\'XSS\'&#41;);">lall</div>',
       '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
       '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}&lt;/STYLE&gt;',
@@ -322,6 +375,10 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       'https://bilderdienst.bundestag.de/archives/btgpict/search/_%27-dOcumEnt.wRite%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/' => "https://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
       '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
     );
+
+    foreach ($testArray as $before => $after) {
+      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
 
     // test for php < OR > 5.3
 

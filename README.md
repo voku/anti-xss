@@ -24,11 +24,13 @@ NOTES:
 
 2) Use [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
 
-3) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
+3) Add "Content Security Policy's" -> [Introduction to Content Security Policy](http://www.html5rocks.com/en/tutorials/security/content-security-policy/)
 
-4) READ THIS TEXT -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+4) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
 
-5) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
+5) READ THIS TEXT -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+
+6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
 Usage:
 ======
