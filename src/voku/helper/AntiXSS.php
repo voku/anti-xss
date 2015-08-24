@@ -869,7 +869,10 @@ class AntiXSS
     if (preg_match_all('/&[a-z]{2,}[;]{0}/i', $str, $matches)) {
 
       if (null === $entities) {
-        // link: http://dev.w3.org/html5/html-author/charref
+
+        // links:
+        // - http://dev.w3.org/html5/html-author/charref
+        // - http://www.w3schools.com/charsets/ref_html_entities_n.asp
         $entities = array(
             '&#x00000;' => '',
             '&#0;'      => '',
