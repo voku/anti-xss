@@ -433,7 +433,8 @@ class AntiXSS
           array(
               '&lt;?',
               '?&gt;',
-          ), $str
+          ),
+          $str
       );
     }
 
