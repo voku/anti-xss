@@ -152,6 +152,17 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
       '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
       '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>' => 'alert&#40;1&#41;', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17
+      '<svg </onload ="1> (_=alert,_(1337)) "">' => '&lt;svg &lt;/> (_=alert,_(1337)) "">',
+      '<svg><script>/<@/>alert(1)</script>' => '&lt;svg&gt;/<@/>alert&#40;1&#41;',
+      '<svg/onload=alert`xss`>' => '&lt;svg/&gt;', // FF34+, Edge | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
+      '<p/onclick=alert(/xss/)>a' => '<p/>a',
+      '<iframe/src=//14.rs>' => '&lt;iframe/src=//14.rs&gt;',
+      '<p/oncut=alert`xss`>x' => '<p/>x',
+      '<svg/onload=alert(/XSS/)>' => '&lt;svg/&gt;', // FF40 | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
+      '<h1/onclick=alert(1)>a' => '<h1/>a',
+      '")}alert(/XSS/);{//' => '")}alert&#40;/XSS/&#41;;{//',
+      '<svgonload=alert(1)>' => '&lt;svgalert&#40;1&#41;&gt;', // 2015: https://twitter.com/ret2libc/status/635923671681507328
+      "<style onload='execScript(/**/\"\x61lert&#40 1&#41\",\"j\x61vascript\");'>" => '&lt;style  1)","javascript");\'&gt;', // IE | 2015: https://twitter.com/soaj1664ashar/status/635040931289370624
       '<​script>alert `1`</script>' => '&lt; script&gt;alert `1`',
       '<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>' => '&lt;form id="test"&gt;&lt;/form>&lt;button action="alert&#40;1&#41;"&gt;X&lt;/button&gt;',
       '<input onfocus=write(1) autofocus>' => '&lt;input  autofocus&gt;',
