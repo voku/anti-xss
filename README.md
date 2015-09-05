@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/voku/anti-xss.png?label=ready&title=Ready)](https://waffle.io/voku/anti-xss)
 [![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
 [![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg?branch=master&service=github)](https://coveralls.io/github/voku/anti-xss?branch=master)
 [![codecov.io](http://codecov.io/github/voku/anti-xss/coverage.svg?branch=master)](http://codecov.io/github/voku/anti-xss?branch=master)
