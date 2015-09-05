@@ -34,7 +34,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertEquals('{a: 1111}', $this->security->xss_clean('{a: 1111}'));
 
     // 清除不可见字符
-    self::assertEquals("a\u0000\u0001\u0002\u0003\r\n b", $this->security->xss_clean("a\u0000\u0001\u0002\u0003\r\n b"));
+    self::assertEquals("a\r\n b", $this->security->xss_clean("a\u0000\u0001\u0002\u0003\r\n b"));
 
     // 过滤不在白名单的标签
     self::assertEquals('<b>abcd</b>', $this->security->xss_clean('<b>abcd</b>'));

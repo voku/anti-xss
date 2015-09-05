@@ -344,23 +344,6 @@ class AntiXSS
     return $str;
   }
 
-  /*
-   * Sanitize naughty scripting elements
-   *
-   * Similar to above, only instead of looking for
-   * tags it looks for PHP and JavaScript commands
-   * that are disallowed. Rather than removing the
-   * code, it simply converts the parenthesis to entities
-   * rendering the code un-executable.
-   *
-   * For example:	eval('some code')
-   * Becomes:	eval&#40;'some code'&#41;
-   *
-   * @param string $str
-   *
-   * @return string
-   */
-
   /**
    * decode the html-tags via "UTF8::html_entity_decode()" or the string via "UTF8::urldecode()"
    *
@@ -490,7 +473,7 @@ class AntiXSS
     return (string)$str;
   }
 
-  /*
+  /**
    * Remove disallowed Javascript in links or img tags
    * We used to do some version comparisons and use of stripos(),
    * but it is dog slow compared to these simplified non-capturing
@@ -506,7 +489,6 @@ class AntiXSS
    *
    * @return string
    */
-
   public function remove_disallowed_javascript($str)
   {
     do {
@@ -633,7 +615,16 @@ class AntiXSS
   }
 
   /**
-   * Sanitize naughty JavaScript elements
+   * Sanitize naughty scripting elements
+   *
+   * Similar to above, only instead of looking for
+   * tags it looks for PHP and JavaScript commands
+   * that are disallowed. Rather than removing the
+   * code, it simply converts the parenthesis to entities
+   * rendering the code un-executable.
+   *
+   * For example:	eval('some code')
+   * Becomes:	eval&#40;'some code'&#41;
    *
    * @param string $str
    *

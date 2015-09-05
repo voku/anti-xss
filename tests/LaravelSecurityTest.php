@@ -159,7 +159,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<iframe/src="j&Tab;AVASCRIP&NewLine;t:\u0061ler\u0074&#x28;1&#x29;">',
-            '&lt;iframe/src="[removed]\u0061ler\u0074(1)"&gt;',
+            '&lt;iframe/src="[removed]alert&#40;1&#41;"&gt;',
         ),
         array(
             '<iframe/src="javascript:void(alert(1))?alert(1):confirm(1),prompt(1)">',
@@ -167,7 +167,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<embed/src=javascript&colon;\u0061&#x6C;&#101%72t&#x28;1&#x29;>',
-            '&lt;embed/src=[removed]\u0061lert(1)&gt;',
+            '&lt;embed/src=[removed]alert&#40;1&#41;&gt;',
         ),
         array(
             '<img/src=\'http://i.imgur.com/P8mL8.jpg \' onmouseover={confirm(1)}f()>',
