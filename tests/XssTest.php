@@ -8,6 +8,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
   // INFO: here you can find some more tests
   //
+  // - https://www.xssposed.org/incidents/
   // - http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
   // - http://htmlpurifier.org/live/smoketests/xssAttacks.php
   // - http://hackingforsecurity.blogspot.de/2013/11/xss-cheat-sheet-huge-list.html
