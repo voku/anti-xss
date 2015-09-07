@@ -363,7 +363,7 @@ class AntiXSS
           $str
       );
     } else {
-      $str = UTF8::urldecode($str, false);
+      $str = UTF8::urldecode($str);
     }
 
     return $str;
@@ -854,7 +854,7 @@ class AntiXSS
     if (strpos($str, $this->xss_hash()) !== false) {
       $str = UTF8::html_entity_decode($str, $flags);
     } else {
-      $str = UTF8::urldecode($str, false);
+      $str = UTF8::urldecode($str);
     }
 
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
