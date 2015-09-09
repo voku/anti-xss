@@ -386,7 +386,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
       '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG >',
       '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG >',
-      '<IMG SRC="j a v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG >',
+      '<IMG SRC="j a' . chr(0) . 'v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG >',
       '<IMG alt="中文空白" SRC="j a v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG alt="中文空白">',
     );
 
