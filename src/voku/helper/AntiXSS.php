@@ -436,6 +436,8 @@ class AntiXSS
    */
   public function compact_exploded_javascript($str)
   {
+    static $wordsCache;
+
     $words = array(
         'javascript',
         'expression',
@@ -456,7 +458,12 @@ class AntiXSS
     );
 
     foreach ($words as $word) {
-      $word = implode('\s*', str_split($word)) . '\s*';
+
+      if (!isset($wordsCache[$word])) {
+        $word = $wordsCache[$word] = chunk_split($word, 1, '\s*');
+      } else {
+        $word = $wordsCache[$word];
+      }
 
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
