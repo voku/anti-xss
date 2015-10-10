@@ -182,7 +182,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<form action="" method="post"> <input name="username" value="admin" /> <input name="password" type="password" value="secret" /> <input name="injected" value="injected" dirname="password" /> <input type="submit"> </form>' => '&lt;form action="" method="post"&gt; &lt;input name="username" value="admin" /&gt; &lt;input name="password" type="password" value="secret" /&gt; &lt;input name="injected" value="injected" dirname="password" /&gt; &lt;input type="submit"&gt; &lt;/form&gt;',
       '<link rel="import" href="test.svg" />' => '&lt;link rel="import" href="test.svg" /&gt;',
       '<iframe srcdoc="&lt;img src&equals;x:x onerror&equals;alert&lpar;1&rpar;&gt;" />' => '&lt;iframe srcdoc="&lt;img >" />',
-      '<picture><source srcset="x"><img onerror="alert(1)"></picture>' => '<picture><source srcset="x"><img ></>',
+      '<picture><source srcset="x"><img onerror="alert(1)"></picture>' => '<picture><source srcset="x"><img ></picture>',
       '<picture><img srcset="x" onerror="alert(1)"></picture>' => '<picture><img srcset="x" ></picture>',
       '<img srcset=",,,,,x" onerror="alert(1)">' => '<img srcset=",,,,,x" >',
       '<table background="javascript:alert(1)"></table>' => '<table background="alert&#40;1&#41;"></table>',
@@ -469,7 +469,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
   public function testOnError()
   {
     $testArray = array(
-        '<img src=1 href=1 onerror="javascript:alert(1)"></img>' => '<  ></>',
+        '<img src=1 href=1 onerror="javascript:alert(1)"></img>' => '<img  ></img>',
         '<audio src=1 href=1 onerror="javascript:alert(1)"></audio>' => '&lt;audio src=1 href=1 &gt;&lt;/audio>',
         '<video src=1 href=1 onerror="javascript:alert(1)"></video>' => '&lt;video src=1 href=1 &gt;&lt;/video>',
         '<body src=1 href=1 onerror="javascript:alert(1)"></body>' => '&lt;body src=1 href=1 &gt;&lt;/body>',
@@ -681,12 +681,8 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
 
   public function test_xss_clean_sanitize_naughty_html()
   {
-    self::assertEquals('<unclosedTag', $this->security->xss_clean('<unclosedTag'));
-    self::assertEquals('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
-    self::assertEquals('<fubar>', $this->security->xss_clean('<fubar>'));
-    self::assertEquals('<img &svg="" src="https://foo/bar">', $this->security->xss_clean('<img <svg=""> src="https://foo/bar">'));
-    self::assertEquals('<img src="b =">"x "alert&#40;1&#41;">', $this->security->xss_clean('<img src="b on="<x">on=">"x ononerror=error="alert(1)">')
-    );
+    $input = '<blink>';
+    self::assertEquals('&lt;blink&gt;', $this->security->xss_clean($input), $input);
   }
 
   public function test_remove_evil_attributes()
@@ -698,19 +694,6 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
     self::assertEquals('<foo prefixOnAttribute="bar">', $this->security->remove_evil_attributes('<foo prefixOnAttribute="bar">', false));
     self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->remove_evil_attributes('<foo>onOutsideOfTag=test</foo>', false));
     self::assertEquals('onNoTagAtAll = true', $this->security->remove_evil_attributes('onNoTagAtAll = true', false));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo fscommand=case-insensitive>'));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo seekSegmentTime=whatever>'));
-    self::assertEquals('<foo bar=">" baz=\'>\' "quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onError="quotes">'));
-    self::assertEquals('<foo bar=">" baz=\'>\' noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onError=noQuotes>'));
-    self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
-    self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
-    self::assertEquals('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">'));
-    self::assertEquals('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
-    self::assertEquals('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
-    self::assertEquals('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
-    self::assertEquals('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
-    self::assertEquals('&lt;svg&lt;img > src="x"error="location=/javascript/.source /:alert/.source /(1)/.source">', $this->security->xss_clean('<svg<img > src="x" ononerror=error="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
   }
 
   /**

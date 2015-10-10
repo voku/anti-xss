@@ -1812,40 +1812,6 @@ class AntiXSS
       $converted_string = $str;
     }
 
-    do {
-      $old_str = $str;
-      $str = $this->_do($str, $is_image);
-    } while ($old_str !== $str);
-
-
-    /*
-     * images are Handled in a special way
-     *
-     * Essentially, we want to know that after all of the character
-     * conversion is done whether any unwanted, likely XSS, code was found.
-     *
-     * If not, we return TRUE, as the image is clean.
-     *
-     * However, if the string post-conversion does not matched the
-     * string post-removal of XSS, then it fails, as there was unwanted XSS
-     * code found and removed/changed during processing.
-     */
-    if ($is_image === true) {
-      /** @noinspection PhpUndefinedVariableInspection */
-      return ($str === $converted_string);
-    }
-
-    return $str;
-  }
-
-  /**
-   * @param $str
-   * @param $is_image
-   *
-   * @return string
-   */
-  protected function _do($str, $is_image)
-  {
     // remove Strings that are never allowed
     $str = $this->_do_never_allowed($str);
 
@@ -1874,7 +1840,24 @@ class AntiXSS
     $str = $this->_do_never_allowed($str);
     $str = $this->_do_never_allowed_afterwards($str);
 
-    return (string)$str;
+    /*
+     * images are Handled in a special way
+     *
+     * Essentially, we want to know that after all of the character
+     * conversion is done whether any unwanted, likely XSS, code was found.
+     *
+     * If not, we return TRUE, as the image is clean.
+     *
+     * However, if the string post-conversion does not matched the
+     * string post-removal of XSS, then it fails, as there was unwanted XSS
+     * code found and removed/changed during processing.
+     */
+    if ($is_image === true) {
+      /** @noinspection PhpUndefinedVariableInspection */
+      return ($str === $converted_string);
+    }
+
+    return $str;
   }
 
   /**
@@ -1988,7 +1971,6 @@ class AntiXSS
         'window',
         'confirm',
         'prompt',
-        'eval'
     );
 
     foreach ($words as $word) {
@@ -2100,7 +2082,6 @@ class AntiXSS
         'xlink:href',
         'seekSegmentTime',
         'FSCommand',
-        'eval'
     );
 
     if ($is_image === true) {
@@ -2143,7 +2124,7 @@ class AntiXSS
    */
   public function sanitize_naughty_html($str)
   {
-    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss|eval';
+    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss';
     $str = preg_replace_callback(
         '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is',
         array(
@@ -2194,10 +2175,7 @@ class AntiXSS
    */
   protected function _do_never_allowed_afterwards($str)
   {
-    do {
-      $old_str = $str;
-      $str = str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
-    } while ($old_str !== $str);
+    $str = str_ireplace(array_keys($this->_never_allowed_str_afterwards), $this->_never_allowed_str_afterwards, $str);
 
     return (string)$str;
   }
@@ -2292,7 +2270,7 @@ class AntiXSS
     }
 
     $replacer = preg_replace(
-        '#' . $search . '=.*?(?:(?:alert|prompt|confirm|eval)(?:\((\')*|&\#40;)|javascript:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
+        '#' . $search . '=.*?(?:(?:alert|prompt|confirm)(?:\((\')*|&\#40;)|javascript:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si',
         '',
         $this->_filter_attributes(str_replace(array('<', '>',), '', $match[1]))
     );
