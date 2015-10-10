@@ -113,7 +113,7 @@
   {
     "title": "mXSS Variation I",
     "payload": "<listing>&lt;img onerror=\"alert(1);//\" src=1&gt;<t t></listing>",
-    "expected": "<listing><img ><t t></listing>"
+    "expected": "<listing><img ><></>"
   },
   {
     "title": "mXSS Variation II",
@@ -357,7 +357,7 @@
   },
   {
     "payload": "<div id=\"33\"><a style=\"pointer-events:none;position:absolute;\"><a style=\"position:absolute;\" onclick=\"alert(33);\">XXX</a></a><a href=\"javascript:alert(2)\">XXX</a>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"33\"><a =\"position:absolute;\" >XXX</a></a><a >XXX</a>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"33\"><a =\">XXX</a></a><a >XXX</a>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"34\">1<vmlframe xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute;width:100%;height:100% src=test.vml#xss></vmlframe>//[\"'`-->]]>]</div>",
@@ -545,7 +545,7 @@
   },
   {
     "payload": "<div id=\"78\"><?xml-stylesheet type=\"text/xsl\" href=\"#\"?><img xmlns=\"x-schema:test.xdr\"/>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img >//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img >//[\"'`--&>]</>"
   },
   {
     "payload": "<div id=\"79\"><object allowscriptaccess=\"always\" data=\"test.swf\"></object>//[\"'`-->]]>]</div>",
@@ -702,7 +702,7 @@
   {
     "title": "window.open",
     "payload": "<div id=\"120\"><script>\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n</script>\n<body>\n<a href=\"#\" onclick=\"makePopups()\">Spam</a>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"120\">\nfunction makePopups(){\n    for (i=1;i<6;i  ) {\n        window.open('popup.html','spam' i,'width=50,height=50');\n    }\n}\n\n&lt;body&gt;\n<a href=\"#\" >Spam</a>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"120\">\nfunction makePopups(){\n    for (i=1;i<6;i  ) {\n        window.open('popup.html','spam' i,'width=50,height=50');\n    }\n}\n\n&lt;body&gt;\n<a href=\"#\">Spam</a>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"121\"><html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\">\n<body style=\"background:gray\">\n<iframe src=\"http://example.com/\" style=\"width:800px; height:350px; border:none; mask: url(#maskForClickjacking);\"/>\n<svg:svg>\n<svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\">\n    <svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/>\n    <svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/>\n</svg:mask>\n</svg:svg>\n</body>\n</html>//[\"'`-->]]>]</div>",
@@ -764,7 +764,7 @@
   {
     "title": "SVG",
     "payload": "<div id=\"135\"><?xml-stylesheet type=\"text/xsl\" href=\"#\" ?>\n<stylesheet xmlns=\"http://www.w3.org/TR/WD-xsl\">\n<template match=\"/\">\n<eval>new ActiveXObject('htmlfile').parentWindow.alert(135)</eval>\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert(2)\"></if>\n</template>\n</stylesheet>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet &gt;\n<template match=\"/\">\n<eval>new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;</eval>\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet &gt;\n<template match=\"/\">\n&lt;eval&gt;new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;&lt;/eval&gt;\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"136\"><form action=\"\" method=\"post\">\n<input name=\"username\" value=\"admin\" />\n<input name=\"password\" type=\"password\" value=\"secret\" />\n<input name=\"injected\" value=\"injected\" dirname=\"password\" />\n<input type=\"submit\">\n</form>//[\"'`-->]]>]</div>",
