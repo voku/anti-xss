@@ -95,7 +95,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<form/action=javascript&#x0003A;eval(setTimeout(confirm(1)))><input/type=submit>',
-            '&lt;form/action=[removed]eval&#40;setTimeout(confirm(1&#41;))&gt;&lt;input/type=submit>',
+            '&lt;form/action=[removed]eval&#40;setTimeout(confirm&#40;1&#41;&#41;)&gt;&lt;input/type=submit>',
         ),
         array(
             '<body/onload=this.onload=document.body.innerHTML=alert&lpar;1&rpar;>',

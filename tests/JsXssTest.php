@@ -154,7 +154,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     // 过滤 style
     self::assertEquals('<DIV  \nalert&#40;1&#41;);">', $this->security->xss_clean('<DIV STYLE="width: \nexpression(alert(1));">'));
-    self::assertEquals('<DIV  \n alert(1&#41;);">', $this->security->xss_clean('<DIV STYLE="width: \n expressionexpression((alert(1));">'));
+    self::assertEquals('<DIV  \n alert&#40;1&#41;&#41;;">', $this->security->xss_clean('<DIV STYLE="width: \n expressionexpression((alert(1));">'));
     // 不正常的url
     self::assertEquals('<DIV  url (ooxx);">', $this->security->xss_clean('<DIV STYLE="background:\n url (javascript:ooxx);">'));
     self::assertEquals('<DIV  (ooxx);">', $this->security->xss_clean('<DIV STYLE="background:url (javascript:ooxx);">'));
