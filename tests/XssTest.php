@@ -691,7 +691,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
     self::assertEquals('<unclosedTag', $this->security->xss_clean('<unclosedTag'));
     self::assertEquals('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
     self::assertEquals('<fubar>', $this->security->xss_clean('<fubar>'));
-    self::assertEquals('<img &svg="" src="x">',$this->security->xss_clean('<img <svg=""> src="x">'));
+    self::assertEquals('<img &svg="" src="x">', $this->security->xss_clean('<img <svg=""> src="x">'));
     self::assertEquals('<img src="b =">"x "alert&#40;1&#41;">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
   }
 
@@ -708,9 +708,9 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
     self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', false));
     self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>', false));
     self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>', false));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>',$this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>', false));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>',$this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>', false));
-    self::assertEquals('<a< >',$this->security->xss_clean('<a< onmouseover="alert(1)">', false));
+    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>', false));
+    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>', false));
+    self::assertEquals('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">', false));
   }
 
   /**
