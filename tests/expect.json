@@ -764,7 +764,7 @@
   {
     "title": "SVG",
     "payload": "<div id=\"135\"><?xml-stylesheet type=\"text/xsl\" href=\"#\" ?>\n<stylesheet xmlns=\"http://www.w3.org/TR/WD-xsl\">\n<template match=\"/\">\n<eval>new ActiveXObject('htmlfile').parentWindow.alert(135)</eval>\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert(2)\"></if>\n</template>\n</stylesheet>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet &gt;\n<template match=\"/\">\n<eval>new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;</eval>\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet &gt;\n<template match=\"/\">\n&lt;eval&gt;new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;&lt;/eval&gt;\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"136\"><form action=\"\" method=\"post\">\n<input name=\"username\" value=\"admin\" />\n<input name=\"password\" type=\"password\" value=\"secret\" />\n<input name=\"injected\" value=\"injected\" dirname=\"password\" />\n<input type=\"submit\">\n</form>//[\"'`-->]]>]</div>",
