@@ -417,6 +417,10 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<script>Array.from([1],alert)</script>' => 'Array.from([1],alert)',
       '<script>Promise.reject("1").then(null,alert)</script>' => 'Promise.reject("1").then(null,alert)',
       '<svg </onload ="1> (_=alert,_(1)) "">' => '&lt;svg &lt;/> (_=alert,_(1)) "">',
+      '<img onerror="location=\'javascript:=lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:\x255Cu0061lert(1)\'" src="x" >' => '<img  src="x" >',
     );
 
     foreach ($testArray as $before => $after) {
