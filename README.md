@@ -37,6 +37,12 @@ NOTES:
 
 6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
+Install via "composer require"
+======
+```shell
+composer require voku/anti-xss
+```
+
 Usage:
 ======
 
