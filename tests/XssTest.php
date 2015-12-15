@@ -733,20 +733,25 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
 
   public function test_xss_clean_sanitize_naughty_html_attributes()
   {
-    self::assertEquals('"bar"', $this->security->xss_clean('onAttribute="bar"', false));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttribute="bar">', false));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>', false));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>', false));
-    self::assertEquals('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">', false));
+    self::assertEquals('"bar"', $this->security->xss_clean('onAttribute="bar"'));
+    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttribute="bar">'));
+    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>'));
+    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>'));
+    self::assertEquals('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">'));
     self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>', false));
-    self::assertEquals('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true', false));
-    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', false));
-    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', false));
+    self::assertEquals('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
+    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
+    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
     self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>', false));
-    self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>', false));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>', false));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>', false));
-    self::assertEquals('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">', false));
+    self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
+    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
+    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
+    self::assertEquals('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">'));
+    self::assertEquals('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
+    self::assertEquals('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
+    self::assertEquals('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
+    self::assertEquals('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
+    self::assertEquals('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
   }
 
   /**
