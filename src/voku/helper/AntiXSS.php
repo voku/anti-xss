@@ -1779,7 +1779,7 @@ class AntiXSS
    *    vulnerabilities along with a few other hacks I've
    *    harvested from examining vulnerabilities in other programs.
    *
-   * @param  string|array $str      input data
+   * @param  mixed        $str      input data e.g. string or array
    * @param  bool         $is_image whether the input is an image
    *
    * @return  string|array|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
@@ -1793,6 +1793,24 @@ class AntiXSS
         $value = $this->xss_clean($value);
       }
 
+      return $str;
+    }
+
+    $str = (string)$str;
+    $strInt = (int)$str;
+    $strFloat = (float)$str;
+    /** @noinspection TypeUnsafeComparisonInspection */
+    if (
+        !$str
+        ||
+        $str === null
+        ||
+        is_bool($str)
+        ||
+        "$strInt" == $str || is_int($str)
+        ||
+        "$strFloat" == $str || is_float($str)
+    ) {
       return $str;
     }
 
