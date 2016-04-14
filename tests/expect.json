@@ -557,7 +557,7 @@
   },
   {
     "payload": "<div id=\"81\"><x xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:actuate=\"onLoad\" xlink:href=\"javascript:alert(81)\" xlink:type=\"simple\"/>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"81\"><x xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:actuate=\"onLoad\"  xlink:type=\"simple\"/>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"81\"><x xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:actuate=\"\"simple\"/>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"82\"><?xml-stylesheet type=\"text/css\" href=\"data:,*%7bx:expression(write(2));%7d\"?>//[\"'`-->]]>]</div><div id=\"83\"><x:template xmlns:x=\"http://www.wapforum.org/2001/wml\"  x:ontimer=\"$(x:unesc)j$(y:escape)a$(z:noecs)v$(x)a$(y)s$(z)cript$x:alert(83)\"><x:timer value=\"1\"/></x:template>//[\"'`-->]]>]</div>",
@@ -581,7 +581,7 @@
   },
   {
     "payload": "<div id=\"89\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<set attributeName=\"onmouseover\" to=\"alert(89)\"/>\n<animate attributeName=\"onunload\" to=\"alert(89)\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"89\">&lt;svg &gt;\n<set attributeName=\"onmouseover\" to=\"alert&#40;89&#41;\"/>\n<animate attributeName=\"onunload\" to=\"alert&#40;89&#41;\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"89\">&lt;svg &gt;\n<set attributeName=\"\"alert&#40;89&#41;\"/>\n<animate attributeName=\"\"alert&#40;89&#41;\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"90\"><!-- Up to Opera 10.63 -->\n<div style=content:url(test2.svg)></div>\n\n<!-- Up to Opera 11.64 - see link below -->\n\n<!-- Up to Opera 12.x -->\n<div style=\"background:url(test5.svg)\">PRESS ENTER</div>//[\"'`-->]]>]</div>",

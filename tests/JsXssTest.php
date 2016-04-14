@@ -136,7 +136,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertEquals('', $this->security->xss_clean('<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'));
 
-    self::assertEquals('&lt;BODY onload!#$%&()*~ -_.,:;?@[/|\]^`=alert&#40;"XSS"&#41;&gt;', $this->security->xss_clean('<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>'));
+    self::assertEquals('&lt;BODY alert&#40;"XSS"&#41;&gt;', $this->security->xss_clean('<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>'));
 
     self::assertEquals('&lt;alert&#40;"XSS"&#41;;//&lt;', $this->security->xss_clean('<<SCRIPT>alert("XSS");//<</SCRIPT>'));
 
@@ -169,7 +169,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertEquals('<a >', $this->security->xss_clean('<a href="javas/**/cript:alert(\'XSS\');">'));
 
-    self::assertEquals('<a ">', $this->security->xss_clean('<a href="javascript">'));
+    self::assertEquals('<a href="test">', $this->security->xss_clean('<a href="javascript:test">'));
     self::assertEquals('<a href="/javascript/a">', $this->security->xss_clean('<a href="/javascript/a">'));
     self::assertEquals('<a href="/javascript/a">', $this->security->xss_clean('<a href="/javascript/a">'));
     self::assertEquals('<a href="http://aa.com">', $this->security->xss_clean('<a href="http://aa.com">'));
