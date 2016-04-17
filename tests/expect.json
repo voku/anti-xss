@@ -1,5 +1,19 @@
 [
-
+  {
+    "title": "Bypass from @filedescriptor when template scrubbing is activated",
+    "payload": "<a href=\"}}javascript:alert(1)\"></a>",
+    "expected": "<a ></a>"
+  },
+  {
+    "title": "safe usage of URI-like attribute values (see #135)",
+    "payload": "<b href=\"javascript:alert(1)\" title=\"javascript:alert(2)\"></b>",
+    "expected": "<b href=\"alert&#40;1&#41;\" title=\"alert&#40;2&#41;\"></b>"
+  },
+  {
+    "title": "src Attributes for IMG, AUDIO, VIDEO and SOURCE (see #131)",
+    "payload": "<img src=\"data:,123\"><audio src=\"data:,456\"></audio><video src=\"data:,789\"></video><source src=\"data:,012\"><div src=\"data:,345\">",
+    "expected": "<img src=\"data:,123\">&lt;audio src=\"data:,456\"&gt;&lt;/audio>&lt;video src=\"data:,789\"&gt;&lt;/video><source src=\"data:,012\"><div src=\"data:,345\">"
+  },
   {
     "title": "DOM Clobbering against document.createElement() (see #47)",
     "payload": "<img src=x name=createElement><img src=y id=createElement>",
