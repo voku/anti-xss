@@ -51,26 +51,33 @@ Usage:
 
     $antiXss = new AntiXSS();
 
-Example 1:
+Example 1: (HTML Character)
 
     $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
     $harmless_string = $antiXss->xss_clean($harm_string);
     
     // Hello, i try to alert&#40;'Hack'&#41;; your site
 
-Example 2:
+Example 2: (Hexadecimal HTML Character)
 
     $harm_string = "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>";
     $harmless_string = $antiXss->xss_clean($harm_string);
         
     // <IMG >
     
-Example 3:
+Example 3: (Unicode Hex Character)
 
-    $harm_string = "<XSS STYLE=\"behavior: url(xss.htc);\">";
+    $harm_string = "<a href='&#x2000;javascript:alert(1)'>CLICK</a>";
     $harmless_string = $antiXss->xss_clean($harm_string);
         
-    //
+    // <a >CLICK</a>
+
+Example 4: (Unicode Character)
+
+    $harm_string = "<a href=\"\u0001java\u0003script:alert(1)\">CLICK<a>";
+    $harmless_string = $antiXss->xss_clean($harm_string);
+        
+    // <a >CLICK</a>
 
 Unit Test:
 ==========
