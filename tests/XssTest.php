@@ -451,6 +451,34 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<http://onxxx%3D1/ (URL)' => '<http:// (URL)',
       // Combo
       '<x%2F1=">%22OnClick%3D1' => '<x/1=">"1',
+      // Location Based Payloads
+      //
+      // Location
+      '<svg onload=location=/javas/.source+/cript:/.source+/ale/.source+/rt/.
+source+location.hash[1]+1+location.hash[2]>#()' => '&lt;svg  /cript:/.source /ale/.source /rt/.
+source location.hash[1] 1 location.hash[2]&gt;#()',
+      '<svg id=t:alert(1) name=javascrip onload=location=name+id>' => '&lt;svg id=t:alert&#40;1&#41; name=javascrip  id&gt;',
+      '<javascript onclick=location=tagName+innerHTML+location.hash>:/*click me!
+#*/alert(1)' => '<javascript  innerHTML location.hash>:/*click me!
+#*/alert&#40;1&#41;', // javas + cript:"click me! + #"-alert(1)
+      '*/"<j"-alert(9)<!-- onclick=location=innerHTML+previousSibling.
+nodeValue+outerHTML>javascript:/*click me' => '*/"<j"-alert&#40;9&#41;&lt;!--  previousSibling.
+nodeValue outerHTML>/*click me',
+      '<alert(1)<!-- onclick=location=innerHTML+outerHTML>javascript:1/*click me!
+*/</alert(1)<!-- -->' => '&lt;alert&#40;1&#41;&lt;!--  outerHTML&gt;1/*click me!
+*/&lt;/alert&#40;1&#41;&lt;!-- --&gt;',
+      '<javas onclick=location=tagName+innerHTML+URL>cript:"-\'click me!</javas>#\'-
+alert(1)' => '<javas  innerHTML URL>cript:"-\'click me!</javas>#\'-
+alert&#40;1&#41;',
+      // Location Self
+      'p=<j onclick=location=textContent>?p=%26lt;svg/onload=alert(1)>' => 'p=<j >?p=&lt;svg/&gt;',
+      'p=<svg id=?p=<svg/onload=alert(1)%2B onload=location=id>' => 'p=&lt;svg id=?p=&lt;svg/ >',
+      // Location Self Plus
+      'p=%26p=%26lt;svg/onload=alert(1)><j onclick=location%2B=document.body.
+textContent>click me!' => 'p=%26p=%26lt;svg/alert&#40;1&#41;><j 
+textContent>click me!',
+      'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>' => 'p=<j >&p=&lt;svg/&gt;',
+
     );
 
     foreach ($testArray as $before => $after) {
