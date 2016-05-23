@@ -36,7 +36,7 @@ class DOMPurifyTest extends PHPUnit_Framework_TestCase
 
   public function setTestArray()
   {
-    $jsonString = UTF8::file_get_contents(__DIR__ . '/expect.json');
+    $jsonString = UTF8::file_get_contents(__DIR__ . '/fixtures/expect.json');
 
     $this->testArray = json_decode($jsonString, true);
   }

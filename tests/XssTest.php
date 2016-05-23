@@ -470,16 +470,16 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
 
   public function testHtmlXssFile()
   {
-    $testString = UTF8::file_get_contents(__DIR__ . '/xss_v1.html');
-    $resultString = UTF8::file_get_contents(__DIR__ . '/xss_v1_clean.html');
+    $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.html');
+    $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.html');
 
     self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
 
   public function testSvgXssFileV1()
   {
-    $testString = UTF8::file_get_contents(__DIR__ . '/xss_v1.svg');
-    $resultString = UTF8::file_get_contents(__DIR__ . '/xss_v1_clean.svg');
+    $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
+    $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
 
     self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
@@ -490,8 +490,8 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
     //
     // http://blog.mindedsecurity.com/2015/08/pdf-based-polyglots-through-svg-images.html
 
-    $testString = UTF8::file_get_contents(__DIR__ . '/xss_v2.svg');
-    $resultString = UTF8::file_get_contents(__DIR__ . '/xss_v2_clean.svg');
+    $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2.svg');
+    $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2_clean.svg');
 
     self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
