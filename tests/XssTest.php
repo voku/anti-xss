@@ -434,6 +434,23 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x255Cu0061lert(1)\'" src="x" >' => '<img  src="x" >',
+      // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
+      //
+      // Spacers
+      '<x%09onxxx=1' => '<x	',
+      '<x%0Aonxxx=1' => '<x' . "\n",
+      '<x%0Conxxx=1' => '<xonxxx=1',
+      '<x%0Donxxx=1' => '<x' . "\r",
+      '<x%2Fonxxx=1' => '<x/',
+      // Quotes
+      '<x 1=\'1\'onxxx=1' => '<x 1=\'1\'',
+      '<x 1="1"onxxx=1' => '<x 1="1"',
+      // Mimetism
+      '<x </onxxx=1 (closing tag)' => '<x </ (closing tag)',
+      '<x 1=">" onxxx=1 (text outside tag)' => '<x 1=">" onxxx=1 (text outside tag)',
+      '<http://onxxx%3D1/ (URL)' => '<http:// (URL)',
+      // Combo
+      '<x%2F1=">%22OnClick%3D1' => '<x/1=">"1',
     );
 
     foreach ($testArray as $before => $after) {
