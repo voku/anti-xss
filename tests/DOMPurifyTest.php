@@ -3,6 +3,9 @@
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
+/**
+ * Class DOMPurifyTest
+ */
 class DOMPurifyTest extends PHPUnit_Framework_TestCase
 {
 

@@ -4,6 +4,9 @@ use voku\helper\AntiXSS;
 use voku\helper\Bootup;
 use voku\helper\UTF8;
 
+/**
+ * Class XssTest
+ */
 class XssTest extends PHPUnit_Framework_TestCase {
 
   // INFO: here you can find some more tests
@@ -215,7 +218,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<// style=x:expression\28write(1)\29>' => '<// >', // IE7
       '<style>*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}</style>' => '&lt;style&gt;*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}&lt;/style&gt;', // IE6
       '<div style="background:url(test5.svg)">PRESS ENTER</div>' => '<div >PRESS ENTER</div>', // Up to Opera 12.x
-      '<?xml-stylesheet type="text/css"?><root style="x:expression(write(1))"/>' => '&lt;?xml-stylesheet type="text/css"?&gt;<root >', // IE7
+      '<?xml-stylesheet type="text/css"?><root style="x:expression(write(1))"/>' => '&lt;?xml-stylesheet type="text/css"?&gt;<root />', // IE7
       '<?xml-stylesheet type="text/css" href="data:,*%7bx:expression(write(2));%7d"?>' => '&lt;?xml-stylesheet type="text/css" href="data:,*{x:write(2));}"?&gt;', // IE8 -> IE10
       '<x xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load" ev:handler="javascript:alert(1)//#x"/>' => '<x xmlns:ev="http://www.w3.org/2001/xml-events" "load" "alert&#40;1&#41;//#x"/>',
       '<iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"></iframe>' => '&lt;iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"&gt;&lt;/iframe>',
@@ -518,7 +521,7 @@ textContent>click me!',
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.html');
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.html');
 
-    self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+    self::assertEquals(str_replace(array("\r\n", "\r"), "\n", $resultString), str_replace(array("\r\n", "\r"), "\n", UTF8::html_entity_decode($this->security->xss_clean($testString))), 'testing: ' . $testString);
   }
 
   public function testSvgXssFileV1()
@@ -974,7 +977,7 @@ textContent>click me!',
         ),
         array(
             '<li style="list-style-image: url(javascript:alert(0))">',
-            '<li -image: url(alert&#40;0&#41;)">',
+            '<li >',
             'style',
             'HTML filter attributes removal -- style, no evasion.',
             array('li'),

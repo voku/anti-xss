@@ -2,6 +2,9 @@
 
 use voku\helper\AntiXSS;
 
+/**
+ * Class XssTestArray
+ */
 class XssTestArray extends PHPUnit_Framework_TestCase
 {
 
@@ -40,7 +43,7 @@ class XssTestArray extends PHPUnit_Framework_TestCase
         '<a href="http://www.chaos.org/">www.chaos.org</a>',
         '<a name="X">Short \'a name\' tag</a>',
         '<td colspan="3" rowspan="5">Foo</td>',
-        '<td rowspan="2" class="mugwump"  rgb(255, 204 204);">Bar</td>',
+        '<td rowspan="2" class="mugwump" >Bar</td>',
         '<td nowrap>Very Long String running to 1000 characters...</td>',
         '<td bgcolor="#00ff00" nowrap>Very Long String with a blue background</td>',
         '<a href="proto1://www.foo.com">New protocol test</a>',

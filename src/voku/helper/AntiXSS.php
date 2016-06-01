@@ -2214,6 +2214,9 @@ class AntiXSS
 
     $evil_attributes_string = implode('|', $evil_attributes);
 
+    // replace style-attribute, first
+    $str = preg_replace('/(<[^>]+)(?<!\w)(style=\"([^\']*?)\")/is', '$1' . $this->_replacement . '$4', $str, -1, $temp_count);
+
     do {
       $count = $temp_count = 0;
 
