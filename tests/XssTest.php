@@ -91,23 +91,23 @@ class XssTest extends PHPUnit_Framework_TestCase {
   {
     $harm_string = '<img src="test.png">';
 
-    $xss_clean_return = $this->security->xss_clean($harm_string, true);
+    $xss_clean_return = $this->security->xss_clean($harm_string);
 
-    self::assertTrue($xss_clean_return);
+    self::assertTrue($xss_clean_return === $harm_string);
   }
 
   public function test_xss_clean_image_invalid()
   {
     $harm_string = '<img src=javascript:alert(String.fromCharCode(88,83,83))>';
 
-    $xss_clean_return = $this->security->xss_clean($harm_string, true);
+    $xss_clean_return = $this->security->xss_clean($harm_string);
 
-    self::assertFalse($xss_clean_return);
+    self::assertFalse($xss_clean_return === $harm_string);
   }
 
   public function test_xss_hash()
   {
-    self::assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->security->xss_hash()) === 1);
+    self::assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->invokeMethod($this->security, 'xss_hash')) === 1);
   }
 
   public function testXssClean()
@@ -728,10 +728,6 @@ textContent>click me!',
       self::assertEquals('<img >', $this->security->xss_clean($test));
     }
 
-    foreach ($testArray as $test) {
-      self::assertEquals(false, $this->security->xss_clean($test, true));
-    }
-
     $testString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';\u006F\u006E\u0065rror=\u0063onfirm;throw\'XSSposed';
     $resultString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';confirm;throw\'XSSposed';
     self::assertEquals($resultString, $this->security->xss_clean($testString));
@@ -739,26 +735,14 @@ textContent>click me!',
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
     self::assertEquals('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
 
-    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
-    self::assertEquals(true, $this->security->xss_clean($testString, true));
-
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
     self::assertEquals('<img >', $this->security->xss_clean($testString));
-
-    $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals(false, $this->security->xss_clean($testString, true));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="foo">';
     self::assertEquals('<img src="&lt;?php echo " alt="bar" title="foo">', $this->security->xss_clean($testString));
 
-    $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="foo">';
-    self::assertEquals(false, $this->security->xss_clean($testString, true));
-
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
     self::assertEquals('<img >', $this->security->xss_clean($testString));
-
-    $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals(false, $this->security->xss_clean($testString, true));
   }
 
   public function test_xss_clean_entity_double_encoded()
@@ -825,11 +809,11 @@ textContent>click me!',
     self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>'));
     self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>'));
     self::assertEquals('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">'));
-    self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>', false));
+    self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>'));
     self::assertEquals('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
     self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
     self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
-    self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>', false));
+    self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
     self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
     self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
     self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
@@ -1179,5 +1163,21 @@ textContent>click me!',
     }
   }
 
+  /**
+   * Call protected/private method of a class.
+   *
+   * @param object &$object    Instantiated object that we will run method on.
+   * @param string $methodName Method name to call
+   * @param array  $parameters Array of parameters to pass into method.
+   *
+   * @return mixed Method return.
+   */
+  public function invokeMethod(&$object, $methodName, array $parameters = array())
+  {
+    $reflection = new \ReflectionClass(get_class($object));
+    $method = $reflection->getMethod($methodName);
+    $method->setAccessible(true);
 
+    return $method->invokeArgs($object, $parameters);
+  }
 }

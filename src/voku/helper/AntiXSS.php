@@ -1859,13 +1859,12 @@ class AntiXSS
    *    harvested from examining vulnerabilities in other programs.
    *
    * @param  mixed $str      input data e.g. string or array
-   * @param  bool  $is_image whether the input is an image
    *
    * @return  string|array|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
    *                                string: will return a string, if the input is a string
    *                                array: will return a array, if the input is a array
    */
-  public function xss_clean($str, $is_image = false)
+  public function xss_clean($str)
   {
     if (is_array($str)) {
       foreach ($str as &$value) {
@@ -1904,49 +1903,26 @@ class AntiXSS
     // and again... removes all non-UTF-8 characters
     $str = UTF8::clean($str, true, true, false);
 
-    // capture converted string for later comparison
-    if ($is_image === true) {
-      $converted_string = $str;
-    }
-
     do {
       $old_str = $str;
-      $str = $this->_do($str, $is_image);
+      $str = $this->_do($str);
     } while ($old_str !== $str);
-
-    /*
-     * images are Handled in a special way
-     *
-     * Essentially, we want to know that after all of the character
-     * conversion is done whether any unwanted, likely XSS, code was found.
-     *
-     * If not, we return TRUE, as the image is clean.
-     *
-     * However, if the string post-conversion does not matched the
-     * string post-removal of XSS, then it fails, as there was unwanted XSS
-     * code found and removed/changed during processing.
-     */
-    if ($is_image === true) {
-      /** @noinspection PhpUndefinedVariableInspection */
-      return ($str === $converted_string);
-    }
 
     return $str;
   }
 
   /**
-   * @param $str
-   * @param $is_image
+   * @param string $str
    *
    * @return mixed
    */
-  protected function _do($str, $is_image)
+  protected function _do($str)
   {
     // remove strings that are never allowed
     $str = $this->_do_never_allowed($str);
 
     // make php tags safe for displaying
-    $str = $this->make_php_tags_safe($str, $is_image);
+    $str = $this->make_php_tags_safe($str);
 
     // corrects words before the browser will do it
     $str = $this->compact_exploded_javascript($str);
@@ -1955,7 +1931,7 @@ class AntiXSS
     $str = $this->remove_disallowed_javascript($str);
 
     // remove evil attributes such as style, onclick and xmlns
-    $str = $this->remove_evil_attributes($str, $is_image);
+    $str = $this->remove_evil_attributes($str);
 
     // sanitize naughty HTML elements
     $str = $this->sanitize_naughty_html($str);
@@ -2020,7 +1996,7 @@ class AntiXSS
     return (string)$str;
   }
 
-  /*
+  /**
    * Makes PHP tags safe
    *
    * Note: XML tags are inadvertently replaced too:
@@ -2030,30 +2006,22 @@ class AntiXSS
    * But it doesn't seem to pose a problem.
    *
    * @param string $str
-   * @param boolean $is_image
    *
    * @return string
    */
-  public function make_php_tags_safe($str, $is_image)
+  private function make_php_tags_safe($str)
   {
-    if ($is_image === true) {
-      // Images have a tendency to have the PHP short opening and
-      // closing tags every so often so we skip those and only
-      // do the long opening tags.
-      $str = preg_replace('/<\?(php)/i', '&lt;?\\1', $str);
-    } else {
-      $str = str_replace(
-          array(
-              '<?',
-              '?>',
-          ),
-          array(
-              '&lt;?',
-              '?&gt;',
-          ),
-          $str
-      );
-    }
+    $str = str_replace(
+        array(
+            '<?',
+            '?>',
+        ),
+        array(
+            '&lt;?',
+            '?&gt;',
+        ),
+        $str
+    );
 
     return (string)$str;
   }
@@ -2068,7 +2036,7 @@ class AntiXSS
    *
    * @return string
    */
-  public function compact_exploded_javascript($str)
+  private function compact_exploded_javascript($str)
   {
     static $wordsCache;
 
@@ -2131,7 +2099,7 @@ class AntiXSS
    *
    * @return string
    */
-  public function remove_disallowed_javascript($str)
+  private function remove_disallowed_javascript($str)
   {
     do {
       $original = $str;
@@ -2184,11 +2152,10 @@ class AntiXSS
    *  </code>
    *
    * @param  string $str      The string to check
-   * @param  bool   $is_image Whether the input is an image
    *
    * @return  string  The string with the evil attributes removed
    */
-  public function remove_evil_attributes($str, $is_image)
+  private function remove_evil_attributes($str)
   {
     // https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Event_Handlers
 
@@ -2204,18 +2171,10 @@ class AntiXSS
         'eval',
     );
 
-    if ($is_image === true) {
-      /*
-       * Adobe Photoshop puts XML metadata into JFIF images,
-       * including namespacing, so we have to allow this for images.
-       */
-      unset($evil_attributes[array_search('xmlns', $evil_attributes, true)]);
-    }
-
     $evil_attributes_string = implode('|', $evil_attributes);
 
     // replace style-attribute, first
-    $str = preg_replace('/(<[^>]+)(?<!\w)(style=\"([^\']*?)\")/is', '$1' . $this->_replacement . '$4', $str, -1, $temp_count);
+    $str = preg_replace('/(<[^>]+)(?<!\w)(style=\"([^\']*?)\")/i', '$1' . $this->_replacement . '$4', $str, -1, $temp_count);
 
     do {
       $count = $temp_count = 0;
@@ -2245,7 +2204,7 @@ class AntiXSS
    *
    * @return string
    */
-  public function sanitize_naughty_html($str)
+  private function sanitize_naughty_html($str)
   {
     $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss|eval';
     $str = preg_replace_callback(
@@ -2276,7 +2235,7 @@ class AntiXSS
    *
    * @return string
    */
-  public function sanitize_naughty_javascript($str)
+  private function sanitize_naughty_javascript($str)
   {
     $str = preg_replace(
         '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*?)\)#si',
@@ -2481,7 +2440,7 @@ class AntiXSS
    *
    * @return  string  XSS hash
    */
-  public function xss_hash()
+  private function xss_hash()
   {
     if ($this->_xss_hash === null) {
       $rand = Bootup::get_random_bytes(16);

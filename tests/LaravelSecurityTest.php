@@ -18,6 +18,9 @@ use voku\helper\AntiXSS;
  */
 class LaravelSecurityTest extends PHPUnit_Framework_TestCase
 {
+  /**
+   * @return array
+   */
   public function snippetProvider()
   {
     return array(
@@ -215,6 +218,9 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
 
   /**
    * @dataProvider snippetProvider
+   *
+   * @param $input
+   * @param $output
    */
   public function testCleanString($input, $output)
   {
@@ -223,9 +229,12 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
 
     $return = $security->xss_clean($input);
 
-    $this->assertSame($output, $return);
+    self::assertSame($output, $return);
   }
 
+  /**
+   * @return AntiXSS
+   */
   protected function getSecurity()
   {
     return new AntiXSS();
