@@ -13,13 +13,13 @@ namespace voku\helper;
  * @copyright   Copyright (c) 2014 - 2015, British Columbia Institute of Technology (http://bcit.ca/)
  * @license     http://opensource.org/licenses/MIT	MIT License
  */
-class AntiXSS
+final class AntiXSS
 {
 
   /**
    * @var array
    */
-  protected static $entitiesFallback = array(
+  private static $entitiesFallback = array(
       "\t" => '&Tab;',
       "\n" => '&NewLine;',
       '!'  => '&excl;',
@@ -1537,7 +1537,7 @@ class AntiXSS
    *
    * @var  array
    */
-  protected static $_never_allowed_regex = array(
+  private static $_never_allowed_regex = array(
     // default javascript
     'javascript\s*:',
     // default javascript
@@ -1575,28 +1575,28 @@ class AntiXSS
    *
    * @var  string
    */
-  protected $_xss_hash;
+  private $_xss_hash;
 
   /**
    * the replacement-string for not allowed strings
    *
    * @var string
    */
-  protected $_replacement = '';
+  private $_replacement = '';
 
   /**
    * list of never allowed strings
    *
    * @var  array
    */
-  protected $_never_allowed_str = array();
+  private $_never_allowed_str = array();
 
   /**
    * list of never allowed strings, afterwards
    *
    * @var array
    */
-  protected $_never_allowed_str_afterwards = array();
+  private $_never_allowed_str_afterwards = array();
 
   /**
    * __construct()
@@ -1916,7 +1916,7 @@ class AntiXSS
    *
    * @return mixed
    */
-  protected function _do($str)
+  private function _do($str)
   {
     // remove strings that are never allowed
     $str = $this->_do_never_allowed($str);
@@ -1956,7 +1956,7 @@ class AntiXSS
    *
    * @return string
    */
-  protected function decode_string($str)
+  private function decode_string($str)
   {
     if (preg_match('/<\w+.*/si', $str, $matches) === 1) {
       $str = preg_replace_callback(
@@ -1981,7 +1981,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _do_never_allowed($str)
+  private function _do_never_allowed($str)
   {
     static $neverAllowedRegex;
 
@@ -2255,7 +2255,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _do_never_allowed_afterwards($str)
+  private function _do_never_allowed_afterwards($str)
   {
     static $neverAllowedStrAfterwardsRegex;
 
@@ -2293,7 +2293,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _compact_exploded_words($matches)
+  private function _compact_exploded_words($matches)
   {
     return preg_replace('/\s+/', '', $matches[1]) . $matches[2];
   }
@@ -2307,7 +2307,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _sanitize_naughty_html($matches)
+  private function _sanitize_naughty_html($matches)
   {
     return '&lt;' . $matches[1] . $matches[2] . $matches[3] // encode opening brace
            // encode captured opening or closing brace to prevent recursive vectors:
@@ -2337,7 +2337,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _js_img_removal($match)
+  private function _js_img_removal($match)
   {
     return $this->_js_removal($match, 'src');
   }
@@ -2356,7 +2356,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _js_removal($match, $search)
+  private function _js_removal($match, $search)
   {
     if (!$match[0]) {
       return '';
@@ -2380,7 +2380,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _filter_attributes($str)
+  private function _filter_attributes($str)
   {
     if ($str === '') {
       return '';
@@ -2409,7 +2409,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _js_link_removal($match)
+  private function _js_link_removal($match)
   {
     return $this->_js_removal($match, 'href');
   }
@@ -2421,7 +2421,7 @@ class AntiXSS
    *
    * @return  string
    */
-  protected function _decode_entity($match)
+  private function _decode_entity($match)
   {
     $hash = $this->xss_hash();
 
@@ -2460,7 +2460,7 @@ class AntiXSS
    *
    * @return string
    */
-  protected function _entity_decode($str)
+  private function _entity_decode($str)
   {
     static $entities;
 
