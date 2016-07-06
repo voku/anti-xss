@@ -18,6 +18,11 @@ use voku\helper\AntiXSS;
  */
 class LaravelSecurityTest extends PHPUnit_Framework_TestCase
 {
+
+  //
+  // https://github.com/GrahamCampbell/Laravel-Security/blob/master/tests/SecurityTest.php
+  //
+
   /**
    * @return array
    */

@@ -1,5 +1,15 @@
 [
   {
+    "title": "Don't remove binary attributes if considered safe (see #168)",
+    "payload": "<input type=checkbox checked><input type=checkbox onclick>",
+    "expected": "&lt;input type=checkbox checked&gt;&lt;input type=checkbox onclick>"
+  },
+  {
+    "title": "Avoid over-zealous stripping of SVG filter elements (see #144)",
+    "payload": "<svg><defs><filter id=\"f1\"><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"15\" /></filter></defs><rect width=\"90\" height=\"90\" stroke=\"green\" stroke-width=\"3\" fill=\"yellow\" filter=\"url(#f1)\" /></svg>",
+    "expected": "&lt;svg&gt;&lt;defs><filter id=\"f1\"><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"15\" /></filter></defs><rect width=\"90\" height=\"90\" stroke=\"green\" stroke-width=\"3\" fill=\"yellow\" filter=\"url(#f1)\" />&lt;/svg&gt;"
+  },
+  {
     "title": "Bypass from @filedescriptor when template scrubbing is activated",
     "payload": "<a href=\"}}javascript:alert(1)\"></a>",
     "expected": "<a ></a>"

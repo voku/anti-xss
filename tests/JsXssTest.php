@@ -178,6 +178,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertEquals('<a href="http://aa.com">', $this->security->xss_clean('<a href="http://aa.com">'));
     self::assertEquals('<a href="https://aa.com">', $this->security->xss_clean('<a href="https://aa.com">'));
     self::assertEquals('<a href="mailto:me@ucdok.com">', $this->security->xss_clean('<a href="mailto:me@ucdok.com">'));
+    self::assertEquals('<a href="#hello">', $this->security->xss_clean('<a href="#hello">'));
     self::assertEquals('<a href="other">', $this->security->xss_clean('<a href="other">'));
 
     // 这个暂时不知道怎么处理
