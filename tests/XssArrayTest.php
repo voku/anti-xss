@@ -57,7 +57,7 @@ class XssTestArray extends PHPUnit_Framework_TestCase
         'http://localhost/text.php/">alert&#40;“Gehackt!”&#41;;&lt;/form&gt;&lt;form action="/...',
     );
 
-    self::assertEquals($resultArray, $this->security->xss_clean($testArray));
+    self::assertSame($resultArray, $this->security->xss_clean($testArray));
   }
 
 }

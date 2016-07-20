@@ -33,7 +33,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -55,7 +55,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -65,7 +65,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $harmless_string = $this->security->xss_clean($harm_string);
 
-    self::assertEquals("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
+    self::assertSame("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
   }
 
   public function test_xss_clean_string_array()
@@ -81,7 +81,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
 
     $this->security->setReplacement('[removed]');
     foreach ($harmStrings as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
 
     $this->security->setReplacement('');
@@ -485,7 +485,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
 
     // test for php < OR > 5.3
@@ -511,7 +511,7 @@ textContent>click me!',
 
     for ($i = 0; $i < 5; $i++) {
       foreach ($testArray as $before => $after) {
-        self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+        self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
       }
     }
   }
@@ -521,7 +521,7 @@ textContent>click me!',
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.html');
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.html');
 
-    self::assertEquals(str_replace(array("\r\n", "\r"), "\n", $resultString), str_replace(array("\r\n", "\r"), "\n", UTF8::html_entity_decode($this->security->xss_clean($testString))), 'testing: ' . $testString);
+    self::assertSame(str_replace(array("\r\n", "\r"), "\n", $resultString), str_replace(array("\r\n", "\r"), "\n", UTF8::html_entity_decode($this->security->xss_clean($testString))), 'testing: ' . $testString);
   }
 
   public function testSvgXssFileV1()
@@ -529,7 +529,7 @@ textContent>click me!',
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
 
-    self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+    self::assertSame($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
 
   public function testSvgXssFileV2()
@@ -541,7 +541,7 @@ textContent>click me!',
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2.svg');
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2_clean.svg');
 
-    self::assertEquals($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+    self::assertSame($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
   }
 
   public function testScriptEncoding()
@@ -556,7 +556,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -574,7 +574,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -619,7 +619,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -725,24 +725,24 @@ textContent>click me!',
     );
 
     foreach ($testArray as $test) {
-      self::assertEquals('<img >', $this->security->xss_clean($test));
+      self::assertSame('<img >', $this->security->xss_clean($test));
     }
 
     $testString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';\u006F\u006E\u0065rror=\u0063onfirm;throw\'XSSposed';
     $resultString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';confirm;throw\'XSSposed';
-    self::assertEquals($resultString, $this->security->xss_clean($testString));
+    self::assertSame($resultString, $this->security->xss_clean($testString));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
-    self::assertEquals('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals('<img >', $this->security->xss_clean($testString));
+    self::assertSame('<img >', $this->security->xss_clean($testString));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="foo">';
-    self::assertEquals('<img src="&lt;?php echo " alt="bar" title="foo">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="&lt;?php echo " alt="bar" title="foo">', $this->security->xss_clean($testString));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertEquals('<img >', $this->security->xss_clean($testString));
+    self::assertSame('<img >', $this->security->xss_clean($testString));
   }
 
   public function test_xss_clean_entity_double_encoded()
@@ -757,72 +757,72 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertEquals($after, $this->security->xss_clean($before), $before);
+      self::assertSame($after, $this->security->xss_clean($before), $before);
     }
   }
 
   public function test_xss_clean_js_img_removal()
   {
     $input = '<img src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertEquals('<img >', $this->security->xss_clean($input), $input);
+    self::assertSame('<img >', $this->security->xss_clean($input), $input);
   }
 
   public function test_xss_clean_js_a_removal()
   {
     $input = '<a src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertEquals('<a src="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<a src="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
   }
 
   public function test_xss_clean_js_div_removal()
   {
     $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertEquals('<div test="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
 
     $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
-    self::assertEquals('<div test="confirm&#40;1&#41;">Clickhere</div>', $this->security->xss_clean($input), $input);
+    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere</div>', $this->security->xss_clean($input), $input);
 
     $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
-    self::assertEquals('<div >Clickhere</div>', $this->security->xss_clean($input), $input);
+    self::assertSame('<div >Clickhere</div>', $this->security->xss_clean($input), $input);
 
     $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertEquals('<div >Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<div >Clickhere', $this->security->xss_clean($input), $input);
   }
 
   public function test_naughty_html_plus_evil_attributes()
   {
-    self::assertEquals('&lt;svg&lt;img > src="x" "location=/javascript/.source /:alert/.source /(1)/.source">', $this->security->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
+    self::assertSame('&lt;svg&lt;img > src="x" "location=/javascript/.source /:alert/.source /(1)/.source">', $this->security->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html()
   {
-    self::assertEquals('<unclosedTag', $this->security->xss_clean('<unclosedTag'));
-    self::assertEquals('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
-    self::assertEquals('<fubar>', $this->security->xss_clean('<fubar>'));
-    self::assertEquals('<img &svg="" src="x">', $this->security->xss_clean('<img <svg=""> src="x">'));
-    self::assertEquals('<img src="b =">"x "alert&#40;1&#41;">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+    self::assertSame('<unclosedTag', $this->security->xss_clean('<unclosedTag'));
+    self::assertSame('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
+    self::assertSame('<fubar>', $this->security->xss_clean('<fubar>'));
+    self::assertSame('<img &svg="" src="x">', $this->security->xss_clean('<img <svg=""> src="x">'));
+    self::assertSame('<img src="b =">"x "alert&#40;1&#41;">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html_attributes()
   {
-    self::assertEquals('"bar"', $this->security->xss_clean('onAttribute="bar"'));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttribute="bar">'));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>'));
-    self::assertEquals('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>'));
-    self::assertEquals('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">'));
-    self::assertEquals('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>'));
-    self::assertEquals('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
-    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
-    self::assertEquals('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
-    self::assertEquals('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
-    self::assertEquals('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
-    self::assertEquals('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
-    self::assertEquals('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">'));
-    self::assertEquals('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
-    self::assertEquals('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
-    self::assertEquals('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
-    self::assertEquals('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
-    self::assertEquals('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
+    self::assertSame('"bar"', $this->security->xss_clean('onAttribute="bar"'));
+    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttribute="bar">'));
+    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>'));
+    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>'));
+    self::assertSame('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">'));
+    self::assertSame('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>'));
+    self::assertSame('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
+    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
+    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
+    self::assertSame('<img src="x">', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
+    self::assertSame('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
+    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
+    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
+    self::assertSame('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">'));
+    self::assertSame('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
+    self::assertSame('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
+    self::assertSame('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
+    self::assertSame('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
+    self::assertSame('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
   }
 
   /**
@@ -1159,7 +1159,7 @@ textContent>click me!',
     );
 
     foreach ($cases as $caseArray) {
-      self::assertEquals($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
+      self::assertSame($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
     }
   }
 

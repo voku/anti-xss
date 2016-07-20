@@ -32,7 +32,7 @@ class DOMPurifyTest extends PHPUnit_Framework_TestCase
   public function testFromDOMPurify()
   {
     foreach ($this->testArray as $test) {
-      self::assertEquals($test['expected'], $this->security->xss_clean($test['payload']), 'testing: ' . $test['payload']);
+      self::assertSame($test['expected'], $this->security->xss_clean($test['payload']), 'testing: ' . $test['payload']);
     }
 
   }
