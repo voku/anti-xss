@@ -2092,7 +2092,7 @@ final class AntiXSS
    * Note: It was reported that not only space characters, but all in
    * the following pattern can be parsed as separators between a tag name
    * and its attributes: [\d\s"\'`;,\/\=\(\x00\x0B\x09\x0C]
-   * ... however, remove_invisible_characters() above already strips the
+   * ... however, UTF8::clean() above already strips the
    * hex-encoded ones, so we'll skip them below.
    *
    * @param string $str
