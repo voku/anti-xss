@@ -168,6 +168,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<svg/onload=alert`xss`>' => '&lt;svg/&gt;', // FF34+, Edge | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
       '<p/onclick=alert(/xss/)>a' => '<p/>a',
       '<iframe/src=//14.rs>' => '&lt;iframe/src=//14.rs&gt;',
+      '<iframe src="https:http://example.com ">' => '&lt;iframe src="https:http://example.com "&gt;',
       '<p/oncut=alert`xss`>x' => '<p/>x',
       '<svg/onload=alert(/XSS/)>' => '&lt;svg/&gt;', // FF40 | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
       '<http://onclick%3d1/alert%601%60//' => '<http://', // 2015 | https://twitter.com/brutelogic/status/673098162635202560
@@ -208,6 +209,13 @@ class XssTest extends PHPUnit_Framework_TestCase {
       '<![><img src="]><img src=x onerror=alert(1)//">' => '<![>< >< >', // up to Opera 11.52, FF 3.6.28
       '<svg><![CDATA[><image xlink:href="]]><img src=xx:x onerror=alert(2)//"></svg>' => '&lt;svg&gt;&lt;![CDATA[><image ><img ></>', // IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+
       '<img src onerror /" \'"= alt=alert(1)//">' => '<img >',
+      '?x=<img+src=x+onerror=`ö`-alert(1)>' => '?x=<img >', // Chrome 2016/07
+      '<audio src=data:;base64,//MUxHNtYWxsZXN0LW1wMy1ieS1AcWFi//MUxCc+Ij4vPlw+PHN2Zy9vbmxvYWQ9//MUxGFsZXJ0KCdAcWFiJyk7cWFiYW5k//MUxA oncanplay=XSS' => '&lt;audio src=//MUxHNtYWxsZXN0LW1wMy1ieS1AcWFi//MUxCc Ij4vPlw PHN2Zy9vbmxvYWQ9//MUxGFsZXJ0KCdAcWFiJyk7cWFiYW5k//MUxA ',
+      '<meta http-equiv=x-ua-compatible content=ie=8>1<comment onresize=alert(1) contenteditable>1' => '&lt;meta http-equiv=x-ua-compatible content=ie=8&gt;1<comment  contenteditable>1', // IE11
+      '<?xml version="1.0" encoding="utf-8" ?><x:script
+xmlns:x="http://www.w3.org/1999/xhtml ">alert(1&#00000041;' => '&lt;?xml version="1.0" encoding="utf-8" ?&gt;<x:script
+xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
+      '<%/%=%&#62<&#112/&#111&#110&#114&#101&#115&#105&#122&#101=&#97&#108&#101&#114&#116(1)//>' => '<%/%=%><p/>',
       '<style><img src="</style><img src=x onerror=alert(1)//">' => '&lt;style&gt;&lt; >< >',
       '<head><base href="javascript://"/></head><body><a href="/. /,alert(1)//#">XXX</a></body>' => '&lt;head&gt;&lt;base href="//"/>&lt;/head&gt;&lt;body><a >XXX</a>&lt;/body&gt;',
       '<SCRIPT FOR=document EVENT=onreadystatechange>alert(1)</SCRIPT>' => 'alert&#40;1&#41;',
