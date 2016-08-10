@@ -1533,7 +1533,7 @@ final class AntiXSS
   );
 
   /**
-   * List of never allowed regex replacements
+   * List of never allowed regex replacements.
    *
    * @var  array
    */
@@ -1578,25 +1578,33 @@ final class AntiXSS
   private $_xss_hash;
 
   /**
-   * the replacement-string for not allowed strings
+   * The replacement-string for not allowed strings.
    *
    * @var string
    */
   private $_replacement = '';
 
   /**
-   * list of never allowed strings
+   * List of never allowed strings.
    *
    * @var  array
    */
   private $_never_allowed_str = array();
 
   /**
-   * list of never allowed strings, afterwards
+   * List of never allowed strings, afterwards.
    *
    * @var array
    */
   private $_never_allowed_str_afterwards = array();
+
+  /**
+   * If your DB (MySQL) encoding is "utf8" and not "utf8mb4", then
+   * you can't save 4-Bytes chars from UTF-8 and someone can create stored XSS-attacks.
+   *
+   * @var bool
+   */
+  private $_stripe_4byte_chars = false;
 
   /**
    * __construct()
@@ -1903,6 +1911,11 @@ final class AntiXSS
     // and again... removes all non-UTF-8 characters
     $str = UTF8::clean($str, true, true, false);
 
+    // remove all >= 4-Byte chars if needed
+    if ($this->_stripe_4byte_chars === true) {
+      $str = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
+    }
+
     do {
       $old_str = $str;
       $str = $this->_do($str);
@@ -1997,13 +2010,9 @@ final class AntiXSS
   }
 
   /**
-   * Makes PHP tags safe
+   * Makes PHP tags safe.
    *
-   * Note: XML tags are inadvertently replaced too:
-   *
-   * <?xml
-   *
-   * But it doesn't seem to pose a problem.
+   * Note: XML tags are inadvertently replaced too, but it doesn't seem to pose a problem.
    *
    * @param string $str
    *
@@ -2027,7 +2036,7 @@ final class AntiXSS
   }
 
   /**
-   * Compact any exploded words
+   * Compact any exploded words.
    *
    * This corrects words like:  j a v a s c r i p t
    * These words are compacted back to their correct state.
@@ -2274,13 +2283,25 @@ final class AntiXSS
   }
 
   /**
-   * set the replacement-string for not allowed strings
+   * Set the replacement-string for not allowed strings.
    *
    * @param string $string
    */
   public function setReplacement($string)
   {
     $this->_replacement = (string)$string;
+  }
+
+  /**
+   * Set the option to stripe 4-Byte chars.
+   *
+   * INFO: use it if your DB (MySQL) can't use "utf8mb4" -> preventing stored XSS-attacks
+   *
+   * @param $bool
+   */
+  public function setStripe4byteChars($bool)
+  {
+    $this->_stripe_4byte_chars = (bool)$bool;
   }
 
   /**

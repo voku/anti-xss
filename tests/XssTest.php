@@ -68,6 +68,30 @@ class XssTest extends PHPUnit_Framework_TestCase {
     self::assertSame("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
   }
 
+  public function test_xss_clean_string_with_3bytes()
+  {
+    $harmStrings = array(
+        "Hello, i try to <script>alert('Hack');</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site",
+        'Simple clean string' => 'Simple clean string',
+        "Hello, i try to <script>alert('Hack')</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;[removed] your site",
+        '<a href="http://test.com?param1="+onMouseOver%3D"alert%281%29%3B&step=2&param12=A">test</a>' => '<a href="http://test.com?param1=">test</a>',
+        '<a href="http://test.com?param1="+on💩MouseOver💩%3D"alert%281%29%3B&step=2&param12=A">test</a>' => '<a href="http://test.com?param1=">test</a>',
+        '<a href="http://test.com?param1=lall&colon=foo;">test</a>' => '<a href="http://test.com?param1=lall&colon=foo;">test</a>',
+        '<a href="http://test.com?param1=lall&colon;=foo;">test</a>' => '<a href="http://test.com?param1=lall:=foo;">test</a>',
+    );
+
+    $this->security->setReplacement('[removed]');
+    $this->security->setStripe4byteChars(true);
+
+    foreach ($harmStrings as $before => $after) {
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
+
+    // reset
+    $this->security->setReplacement('');
+    $this->security->setStripe4byteChars(false);
+  }
+
   public function test_xss_clean_string_array()
   {
     $harmStrings = array(
@@ -75,15 +99,18 @@ class XssTest extends PHPUnit_Framework_TestCase {
         'Simple clean string' => 'Simple clean string',
         "Hello, i try to <script>alert('Hack')</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;[removed] your site",
         '<a href="http://test.com?param1="+onMouseOver%3D"alert%281%29%3B&step=2&param12=A">test</a>' => '<a href="http://test.com?param1=">test</a>',
+        '<a href="http://test.com?param1="+on💩MouseOver💩%3D"alert%281%29%3B&step=2&param12=A">test💩</a>' => '<a href="http://test.com?param1=">test💩</a>',
         '<a href="http://test.com?param1=lall&colon=foo;">test</a>' => '<a href="http://test.com?param1=lall&colon=foo;">test</a>',
         '<a href="http://test.com?param1=lall&colon;=foo;">test</a>' => '<a href="http://test.com?param1=lall:=foo;">test</a>',
     );
 
     $this->security->setReplacement('[removed]');
+
     foreach ($harmStrings as $before => $after) {
       self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
     }
 
+    // reset
     $this->security->setReplacement('');
   }
 
