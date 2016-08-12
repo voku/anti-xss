@@ -1596,7 +1596,222 @@ final class AntiXSS
    *
    * @var array
    */
-  private $_never_allowed_str_afterwards = array();
+  private $_never_allowed_str_afterwards = array(
+      'FSCommand',
+      'onAbort',
+      'onActivate',
+      'onAttribute',
+      'onAfterPrint',
+      'onAfterScriptExecute',
+      'onAfterUpdate',
+      'onAnimationEnd',
+      'onAnimationIteration',
+      'onAnimationStart',
+      'onAriaRequest',
+      'onAutoComplete',
+      'onAutoCompleteError',
+      'onBeforeActivate',
+      'onBeforeCopy',
+      'onBeforeCut',
+      'onBeforeDeactivate',
+      'onBeforeEditFocus',
+      'onBeforePaste',
+      'onBeforePrint',
+      'onBeforeScriptExecute',
+      'onBeforeUnload',
+      'onBeforeUpdate',
+      'onBegin',
+      'onBlur',
+      'onBounce',
+      'onCancel',
+      'onCanPlay',
+      'onCanPlayThrough',
+      'onCellChange',
+      'onChange',
+      'onClick',
+      'onClose',
+      'onCommand',
+      'onCompassNeedsCalibration',
+      'onContextMenu',
+      'onControlSelect',
+      'onCopy',
+      'onCueChange',
+      'onCut',
+      'onDataAvailable',
+      'onDataSetChanged',
+      'onDataSetComplete',
+      'onDblClick',
+      'onDeactivate',
+      'onDeviceLight',
+      'onDeviceMotion',
+      'onDeviceOrientation',
+      'onDeviceProximity',
+      'onDrag',
+      'onDragDrop',
+      'onDragEnd',
+      'onDragEnter',
+      'onDragLeave',
+      'onDragOver',
+      'onDragStart',
+      'onDrop',
+      'onDurationChange',
+      'onEmptied',
+      'onEnd',
+      'onEnded',
+      'onError',
+      'onErrorUpdate',
+      'onExit',
+      'onFilterChange',
+      'onFinish',
+      'onFocus',
+      'onFocusIn',
+      'onFocusOut',
+      'onFormChange',
+      'onFormInput',
+      'onFullScreenChange',
+      'onFullScreenError',
+      'onGotPointerCapture',
+      'onHashChange',
+      'onHelp',
+      'onInput',
+      'onInvalid',
+      'onKeyDown',
+      'onKeyPress',
+      'onKeyUp',
+      'onLanguageChange',
+      'onLayoutComplete',
+      'onLoad',
+      'onLoadedData',
+      'onLoadedMetaData',
+      'onLoadStart',
+      'onLoseCapture',
+      'onLostPointerCapture',
+      'onMediaComplete',
+      'onMediaError',
+      'onMessage',
+      'onMouseDown',
+      'onMouseEnter',
+      'onMouseLeave',
+      'onMouseMove',
+      'onMouseOut',
+      'onMouseOver',
+      'onMouseUp',
+      'onMouseWheel',
+      'onMove',
+      'onMoveEnd',
+      'onMoveStart',
+      'onMozFullScreenChange',
+      'onMozFullScreenError',
+      'onMozPointerLockChange',
+      'onMozPointerLockError',
+      'onMsContentZoom',
+      'onMsFullScreenChange',
+      'onMsFullScreenError',
+      'onMsGestureChange',
+      'onMsGestureDoubleTap',
+      'onMsGestureEnd',
+      'onMsGestureHold',
+      'onMsGestureStart',
+      'onMsGestureTap',
+      'onMsGotPointerCapture',
+      'onMsInertiaStart',
+      'onMsLostPointerCapture',
+      'onMsManipulationStateChanged',
+      'onMsPointerCancel',
+      'onMsPointerDown',
+      'onMsPointerEnter',
+      'onMsPointerLeave',
+      'onMsPointerMove',
+      'onMsPointerOut',
+      'onMsPointerOver',
+      'onMsPointerUp',
+      'onMsSiteModeJumpListItemRemoved',
+      'onMsThumbnailClick',
+      'onOffline',
+      'onOnline',
+      'onOutOfSync',
+      'onPage',
+      'onPageHide',
+      'onPageShow',
+      'onPaste',
+      'onPause',
+      'onPlay',
+      'onPlaying',
+      'onPointerCancel',
+      'onPointerDown',
+      'onPointerEnter',
+      'onPointerLeave',
+      'onPointerLockChange',
+      'onPointerLockError',
+      'onPointerMove',
+      'onPointerOut',
+      'onPointerOver',
+      'onPointerUp',
+      'onPopState',
+      'onProgress',
+      'onPropertyChange',
+      'onRateChange',
+      'onReadyStateChange',
+      'onReceived',
+      'onRepeat',
+      'onReset',
+      'onResize',
+      'onResizeEnd',
+      'onResizeStart',
+      'onResume',
+      'onReverse',
+      'onRowDelete',
+      'onRowEnter',
+      'onRowExit',
+      'onRowInserted',
+      'onRowsDelete',
+      'onRowsEnter',
+      'onRowsExit',
+      'onRowsInserted',
+      'onScroll',
+      'onSearch',
+      'onSeek',
+      'onSeeked',
+      'onSeeking',
+      'onSelect',
+      'onSelectionChange',
+      'onSelectStart',
+      'onStalled',
+      'onStorage',
+      'onStorageCommit',
+      'onStart',
+      'onStop',
+      'onShow',
+      'onSyncRestored',
+      'onSubmit',
+      'onSuspend',
+      'onSynchRestored',
+      'onTimeError',
+      'onTimeUpdate',
+      'onTrackChange',
+      'onTransitionEnd',
+      'onToggle',
+      'onUnload',
+      'onURLFlip',
+      'onUserProximity',
+      'onVolumeChange',
+      'onWaiting',
+      'onWebKitAnimationEnd',
+      'onWebKitAnimationIteration',
+      'onWebKitAnimationStart',
+      'onWebKitFullScreenChange',
+      'onWebKitFullScreenError',
+      'onWebKitTransitionEnd',
+      'onWheel',
+      'seekSegmentTime',
+      'userid',
+      'datasrc',
+      'datafld',
+      'dataformatas',
+      'ev:handler',
+      'ev:event',
+      '0;url',
+  );
 
   /**
    * If your DB (MySQL) encoding is "utf8" and not "utf8mb4", then
@@ -1607,9 +1822,34 @@ final class AntiXSS
   private $_stripe_4byte_chars = false;
 
   /**
+   * https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Event_Handlers
+   *
+   * @var array
+   */
+  private $_evil_attributes = array(
+      'on\w*',
+      'style',
+      'xmlns',
+      'formaction',
+      'form',
+      'xlink:href',
+      'seekSegmentTime',
+      'FSCommand',
+      'eval',
+  );
+
+  /**
    * __construct()
    */
   public function __construct()
+  {
+    $this->_initNeverAllowedStr();
+  }
+
+  /**
+   * initialize _initNeverAllowedStr
+   */
+  private function _initNeverAllowedStr()
   {
     $this->_never_allowed_str = array(
         'document.cookie' => $this->_replacement,
@@ -1624,223 +1864,6 @@ final class AntiXSS
         '<!DOCTYPE'       => '&lt;!DOCTYPE',
         '<!ATTLIST'       => '&lt;!ATTLIST',
         '<comment>'       => '&lt;comment&gt;',
-    );
-
-    $this->_never_allowed_str_afterwards = array(
-        'FSCommand',
-        'onAbort',
-        'onActivate',
-        'onAttribute',
-        'onAfterPrint',
-        'onAfterScriptExecute',
-        'onAfterUpdate',
-        'onAnimationEnd',
-        'onAnimationIteration',
-        'onAnimationStart',
-        'onAriaRequest',
-        'onAutoComplete',
-        'onAutoCompleteError',
-        'onBeforeActivate',
-        'onBeforeCopy',
-        'onBeforeCut',
-        'onBeforeDeactivate',
-        'onBeforeEditFocus',
-        'onBeforePaste',
-        'onBeforePrint',
-        'onBeforeScriptExecute',
-        'onBeforeUnload',
-        'onBeforeUpdate',
-        'onBegin',
-        'onBlur',
-        'onBounce',
-        'onCancel',
-        'onCanPlay',
-        'onCanPlayThrough',
-        'onCellChange',
-        'onChange',
-        'onClick',
-        'onClose',
-        'onCommand',
-        'onCompassNeedsCalibration',
-        'onContextMenu',
-        'onControlSelect',
-        'onCopy',
-        'onCueChange',
-        'onCut',
-        'onDataAvailable',
-        'onDataSetChanged',
-        'onDataSetComplete',
-        'onDblClick',
-        'onDeactivate',
-        'onDeviceLight',
-        'onDeviceMotion',
-        'onDeviceOrientation',
-        'onDeviceProximity',
-        'onDrag',
-        'onDragDrop',
-        'onDragEnd',
-        'onDragEnter',
-        'onDragLeave',
-        'onDragOver',
-        'onDragStart',
-        'onDrop',
-        'onDurationChange',
-        'onEmptied',
-        'onEnd',
-        'onEnded',
-        'onError',
-        'onErrorUpdate',
-        'onExit',
-        'onFilterChange',
-        'onFinish',
-        'onFocus',
-        'onFocusIn',
-        'onFocusOut',
-        'onFormChange',
-        'onFormInput',
-        'onFullScreenChange',
-        'onFullScreenError',
-        'onGotPointerCapture',
-        'onHashChange',
-        'onHelp',
-        'onInput',
-        'onInvalid',
-        'onKeyDown',
-        'onKeyPress',
-        'onKeyUp',
-        'onLanguageChange',
-        'onLayoutComplete',
-        'onLoad',
-        'onLoadedData',
-        'onLoadedMetaData',
-        'onLoadStart',
-        'onLoseCapture',
-        'onLostPointerCapture',
-        'onMediaComplete',
-        'onMediaError',
-        'onMessage',
-        'onMouseDown',
-        'onMouseEnter',
-        'onMouseLeave',
-        'onMouseMove',
-        'onMouseOut',
-        'onMouseOver',
-        'onMouseUp',
-        'onMouseWheel',
-        'onMove',
-        'onMoveEnd',
-        'onMoveStart',
-        'onMozFullScreenChange',
-        'onMozFullScreenError',
-        'onMozPointerLockChange',
-        'onMozPointerLockError',
-        'onMsContentZoom',
-        'onMsFullScreenChange',
-        'onMsFullScreenError',
-        'onMsGestureChange',
-        'onMsGestureDoubleTap',
-        'onMsGestureEnd',
-        'onMsGestureHold',
-        'onMsGestureStart',
-        'onMsGestureTap',
-        'onMsGotPointerCapture',
-        'onMsInertiaStart',
-        'onMsLostPointerCapture',
-        'onMsManipulationStateChanged',
-        'onMsPointerCancel',
-        'onMsPointerDown',
-        'onMsPointerEnter',
-        'onMsPointerLeave',
-        'onMsPointerMove',
-        'onMsPointerOut',
-        'onMsPointerOver',
-        'onMsPointerUp',
-        'onMsSiteModeJumpListItemRemoved',
-        'onMsThumbnailClick',
-        'onOffline',
-        'onOnline',
-        'onOutOfSync',
-        'onPage',
-        'onPageHide',
-        'onPageShow',
-        'onPaste',
-        'onPause',
-        'onPlay',
-        'onPlaying',
-        'onPointerCancel',
-        'onPointerDown',
-        'onPointerEnter',
-        'onPointerLeave',
-        'onPointerLockChange',
-        'onPointerLockError',
-        'onPointerMove',
-        'onPointerOut',
-        'onPointerOver',
-        'onPointerUp',
-        'onPopState',
-        'onProgress',
-        'onPropertyChange',
-        'onRateChange',
-        'onReadyStateChange',
-        'onReceived',
-        'onRepeat',
-        'onReset',
-        'onResize',
-        'onResizeEnd',
-        'onResizeStart',
-        'onResume',
-        'onReverse',
-        'onRowDelete',
-        'onRowEnter',
-        'onRowExit',
-        'onRowInserted',
-        'onRowsDelete',
-        'onRowsEnter',
-        'onRowsExit',
-        'onRowsInserted',
-        'onScroll',
-        'onSearch',
-        'onSeek',
-        'onSeeked',
-        'onSeeking',
-        'onSelect',
-        'onSelectionChange',
-        'onSelectStart',
-        'onStalled',
-        'onStorage',
-        'onStorageCommit',
-        'onStart',
-        'onStop',
-        'onShow',
-        'onSyncRestored',
-        'onSubmit',
-        'onSuspend',
-        'onSynchRestored',
-        'onTimeError',
-        'onTimeUpdate',
-        'onTrackChange',
-        'onTransitionEnd',
-        'onToggle',
-        'onUnload',
-        'onURLFlip',
-        'onUserProximity',
-        'onVolumeChange',
-        'onWaiting',
-        'onWebKitAnimationEnd',
-        'onWebKitAnimationIteration',
-        'onWebKitAnimationStart',
-        'onWebKitFullScreenChange',
-        'onWebKitFullScreenError',
-        'onWebKitTransitionEnd',
-        'onWheel',
-        'seekSegmentTime',
-        'userid',
-        'datasrc',
-        'datafld',
-        'dataformatas',
-        'ev:handler',
-        'ev:event',
-        '0;url',
     );
   }
 
@@ -1866,7 +1889,7 @@ final class AntiXSS
    *    vulnerabilities along with a few other hacks I've
    *    harvested from examining vulnerabilities in other programs.
    *
-   * @param  mixed $str      input data e.g. string or array
+   * @param  mixed $str input data e.g. string or array
    *
    * @return  string|array|boolean  boolean: will return a boolean, if the "is_image"-parameter is true
    *                                string: will return a string, if the input is a string
@@ -2160,30 +2183,18 @@ final class AntiXSS
    *    <a |style="document.write('hello'); alert('world');"| class="link">
    *  </code>
    *
-   * @param  string $str      The string to check
+   * @param  string $str The string to check
    *
    * @return  string  The string with the evil attributes removed
    */
   private function remove_evil_attributes($str)
   {
-    // https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Event_Handlers
+    $evil_attributes_string = implode('|', $this->_evil_attributes);
 
-    $evil_attributes = array(
-        'on\w*',
-        'style',
-        'xmlns',
-        'formaction',
-        'form',
-        'xlink:href',
-        'seekSegmentTime',
-        'FSCommand',
-        'eval',
-    );
-
-    $evil_attributes_string = implode('|', $evil_attributes);
-
-    // replace style-attribute, first
-    $str = preg_replace('/(<[^>]+)(?<!\w)(style=\"([^\']*?)\")/i', '$1' . $this->_replacement . '$4', $str, -1, $temp_count);
+    // replace style-attribute, first (if needed)
+    if (in_array('style', $this->_evil_attributes, true)) {
+      $str = preg_replace('/(<[^>]+)(?<!\w)(style=\"([^\']*?)\")/i', '$1' . $this->_replacement . '$4', $str, -1, $temp_count);
+    }
 
     do {
       $count = $temp_count = 0;
@@ -2283,13 +2294,49 @@ final class AntiXSS
   }
 
   /**
+   * Remove some strings from "_evil_attributes".
+   *
+   * WARNING: Use this method only if you have a really good reason.
+   *
+   * @param array $strings
+   *
+   * @return $this
+   */
+  public function removeEvilAttributes(array $strings)
+  {
+    $this->_evil_attributes = array_diff(array_intersect($strings, $this->_evil_attributes), $this->_evil_attributes);
+
+    return $this;
+  }
+
+  /**
+   * Add some strings from "_evil_attributes".
+   *
+   * @param array $strings
+   *
+   * @return $this
+   */
+  public function addEvilAttributes(array $strings)
+  {
+    $this->_evil_attributes = array_merge($strings, $this->_evil_attributes);
+
+    return $this;
+  }
+
+  /**
    * Set the replacement-string for not allowed strings.
    *
    * @param string $string
+   *
+   * @return $this
    */
   public function setReplacement($string)
   {
     $this->_replacement = (string)$string;
+
+    $this->_initNeverAllowedStr();
+
+    return $this;
   }
 
   /**
@@ -2298,10 +2345,14 @@ final class AntiXSS
    * INFO: use it if your DB (MySQL) can't use "utf8mb4" -> preventing stored XSS-attacks
    *
    * @param $bool
+   *
+   * @return $this
    */
   public function setStripe4byteChars($bool)
   {
     $this->_stripe_4byte_chars = (bool)$bool;
+
+    return $this;
   }
 
   /**

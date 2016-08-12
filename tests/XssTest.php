@@ -78,6 +78,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
         '<a href="http://test.com?param1="+on💩MouseOver💩%3D"alert%281%29%3B&step=2&param12=A">test</a>' => '<a href="http://test.com?param1=">test</a>',
         '<a href="http://test.com?param1=lall&colon=foo;">test</a>' => '<a href="http://test.com?param1=lall&colon=foo;">test</a>',
         '<a href="http://test.com?param1=lall&colon;=foo;">test</a>' => '<a href="http://test.com?param1=lall:=foo;">test</a>',
+        '<li style="list-style-image: url(alert&#40;0&#41;)">' => '<li [removed]>',
     );
 
     $this->security->setReplacement('[removed]');
@@ -88,8 +89,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
     }
 
     // reset
-    $this->security->setReplacement('');
-    $this->security->setStripe4byteChars(false);
+    $this->security->setReplacement('')->setStripe4byteChars(false);
   }
 
   public function test_xss_clean_string_array()
@@ -549,6 +549,26 @@ textContent>click me!',
         self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
       }
     }
+  }
+
+  public function testRemoveEvilAttributes()
+  {
+    $testString = '<li style="list-style-image: url(javascript:alert(0))">';
+
+    self::assertSame('<li >', $this->security->xss_clean($testString));
+
+    // ---
+
+    $this->security->removeEvilAttributes(array('style'));
+
+    self::assertSame('<li style="list-style-image: url(alert&#40;0&#41;)">', $this->security->xss_clean($testString));
+
+    // ---
+
+    // reset
+    $this->security->addEvilAttributes(array('style'));
+
+    self::assertSame('<li >', $this->security->xss_clean($testString));
   }
 
   public function testHtmlXssFile()
