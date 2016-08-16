@@ -2294,7 +2294,7 @@ final class AntiXSS
   }
 
   /**
-   * Remove some strings from "_evil_attributes".
+   * Remove some strings from the "_evil_attributes"-array.
    *
    * WARNING: Use this method only if you have a really good reason.
    *
@@ -2310,7 +2310,7 @@ final class AntiXSS
   }
 
   /**
-   * Add some strings from "_evil_attributes".
+   * Add some strings to the "_evil_attributes"-array.
    *
    * @param array $strings
    *
