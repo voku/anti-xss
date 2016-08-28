@@ -790,6 +790,15 @@ textContent>click me!',
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
     self::assertSame('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
 
+    $testString = '<img src=www.example.com/smiley.gif >';
+    self::assertSame('<img  >', $this->security->xss_clean($testString));
+
+    $testString = '<img src="www.example.com/smiley.gif" >';
+    self::assertSame('<img src="www.example.com/smiley.gif" >', $this->security->xss_clean($testString));
+
+    $testString = '<img src=\'www.example.com/smiley.gif\' >';
+    self::assertSame('<img src=\'www.example.com/smiley.gif\' >', $this->security->xss_clean($testString));
+
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
     self::assertSame('<img >', $this->security->xss_clean($testString));
 
