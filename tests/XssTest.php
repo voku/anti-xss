@@ -320,6 +320,7 @@ xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
       '<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
       '<META HTTP-EQUIV="Link" Content="<javascript:alert(\'XSS\')>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;alert&#40;\'XSS\'&#41;>; REL=stylesheet">',
       '<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=alert&#40;\'XSS\'&#41;;"&gt;',
+      '<a><a><p></a></p><meta property="the:property" content="No results for;url=hxxp://www.maliciousxss.com" HTTP-EQUIV="refresh" blah=" (Page 1)" />foobar</a>' => '<a><a><p></a></p>&lt;meta property="the:property" content="No results for;url=hxxp://www.maliciousxss.com" HTTP-EQUIV="refresh" blah=" (Page 1)" /&gt;foobar</a>',
       '<IFRAME SRC="javascript:alert(\'XSS\');"></IFRAME>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
       '<FRAMESET><FRAME SRC="javascript:alert(\'XSS\');"></FRAMESET>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
       '<TABLE BACKGROUND="javascript:alert(\'XSS\')">' => '<TABLE BACKGROUND="alert&#40;\'XSS\'&#41;">',
