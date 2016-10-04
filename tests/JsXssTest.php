@@ -53,6 +53,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     // 过滤不是标签的<>
     self::assertSame('<>>', $this->security->xss_clean('<>>'));
     self::assertSame("'<scri'   'pt>'", $this->security->xss_clean("'<scri' + 'pt>'"));
+    self::assertSame("''", $this->security->xss_clean("'<script' + '>'"));
     self::assertSame('<<a>b>', $this->security->xss_clean('<<a>b>'));
     self::assertSame('<<<a>>b</a><x>', $this->security->xss_clean('<<<a>>b</a><x>'));
 
