@@ -41,23 +41,23 @@ class LibFilterSecurityTest extends PHPUnit_Framework_TestCase
 
   public function testClean()
   {
-    $this->addToTestArray('<script','');
-    $this->addToTestArray('<script woo="yay<b>','');
-    $this->addToTestArray('<script woo="yay<b>hello','<b>hello</b>');
-    $this->addToTestArray('<script<script>>','');
-    $this->addToTestArray('<<script>script<script>>','script');
-    $this->addToTestArray('<<script><script>>','');
-    $this->addToTestArray('<<script>script>>','');
-    $this->addToTestArray('<<script<script>>','');
+    $this->addToTestArray('<script', '');
+    $this->addToTestArray('<script woo="yay<b>', '');
+    $this->addToTestArray('<script woo="yay<b>hello', '<b>hello</b>');
+    $this->addToTestArray('<script<script>>', '');
+    $this->addToTestArray('<<script>script<script>>', 'script');
+    $this->addToTestArray('<<script><script>>', '');
+    $this->addToTestArray('<<script>script>>', '');
+    $this->addToTestArray('<<script<script>>', '');
 
-    $this->addToTestArray('<script','&lt;script');
-    $this->addToTestArray('<script woo="yay<b>','');
-    $this->addToTestArray('<script woo="yay<b>hello','hello');
-    $this->addToTestArray('<script<script>>','>');
-    $this->addToTestArray('<<script>script<script>>','');
-    $this->addToTestArray('<<script><script>>','<>');
-    $this->addToTestArray('<<script>script>>','>');
-    $this->addToTestArray('<<script<script>>','<>');
+    $this->addToTestArray('<script', '&lt;script');
+    $this->addToTestArray('<script woo="yay<b>', '');
+    $this->addToTestArray('<script woo="yay<b>hello', 'hello');
+    $this->addToTestArray('<script<script>>', '>');
+    $this->addToTestArray('<<script>script<script>>', '');
+    $this->addToTestArray('<<script><script>>', '<>');
+    $this->addToTestArray('<<script>script>>', '>');
+    $this->addToTestArray('<<script<script>>', '<>');
 
     # bad protocols
     $this->addToTestArray('<a href="http://foo">bar</a>', '<a href="http://foo">bar</a>');
