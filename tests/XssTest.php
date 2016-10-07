@@ -58,7 +58,7 @@ class XssTest extends PHPUnit_Framework_TestCase {
       true => '1',
       false => '0',
       0 => '0',
-      "0.0" => '0.0',
+      '0.0' => '0.0',
     );
 
     foreach ($testArray as $before => $after) {
