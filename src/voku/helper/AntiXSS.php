@@ -1569,7 +1569,7 @@ final class AntiXSS
     // old Netscape
     'livescript\s*:',
     // default view source
-    'view-source:',
+    'view-source\s*:',
   );
 
   /**

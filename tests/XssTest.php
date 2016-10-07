@@ -890,6 +890,8 @@ textContent>click me!',
     self::assertSame('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
     self::assertSame('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
     self::assertSame('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
+    self::assertSame('&lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;', $this->security->xss_clean('<meta http-equiv="refresh" content="0;url=javascript:document.vulnerable=true;">'));
+    self::assertSame('<><&lt;meta &lt;meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">', $this->security->xss_clean('<><<meta <meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">'));
   }
 
   /**
