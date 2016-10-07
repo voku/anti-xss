@@ -1568,6 +1568,8 @@ final class AntiXSS
     'mocha\s*:',
     // old Netscape
     'livescript\s*:',
+    // default view source
+    'view-source:',
   );
 
   /**
@@ -2075,6 +2077,7 @@ final class AntiXSS
     $words = array(
         'javascript',
         'expression',
+        'view-source',
         'vbscript',
         'jscript',
         'wscript',
