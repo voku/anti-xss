@@ -1907,6 +1907,21 @@ final class AntiXSS
       return $str;
     }
 
+    do {
+      $old_str = $str;
+      $str = $this->_do($str);
+    } while ($old_str !== $str);
+
+    return $str;
+  }
+
+  /**
+   * @param string $str
+   *
+   * @return mixed
+   */
+  private function _do($str)
+  {
     $str = (string)$str;
     $strInt = (int)$str;
     $strFloat = (float)$str;
@@ -1937,21 +1952,6 @@ final class AntiXSS
       $str = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
     }
 
-    do {
-      $old_str = $str;
-      $str = $this->_do($str);
-    } while ($old_str !== $str);
-
-    return $str;
-  }
-
-  /**
-   * @param string $str
-   *
-   * @return mixed
-   */
-  private function _do($str)
-  {
     // remove strings that are never allowed
     $str = $this->_do_never_allowed($str);
 
@@ -2225,7 +2225,7 @@ final class AntiXSS
    */
   private function sanitize_naughty_html($str)
   {
-    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|svg|xml|xss|eval';
+    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|source|svg|xml|xss|eval';
     $str = preg_replace_callback(
         '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is',
         array(

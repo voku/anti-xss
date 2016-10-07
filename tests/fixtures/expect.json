@@ -22,7 +22,7 @@
   {
     "title": "src Attributes for IMG, AUDIO, VIDEO and SOURCE (see #131)",
     "payload": "<img src=\"data:,123\"><audio src=\"data:,456\"></audio><video src=\"data:,789\"></video><source src=\"data:,012\"><div src=\"data:,345\">",
-    "expected": "<img src=\"data:,123\">&lt;audio src=\"data:,456\"&gt;&lt;/audio>&lt;video src=\"data:,789\"&gt;&lt;/video><source src=\"data:,012\"><div src=\"data:,345\">"
+    "expected": "<img src=\"data:,123\">&lt;audio src=\"data:,456\"&gt;&lt;/audio>&lt;video src=\"data:,789\"&gt;&lt;/video>&lt;source src=\"data:,012\"&gt;&lt;div src=\"data:,345\">"
   },
   {
     "title": "DOM Clobbering against document.createElement() (see #47)",
@@ -485,7 +485,7 @@
   },
   {
     "payload": "<div id=\"56\"><video onerror=\"alert(56)\"><source></source></video>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"56\">&lt;video &gt;&lt;source></source>&lt;/video&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"56\">&lt;video &gt;&lt;source>&lt;/source&gt;&lt;/video>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"57\"><b <script>alert(57)//</script>0</script></b>//[\"'`-->]]>]</div>",
