@@ -1914,13 +1914,9 @@ final class AntiXSS
     if (
         !$str
         ||
-        $str === null
+        "$strInt" == $str
         ||
-        is_bool($str)
-        ||
-        "$strInt" == $str || is_int($str)
-        ||
-        "$strFloat" == $str || is_float($str)
+        "$strFloat" == $str
     ) {
       return $str;
     }
