@@ -2002,7 +2002,7 @@ final class AntiXSS
           $str
       );
     } else {
-      $str = UTF8::urldecode($str);
+      $str = UTF8::rawurldecode($str);
     }
 
     return $str;
