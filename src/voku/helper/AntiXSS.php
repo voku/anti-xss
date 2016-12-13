@@ -2494,14 +2494,14 @@ final class AntiXSS
    */
   private function _decode_entity($match)
   {
-    $hash = $this->xss_hash();
+    $this->xss_hash();
 
     // protect GET variables in URLs
     // 901119URL5918AMP18930PROTECT8198
-    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $hash . '\\1=\\2', $match[0]);
+    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '\\1=\\2', $match[0]);
 
     // un-protect URL GET vars
-    return str_replace($this->xss_hash(), '&', $this->_entity_decode($match));
+    return str_replace($this->_xss_hash, '&', $this->_entity_decode($match));
   }
 
   /**
@@ -2533,12 +2533,12 @@ final class AntiXSS
    */
   private function _entity_decode($str)
   {
-    static $entities;
+    static $HTML_ENTITIES_CACHE;
 
     $flags = Bootup::is_php('5.4') ? ENT_QUOTES | ENT_HTML5 : ENT_QUOTES;
 
     // decode
-    if (strpos($str, $this->xss_hash()) !== false) {
+    if (strpos($str, $this->_xss_hash) !== false) {
       $str = UTF8::html_entity_decode($str, $flags);
     } else {
       $str = UTF8::urldecode($str);
@@ -2547,7 +2547,7 @@ final class AntiXSS
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
     if (preg_match_all('/&[a-z]{2,}[;]{0}/i', $str, $matches)) {
 
-      if (null === $entities) {
+      if (null === $HTML_ENTITIES_CACHE) {
 
         // links:
         // - http://dev.w3.org/html5/html-author/charref
@@ -2611,21 +2611,18 @@ final class AntiXSS
             '&#9;'               => "\n",
         );
 
-        $entitiesTmp = get_html_translation_table(HTML_ENTITIES, $flags);
-        $entitiesTmp = array_merge(self::$entitiesFallback, $entitiesTmp);
-
-        $entities = array_merge(
+        $HTML_ENTITIES_CACHE = array_merge(
             $entitiesSecurity,
-            array_map('strtolower', array_flip($entitiesTmp))
+            array_flip(get_html_translation_table(HTML_ENTITIES, $flags)),
+            array_flip(self::$entitiesFallback)
         );
       }
 
       $replace = array();
-      $matches = array_unique(array_map('strtolower', $matches[0]));
-      foreach ($matches as $match) {
+      foreach ($matches[0] as $match) {
         $match .= ';';
-        if (array_key_exists($match, $entities) === true) {
-          $replace[$match] = $entities[$match];
+        if (isset($HTML_ENTITIES_CACHE[$match])) {
+          $replace[$match] = $HTML_ENTITIES_CACHE[$match];
         }
       }
 
