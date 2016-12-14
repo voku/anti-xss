@@ -7,7 +7,8 @@ use voku\helper\UTF8;
 /**
  * Class XssTest
  */
-class XssTest extends PHPUnit_Framework_TestCase {
+class XssTest extends PHPUnit_Framework_TestCase
+{
 
   // INFO: here you can find some more tests
   //
