@@ -49,35 +49,63 @@ composer require voku/anti-xss
 Usage:
 ======
 
-    $antiXss = new AntiXSS();
+```php
+$antiXss = new AntiXSS();
+```
 
 Example 1: (HTML Character)
 
-    $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
-    $harmless_string = $antiXss->xss_clean($harm_string);
-    
-    // Hello, i try to alert&#40;'Hack'&#41;; your site
+```php
+$harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
+$harmless_string = $antiXss->xss_clean($harm_string);
+
+// Hello, i try to alert&#40;'Hack'&#41;; your site
+```
 
 Example 2: (Hexadecimal HTML Character)
 
-    $harm_string = "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>";
-    $harmless_string = $antiXss->xss_clean($harm_string);
-        
-    // <IMG >
+```php
+$harm_string = "<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>";
+$harmless_string = $antiXss->xss_clean($harm_string);
+    
+// <IMG >
+```
     
 Example 3: (Unicode Hex Character)
 
-    $harm_string = "<a href='&#x2000;javascript:alert(1)'>CLICK</a>";
-    $harmless_string = $antiXss->xss_clean($harm_string);
-        
-    // <a >CLICK</a>
+```php
+$harm_string = "<a href='&#x2000;javascript:alert(1)'>CLICK</a>";
+$harmless_string = $antiXss->xss_clean($harm_string);
+    
+// <a >CLICK</a>
+```
 
 Example 4: (Unicode Character)
 
-    $harm_string = "<a href=\"\u0001java\u0003script:alert(1)\">CLICK<a>";
-    $harmless_string = $antiXss->xss_clean($harm_string);
-        
-    // <a >CLICK</a>
+```php
+$harm_string = "<a href=\"\u0001java\u0003script:alert(1)\">CLICK<a>";
+$harmless_string = $antiXss->xss_clean($harm_string);
+    
+// <a >CLICK</a>
+```
+
+Example 5.1: (non Inline CSS)
+
+```php
+$harm_string = '<li style="list-style-image: url(javascript:alert(0))">';
+$harmless_string = $this->security->xss_clean($harm_string));
+
+// <li >
+
+Example 5.2: (with Inline CSS)
+
+$harm_string = '<li style="list-style-image: url(javascript:alert(0))">';
+$antiXss->removeEvilAttributes(array('style')); // allow style-attributes
+$harmless_string = $antiXss->xss_clean($harm_string)
+
+// <li style="list-style-image: url(alert&#40;0&#41;)">
+
+```
 
 Unit Test:
 ==========
