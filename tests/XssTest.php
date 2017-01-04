@@ -41,13 +41,7 @@ class XssTest extends PHPUnit_Framework_TestCase
   public function test_no_xss()
   {
     $testArray = array(
-      '<meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">' => '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;',
-      '<meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" />' => '&lt;meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" /&gt;',
-      '<style type="text/css">html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}</style>' => '&lt;style type="text/css"&gt;html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}&lt;/style&gt;',
       '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>' => '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>',
-      '<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/>' => '&lt;link href="//fonts.googleapis.com/css?family=Open Sans" rel="stylesheet" type="text/css"/&gt;',
-      '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>' => '',
-      '<!--[if lt IE 9]><script src="http://moelleken.org/vendor/bower/nwmatcher/src/nwmatcher.js"></script><![endif]-->' => '&lt;!--[if lt IE 9]><![endif]--&gt;',
       '<a href="http://suckup.de/about" target="_blank">About</a>' => '<a href="http://suckup.de/about" target="_blank">About</a>',
       "<a href='http://suckup.de/about' target='_blank'>About</a>" => "<a href='http://suckup.de/about' target='_blank'>About</a>",
       '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>' => '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>',
@@ -61,10 +55,15 @@ class XssTest extends PHPUnit_Framework_TestCase
       0 => '0',
       '0.0' => '0.0',
       '3+ years of experience' => '3+ years of experience',
+      ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9" => ' foo   öäü ',
+      " foo\t foo " => ' foo	 foo ',
+      'a="get";' => 'a="get";',
+      '<x 1=">" onxxx=1 (text outside tag)' => '<x 1=">" onxxx=1 (text outside tag)',
     );
 
     foreach ($testArray as $before => $after) {
       self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertFalse($this->security->isXssFound(), 'testing: ' . $before);
     }
   }
 
@@ -104,6 +103,12 @@ class XssTest extends PHPUnit_Framework_TestCase
   public function test_xss_clean_string_array()
   {
     $harmStrings = array(
+        '<style type="text/css">html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}</style>' => '&lt;style type="text/css"&gt;html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}&lt;/style&gt;',
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">' => '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;',
+        '<meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" />' => '&lt;meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" /&gt;',
+        '<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/>' => '&lt;link href="//fonts.googleapis.com/css?family=Open Sans" rel="stylesheet" type="text/css"/&gt;',
+        '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>' => '[removed][removed]',
+        '<!--[if lt IE 9]><script src="http://moelleken.org/vendor/bower/nwmatcher/src/nwmatcher.js"></script><![endif]-->' => '&lt;!--[if lt IE 9]>[removed][removed]<![endif]--&gt;',
         "Hello, i try to <script>alert('Hack');</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site",
         'Simple clean string' => 'Simple clean string',
         "Hello, i try to <script>alert('Hack')</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;[removed] your site",
@@ -187,7 +192,6 @@ class XssTest extends PHPUnit_Framework_TestCase
       'http://securitee.tk/files/chrome_xss.php?a=<script>void(\'&b=\');alert(1);</script>' => 'http://securitee.tk/files/chrome_xss.php?a=void(\'&b=\');alert&#40;1&#41;;', // Bypassing Chrome’s Anti-XSS filter | 2012: http://blog.securitee.org/?p=37
       'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
       'http://www.nowvideo.sx/share.php?id=foobar&title=\'\';with(document)body.appendChild(createElement(\\\'iframe onload =&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\\\';with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//--></SCRIPT>">\'><SCRIPT>with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'</SCRIPT>=&{}' => "http://www.nowvideo.sx/share.php?id=foobar&title='';with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\';with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\";with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\\\";with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//--&gt;\">'>with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body =\'\'=",
-      '<!DOCTYPE foo [<!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>' => '&lt;!DOCTYPE foo [&lt;!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>', // XXE injection | http://phpsecurity.readthedocs.org/en/latest/Injection-Attacks.html#xml-injection
       '<div><embed allowscriptaccess=always src=/xss.swf><base href=//l0.cm/</div>' => '<div>&lt;embed allowscriptaccess=always src=/xss.swf&gt;&lt;base href=//l0.cm/</div>', // 2016 | http://mksben.l0.cm/2016/05/xssauditor-bypass-flash-basetag.html
       'https%3A%2F%2F%252567%252569%252573%252574.github.com%2Fauth%2Fgithub%2Fcallback' => 'https://gist.github.com/auth/github/callback', // 2016 | Internet Explorer 11 on Windows 7 / 8.1 | http://blog.innerht.ml/internet-explorer-has-a-url-problem/
       '<base href="javascript:/a/+alert(1)//">' => '&lt;base href="/a/ alert&#40;1&#41;//"&gt;',
@@ -350,7 +354,6 @@ xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
       '<OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"></OBJECT>' => '&lt;OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"&gt;&lt;/OBJECT>',
       '<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(\'XSS\')></OBJECT>' => '&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=alert&#40;\'XSS\'&#41;>&lt;/OBJECT&gt;',
       'getURL("javascript:alert(\'XSS\')")' => 'getURL("alert&#40;\'XSS\'&#41;")',
-      'a="get";' => 'a="get";',
       '<EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
 org/xss.swf" AllowScriptAccess="always"></EMBED>' => '&lt;EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
 org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
@@ -501,7 +504,6 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<x 1="1"onxxx=1' => '<x 1="1"',
       // Mimetism
       '<x </onxxx=1 (closing tag)' => '<x </ (closing tag)',
-      '<x 1=">" onxxx=1 (text outside tag)' => '<x 1=">" onxxx=1 (text outside tag)',
       '<http://onxxx%3D1/ (URL)' => '<http:// (URL)',
       // Combo
       '<x%2F1=">%22OnClick%3D1' => '<x/1=">"1',
@@ -537,6 +539,7 @@ textContent>click me!',
 
     foreach ($testArray as $before => $after) {
       self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertTrue($this->security->isXssFound(), 'testing: ' . $before);
     }
 
     // test for php < OR > 5.3
@@ -613,6 +616,19 @@ textContent>click me!',
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2_clean.svg');
 
     self::assertSame($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+  }
+
+  public function testXmlInjection()
+  {
+    // XXE injection | http://phpsecurity.readthedocs.org/en/latest/Injection-Attacks.html#xml-injection
+
+    $testArray = array(
+        '<!DOCTYPE foo [<!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>' => '&lt;!DOCTYPE foo [&lt;!ENTITY xxe7eb97 SYSTEM "file:///etc/passwd"> ]>',
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
   }
 
   public function testScriptEncoding()

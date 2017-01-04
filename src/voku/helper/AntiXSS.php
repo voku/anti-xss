@@ -1841,6 +1841,11 @@ final class AntiXSS
   );
 
   /**
+   * @var bool|null
+   */
+  private $xss_found = null;
+
+  /**
    * __construct()
    */
   public function __construct()
@@ -1899,6 +1904,10 @@ final class AntiXSS
    */
   public function xss_clean($str)
   {
+    // reset
+    $this->xss_found = null;
+
+    // check for an array of strings
     if (is_array($str)) {
       foreach ($str as &$value) {
         $value = $this->xss_clean($value);
@@ -1907,6 +1916,7 @@ final class AntiXSS
       return $str;
     }
 
+    // process
     do {
       $old_str = $str;
       $str = $this->_do($str);
@@ -1933,6 +1943,13 @@ final class AntiXSS
         ||
         "$strFloat" == $str
     ) {
+
+      // no xss found
+
+      if ($this->xss_found !== true) {
+        $this->xss_found = false;
+      }
+
       return $str;
     }
 
@@ -1940,6 +1957,8 @@ final class AntiXSS
     // &&
     // remove NULL characters (ignored by some browsers)
     $str = UTF8::clean($str, true, true, false);
+
+    $str_backup = $str;
 
     // decode the string
     $str = $this->decode_string($str);
@@ -1980,7 +1999,22 @@ final class AntiXSS
     $str = $this->_do_never_allowed($str);
     $str = $this->_do_never_allowed_afterwards($str);
 
+    // check if we removed some XSS attacks
+    if ($this->xss_found !== true) {
+      $this->xss_found = !($str_backup === $str);
+    }
+
     return $str;
+  }
+
+  /**
+   * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
+   *
+   * @return bool|null will return null if the "xss_clean()" wan't running at all
+   */
+  public function isXssFound()
+  {
+    return $this->xss_found;
   }
 
   /**

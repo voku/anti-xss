@@ -93,7 +93,7 @@ Example 5.1: (non Inline CSS)
 
 ```php
 $harm_string = '<li style="list-style-image: url(javascript:alert(0))">';
-$harmless_string = $this->security->xss_clean($harm_string));
+$harmless_string = $this->security->xss_clean($harm_string);
 
 // <li >
 ```
@@ -103,11 +103,23 @@ Example 5.2: (with Inline CSS)
 ```php
 $harm_string = '<li style="list-style-image: url(javascript:alert(0))">';
 $antiXss->removeEvilAttributes(array('style')); // allow style-attributes
-$harmless_string = $antiXss->xss_clean($harm_string)
+$harmless_string = $antiXss->xss_clean($harm_string);
 
 // <li style="list-style-image: url(alert&#40;0&#41;)">
 ```
 
+Example 6: (check if an string contains a XSS attack)
+
+```php
+$harm_string = "\x3cscript src=http://www.example.com/malicious-code.js\x3e\x3c/script\x3e";
+$harmless_string = $antiXss->xss_clean($harm_string);
+
+// 
+
+$antiXss->isXssFound(); 
+
+// true
+```
 
 Unit Test:
 ==========
