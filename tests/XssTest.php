@@ -47,6 +47,8 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>' => '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>',
       '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>' => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
       'eval is evil and xss is bad, but this is only a string : onerror ...' => 'eval is evil and xss is bad, but this is only a string : onerror ...',
+      '<a href="https://test.com?lall=123&lall=312">test&amp;</a>' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
+      '&lt;a href="https://test.com?lall=123&lall=312">test&amp;&lt;/a&gt;' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
       '' => '',
       ' ' => ' ',
       null => '',
@@ -63,7 +65,7 @@ class XssTest extends PHPUnit_Framework_TestCase
 
     foreach ($testArray as $before => $after) {
       self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
-      self::assertFalse($this->security->isXssFound(), 'testing: ' . $before);
+      self::assertFalse($this->security->isXssFound(), 'testing: ' . $before . ' | ' . $after);
     }
   }
 
@@ -106,7 +108,8 @@ class XssTest extends PHPUnit_Framework_TestCase
         '<style type="text/css">html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}</style>' => '&lt;style type="text/css"&gt;html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}&lt;/style&gt;',
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">' => '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;',
         '<meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" />' => '&lt;meta property="og:description" content="Lars Moelleken: Webentwickler & Sysadmin aus Krefeld" /&gt;',
-        '<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/>' => '&lt;link href="//fonts.googleapis.com/css?family=Open Sans" rel="stylesheet" type="text/css"/&gt;',
+        '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;' => '&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"&gt;',
+        '<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/>' => '&lt;link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"/&gt;',
         '<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>' => '[removed][removed]',
         '<!--[if lt IE 9]><script src="http://moelleken.org/vendor/bower/nwmatcher/src/nwmatcher.js"></script><![endif]-->' => '&lt;!--[if lt IE 9]>[removed][removed]<![endif]--&gt;',
         "Hello, i try to <script>alert('Hack');</script> your site" => "Hello, i try to [removed]alert&#40;'Hack'&#41;;[removed] your site",
@@ -148,7 +151,7 @@ class XssTest extends PHPUnit_Framework_TestCase
 
   public function test_xss_hash()
   {
-    self::assertTrue(preg_match('#^[0-9a-f]{32}$#iS', $this->invokeMethod($this->security, 'xss_hash')) === 1);
+    self::assertTrue(preg_match('#^voku::anti-xss::[0-9a-f]{32}$#iS', $this->invokeMethod($this->security, 'xss_hash')) === 1);
   }
 
   public function testXssClean()
@@ -193,7 +196,6 @@ class XssTest extends PHPUnit_Framework_TestCase
       'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
       'http://www.nowvideo.sx/share.php?id=foobar&title=\'\';with(document)body.appendChild(createElement(\\\'iframe onload =&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\\\';with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//--></SCRIPT>">\'><SCRIPT>with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'</SCRIPT>=&{}' => "http://www.nowvideo.sx/share.php?id=foobar&title='';with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\';with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\";with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\\\";with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//--&gt;\">'>with(document)body.appendChild(createElement(\'iframe alert&#40;1&#41;>\')),body =\'\'=",
       '<div><embed allowscriptaccess=always src=/xss.swf><base href=//l0.cm/</div>' => '<div>&lt;embed allowscriptaccess=always src=/xss.swf&gt;&lt;base href=//l0.cm/</div>', // 2016 | http://mksben.l0.cm/2016/05/xssauditor-bypass-flash-basetag.html
-      'https%3A%2F%2F%252567%252569%252573%252574.github.com%2Fauth%2Fgithub%2Fcallback' => 'https://gist.github.com/auth/github/callback', // 2016 | Internet Explorer 11 on Windows 7 / 8.1 | http://blog.innerht.ml/internet-explorer-has-a-url-problem/
       '<base href="javascript:/a/+alert(1)//">' => '&lt;base href="/a/ alert&#40;1&#41;//"&gt;',
       '<base href=data:/,alert(1)/>' => '&lt;base href=data:/,alert&#40;1&#41;/&gt;',
       '<base href=javascript:/0/><iframe src=,alert(1)></iframe>' => '&lt;base href=/0/&gt;&lt;iframe src=,alert&#40;1&#41;>&lt;/iframe&gt;',
@@ -436,12 +438,10 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       'http://www.amazon.com/s?ie=UTF5&amp;keywords="><script>alert(document. cookie)</script>' => 'http://www.amazon.com/s?ie=UTF5&keywords=">alert&#40;document. cookie&#41;',
       'http://www.amazon.com/gp/digital/rich-media/media-player.html?ie=UTF8& amp;location=javascript:alert(1)&amp;ASIN=B000083JTS' => 'http://www.amazon.com/gp/digital/rich-media/media-player.html?ie=UTF8& amp;location=alert&#40;1&#41;&ASIN=B000083JTS',
       'http://r-images.amazon.com/s7ondemand/brochure/flash_brochure.jsp?comp any=ama1&amp;sku=AtHome7&amp;windowtitle=XSS&lt;/title&gt;&lt;script/s rc=//z.l.to&gt;&lt;/script&gt;&lt;plaintext&gt;' => 'http://r-images.amazon.com/s7ondemand/brochure/flash_brochure.jsp?comp any=ama1&sku=AtHome7&windowtitle=XSS&lt;/title&gt;&lt;plaintext>',
-      "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2" => "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm sorry, the Password Assistance pag e is temporarily unavailable.  Please try again in 1 5%2",
       "http://www.amazon.com/s/ref=amb_link_7189562_72/002-2069697-5560831?ie =UTF8&amp;node=&quot;/&gt;&lt;script&gt;alert('XSS');&lt;/script&gt;&a mp;pct-off=25-&amp;hidden-keywords=athletic|outdoor&amp;pf_rd_m=ATVPDK IKX0DER&amp;pf_rd_s=center-5&amp;pf_r" => "http://www.amazon.com/s/ref=amb_link_7189562_72/002-2069697-5560831?ie =UTF8&node=\"/>alert&#40;'XSS'&#41;;&a mp;pct-off=25-&hidden-keywords=athletic|outdoor&pf_rd_m=ATVPDK IKX0DER&pf_rd_s=center-5&pf_r",
       'https://sellercentral.amazon.com/gp/on-board/workflow/Registration/log in.html?passthrough/&amp;passthrough/account=soa"><script>alert("XSS") </script>&amp;passthrough/superSource=OAR&amp;passthrough/marketplaceI D=ATVPDKI' => 'https://sellercentral.amazon.com/gp/on-board/workflow/Registration/log in.html?passthrough/&passthrough/account=soa">alert&#40;"XSS"&#41; &passthrough/superSource=OAR&passthrough/marketplaceI D=ATVPDKI',
       'http://sellercentral.amazon.com/gp/seller/product-ads/registration.htm l?ld="><script>alert(document.cookie)</script>' => 'http://sellercentral.amazon.com/gp/seller/product-ads/registration.htm l?ld=">alert&#40;&#41;',
       'https://sellercentral.amazon.com/gp/change-password/-"><script>alert(d ocument.cookie)</script>-.html' => 'https://sellercentral.amazon.com/gp/change-password/-">alert&#40;&#41;-.html',
-      'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&amp;ie=UTF8&amp;qid=1285870078&amp;sr=8-3' => 'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&ie=UTF8&qid=1285870078&sr=8-3',
       'http://www.amazon.com/s/ref=sr_a9ps_home/?url=search-alias=aps&amp;tag =amzna9-1-20&amp;field-keywords=-"><script>alert(document.cookie)</scr ipt>' => 'http://www.amazon.com/s/ref=sr_a9ps_home/?url=search-alias=aps&tag =amzna9-1-20&field-keywords=-">alert&#40;&#41;',
       'http://www.amazon.com/s/ref=amb_link_7581132_5/102-9803838-3100108?ie= UTF8&amp;node=&quot;/&gt;&lt;script&gt;alert(&quot;XSS&quot;);&lt;/scr ipt&gt;&amp;keywords=Lips&amp;emi=A19ZEOAOKUUP0Q&amp;pf_rd_m=ATVPDKIKX 0DER&amp;pf_rd_s=left-1&amp;pf_rd_r=1JMP7' => 'http://www.amazon.com/s/ref=amb_link_7581132_5/102-9803838-3100108?ie= UTF8&node="/>alert&#40;"XSS"&#41;;&keywords=Lips&emi=A19ZEOAOKUUP0Q&pf_rd_m=ATVPDKIKX 0DER&pf_rd_s=left-1&pf_rd_r=1JMP7',
       "http://askville.amazon.com/SearchRequests.do?search=\"></script><script >alert('XSS')</script>&amp;start=0&amp;max=10&amp;open=true&amp;closed =true&amp;x=18&amp;y=7" => "http://askville.amazon.com/SearchRequests.do?search=\">alert&#40;'XSS'&#41;&start=0&max=10&open=true&closed =true&x=18&y=7",
@@ -496,7 +496,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       // Spacers
       '<x%09onxxx=1' => '<x	',
       '<x%0Aonxxx=1' => '<x' . "\n",
-      '<x%0Conxxx=1' => '<xonxxx=1',
+      '<x%0Conxxx=1' => '<x',
       '<x%0Donxxx=1' => '<x' . "\r",
       '<x%2Fonxxx=1' => '<x/',
       // Quotes
@@ -616,6 +616,19 @@ textContent>click me!',
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2_clean.svg');
 
     self::assertSame($resultString, UTF8::html_entity_decode($this->security->xss_clean($testString)), 'testing: ' . $testString);
+  }
+
+  public function testUrls()
+  {
+    $testArray = array(
+        "<a href=\"https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2\">test</a>" => "<a href=\"https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2\">test</a>",
+        "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2" => "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm sorry, the Password Assistance pag e is temporarily unavailable.  Please try again in 1 5%2",
+        'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&amp;ie=UTF8&amp;qid=1285870078&amp;sr=8-3' => 'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&ie=UTF8&qid=1285870078&sr=8-3',
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+    }
   }
 
   public function testXmlInjection()

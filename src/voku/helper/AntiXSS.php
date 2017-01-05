@@ -1958,13 +1958,11 @@ final class AntiXSS
     // remove NULL characters (ignored by some browsers)
     $str = UTF8::clean($str, true, true, false);
 
-    $str_backup = $str;
-
     // decode the string
     $str = $this->decode_string($str);
 
-    // and again... removes all non-UTF-8 characters
-    $str = UTF8::clean($str, true, true, false);
+    // backup the string (for later comparision)
+    $str_backup = $str;
 
     // remove all >= 4-Byte chars if needed
     if ($this->_stripe_4byte_chars === true) {
@@ -2026,9 +2024,12 @@ final class AntiXSS
    */
   private function decode_string($str)
   {
-    if (preg_match('/<\w+.*/si', $str, $matches) === 1) {
+    // init
+    $regExForHtmlTags = '/<\w+.*/si';
+
+    if (preg_match($regExForHtmlTags, $str, $matches) === 1) {
       $str = preg_replace_callback(
-          '/<\w+.*/si',
+          $regExForHtmlTags,
           array(
               $this,
               '_decode_entity',
@@ -2102,7 +2103,7 @@ final class AntiXSS
    */
   private function compact_exploded_javascript($str)
   {
-    static $wordsCache;
+    static $WORDS_CACHE;
 
     $words = array(
         'javascript',
@@ -2127,10 +2128,10 @@ final class AntiXSS
 
     foreach ($words as $word) {
 
-      if (!isset($wordsCache[$word])) {
-        $word = $wordsCache[$word] = chunk_split($word, 1, '\s*');
+      if (!isset($WORDS_CACHE[$word])) {
+        $word = $WORDS_CACHE[$word] = chunk_split($word, 1, '\s*');
       } else {
-        $word = $wordsCache[$word];
+        $word = $WORDS_CACHE[$word];
       }
 
       // We only want to do this when it is followed by a non-word character
@@ -2528,14 +2529,27 @@ final class AntiXSS
    */
   private function _decode_entity($match)
   {
+    // init
     $this->xss_hash();
 
+    $match = $match[0];
+
     // protect GET variables in URLs
-    // 901119URL5918AMP18930PROTECT8198
-    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '\\1=\\2', $match[0]);
+    $match = preg_replace('|\?([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_FIRST' . '\\1=\\2', $match);
+    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_NEXT' . '\\1=\\2', $match);
 
     // un-protect URL GET vars
-    return str_replace($this->_xss_hash, '&', $this->_entity_decode($match));
+    return str_replace(
+        array(
+            $this->_xss_hash . '::GET_FIRST',
+            $this->_xss_hash . '::GET_NEXT',
+        ),
+        array(
+            '?',
+            '&'
+        ),
+        $this->_entity_decode($match)
+    );
   }
 
   /**
@@ -2557,7 +2571,7 @@ final class AntiXSS
       }
     }
 
-    return $this->_xss_hash;
+    return 'voku::anti-xss::' . $this->_xss_hash;
   }
 
   /**
