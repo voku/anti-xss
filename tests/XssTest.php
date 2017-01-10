@@ -217,7 +217,7 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<p/oncut=alert`xss`>x' => '<p/>x',
       '<svg/onload=alert(/XSS/)>' => '&lt;svg/&gt;', // FF40 | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
       '<http://onclick%3d1/alert%601%60//' => '<http://', // 2015 | https://twitter.com/brutelogic/status/673098162635202560
-      '<a href="data:　, &lt &NewLine; script &gt alert(1) &lt /script &gt ">CLICK' => '<a >CLICK', // FF45 | 2016 | https://twitter.com/0x6D6172696F/status/716364272889176064
+      '<a href="data:　, &lt &NewLine; script &gt alert(1) &lt /script &gt ">CLICK' => '<a  , &>CLICK', // FF45 | 2016 | https://twitter.com/0x6D6172696F/status/716364272889176064
       'http://www.wolframalpha.com/input/?i=1&n=%22%3E%3Cscript%20src=//3237054390/1%3E' => 'http://www.wolframalpha.com/input/?i=1&n=">', // 2015 | https://twitter.com/brutelogic/status/671740844450426880
       '<svg onload=1?alert(9):0>' => '&lt;svg &gt;', // 2015 | https://twitter.com/brutelogic/status/669852435209416704
       '<style>@KeyFrames x{</style><div style=animation-name:x onanimationstart=alert(1)> <' => '&lt;style&gt;@KeyFrames x{&lt;/style&gt;&lt;div  > <', // Chrome | 2016 | https://twitter.com/0x6D6172696F/status/669183179165720576
@@ -491,6 +491,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x255Cu0061lert(1)\'" src="x" >' => '<img  src="x" >',
+      "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n" => "\n><!-\n<b\n<c d=\"'e>&lt;iframe  src=x&gt;\n<a HREF=\"\">\n", // CodeIgniter 2017-01 - https://github.com/bcit-ci/CodeIgniter/commit/2ab1c1902711c8b0caf5c3e8f2fa825d72f6755d
       // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
       //
       // Spacers

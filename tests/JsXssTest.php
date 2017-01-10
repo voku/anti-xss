@@ -196,14 +196,14 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertSame('<a >', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
 
     // data URI 协议过滤
-    self::assertSame('<a href="data:">', $this->security->xss_clean('<a href="data:">'));
-    self::assertSame('<a href="d a t a : ">', $this->security->xss_clean('<a href="d a t a : ">'));
-    self::assertSame('<a href="data: html/text;">', $this->security->xss_clean('<a href="data: html/text;">'));
-    self::assertSame('<a href="data:html/text;">', $this->security->xss_clean('<a href="data:html/text;">'));
-    self::assertSame('<a href="data:html /text;">', $this->security->xss_clean('<a href="data:html /text;">'));
-    self::assertSame('<a href="data: image/text;">', $this->security->xss_clean('<a href="data: image/text;">'));
-    self::assertSame('<img src="data: aaa/text;">', $this->security->xss_clean('<img src="data: aaa/text;">'));
-    self::assertSame('<img src="data:image/png; base64; ofdkofiodiofl">', $this->security->xss_clean('<img src="data:image/png; base64; ofdkofiodiofl">'));
+    self::assertSame('<a ">', $this->security->xss_clean('<a href="data:">'));
+    self::assertSame('<a  ">', $this->security->xss_clean('<a href="d a t a : ">'));
+    self::assertSame('<a  >', $this->security->xss_clean('<a href="data: html/text;">'));
+    self::assertSame('<a >', $this->security->xss_clean('<a href="data:html/text;">'));
+    self::assertSame('<a >', $this->security->xss_clean('<a href="data:html /text;">'));
+    self::assertSame('<a  >', $this->security->xss_clean('<a href="data: image/text;">'));
+    self::assertSame('<img  >', $this->security->xss_clean('<img src="data: aaa/text;">'));
+    self::assertSame('<img >', $this->security->xss_clean('<img src="data:image/png; base64; ofdkofiodiofl">'));
 
     self::assertSame('<img >', $this->security->xss_clean('<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">'));
 
