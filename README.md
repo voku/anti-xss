@@ -136,3 +136,8 @@ composer install
 ./vendor/bin/phpunit
 ```
 
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/voku/anti-xss/badge.svg?style=beer-square)](https://beerpay.io/voku/anti-xss)  [![Beerpay](https://beerpay.io/voku/anti-xss/make-wish.svg?style=flat-square)](https://beerpay.io/voku/anti-xss?focus=wish)
