@@ -2647,8 +2647,10 @@ final class AntiXSS
   {
     static $HTML_ENTITIES_CACHE;
 
+    /** @noinspection PhpUsageOfSilenceOperatorInspection */
+    // HHVM dons't support "ENT_DISALLOWED" && "ENT_SUBSTITUTE"
     $flags = Bootup::is_php('5.4') ?
-        ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE :
+        ENT_QUOTES | ENT_HTML5 | @ENT_DISALLOWED | @ENT_SUBSTITUTE :
         ENT_QUOTES;
 
     // decode
