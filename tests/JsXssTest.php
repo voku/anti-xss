@@ -165,7 +165,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     // 正常的url
     self::assertSame('<DIV >', $this->security->xss_clean('<DIV STYLE="background: url (ooxx);">'));
 
-    self::assertSame('<IMG SRC=\'msgbox("XSS")\'>', $this->security->xss_clean('<IMG SRC=\'vbscript:msgbox("XSS")\'>'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC=\'vbscript:msgbox("XSS")\'>'));
 
     self::assertSame('<IMG SRC="[code]">', $this->security->xss_clean('<IMG SRC="livescript:[code]">'));
 

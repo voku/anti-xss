@@ -336,7 +336,7 @@ xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
       '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV  alert&#40;\'XSS\'&#41;);">lall</div>',
       '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
       '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}&lt;/STYLE&gt;',
-      '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG SRC=\'msgbox("XSS")\'>',
+      '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG src="">',
       '<IMG SRC="mocha:[code]">' => '<IMG SRC="[code]">',
       '<IMG SRC="livescript:[code]">' => '<IMG SRC="[code]">',
       '<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
@@ -459,9 +459,6 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       "http://www.amazon.com/gp/daily/ref=\"/><script>alert('XSS $4.99 S&amp;H')</script>" => "http://www.amazon.com/gp/daily/ref=\"/>alert&#40;'XSS $4.99 S&H'&#41;",
       'http://bilderdienst.bundestag.de/archives/btgpict/search/_%27-document.write%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/' => "http://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
       'https://bilderdienst.bundestag.de/archives/btgpict/search/_%27-dOcumEnt.wRite%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/' => "https://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
-      '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
-      '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
-      '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
       '<img src=x:alert(alt) onerror=eval(src) alt=0>' => '<img >',
       '<IMG SRC="j a' . chr(0) . 'v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
       '<IMG alt="中文空白" SRC="j a v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG alt="中文空白" src="">',
@@ -552,7 +549,9 @@ textContent>click me!',
 
     if (Bootup::is_php('5.4.0') !== true || defined('HHVM_VERSION')) {
       $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">'                                                                            => '<IMG >',
+          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
+          '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG >',
+          '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG >',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">'                                                      => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
           'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>',
           // https://twitter.com/0x6D6172696F/status/629754114084175872
@@ -562,6 +561,8 @@ textContent>click me!',
     } else {
       $testArray = array(
           '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
+          '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
+          '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
           'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a >⃒⃒\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
           '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
@@ -931,7 +932,7 @@ textContent>click me!',
 
   public function test_naughty_html_plus_evil_attributes()
   {
-    self::assertSame('&lt;svg&lt;img > src="x">', $this->security->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
+    self::assertSame('&lt;svg&lt;img > src="">', $this->security->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html()
@@ -1239,15 +1240,6 @@ textContent>click me!',
             'HTML scheme clearing evasion -- an encoded, embedded newline.',
             array('img'),
         ),
-      // With &#xD; this test would fail, but the entity gets turned into
-      // &amp;#xD;, so it's OK.
-        array(
-            '<img src="jav&#x0D;ascript:alert(0)">',
-            '<img src="">',
-            'script',
-            'HTML scheme clearing evasion -- an encoded, embedded carriage return.',
-            array('img'),
-        ),
         array(
             "<img src=\"\n\n\nj\na\nva\ns\ncript:alert(0)\">",
             '<img src="">',
@@ -1264,14 +1256,14 @@ textContent>click me!',
         ),
         array(
             '<img src="vbscript:msgbox(0)">',
-            '<img src="msgbox(0)">',
+            '<img src="">',
             'vbscript',
             'HTML scheme clearing evasion -- another scheme.',
             array('img'),
         ),
         array(
             '<img src="nosuchscheme:notice(0)">',
-            '<img src="nosuchscheme:notice(0)">',
+            '<img src="">',
             'nosuchscheme',
             'HTML scheme clearing evasion -- unknown scheme.',
             array('img'),

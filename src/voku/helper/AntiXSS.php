@@ -2518,7 +2518,7 @@ final class AntiXSS
 
     // init
     $replacer = $this->_filter_attributes(str_replace(array('<', '>',), '', $match[1]));
-    $pattern = '#' . $search . '=.*(?:(?:alert|prompt|confirm)\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|d\s*a\s*t\s*a\s*:)#si';
+    $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#si';
 
     $matchInner = array();
     preg_match($pattern, $match[1], $matchInner);
