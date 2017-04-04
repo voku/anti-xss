@@ -503,6 +503,8 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<x%0Donxxx=1' => '<x' . "\r",
       '<x%2Fonxxx=1' => '<x/',
       //
+      '<img alt=\'Right click and share me!\' src=% />' => '<img alt=\'Right click and share me!\' />',
+      //
       '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
       '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
       '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
