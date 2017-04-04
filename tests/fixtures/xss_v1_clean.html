@@ -1,52 +1,52 @@
-<!DOCTYPE html>
+&lt;!DOCTYPE html>
 < lang="en">
-<head>
-  <meta charset="UTF-7">
+&lt;head&gt;
+  &lt;meta charset="UTF-7"&gt;
 
-  <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7">
+  &lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"&gt;
 
-  <meta http-equiv="refresh" content="document.vulnerable=true;">
+  &lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;
 
-  <META HTTP-EQUIV="Set-Cookie" Content="document.vulnerable=true">
+  &lt;META HTTP-EQUIV="Set-Cookie" Content="document.vulnerable=true"&gt;
 
-  <BASE HREF="document.vulnerable=true;//">
+  &lt;BASE HREF="document.vulnerable=true;//"&gt;
 
-  <title>XSS</TITLE>document.vulnerable=true;
+  &lt;title&gt;XSS&lt;/TITLE&gt;document.vulnerable=true;
 
-  <!-- style -->
+  &lt;!-- style --&gt;
 
-  <STYLE>@im\port'\ja\vasc\ript:document.vulnerable=true';</STYLE>
+  &lt;STYLE&gt;@im\port'\ja\vasc\ript:document.vulnerable=true';&lt;/STYLE&gt;
 
-  <STYLE TYPE="text/javascript">document.vulnerable=true;</STYLE>
+  &lt;STYLE TYPE="text/javascript"&gt;document.vulnerable=true;&lt;/STYLE&gt;
 
-  <STYLE type="text/css">BODY{background:url("document.vulnerable=true")}</STYLE>
+  &lt;STYLE type="text/css"&gt;BODY{background:url("document.vulnerable=true")}&lt;/STYLE&gt;
 
-  <style type="text/javascript">document.vulnerable=true;</style>
+  &lt;style type="text/javascript"&gt;document.vulnerable=true;&lt;/style&gt;
 
-  <STYLE>.XSS{background-image:url("document.vulnerable=true");}</STYLE>
+  &lt;STYLE&gt;.XSS{background-image:url("document.vulnerable=true");}&lt;/STYLE&gt;
 
-  <!-- script -->
+  &lt;!-- script --&gt;
 
-  <style><!--</style>document.vulnerable=true;//-->
+  &lt;style&gt;&lt;!--&lt;/style&gt;document.vulnerable=true;//--&gt;
 
   
     document.vulnerable=true;
     \";document.vulnerable=true;;//
   
 
-  <!-- -- -->document.vulnerable=true;<!-- -- -->
+  &lt;!-- -- --&gt;document.vulnerable=true;&lt;!-- -- --&gt;
 
-  <![CDATA[<!--]]document.vulnerable=true;//-->
+  &lt;![CDATA[&lt;!--]]document.vulnerable=true;//--&gt;
 
   <document.vulnerable=true;
 
-  <!--[if gte IE 4]>document.vulnerable=true;<![endif]-->
+  &lt;!--[if gte IE 4]>document.vulnerable=true;<![endif]--&gt;
 
   <document.vulnerable=true;//<
 
   [\xC0][\xBC]script>document.vulnerable=true;[\xC0][\xBC]/script>
 
-  ¼script¾document.vulnerable=true;¼/script¾
+  document.vulnerable=true;
 
   document.vulnerable=true;</B>
 
@@ -54,44 +54,48 @@
 
   &document.vulnerable=true;
 
-</head> ADw-SCRIPT AD4-document.vulnerable=true; ADw-/SCRIPT AD4-
-<BODY BACKGROUND="document.vulnerable=true;" document.vulnerable=true;>
+&lt;/head&gt;+ADw-SCRIPT+AD4-document.vulnerable=true;+ADw-/SCRIPT+AD4-
+&lt;BODY BACKGROUND="document.vulnerable=true;" document.vulnerable=true;&gt;
 
-<!-- link -->
+&lt;!-- link --&gt;
 
-<link rel="stylesheet" href="document.vulnerable=true;">
+&lt;link rel="stylesheet" href="document.vulnerable=true;"&gt;
 
-<LINK REL="stylesheet" HREF="document.vulnerable=true;">
+&lt;LINK REL="stylesheet" HREF="document.vulnerable=true;"&gt;
 
-<!-- a -->
+&lt;!-- a --&gt;
 
-exp/*<A >li {list-style-image: url("document.vulnerable=true;");</STYLE><UL><LI>XSS</LI></UL>
+exp/*<A >li {list-style-image: url("document.vulnerable=true;");&lt;/STYLE&gt;&lt;UL><LI>XSS</LI></UL>
 
-<!-- php -->
+&lt;!-- php --&gt;
 
-<? echo('<SCR)';echo('IPT>document.vulnerable=true'); ?>
+&lt;? echo('<SCR)';echo('IPT>document.vulnerable=true'); ?&gt;
 
-<!-- text -->
+&lt;!-- text --&gt;
 
-<p>alert(1)</p>
+<p>alert&#40;1&#41;</p>
 
-<p><img >
+<p><img src="">
 
+&lt;XSS &gt;
 
+&lt;!-- link + text --&gt;
 
-&> >></>
+<p>foo<a href="">link</a></p>
 
-<>< >></>
+<p><a href="">link2</a></p>
 
-<>< >>></>
+<p><a >alert&#40;1&#41;">link3</a></p>
 
-<>< >> >></>
+<p><a >alert&#40;1&#41;">link4 >alert&#40;1&#41;</a></p>
 
-&><  alt="img" /></p>
+&lt;!-- images + text --&gt;
 
-<p><  /></>
+<p><img src="" /></p>
 
-<>< > alt="img3" /></p>
+<p><img src="" /></p>
 
-</body>
-</html>
+<p><img > alt="img3" /></p>
+
+&lt;/body&gt;
+&lt;/html&gt;

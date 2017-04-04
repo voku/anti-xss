@@ -35,7 +35,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<a href="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</a>',
-            '<a >Clickhere</a>',
+            '<a href="[removed]">Clickhere</a>',
         ),
         array(
             '&foo should not include a semicolon',
@@ -71,7 +71,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<div/style=content:url(data:image/svg+xml);visibility:visible onmouseover=alert(1)>x</div>',
-            '<div/[removed] xml);visibility:visible [removed]>x</div>',
+            '<div/[removed] [removed]>x</div>',
         ),
         array(
             '<script>Object.defineProperties(window,{w:{value:{f:function(){return 1}}}});confirm(w.f())</script>',
@@ -163,7 +163,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<math><solve i.e., x=2+2*2-2/2=? href="data:text/html,<script>prompt(1)</script>">X',
-            '&lt;math&gt;&lt;solve i.e., x=2 2*2-2/2=? href="data:text/html,[removed]prompt&#40;1&#41;[removed]">X',
+            '&lt;math&gt;&lt;solve i.e., x=2+2*2-2/2=? href="data:text/html,[removed]prompt&#40;1&#41;[removed]">X',
         ),
         array(
             '<iframe/src="j&Tab;AVASCRIP&NewLine;t:\u0061ler\u0074&#x28;1&#x29;">',
@@ -195,7 +195,7 @@ class LaravelSecurityTest extends PHPUnit_Framework_TestCase
         ),
         array(
             '<script>x=\'con\';s=\'firm\';S=\'(1)\';setTimeout(x+s+S,0);</script>',
-            '[removed]x=\'con\';s=\'firm\';S=\'(1)\';setTimeout(x s S,0);[removed]',
+            '[removed]x=\'con\';s=\'firm\';S=\'(1)\';setTimeout(x+s+S,0);[removed]',
         ),
         array(
             '<img/id="confirm&lpar;1&#x29;"/alt="/"src="/"onerror=eval(id&#x29;>',

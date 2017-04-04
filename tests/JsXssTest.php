@@ -45,14 +45,14 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertSame('<b>abcd</o>', $this->security->xss_clean('<b>abcd</o>'));
     self::assertSame('<b><o>abcd</b></o>', $this->security->xss_clean('<b><o>abcd</b></o>'));
     self::assertSame('<hr>', $this->security->xss_clean('<hr>'));
-    self::assertSame('', $this->security->xss_clean('<xss>'));
-    self::assertSame('', $this->security->xss_clean('<xss o="x">'));
+    self::assertSame('&lt;xss&gt;', $this->security->xss_clean('<xss>'));
+    self::assertSame('&lt;xss o="x"&gt;', $this->security->xss_clean('<xss o="x">'));
     self::assertSame('<a><b>c</b></a>', $this->security->xss_clean('<a><b>c</b></a>'));
     self::assertSame('<a><c>b</c></a>', $this->security->xss_clean('<a><c>b</c></a>'));
 
     // 过滤不是标签的<>
     self::assertSame('<>>', $this->security->xss_clean('<>>'));
-    self::assertSame("'<scri'   'pt>'", $this->security->xss_clean("'<scri' + 'pt>'"));
+    self::assertSame("''", $this->security->xss_clean("'<scri' + 'pt>'"));
     self::assertSame("''", $this->security->xss_clean("'<script' + '>'"));
     self::assertSame('<<a>b>', $this->security->xss_clean('<<a>b>'));
     self::assertSame('<<<a>>b</a><x>', $this->security->xss_clean('<<<a>>b</a><x>'));
@@ -106,11 +106,11 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertSame('>">\'>alert&#40;String.fromCharCode(88,83,83&#41;)', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
 
-    self::assertSame(';!--"=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
+    self::assertSame(';!--"&lt;XSS&gt;=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
 
     self::assertSame('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>'));
 
-    self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\');">'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\');">'));
 
     self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(\'XSS\')>'));
 
@@ -128,15 +128,15 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>'));
 
-    self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC="jav ascript:alert(\'XSS\');">'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav ascript:alert(\'XSS\');">'));
 
-    self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">'));
 
-    self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC="jav\nascript:alert(\'XSS\');">'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav\nascript:alert(\'XSS\');">'));
 
     self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=java\0script:alert(\"XSS\")>'));
 
-    self::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=" &#14;  javascript:alert(\'XSS\');">'));
+    self::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC=" &#14;  javascript:alert(\'XSS\');">'));
 
     self::assertSame('', $this->security->xss_clean('<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'));
 
@@ -148,7 +148,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertSame('&lt;SCRIPT SRC=//ha.ckers.org/.j', $this->security->xss_clean('<SCRIPT SRC=//ha.ckers.org/.j'));
 
-    self::assertSame('<IMG ', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
+    self::assertSame('<IMG src=""', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
 
     self::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html &lt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
 
@@ -171,7 +171,7 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     self::assertSame('<IMG SRC="[code]">', $this->security->xss_clean('<IMG SRC="mocha:[code]">'));
 
-    self::assertSame('<a >', $this->security->xss_clean('<a href="javas/**/cript:alert(\'XSS\');">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="javas/**/cript:alert(\'XSS\');">'));
 
     self::assertSame('<a href="test">', $this->security->xss_clean('<a href="javascript:test">'));
     self::assertSame('<a href="/javascript/a">', $this->security->xss_clean('<a href="/javascript/a">'));
@@ -189,21 +189,21 @@ class JsXssTest extends PHPUnit_Framework_TestCase
     self::assertSame('&lt;!--[if gte IE 4]>alert&#40;\'XSS\'&#41;;<![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
 
     // HTML5新增实体编码 冒号&colon; 换行&NewLine;
-    self::assertSame('<a />', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
-    self::assertSame('<a />', $this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
     self::assertSame("<a href=\"a\nb\">", $this->security->xss_clean('<a href="a&NewLine;b">'));
     self::assertSame('<a href="a&NewLineb">', $this->security->xss_clean('<a href="a&NewLineb">'));
-    self::assertSame('<a >', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
 
     // data URI 协议过滤
-    self::assertSame('<a ">', $this->security->xss_clean('<a href="data:">'));
-    self::assertSame('<a  ">', $this->security->xss_clean('<a href="d a t a : ">'));
-    self::assertSame('<a  >', $this->security->xss_clean('<a href="data: html/text;">'));
-    self::assertSame('<a >', $this->security->xss_clean('<a href="data:html/text;">'));
-    self::assertSame('<a >', $this->security->xss_clean('<a href="data:html /text;">'));
-    self::assertSame('<a  >', $this->security->xss_clean('<a href="data: image/text;">'));
-    self::assertSame('<img  >', $this->security->xss_clean('<img src="data: aaa/text;">'));
-    self::assertSame('<img >', $this->security->xss_clean('<img src="data:image/png; base64; ofdkofiodiofl">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="data:">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="d a t a : ">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="data: html/text;">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="data:html/text;">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="data:html /text;">'));
+    self::assertSame('<a href="">', $this->security->xss_clean('<a href="data: image/text;">'));
+    self::assertSame('<img src="">', $this->security->xss_clean('<img src="data: aaa/text;">'));
+    self::assertSame('<img src="">', $this->security->xss_clean('<img src="data:image/png; base64; ofdkofiodiofl">'));
 
     self::assertSame('<img >', $this->security->xss_clean('<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">'));
 
