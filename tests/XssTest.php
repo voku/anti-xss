@@ -502,6 +502,10 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<x%0Conxxx=1' => '<x',
       '<x%0Donxxx=1' => '<x' . "\r",
       '<x%2Fonxxx=1' => '<x/',
+      //
+      '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
       // Quotes
       '<x 1=\'1\'onxxx=1' => '<x 1=\'1\'',
       '<x 1="1"onxxx=1' => '<x 1="1"',
@@ -549,10 +553,7 @@ textContent>click me!',
 
     if (Bootup::is_php('5.4.0') !== true || defined('HHVM_VERSION')) {
       $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG >',
-          '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG >',
-          '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG >',
-          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">'                                                      => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(alert&#40;\'XSS\'&#41;)">',
           'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>',
           // https://twitter.com/0x6D6172696F/status/629754114084175872
           '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >&lt;/iframe&gt;',
@@ -560,9 +561,6 @@ textContent>click me!',
       );
     } else {
       $testArray = array(
-          '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
-          '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
-          '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
           '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV  url(&#1;alert&#40;\'XSS\'&#41;)">',
           'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a >⃒⃒\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
           '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
