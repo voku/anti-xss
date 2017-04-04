@@ -2647,10 +2647,9 @@ final class AntiXSS
   {
     static $HTML_ENTITIES_CACHE;
 
-    // ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE
     $flags = Bootup::is_php('5.4') ?
         ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE :
-        ENT_QUOTES | ENT_HTML401;
+        ENT_QUOTES;
 
     // decode
     if (strpos($str, $this->_xss_hash) !== false) {
