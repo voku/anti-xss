@@ -2123,8 +2123,8 @@ final class AntiXSS
             '&#x0000A;'          => "\n",
             '&#10;'              => "\n",
             '&tab;'              => "\t",
-            '&#x00009;'          => "\n",
-            '&#9;'               => "\n",
+            '&#x00009;'          => "\t",
+            '&#9;'               => "\t",
         );
 
         $HTML_ENTITIES_CACHE = array_merge(
@@ -2704,7 +2704,7 @@ final class AntiXSS
   private function _sanitize_naughty_javascript($str)
   {
     $str = preg_replace(
-        '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*?)\)#si',
+        '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#siU',
         '\\1\\2&#40;\\3&#41;',
         $str
     );
