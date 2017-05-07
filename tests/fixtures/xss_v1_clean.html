@@ -54,7 +54,7 @@
 
   &document.vulnerable=true;
 
-&lt;/head&gt;+ADw-SCRIPT+AD4-document.vulnerable=true;+ADw-/SCRIPT+AD4-
+&lt;/head&gt;document.vulnerable=true;
 &lt;BODY BACKGROUND="document.vulnerable=true;" document.vulnerable=true;&gt;
 
 &lt;!-- link --&gt;
@@ -65,7 +65,118 @@
 
 &lt;!-- a --&gt;
 
-exp/*<A >li {list-style-image: url("document.vulnerable=true;");&lt;/STYLE&gt;&lt;UL><LI>XSS</LI></UL>
+exp/*<A >XSS</A>
+
+<a href=""></a>
+
+<a >document.vulnerable=true;"></a>
+
+<A ></A>
+
+&lt;!-- layer --&gt;
+
+&lt;LAYER SRC="document.vulnerable=true;"&gt;&lt;/LAYER>
+
+&lt;!-- br --&gt;
+
+<BR SIZE="">
+
+&lt;!-- input --&gt;
+
+&lt;INPUT TYPE="IMAGE" SRC="document.vulnerable=true;"&gt;
+
+&lt;input type="image" dynsrc="document.vulnerable=true;"&gt;
+
+&lt;!-- bgsound --&gt;
+
+&lt;BGSOUND SRC="document.vulnerable=true;"&gt;foo&lt;/BGSOUND&gt;
+
+&lt;bgsound src="document.vulnerable=true;"&gt;&lt;/bgsound>
+
+&lt;!-- frameset --&gt;
+
+&lt;FRAMESET&gt;&lt;FRAME SRC="document.vulnerable=true;">&lt;/FRAMESET&gt;
+
+&lt;!-- images --&gt;
+
+<IMG >
+
+< LOWsrc="">
+
+<IMG DYNsrc="">
+
+<img >
+
+< src="">
+
+<IMG src="">
+
+<img src="">
+
+<IMG src="">
+
+<img src="">
+
+<img src="">
+
+<img src="">
+
+<img >" ">
+
+< dynsrc="">
+
+<IMG src="">
+
+&lt;!-- object --&gt;
+
+&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=document.vulnerable=true>&lt;/OBJECT&gt;
+
+&lt;object classid="clsid:..." codebase="document.vulnerable=true;"&gt;&lt;/object>
+
+&lt;!-- iframe --&gt;
+
+&lt;IFRAME SRC="document.vulnerable=true;"&gt;&lt;/IFRAME>
+
+&lt;iframe src="document.vulnerable=true; "&gt;&lt;/iframe>
+
+&lt;!-- table --&gt;
+
+<TABLE BACKGROUND="document.vulnerable=true;"></TABLE>
+
+<TABLE><TD BACKGROUND="document.vulnerable=true;"></TD></TABLE>
+
+&lt;!-- xml --&gt;
+
+&lt;xml src="document.vulnerable=true;"&gt;&lt;/xml>
+
+&lt;xml id="X"&gt;&lt;a><b>document.vulnerable=true;;</b></a>&lt;/xml&gt;
+
+&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">]]</C></X>&lt;/xml&gt;&lt;SPAN #I C HTML></SPAN>
+
+&lt;XML ID="xss"&gt;&lt;I><B><IMG src=""></B></I>&lt;/XML&gt;&lt;SPAN "#xss" "B" "HTML"></SPAN>
+
+&lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time">&lt;?import namespace="t" implementation="#default#time2">< attributeName="innerHTML" to="XSSdocument.vulnerable=true">
+
+&lt;!-- div --&gt;
+
+<div "b" "html" "#X"></div>
+
+<DIV >
+  <DIV >XSS</DIV>
+  <DIV ></DIV>
+</DIV>
+
+<div >XSS</div>
+
+<div ></div>
+
+<div ></div>
+
+<div ></div>
+
+&lt;!-- list --&gt;
+
+&lt;STYLE&gt;li {list-style-image: url("document.vulnerable=true;");&lt;/STYLE&gt;&lt;UL><LI>XSS</LI></UL>
 
 &lt;!-- php --&gt;
 
