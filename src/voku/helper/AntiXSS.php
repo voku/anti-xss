@@ -2001,7 +2001,7 @@ final class AntiXSS
     if (null === $NEVER_ALLOWED_CACHE['regex']) {
       $NEVER_ALLOWED_CACHE['regex'] = implode('|', self::$_never_allowed_regex);
     }
-    $str = preg_replace('#' . $NEVER_ALLOWED_CACHE['regex'] . '#i', $this->_replacement, $str);
+    $str = preg_replace('#' . $NEVER_ALLOWED_CACHE['regex'] . '#is', $this->_replacement, $str);
 
     return (string)$str;
   }
