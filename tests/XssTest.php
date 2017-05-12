@@ -496,6 +496,9 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x255Cu0061lert(1)\'" src="x" >' => '<img  src="x" >',
+      '<div data-toggle=tooltip data-html=true title=\'<script>alert(1)</script>\'></div>' => '<div data-toggle=tooltip data-html=true title=\'alert&#40;1&#41;\'></div>', // Bypassing CSP strict-dynamic via Bootstrap
+      '<div data-role=popup id=\'--><script>alert(1)</script>\'></div>' => '<div data-role=popup id=\'--&gt;alert&#40;1&#41;\'></div>', // Bypassing sanitizers via jQuery Mobile
+      '<div data-bind="html:\'<script src=&quot;//evil.com&quot;></script>\'"></div>' => '<div data-bind="html:\'\'"></div>', // Bypassing sanitizers via Knockout
       "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n" => "\n><!-\n<b\n<c d=\"'e>&lt;iframe  src=x&gt;\n<a HREF=\"\">\n", // CodeIgniter 2017-01 - https://github.com/bcit-ci/CodeIgniter/commit/2ab1c1902711c8b0caf5c3e8f2fa825d72f6755d
       // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
       //
