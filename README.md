@@ -8,8 +8,7 @@
 [![Reference Status](https://www.versioneye.com/php/voku:anti-xss/reference_badge.svg?style=flat)](https://www.versioneye.com/php/voku:anti-xss/references)
 [![Dependency Status](https://www.versioneye.com/php/voku:anti-xss/dev-master/badge.svg)](https://www.versioneye.com/php/voku:anti-xss/dev-master)
 [![Latest Stable Version](https://poser.pugx.org/voku/anti-xss/v/stable)](https://packagist.org/packages/voku/anti-xss) 
-[![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads)](https://packagist.org/packages/voku/anti-xss) 
-[![Latest Unstable Version](https://poser.pugx.org/voku/anti-xss/v/unstable)](https://packagist.org/packages/voku/anti-xss)
+[![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads)](https://packagist.org/packages/voku/anti-xss)
 [![PHP 7 ready](http://php7ready.timesplinter.ch/voku/anti-xss/badge.svg)](https://travis-ci.org/voku/anti-xss)
 [![License](https://poser.pugx.org/voku/anti-xss/license)](https://packagist.org/packages/voku/anti-xss)
 
