@@ -603,6 +603,18 @@ textContent>click me!',
     self::assertSame('<li >', $this->security->xss_clean($testString));
   }
 
+  public function testHtmlNoXssFile()
+  {
+    $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_no_v1.html');
+    $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_no_v1_clean.html');
+
+    self::assertSame(
+        str_replace(array("\r\n", "\r"), "\n", $resultString),
+        str_replace(array("\r\n", "\r"), "\n", $this->security->xss_clean($testString)),
+        'testing: ' . $testString
+    );
+  }
+
   public function testHtmlXssFile()
   {
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.html');
