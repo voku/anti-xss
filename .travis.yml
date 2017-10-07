@@ -1,3 +1,5 @@
+dist: precise
+
 language: php
 
 sudo: false
@@ -37,6 +39,10 @@ matrix:
     - php: 7.1
       env: extension='true'
     - php: 7.1
+      env: extension='false'    
+    - php: 7.2
+      env: extension='true'
+    - php: 7.2
       env: extension='false'
 
 before_script:
