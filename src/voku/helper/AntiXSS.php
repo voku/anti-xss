@@ -1914,7 +1914,7 @@ final class AntiXSS
     $str = (string)$str;
     $strInt = (int)$str;
     $strFloat = (float)$str;
-    if ($this->stringHasXss($str) === false)
+    if ($this->stringHasXss($str) === false) {
       return $str;
     }
 
