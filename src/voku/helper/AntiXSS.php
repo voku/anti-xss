@@ -2818,7 +2818,7 @@ final class AntiXSS
    *
    * @return bool
    */
-  public function stringHasXss(string $str)
+  public function stringHasXss($str)
   {
     $str = (string)$str;
     $strInt = (int)$str;
