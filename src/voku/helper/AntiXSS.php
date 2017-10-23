@@ -1913,6 +1913,12 @@ final class AntiXSS
   {
     $str = (string)$str;
     if ($this->stringHasXss($str) === false) {
+
+      // no xss found
+      if ($this->xss_found !== true) {
+        $this->xss_found = false;
+      }
+
       return $str;
     }
 
