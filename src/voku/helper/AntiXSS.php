@@ -1912,15 +1912,7 @@ final class AntiXSS
   private function _do($str)
   {
     $str = (string)$str;
-    $strInt = (int)$str;
-    $strFloat = (float)$str;
-    if (
-        !$str
-        ||
-        "$strInt" == $str
-        ||
-        "$strFloat" == $str
-    ) {
+    if ($this->stringHasXss($str) === false) {
 
       // no xss found
       if ($this->xss_found !== true) {
@@ -2823,6 +2815,33 @@ final class AntiXSS
     }
 
     return 'voku::anti-xss::' . $this->_xss_hash;
+  }
+
+  /**
+   * Check if the given string has XSS code.
+   *
+   * @param string $str
+   *
+   * @return bool
+   */
+  public function stringHasXss($str)
+  {
+    $str = (string)$str;
+    $strInt = (int)$str;
+    $strFloat = (float)$str;
+    if (
+        !$str
+        ||
+        "$strInt" == $str
+        ||
+        "$strFloat" == $str
+    ) {
+
+      // no xss found
+      return false;
+    }
+
+    return true;
   }
 
 }

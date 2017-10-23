@@ -179,7 +179,7 @@ class XssTest extends PHPUnit_Framework_TestCase
         <IMG >
         < src="">
         &lt;!-- file:xss --&gt;
-        
+
         &lt;layer SRC="http://absynth.de/x.js"&gt;&lt;/layer>
         &lt;!-- style:xss --&gt;
         &lt;LINK REL="stylesheet" HREF="alert&#40;\'XSS\'&#41;;"&gt;
@@ -526,14 +526,14 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       //
       // Location
       '<svg onload=location=/javas/.source+/cript:/.source+/ale/.source+/rt/.
-source+location.hash[1]+1+location.hash[2]>#()' => '&lt;svg 
+source+location.hash[1]+1+location.hash[2]>#()' => '&lt;svg
 source+location.hash[1]+1+location.hash[2]&gt;#()',
       '<svg id=t:alert(1) name=javascrip onload=location=name+id>' => '&lt;svg id=t:alert&#40;1&#41; name=javascrip &gt;',
       '<javascript onclick=location=tagName+innerHTML+location.hash>:/*click me!
 #*/alert(1)' => '<javascript >:/*click me!
 #*/alert&#40;1&#41;', // javas + cript:"click me! + #"-alert(1)
       '*/"<j"-alert(9)<!-- onclick=location=innerHTML+previousSibling.
-nodeValue+outerHTML>javascript:/*click me' => '*/"<j"-alert&#40;9&#41;&lt;!-- 
+nodeValue+outerHTML>javascript:/*click me' => '*/"<j"-alert&#40;9&#41;&lt;!--
 nodeValue+outerHTML>/*click me',
       '<alert(1)<!-- onclick=location=innerHTML+outerHTML>javascript:1/*click me!
 */</alert(1)<!-- -->' => '&lt;alert&#40;1&#41;&lt;!-- &gt;1/*click me!
@@ -546,7 +546,7 @@ alert&#40;1&#41;',
       'p=<svg id=?p=<svg/onload=alert(1)%2B onload=location=id>' => 'p=&lt;svg id=?p=&lt;svg/ >',
       // Location Self Plus
       'p=%26p=%26lt;svg/onload=alert(1)><j onclick=location%2B=document.body.
-textContent>click me!' => 'p=%26p=%26lt;svg/alert&#40;1&#41;><j 
+textContent>click me!' => 'p=%26p=%26lt;svg/alert&#40;1&#41;><j
 textContent>click me!',
       'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>' => 'p=<j >&p=&lt;svg/&gt;',
 
@@ -726,30 +726,30 @@ textContent>click me!',
         <!DOCTYPE html>
         <html onAttribute="bar">
         <body onload    =load"myFunction()" id="">
-        
+
         <h1 onload="test" >Hello World!</h1>
-        
+
         <script>
         function myFunction() {
             alert("Page is loaded");
         }
         </script>
-        
+
         </body>
         </html>
         ' => '
         &lt;!DOCTYPE html>
         &lt;html &gt;
         &lt;body  id=""&gt;
-        
+
         <h1  >Hello World!</h1>
-        
-        
+
+
         function myFunction() {
             alert&#40;"Page is loaded"&#41;;
         }
-        
-        
+
+
         &lt;/body&gt;
         &lt;/html&gt;
         ',
@@ -1314,6 +1314,462 @@ textContent>click me!',
 
     foreach ($cases as $caseArray) {
       self::assertSame($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
+    }
+  }
+
+  public function testStringHasXss()
+  {
+    // \v (vertical whitespace) isn't working on travis-ci ?
+
+    $testArray = array(
+      '<div BACKGROUND="mocha:alert(\'XSS\')">
+        <!-- image:xss -->
+        <IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
+        <IMG SRC="jav&#x09;ascript:alert(\'XSS\');">
+        <!-- file:xss -->
+        <script SRC="http://absynth.de/x.js"></script>
+        <layer SRC="http://absynth.de/x.js"></layer>
+        <!-- style:xss -->
+        <LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">
+        <DIV STYLE="background-image: url(javascript:alert(\'XSS\')">
+          <div style=background-image:expression(alert(\'XSS\'));">lall</div>
+        </div>
+      </div>' => '<div BACKGROUND="alert&#40;\'XSS\'&#41;">
+        &lt;!-- image:xss --&gt;
+        <IMG >
+        < src="">
+        &lt;!-- file:xss --&gt;
+
+        &lt;layer SRC="http://absynth.de/x.js"&gt;&lt;/layer>
+        &lt;!-- style:xss --&gt;
+        &lt;LINK REL="stylesheet" HREF="alert&#40;\'XSS\'&#41;;"&gt;
+        <DIV >
+          <div >lall</div>
+        </div>
+      </div>',
+      '<img/src=">" onerror=alert(1)>
+      <button/a=">" autofocus onfocus=alert&#40;1&#40;></button>
+      <button a=">" autofocus onfocus=alert&#40;1&#40;>' => '<img/>" >
+      <>" ></>
+      <>" >', // autofocus trick | https://html5sec.org/#7
+      'http://vulnerable.info/poc/poc.php?foo=%3Csvg%3E%3Cscript%3E/%3C1/%3Ealert(document.domain)%3C/script%3E%3C/svg%3E' => 'http://vulnerable.info/poc/poc.php?foo=&lt;svg&gt;/<1/>alert&#40;document.domain&#41;&lt;/svg&gt;',
+      '"><svg><script>/<@/>alert(1337)</script>' => '">&lt;svg&gt;/<@/>alert&#40;1337&#41;', // Bypassing Chrome’s Anti-XSS Filter | 2015: http://vulnerable.info/bypassing-chromes-anti-xss-filter/
+      'Location: https://www.google.com%3a443%2fcse%2ftools%2fcreate_onthefly%3b%3c%2ftextarea%3e%3csvg%2fonload%3dalert%28document%2edomain%29%3e%3b%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f' => 'Location: https://www.google.com:443/cse/tools/create_onthefly;&lt;/textarea&gt;&lt;svg/>;/../../../../../../../../../../../../../../', // Google XSS in IE | 2015: http://blog.bentkowski.info/2015/04/xss-via-host-header-cse.html
+      'Location: http://example.jp:xyz%27onclick%3D%27a%5Cu006c%5Cu0065%5Cu0072t(1)%27/2.php' => 'Location: http://example.jp:xyz\'\'alert&#40;1&#41;\'/2.php',
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D"/></feImage> </svg>' => '&lt;svg :xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to=PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
+      '<a target="_blank" href="data:text/html;BASE64youdummy,PHNjcmlwdD5hbGVydCh3aW5kb3cub3BlbmVyLmRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5pbm5lckhUTUwpPC9zY3JpcHQ+">clickme in firefox</a><a/\'\'\' target="_blank" href=data:text/html;;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuYm9keS5pbm5lckhUTUwpPC9zY3JpcHQ+>firefox11</a>' => '<a target="_blank">clickme in firefox</a><a/\'\'\' target="_blank">firefox11</a>', // data: URI with base64 encoding bypass exploiting Firefox | 2012: https://bugzilla.mozilla.org/show_bug.cgi?id=255107
+      'http://securitee.tk/files/chrome_xss.php?a=<script>void(\'&b=\');alert(1);</script>' => 'http://securitee.tk/files/chrome_xss.php?a=void(\'&b=\');alert&#40;1&#41;;', // Bypassing Chrome’s Anti-XSS filter | 2012: http://blog.securitee.org/?p=37
+      'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
+      'http://www.nowvideo.sx/share.php?id=foobar&title=\'\';with(document)body.appendChild(createElement(\\\'iframe onload =&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\\\';with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//\";with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'//--></SCRIPT>">\'><SCRIPT>with(document)body.appendChild(createElement(\\\'iframe onload=&#97&#108&#101&#114&#116(1)>\\\')),body.innerHTML+=\\\'\\\'</SCRIPT>=&{}' => "http://www.nowvideo.sx/share.php?id=foobar&title='';with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\';with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\";with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//\\\";with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'//--&gt;\">'>with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'=",
+      '<div><embed allowscriptaccess=always src=/xss.swf><base href=//l0.cm/</div>' => '<div>&lt;embed allowscriptaccess=always src=/xss.swf&gt;&lt;base href=//l0.cm/</div>', // 2016 | http://mksben.l0.cm/2016/05/xssauditor-bypass-flash-basetag.html
+      '<base href="javascript:/a/+alert(1)//">' => '&lt;base href="/a/+alert&#40;1&#41;//"&gt;',
+      '<base href=data:/,alert(1)/>' => '&lt;base href=data:/,alert&#40;1&#41;/&gt;',
+      '<base href=javascript:/0/><iframe src=,alert(1)></iframe>' => '&lt;base href=/0/&gt;&lt;iframe src=,alert&#40;1&#41;>&lt;/iframe&gt;',
+      '<!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>' => '&lt;!DOCTYPE foo [&lt;!ENTITY xxe46471 SYSTEM "http://4mr71zbvk10c5vd1k074izfvbmhnxdi7xw.burpcollaborator.net"> ]>', // XXE injection | 2015: http://blog.portswigger.net/2015/05/burp-suite-now-reports-blind-xxe.html
+      "<iframe name=alert(1) src=\"//somedomain?x=',__defineSetter__('x',eval),x=name,'\"></iframe>" => '&lt;iframe name=alert&#40;1&#41; src="//somedomain?x=\',__defineSetter__(\'x\',eval),x=name,\'"&gt;&lt;/iframe>',
+      "<script>x = '',__defineSetter__('x',alert),x=1,'';</script>" => 'x = \'\',__defineSetter__(\'x\',alert),x=1,\'\';', // NoScript XSS filter bypass | 2015: http://blog.portswigger.net/2015/07/noscript-xss-filter-bypass.html
+      '"><a href="JAVASCRIPT:%E2%80%A8alert`1`">CLICKME 😃' => '"><a href=" alert`1`">CLICKME 😃', // NoScript XSS filter bypass | 2015: https://twitter.com/0x6D6172696F/status/623081477002014720?s=02
+      '<div id="b" style="font-family:a/**/ression(alert(1))(\'\\\')exp\\\')">aa</div>' => '<div id="b" >aa</div>', // IE | 2014: http://wooyun.org/bugs/wooyun-2014-068564
+      '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
+      '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
+      '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>' => 'alert&#40;1&#41;', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17
+      '<svg </onload ="1> (_=alert,_(1337)) "">' => '&lt;svg &lt;/> (_=alert,_(1337)) "">',
+      '<svg><script>/<@/>alert(1)</script>' => '&lt;svg&gt;/<@/>alert&#40;1&#41;',
+      '<svg/onload=alert`xss`>' => '&lt;svg/&gt;', // FF34+, Edge | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
+      '<script/src=//⑭.₨>' => '', // Edge | 2016 | https://twitter.com/0x6D6172696F/status/784356959063535616
+      '<p/onclick=alert(/xss/)>a' => '<p/>a',
+      '<iframe/src=//14.rs>' => '&lt;iframe/src=//14.rs&gt;',
+      '<iframe src="https:http://example.com ">' => '&lt;iframe src="https:http://example.com "&gt;',
+      '<p/oncut=alert`xss`>x' => '<p/>x',
+      '<svg/onload=alert(/XSS/)>' => '&lt;svg/&gt;', // FF40 | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
+      '<http://onclick%3d1/alert%601%60//' => '<http://', // 2015 | https://twitter.com/brutelogic/status/673098162635202560
+      '<a href="data:　, &lt &NewLine; script &gt alert(1) &lt /script &gt ">CLICK' => '<a href="">CLICK', // FF45 | 2016 | https://twitter.com/0x6D6172696F/status/716364272889176064
+      'http://www.wolframalpha.com/input/?i=1&n=%22%3E%3Cscript%20src=//3237054390/1%3E' => 'http://www.wolframalpha.com/input/?i=1&n=">', // 2015 | https://twitter.com/brutelogic/status/671740844450426880
+      '<svg onload=1?alert(9):0>' => '&lt;svg &gt;', // 2015 | https://twitter.com/brutelogic/status/669852435209416704
+      '<style>@KeyFrames x{</style><div style=animation-name:x onanimationstart=alert(1)> <' => '&lt;style&gt;@KeyFrames x{&lt;/style&gt;&lt;div  > <', // Chrome | 2016 | https://twitter.com/0x6D6172696F/status/669183179165720576
+      '<style>:target{zoom:2;transition:1s}</style><div id=x ontransitionend=alert(1)>' => '&lt;style&gt;:target{zoom:2;transition:1s}&lt;/style&gt;&lt;div id=x >', // https://twitter.com/cgvwzq/status/684316889221337088
+      '<brute contenteditable onblur=alert(1)>lose focus!<brute onclick=alert(1)>click this!<brute oncopy=alert(1)>copy this!<brute oncontextmenu=alert(1)>right click this!<brute oncut=alert(1)>copy this!<brute ondblclick=alert(1)>double click this!<brute ondrag=alert(1)>drag this!<brute contenteditable onfocus=alert(1)>focus this!<brute contenteditable oninput=alert(1)>input here!<brute contenteditable onkeydown=alert(1)>press any key!<brute contenteditable onkeypress=alert(1)>press any key!<brute contenteditable onkeyup=alert(1)>press any key!<brute onmousedown=alert(1)>click this!<brute onmousemove=alert(1)>hover this!<brute onmouseout=alert(1)>hover this!<brute onmouseover=alert(1)>hover this!<brute onmouseup=alert(1)>click this!<brute contenteditable onpaste=alert(1)>paste here!<brute style=font-size:500px onmouseover=alert(1)>0000' => '<brute contenteditable >lose focus!<brute >click this!<brute >copy this!<brute >right click this!<brute >copy this!<brute >double click this!<brute >drag this!<brute contenteditable >focus this!<brute contenteditable >input here!<brute contenteditable >press any key!<brute contenteditable >press any key!<brute contenteditable >press any key!<brute >click this!<brute >hover this!<brute >hover this!<brute >hover this!<brute >click this!<brute contenteditable >paste here!<brute  >0000', // 2015 | http://brutelogic.com.br/blog/agnostic-event-handlers/
+      '<x contextmenu=">"><acronym%0Cx=""%09oncut+=%09d=document;a=d.createElement("a");a.href="img/hacked1.jpg";a.download="open.me";d.body.appendChild(a);a.click()+><option><input type=submit>' => '<x contextmenu=">"><acronymx=""   d=document;a=d.createElement("a");a.href="img/hacked1.jpg";a.download="open.me";d.body(a);a.click()+><option>&lt;input type=submit&gt;', // http://brutelogic.com.br/webgun/
+      '<h1/onclick=alert(1)>a' => '<h1/>a',
+      '")}alert(/XSS/);{//' => '")}alert&#40;/XSS/&#41;;{//',
+      '<svgonload=alert(1)>' => '&lt;svgalert&#40;1&#41;&gt;', // 2015: https://twitter.com/ret2libc/status/635923671681507328
+      "<style onload='execScript(/**/\"\x61lert&#40 1&#41\",\"j\x61vascript\");'>" => '&lt;style  1)","javascript");\'&gt;', // IE | 2015: https://twitter.com/soaj1664ashar/status/635040931289370624
+      '<​script>alert `1`</script>' => '&lt; script&gt;alert `1`',
+      '<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>' => '&lt;form id="test"&gt;&lt;/form>&lt;button  &gt;X&lt;/button&gt;',
+      '<input onfocus=write(1) autofocus>' => '&lt;input  autofocus&gt;',
+      '<input onblur=write(1) autofocus><input autofocus>' => '&lt;input  autofocus&gt;&lt;input autofocus>',
+      '<video poster=javascript:alert(1)//></video>' => '< /></>',
+      '<Video> <source onerror = "javascript: alert (XSS)">' => '&lt;Video&gt; <  >',
+      '<body onscroll=alert(1)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>' => '&lt;body &gt;&lt;br><br><br><br><br><br>...<br><br><br><br>&lt;input autofocus&gt;',
+      '<form id=test onforminput=alert(1)><input></form><button form=test onformchange=alert(2)>X</button>' => '&lt;form id=test &gt;&lt;input>&lt;/form&gt;&lt;button  >X&lt;/button&gt;',
+      '<video><source onerror="alert(1)">' => '&lt;video&gt;&lt; >',
+      '<video onerror="alert(1)"><source></source></video>' => '< ><></></>',
+      '<form><button formaction="javascript:alert(1)">X</button>' => '&lt;form&gt;&lt;button >X&lt;/button&gt;',
+      '<body oninput=alert(1)><input autofocus>' => '&lt;body &gt;&lt;input autofocus>',
+      '<math href="javascript:alert(1)">CLICKME</math>' => '&lt;math href="alert&#40;1&#41;"&gt;CLICKME&lt;/math&gt;',
+      '<math> <!-- up to FF 13 --> <maction actiontype="statusline#http://google.com" xlink:href="javascript:alert(2)">CLICKME</maction>  <!-- FF 14+ --> <maction actiontype="statusline" xlink:href="javascript:alert(3)">CLICKME<mtext>http://http://google.com</mtext></maction> </math>' => '&lt;math&gt; &lt;!-- up to FF 13 --&gt; <maction actiontype="statusline#http://google.com" ="alert&#40;3&#41;">CLICKME<mtext>http://http://google.com</mtext></maction> &lt;/math&gt;',
+      '<​img[a][b]src=x[d]onerror[c]=[e]"alert(1)">' => '< img[a][b]src=x[d][e]"alert&#40;1&#41;">',
+      '<a href="[a]java[b]script[c]:alert(1)">XXX</a>' => '<a href="">XXX</a>',
+      '<form action="" method="post"> <input name="username" value="admin" /> <input name="password" type="password" value="secret" /> <input name="injected" value="injected" dirname="password" /> <input type="submit"> </form>' => '&lt;form action="" method="post"&gt; &lt;input name="username" value="admin" /&gt; &lt;input name="password" type="password" value="secret" /&gt; &lt;input name="injected" value="injected" dirname="password" /&gt; &lt;input type="submit"&gt; &lt;/form&gt;',
+      '<link rel="import" href="test.svg" />' => '&lt;link rel="import" href="test.svg" /&gt;',
+      '<iframe srcdoc="&lt;img src&equals;x:x onerror&equals;alert&lpar;1&rpar;&gt;" />' => '&lt;iframe srcdoc="&lt;img >" />',
+      '<picture><source srcset="x"><img onerror="alert(1)"></picture>' => '<picture>&lt;source srcset="x"&gt;&lt;img ></>',
+      '<picture><img srcset="x" onerror="alert(1)"></picture>' => '<picture><img srcset="x" ></picture>',
+      '<img srcset=",,,,,x" onerror="alert(1)">' => '<img srcset=",,,,,x" >',
+      '<table background="javascript:alert(1)"></table>' => '<table background="alert&#40;1&#41;"></table>',
+      '<comment><img src="</comment><img src=x onerror=alert(1)//">' => '&lt;comment&gt;< >< >',
+      '<![><img src="]><img src=x onerror=alert(1)//">' => '<![>< >< >', // up to Opera 11.52, FF 3.6.28
+      '<svg><![CDATA[><image xlink:href="]]><img src=xx:x onerror=alert(2)//"></svg>' => '&lt;svg&gt;&lt;![CDATA[><image ><img ></>', // IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+
+      '<img src onerror /" \'"= alt=alert(1)//">' => '<img >',
+      '?x=<img+src=x+onerror=`ö`-alert(1)>' => '?x=<img+>', // Chrome 2016/07
+      '<audio src=data:;base64,//MUxHNtYWxsZXN0LW1wMy1ieS1AcWFi//MUxCc+Ij4vPlw+PHN2Zy9vbmxvYWQ9//MUxGFsZXJ0KCdAcWFiJyk7cWFiYW5k//MUxA oncanplay=XSS' => '&lt;audio ',
+      '<meta http-equiv=x-ua-compatible content=ie=8>1<comment onresize=alert(1) contenteditable>1' => '&lt;meta http-equiv=x-ua-compatible content=ie=8&gt;1<comment  contenteditable>1', // IE11
+      '<?xml version="1.0" encoding="utf-8" ?><x:script
+xmlns:x="http://www.w3.org/1999/xhtml ">alert(1&#00000041;' => '&lt;?xml version="1.0" encoding="utf-8" ?&gt;<x:script
+xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
+      '<%/%=%&#62<&#112/&#111&#110&#114&#101&#115&#105&#122&#101=&#97&#108&#101&#114&#116(1)//>' => '<%/%=%><p/>',
+      '<style><img src="</style><img src=x onerror=alert(1)//">' => '&lt;style&gt;&lt; >< >',
+      '<head><base href="javascript://"/></head><body><a href="/. /,alert(1)//#">XXX</a></body>' => '&lt;head&gt;&lt;base href="//"/>&lt;/head&gt;&lt;body><a href="">XXX</a>&lt;/body&gt;',
+      '<SCRIPT FOR=document EVENT=onreadystatechange>alert(1)</SCRIPT>' => 'alert&#40;1&#41;',
+      '<OBJECT CLASSID="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83"><PARAM NAME="DataURL" VALUE="javascript:alert(1)"></OBJECT>' => '&lt;OBJECT CLASSID="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83"&gt;&lt;PARAM NAME="DataURL" VALUE="alert&#40;1&#41;">&lt;/OBJECT&gt;',
+      '<object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="></object>' => '&lt;object data=PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="&gt;&lt;/object>',
+      '<embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="></embed>' => '&lt;embed src=PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="&gt;&lt;/embed>',
+      '<b <script>alert(1)//</script>0</script></b>' => '<b alert&#40;1&#41;//0</b>',
+      '<// style=x:expression\28write(1)\29>' => '<// >', // IE7
+      '<style>*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}</style>' => '&lt;style&gt;*{x:ｅｘｐｒｅｓｓｉｏｎ(write(1))}&lt;/style&gt;', // IE6
+      '<div style="background:url(test5.svg)">PRESS ENTER</div>' => '<div >PRESS ENTER</div>', // Up to Opera 12.x
+      '<?xml-stylesheet type="text/css"?><root style="x:expression(write(1))"/>' => '&lt;?xml-stylesheet type="text/css"?&gt;<root />', // IE7
+      '<?xml-stylesheet type="text/css" href="data:,*%7bx:expression(write(2));%7d"?>' => '&lt;?xml-stylesheet type="text/css" href="data:,*{x:write(2));}"?&gt;', // IE8 -> IE10
+      '<x xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load" ev:handler="javascript:alert(1)//#x"/>' => '<x xmlns:ev="http://www.w3.org/2001/xml-events" "load" "alert&#40;1&#41;//#x"/>',
+      '<iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"></iframe>' => '&lt;iframe sandbox="allow-same-origin allow-forms allow-scripts" src="http://example.org/"&gt;&lt;/iframe>',
+      '<!-- `<img/src=xx:xx onerror=alert(1)//--!>' => '&lt;!-- `<img/>',
+      '<title onpropertychange=alert(1)></title><title title=></title>' => '&lt;title &gt;&lt;/title>&lt;title title=&gt;&lt;/title>',
+      '<​iframe src="data:text/html,&lt;iframe src=\'data:text/html,%26lt;iframe onload=alert(1)&gt;\'&gt;"></iframe>' => '&lt; iframe src="data:text/html,&lt;iframe src=\'data:text/html,&lt;iframe &gt;\'>">&lt;/iframe&gt;',
+      '<!--<img src="--><​img src=x onerror=alert(1)//">' => '&lt;!--<img src="">',
+      '<​frameset onload=alert(1)>' => '&lt; frameset &gt;',
+      '<​body oninput=alert(1)><​input autofocus>' => '&lt; body &gt;&lt; input autofocus>',
+      '<​video poster=javascript:alert(1)//></video>' => '&lt; video poster=alert&#40;1&#41;//&gt;&lt;/video>',
+      '<a style="-o-link:\'javascript:alert(1)\';-o-link-source:current">X</a>' => '<a >X</a>',
+      '<a href="applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>' => '<a href="//com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>',
+      '<a onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
+      '<a onmouseover=alert(document.cookie)>xxs</a>' => '<a >xxs</a>',
+      '<a onerror="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
+      '<a onerror=`alert(document.cookie)`>xxs</a>' => '<a >xxs</a>',
+      '<a href=http://foo.bar STYLE=xss:expression(alert("XSS"))>xxs style</a>' => '<a >xxs style</a>',
+      '<SCRIPT>alert(\'XSS\');</SCRIPT>' => 'alert&#40;\'XSS\'&#41;;',
+      '\'\';!--"<XSS>=&{()}' => '\'\';!--"&lt;XSS&gt;=',
+      '<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>' => '',
+      '<IMG SRC="javascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC=javascript:alert(\'XSS\')>' => '<IMG >',
+      '<IMG SRC=JaVaScRiPt:alert(\'XSS\')>' => '<IMG >',
+      '<IMG SRC=javascript:alert(&quot;XSS&quot;)>' => '<IMG >',
+      '<IMG SRC=`javascript:alert("RSnake says, \'XSS\'")`>' => '<IMG >',
+      '<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>' => '<IMG >',
+      'SRC=&#10<IMG 6;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>' => 'SRC=&#10<IMG >',
+      '<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>' => '<IMG >',
+      '<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>' => '<IMG >',
+      '<IMG SRC="jav  ascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="jav&#x0A;ascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC=" &#14;  javascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG%0aSRC%0a=%0a"%0aj%0aa%0av%0aa%0as%0ac%0ar%0ai%0ap%0at%0a:%0aa%0al%0ae%0ar%0at%0a(%0a\'%0aX%0aS%0aS%0a\'%0a)%0a"%0a>' => "<IMG\nSRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n\"\n>",
+      '<IMG SRC=java%00script:alert(\"XSS\")>' => '<IMG >',
+      '<SCR%00IPT>alert(\"XSS\")</SCR%00IPT>' => 'alert&#40;\"XSS\"&#41;',
+      '<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '',
+      '<SCRIPT SRC=http://ha.ckers.org/xss.js?<B>' => '',
+      '<IMG SRC="javascript:alert(\'XSS\')"' => '<IMG src=""',
+      '<SCRIPT>a=/XSS/' => 'a=/XSS/',
+      '\";alert(\'XSS\');//' => '\";alert&#40;\'XSS\'&#41;;//',
+      '<INPUT TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">' => '&lt;INPUT TYPE="IMAGE" SRC="alert&#40;\'XSS\'&#41;;"&gt;',
+      '<BODY BACKGROUND="javascript:alert(\'XSS\')">' => '&lt;BODY BACKGROUND="alert&#40;\'XSS\'&#41;"&gt;',
+      '<BODY ONLOAD=alert(\'XSS\')>' => '&lt;BODY &gt;',
+      '<IMG DYNSRC="javascript:alert(\'XSS\')">' => '<IMG DYNsrc="">',
+      '<IMG LOWSRC="javascript:alert(\'XSS\')">' => '<IMG LOWsrc="">',
+      '<BGSOUND SRC="javascript:alert(\'XSS\');">' => '<IMG >',
+      '<BR SIZE="&{alert(\'XSS\')}">' => '',
+      '<DIV STYLE="width:' . "\n" . 'expression(alert(\'XSS\'));">' => '<DIV >',
+      '<LAYER SRC="http://ha.ckers.org/scriptlet.html"></LAYER>' => '&lt;LAYER SRC="http://ha.ckers.org/scriptlet.html"&gt;&lt;/LAYER>',
+      '<LINK REL="stylesheet" HREF="javascript:alert(\'XSS\');">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
+      '<LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css">' => '&lt;LINK REL="stylesheet" HREF="http://ha.ckers.org/xss.css"&gt;',
+      '<link rel=stylesheet href=data:,*%7bx:expression(write(1))%7d' => '&lt;link rel=stylesheet href=data:,*{x:write(1))}',
+      '<STYLE>@import\'http://ha.ckers.org/xss.css\';</STYLE>' => '&lt;STYLE&gt;@import\'http://ha.ckers.org/xss.css\';&lt;/STYLE&gt;',
+      '<style>p[foo=bar{}*{-o-link:\'javascript:alert(1)\'}{}*{-o-link-source:current}*{background:red}]{background:green};</style>' => '&lt;style&gt;p[foo=bar{}*{-o-link:\'alert&#40;1&#41;\'}{}*{-o-link-source:current}*{background:red}]{background:green};&lt;/style&gt;',
+      '<DIV STYLE="width: expression(alert(\'XSS\'));">lall</div>' => '<DIV >lall</div>',
+      '<DIV STYLE=\'width: expression(alert("XSS"));\'>lall</div>' => '<DIV >lall</div>',
+      '<DIV STYLE="width: expression(alert(\'XSS\'));" title="lall" STYLE=\'width: expression(alert("XSS"));\'>lall</div>' => '<DIV  title="lall" >lall</div>',
+      '<META HTTP-EQUIV="Link" Content="<http://ha.ckers.org/xss.css>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;http://ha.ckers.org/xss.css>; REL=stylesheet">',
+      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</STYLE>' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}&lt;/STYLE&gt;',
+      '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG src="">',
+      '<IMG SRC="mocha:[code]">' => '<IMG SRC="[code]">',
+      '<IMG SRC="livescript:[code]">' => '<IMG SRC="[code]">',
+      '<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
+      '<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K"&gt;',
+      '<META HTTP-EQUIV="Link" Content="<javascript:alert(\'XSS\')>; REL=stylesheet">' => '&lt;META HTTP-EQUIV="Link" Content="&lt;alert&#40;\'XSS\'&#41;>; REL=stylesheet">',
+      '<META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=javascript:alert(\'XSS\');">' => '&lt;META HTTP-EQUIV="refresh" CONTENT="0; URL=http://;URL=alert&#40;\'XSS\'&#41;;"&gt;',
+      '<a><a><p></a></p><meta property="the:property" content="No results for;url=hxxp://www.maliciousxss.com" HTTP-EQUIV="refresh" blah=" (Page 1)" />foobar</a>' => '<a><a><p></a></p>&lt;meta property="the:property" content="No results for;url=hxxp://www.maliciousxss.com" HTTP-EQUIV="refresh" blah=" (Page 1)" /&gt;foobar</a>',
+      '<IFRAME SRC="javascript:alert(\'XSS\');"></IFRAME>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
+      '<FRAMESET><FRAME SRC="javascript:alert(\'XSS\');"></FRAMESET>' => '&lt;FRAMESET&gt;&lt;FRAME SRC="alert&#40;\'XSS\'&#41;;">&lt;/FRAMESET&gt;',
+      '<TABLE BACKGROUND="javascript:alert(\'XSS\')">' => '<TABLE BACKGROUND="alert&#40;\'XSS\'&#41;">',
+      '<DIV STYLE="background-image: url(javascript:alert(\'XSS\'))">' => '<DIV >',
+      '<DIV STYLE="width: expression(alert(\'XSS\'));">' => '<DIV >',
+      '<STYLE>@im\port\'\ja\vasc\ript:alert("XSS")\';</STYLE>' => '&lt;STYLE&gt;@im\port\'\ja\vasc\ript:alert&#40;"XSS"&#41;\';&lt;/STYLE&gt;',
+      '<IMG STYLE="xss:expr/*XSS*/ession(alert(\'XSS\'))">' => '<IMG >',
+      '<XSS STYLE="xss:expression(alert(\'XSS\'))">' => '&lt;XSS &gt;',
+      'exp/*<XSS STYLE=\'no\xss:noxss("*//*");' => 'exp/*&lt;XSS ',
+      '<STYLE TYPE="text/javascript">alert(\'XSS\');</STYLE>' => '&lt;STYLE TYPE="text/javascript"&gt;alert&#40;\'XSS\'&#41;;&lt;/STYLE&gt;',
+      '<STYLE>.XSS{background-image:url("javascript:alert(\'XSS\')");}</STYLE><A CLASS=XSS></A>' => '&lt;STYLE TYPE="text/javascript"&gt;alert&#40;\'XSS\'&#41;;&lt;/STYLE&gt;',
+      '<STYLE type="text/css">BODY{background:url("javascript:alert(\'XSS\')")}</STYLE>' => '&lt;STYLE type="text/css"&gt;BODY{background:url("alert&#40;\'XSS\'&#41;")}&lt;/STYLE&gt;',
+      '<BASE HREF="javascript:alert(\'XSS\');//">' => '&lt;BASE HREF="alert&#40;\'XSS\'&#41;;//"&gt;',
+      '<object allowscriptaccess="always" data="test.swf"></object>' => '&lt;object allowscriptaccess="always" data="test.swf"&gt;&lt;/object>',
+      '<OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"></OBJECT>' => '&lt;OBJECT TYPE="text/x-scriptlet" DATA="http://ha.ckers.org/scriptlet.html"&gt;&lt;/OBJECT>',
+      '<OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389><param name=url value=javascript:alert(\'XSS\')></OBJECT>' => '&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=alert&#40;\'XSS\'&#41;>&lt;/OBJECT&gt;',
+      'getURL("javascript:alert(\'XSS\')")' => 'getURL("alert&#40;\'XSS\'&#41;")',
+      '<EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
+org/xss.swf" AllowScriptAccess="always"></EMBED>' => '&lt;EMBED SRC="http://ha.ckers.Using an EMBED tag you can embed a Flash movie that contains XSS. Click here for a demo. If you add the attributes allowScriptAccess="never" and allownetworking="internal" it can mitigate this risk (thank you to Jonathan Vanasco for the info).:
+org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
+      '<EMBED SRC="data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI+YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==" type="image/svg+xml" AllowScriptAccess="always"></EMBED>' => '&lt;EMBED SRC=PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI+YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==" type="image/svg+xml" AllowScriptAccess="always"&gt;&lt;/EMBED>',
+      '<!--<value><![CDATA[<XML ID=I><X><C><![CDATA[<IMG SRC="javas<![CDATA[cript:alert(\'XSS\');">' => '&lt;!--<value>&lt;![CDATA[&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">',
+      '<XML SRC="http://ha.ckers.org/xsstest.xml" ID=I></XML>' => '&lt;XML SRC="http://ha.ckers.org/xsstest.xml" ID=I&gt;&lt;/XML>',
+      '<XML ID="xss"><I><B><IMG SRC="javas<!-- -->cript:alert(\'XSS\')"></B></I></XML>' => '&lt;XML ID="xss"&gt;&lt;I><B><IMG src=""></B></I>&lt;/XML&gt;',
+      '<HTML><BODY>' => '&lt;HTML&gt;&lt;BODY>',
+      '<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>' => '',
+      '<!--#exec cmd="/bin/echo \'<SCRIPT SRC\'"--><!--#exec cmd="/bin/echo \'=http://ha.ckers.org/xss.js></SCRIPT>\'"-->' => '&lt;!--#exec cmd="/bin/echo \'\'"--&gt;',
+      '<? echo(\'<SCR)\';' => '&lt;? echo(\'<SCR)\';',
+      '<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(\'XSS\')&lt;/SCRIPT&gt;">' => '&lt;META HTTP-EQUIV="Set-Cookie" Content="alert&#40;\'XSS\'&#41;"&gt;',
+      '<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(\'XSS\');+ADw-/SCRIPT+AD4-' => '&lt;HEAD&gt;&lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> &lt;/HEAD&gt;alert&#40;\'XSS\'&#41;;', // UTF-7
+      '<img src="http://test.de/[0xE0]">
+      ... foo ...
+      ... bar ...
+      " onerror="alert(\'XSS\')"
+      <div>lall</div>' => '<img src="http://test.de/[0xE0]">
+      ... foo ...
+      ... bar ...
+      " "alert&#40;\'XSS\'&#41;"
+      <div>lall</div>',
+      '<script>+-+-1-+-+alert(1)</script>' => '+-+-1-+-+alert&#40;1&#41;',
+      '<body/onload=&lt;!--&gt;&#10alert(1)>' => "&lt;body/\nalert&#40;1&#41;&gt;",
+      '<a aa aaa aaaa aaaaa aaaaaa aaaaaaa aaaaaaaa  aaaaaaaaa aaaaaaaaaa  href=j&#97v&#97script&#x3A;&#97lert(1)>ClickMe' => '<a >ClickMe',
+      '<--`<img/src=` onerror=alert(1)> --!>' => '<--`<img/> --!>',
+      '<script/src=&#100&#97&#116&#97:text/&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x000070&#x074,&#x0061;&#x06c;&#x0065;&#x00000072;&#x00074;(1)></script> ​' => '  ',
+      '<meta charset="x-imap4-modified-utf7">&<script&S1&TS&1>alert&A7&(1)&R&UA;&&<&A9&11/script&X&>' => '&lt;meta charset="x-imap4-modified-utf7"&gt;&alert&A7&(1)&R&UA;&&<&A9&11/script&X&>',
+      '<div id=”3″><meta charset=”x-imap4-modified-utf7″>&<script&S1&TS&1>alert&A7&(1)&R&UA;&&<&A9&11/script&X&>//[“‘`–>]]>]</div>' => '<div id=”3″>&lt;meta charset=”x-imap4-modified-utf7″&gt;&alert&A7&(1)&R&UA;&&<&A9&11/script&X&>//[“‘`–>]]>]</div>',
+      '<SCRIPT a=">" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT a=">" \'\' SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '" \'\' SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT "a=\'>\'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '\'" SRC="http://ha.ckers.org/xss.js">',
+      '<SCRIPT a=`>` SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '` SRC="http://ha.ckers.org/xss.js">',
+      'onAttribute="bar"' => '"bar"',
+      "onAttribute=\"<script>alert('bar')</script>\"" => "\"alert&#40;'bar'&#41;\"",
+      "<BGSOUND SRC=\"javascript:alert('XSS');\">" => "&lt;BGSOUND SRC=\"alert&#40;'XSS'&#41;;\"&gt;", // BGSOUND
+      "<BR SIZE=\"&{alert('XSS')}\">" => '<BR SIZE="">', // & JavaScript includes
+      "<LINK REL=\"stylesheet\" HREF=\"javascript:alert('XSS');\">" => "&lt;LINK REL=\"stylesheet\" HREF=\"alert&#40;'XSS'&#41;;\"&gt;", // STYLE sheet
+      '<STYLE>BODY{-moz-binding:url("http://ha.ckers.org/xssmoz.xml#xss")}</styel>foo' => '&lt;STYLE&gt;BODY{:url("http://ha.ckers.org/xssmoz.xml#xss")}</styel>foo', // Remote style sheet
+      "<STYLE>@im\\port'\\jaasc\ript:alert(\"XSS\")';</STYLE>" => "&lt;STYLE&gt;@im\port'\jaasc\ript:alert&#40;\"XSS\"&#41;';&lt;/STYLE&gt;", // STYLE tags with broken up JavaScript for XSS
+      "<XSS STYLE=\"xss:expression_r(alert('XSS'))\">" => '&lt;XSS &gt;', // Anonymous HTML with STYLE attribute
+      '<XSS STYLE="behavior: url(xss.htc);">' => '&lt;XSS &gt;', // Local htc file
+      '¼script¾alert(¢XSS¢)¼/script¾' => 'alert&#40;¢XSS¢&#41;', // US-ASCII encoding
+      "<IMG defang_SRC=javascript:alert\(&quot;XSS&quot;\)>" => '<IMG >', // IMG
+      '<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>' => '<IMG >',
+      '<img src =x onerror=confirm(document.cookie);>' => '<img >',
+      "<IMG SRC=\"jav ascript:alert('XSS');\">" => '<IMG src="">',
+      "<IMG SRC=\"jav&#x09;ascript:alert('XSS');\">" => '<IMG src="">',
+      "<IMG SRC=\"jav&#x09;ascript:alert&rpar;'XSS'&rpar;;\">" => '<IMG src="">',
+      "<IMG SRC=\"jav&#x0A;ascript:alert('XSS');\">" => '<IMG src="">',
+      '<test lall=&amp;amp;#039;jav&#x0A;ascript:alert(\\&amp;amp;#039;XSS\\&amp;amp;#039;);&amp;amp;#039;>' => "<test lall='alert&#40;\'XSS\'&#41;;'>",
+      "<IMG SRC\n=\n\"\nj\na\nv\n&#x0A;a\ns\nc\nr\ni\np\nt\n:\na\nl\ne\nr\nt\n(\n'\nX\nS\nS\n'\n)\n;\">" => "<IMG SRC\n=\n\"\n\nalert\n&#40;\n'\nX\nS\nS\n'\n&#41;\n;\">",
+      "<IMG SRC=java�script:alert('XSS')>" => '<IMG >',
+      "<DIV STYLE=\"background-image:\\0075\\0072\\006C\\0028'\\006a\\0061\\0076\\0061\\0073\\0063\\0072\\0069\\0070\\0074\\003a\\0061\\006c\\0065\\0072\\0074\\0028\\0027\\0058\\0053\\0053\\0027\\0029'\\0029\">" => '<DIV >',
+      "<STYLE>.XSS{background-image:url(\"javascript:alert('XSS')\");}</STYLE><A CLASS=XSS></A>" => "&lt;STYLE&gt;.XSS{background-image:url(\"alert&#40;'XSS'&#41;\");}&lt;/STYLE&gt;&lt;A ></A>",
+      "<META HTTP-EQUIV=\"refresh\" CONTENT=\"0;url=javascript:alert('XSS');\">" => "&lt;META HTTP-EQUIV=\"refresh\" CONTENT=\"alert&#40;'XSS'&#41;;\"&gt;", // META
+      "<IFRAME SRC=\"javascript:alert('XSS');\"></IFRAME>" => "&lt;IFRAME SRC=\"alert&#40;'XSS'&#41;;\"&gt;&lt;/IFRAME>", // IFRAME
+      '<applet code=A21 width=256 height=256 archive="toir.jar"></applet>' => '&lt;applet code=A21 width=256 height=256 archive="toir.jar"&gt;&lt;/applet>',
+      '<applet code="javascript:confirm(document.cookie);">' => '&lt;applet code="confirm&#40;&#41;;"&gt;',
+      '<script Language="JavaScript" event="FSCommand (command, args)" for="theMovie">...</script>' => '...', // <script>
+      '<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://ha.ckers.org/xss.js"></SCRIPT>' => '("<SCRI");PT SRC="http://ha.ckers.org/xss.js">', // XSS using HTML quote encapsulation
+      '<SCR�IPT>alert("XSS")</SCR�IPT>' => 'alert&#40;"XSS"&#41;',
+      "Би шил идэй чадна,<STYLE>li {list-style-image: url(\"javascript:alert('XSS')\");}</STYLE><UL><LI>我能吞下玻璃而不傷身體</br>" => "Би шил идэй чадна,&lt;STYLE&gt;li {list-style-image: url(\"alert&#40;'XSS'&#41;\");}&lt;/STYLE&gt;&lt;UL><LI>我能吞下玻璃而不傷身體</br>",
+      "';alert(String.fromCharCode(88,83,83))//';alert(String.fromCharCode(88,83,83))//\"\; alert(String.fromCharCode(88,83,83))//\"\;alert(String.fromCharCode(88,83,83))//--></SCRIPT>\">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>" => "';alert&#40;String.fromCharCode(88,83,83&#41;)//';alert&#40;String.fromCharCode(88,83,83&#41;)//\"\\; alert&#40;String.fromCharCode(88,83,83&#41;)//\"\\;alert&#40;String.fromCharCode(88,83,83&#41;)//--&gt;\">'>alert&#40;String.fromCharCode(88,83,83&#41;)",
+      'म काँच खान सक्छू र मलाई केहि नी हुन्‍न् <IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>।' => 'म काँच खान सक्छू र मलाई केहि नी हुन्‍न् <IMG >।',
+      "https://[host]/testing?foo=bar&tab=<script>alert('foobar')</script>" => "https://[host]/testing?foo=bar&tab=alert&#40;'foobar'&#41;",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_qty=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_qty='\">alert&#40;'ImmuniWeb'&#41;;", // XSS to attack "pfSense" - https://www.htbridge.com/advisory/HTB23251
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_protocolflags=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_protocolflags='\">alert&#40;'ImmuniWeb'&#41;;",
+      'https://[host]/diag_logs_filter.php?filterlogentries_submit=1&filterlogentries_s ourceport=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.php?filterlogentries_submit=1&filterlogentries_s ourceport='\">alert&#40;'ImmuniWeb'&#41;;",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_destinationport=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_destinationport='\">alert&#40;'ImmuniWeb'&#41;;",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_destinationipaddress=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3 E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_destinationipaddress='\">alert&#40;'ImmuniWeb'&#41;;&lt;/script%3 E",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_sourceport=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_sourceport='\">alert&#40;'ImmuniWeb'&#41;;",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_sourceipaddress=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_sourceipaddress='\">alert&#40;'ImmuniWeb'&#41;;",
+      'https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_time=%27%22%3E%3Cscript%3Ealert%28%27ImmuniWeb%27%29;%3C/script%3E' => "https://[host]/diag_logs_filter.phpfilterlogentries_submit=1&filterlogentries_time='\">alert&#40;'ImmuniWeb'&#41;;",
+      "http://www.amazon.com/review/R3FSGZJ3NBYZM/?id=brute'-alert('XSSPOSED' )-'logic" => "http://www.amazon.com/review/R3FSGZJ3NBYZM/?id=brute'-alert&#40;'XSSPOSED' &#41;-'logic", // XSS from amazon -> https://www.xssposed.org/search/?search=amazon.com&type=host&
+      "User-Agent: </script><svg/onload=alert('xssposed')>" => 'User-Agent: &lt;svg/&gt;',
+      "https://www.amazon.com/gp/aw/ya/181-1583093-7256013/\"></form><script>a lert('Lohit Tummalapenta')</script>" => "https://www.amazon.com/gp/aw/ya/181-1583093-7256013/\">&lt;/form&gt;alert&#40;'Lohit Tummalapenta'&#41;",
+      "https://aws.amazon.com/amis?ami_provider_id=4&amp;architecture='\"--></ style></script><script>alert(0x015E00)</script>&amp;selection=ami_prov ider_id+architecture" => "https://aws.amazon.com/amis?ami_provider_id=4&architecture='\"--&gt;&lt;/ style&gt;alert&#40;0x015E00&#41;&selection=ami_prov ider_id+architecture",
+      'pipe=ssrProductAds&amp;step=2&amp;userName=1211&amp;replyTo=test%40xssed.com&amp;subjectEscape=&amp;subject=Unable+to+re gister+for+Product+Ads&amp;emailMessageEscape=&amp;emailMessage=&amp;displayName=%27%22%3E%3Ciframe+src%3Dhttp:% 2F%2Fxssed.com%3E&amp;companyURL=&amp;address1=&amp;address2=&amp;city=&amp;state=&amp;zipCode=&amp;country=United+States&amp;ccCard holderName=&amp;ccIssuer=V&amp;addCreditCardNumber=&amp;ccExpMonth=10&amp;ccExpYear=2010&amp;businessAddressCheck=useBus inessAddress&amp;billingAddress1=&amp;billingAddress2=&amp;billingCity=&amp;billingState=&amp;billingZipCode=&amp;billingCou ntry=United+States&amp;Continue=&amp;_pi_legalName=121&amp;_pi_tokenID=A1F3841M9ZHMMV&amp;_pi_pipe=ssrProductAds&amp;_pi _email=kf%40xssed.com&amp;_pi_step=1&amp;_pi_areaCode=112&amp;_pi_phone1=121&amp;_pi_userName=1211&amp;_pi_ext=211221212 1&amp;_pi_phone2=1221' => "pipe=ssrProductAds&step=2&userName=1211&replyTo=test@xssed.com&subjectEscape=&subject=Unable+to+re gister+for+Product+Ads&emailMessageEscape=&emailMessage=&displayName='\">&lt;iframe+src=http:% 2F/xssed.com&gt;&companyURL=&address1=&address2=&city=&state=&zipCode=&country=United+States&ccCard holderName=&ccIssuer=V&addCreditCardNumber=&ccExpMonth=10&ccExpYear=2010&businessAddressCheck=useBus inessAddress&billingAddress1=&billingAddress2=&billingCity=&billingState=&billingZipCode=&billingCou ntry=United+States&Continue=&_pi_legalName=121&_pi_tokenID=A1F3841M9ZHMMV&_pi_pipe=ssrProductAds&_pi _email=kf@xssed.com&_pi_step=1&_pi_areaCode=112&_pi_phone1=121&_pi_userName=1211&_pi_ext=211221212 1&_pi_phone2=1221",
+      'http://www.amazon.com/s?ie=UTF5&amp;keywords="><script>alert(document. cookie)</script>' => 'http://www.amazon.com/s?ie=UTF5&keywords=">alert&#40;document. cookie&#41;',
+      'http://www.amazon.com/gp/digital/rich-media/media-player.html?ie=UTF8& amp;location=javascript:alert(1)&amp;ASIN=B000083JTS' => 'http://www.amazon.com/gp/digital/rich-media/media-player.html?ie=UTF8& amp;location=alert&#40;1&#41;&ASIN=B000083JTS',
+      'http://r-images.amazon.com/s7ondemand/brochure/flash_brochure.jsp?comp any=ama1&amp;sku=AtHome7&amp;windowtitle=XSS&lt;/title&gt;&lt;script/s rc=//z.l.to&gt;&lt;/script&gt;&lt;plaintext&gt;' => 'http://r-images.amazon.com/s7ondemand/brochure/flash_brochure.jsp?comp any=ama1&sku=AtHome7&windowtitle=XSS&lt;/title&gt;&lt;plaintext>',
+      "http://www.amazon.com/s/ref=amb_link_7189562_72/002-2069697-5560831?ie =UTF8&amp;node=&quot;/&gt;&lt;script&gt;alert('XSS');&lt;/script&gt;&a mp;pct-off=25-&amp;hidden-keywords=athletic|outdoor&amp;pf_rd_m=ATVPDK IKX0DER&amp;pf_rd_s=center-5&amp;pf_r" => "http://www.amazon.com/s/ref=amb_link_7189562_72/002-2069697-5560831?ie =UTF8&node=\"/>alert&#40;'XSS'&#41;;&a mp;pct-off=25-&hidden-keywords=athletic|outdoor&pf_rd_m=ATVPDK IKX0DER&pf_rd_s=center-5&pf_r",
+      'https://sellercentral.amazon.com/gp/on-board/workflow/Registration/log in.html?passthrough/&amp;passthrough/account=soa"><script>alert("XSS") </script>&amp;passthrough/superSource=OAR&amp;passthrough/marketplaceI D=ATVPDKI' => 'https://sellercentral.amazon.com/gp/on-board/workflow/Registration/log in.html?passthrough/&passthrough/account=soa">alert&#40;"XSS"&#41; &passthrough/superSource=OAR&passthrough/marketplaceI D=ATVPDKI',
+      'http://sellercentral.amazon.com/gp/seller/product-ads/registration.htm l?ld="><script>alert(document.cookie)</script>' => 'http://sellercentral.amazon.com/gp/seller/product-ads/registration.htm l?ld=">alert&#40;&#41;',
+      'https://sellercentral.amazon.com/gp/change-password/-"><script>alert(d ocument.cookie)</script>-.html' => 'https://sellercentral.amazon.com/gp/change-password/-">alert&#40;&#41;-.html',
+      'http://www.amazon.com/s/ref=sr_a9ps_home/?url=search-alias=aps&amp;tag =amzna9-1-20&amp;field-keywords=-"><script>alert(document.cookie)</scr ipt>' => 'http://www.amazon.com/s/ref=sr_a9ps_home/?url=search-alias=aps&tag =amzna9-1-20&field-keywords=-">alert&#40;&#41;',
+      'http://www.amazon.com/s/ref=amb_link_7581132_5/102-9803838-3100108?ie= UTF8&amp;node=&quot;/&gt;&lt;script&gt;alert(&quot;XSS&quot;);&lt;/scr ipt&gt;&amp;keywords=Lips&amp;emi=A19ZEOAOKUUP0Q&amp;pf_rd_m=ATVPDKIKX 0DER&amp;pf_rd_s=left-1&amp;pf_rd_r=1JMP7' => 'http://www.amazon.com/s/ref=amb_link_7581132_5/102-9803838-3100108?ie= UTF8&node="/>alert&#40;"XSS"&#41;;&keywords=Lips&emi=A19ZEOAOKUUP0Q&pf_rd_m=ATVPDKIKX 0DER&pf_rd_s=left-1&pf_rd_r=1JMP7',
+      "http://askville.amazon.com/SearchRequests.do?search=\"></script><script >alert('XSS')</script>&amp;start=0&amp;max=10&amp;open=true&amp;closed =true&amp;x=18&amp;y=7" => "http://askville.amazon.com/SearchRequests.do?search=\">alert&#40;'XSS'&#41;&start=0&max=10&open=true&closed =true&x=18&y=7",
+      'https://sellercentral.amazon.com/gp/seller/registration/login.html?ie= UTF8&amp;email=&amp;errors=<script src=http://ha.ckers.org/xss.js?/>&amp;userName=&amp;tokenID=AO9UIQIH15 TE' => 'https://sellercentral.amazon.com/gp/seller/registration/login.html?ie= UTF8&email=&errors=&userName=&tokenID=AO9UIQIH15 TE',
+      'https://sellercentral.amazon.com/gp/seller/registration/login.html?ie= UTF8&amp;email=<script src=http://ha.ckers.org/xss.js?/>&amp;userName=&amp;tokenID=AO9UIQIH15 TE' => 'https://sellercentral.amazon.com/gp/seller/registration/login.html?ie= UTF8&email=&userName=&tokenID=AO9UIQIH15 TE',
+      'address-daytime-phone=&amp;address-daytime-phone-areacode=%24Q%24%2F%3E&amp;address-daytime-phone-ext=&amp;pipel ine-return-directly=1&amp;pipeline-return-handler=fx-pay-pages%2Fmanage-pay-pages%2F&amp;pipeline-return-han dler-type=post&amp;pipeline-return-html=fx%2Fhelp%2Fgetting-started.html&amp;pipeline-type=payee&amp;register-bi lling-address-id=jgmhpujplj&amp;register-credit-card-id=A1V46DGTZUE15I&amp;register-enter-checking-info=no&amp;r egister-epay-registration-status-check=no&amp;register-nickname=pg5of16&amp;register-payment-program=tipping &amp;input-address-daytime-phone-areacode=%22%2F%3E%3Cscript+src%3Dhttp%3A%2F%2Fha.ckers.org%2Fxss.js%3F %2F%3E&amp;input-address-daytime-phone=&amp;input-address-daytime-phone-ext=&amp;input-register-nickname=xss&amp;inp ut-register-enter-checking-info=no&amp;x=0&amp;y=0' => 'address-daytime-phone=&address-daytime-phone-areacode=$Q$/>&address-daytime-phone-ext=&pipel ine-return-directly=1&pipeline-return-handler=fx-pay-pages/manage-pay-pages/&pipeline-return-han dler-type=post&pipeline-return-html=fx/help/getting-started.html&pipeline-type=payee&register-bi lling-address-id=jgmhpujplj&register-credit-card-id=A1V46DGTZUE15I&register-enter-checking-info=no&r egister-epay-registration-status-check=no&register-nickname=pg5of16&register-payment-program=tipping &input-address-daytime-phone-areacode="/>&input-address-daytime-phone=&input-address-daytime-phone-ext=&input-register-nickname=xss&inp ut-register-enter-checking-info=no&x=0&y=0',
+      'c=A2H6YBKBHMURHR&amp;t=1&amp;o=4&amp;process_form=1&amp;email_address=%22%2F%3E%3Cscript+src%3Dhttp%3A%2F%2Fha.ckers .org%2Fxss.js%3F%2F%3E&amp;password=&amp;x=0&amp;y=0' => 'c=A2H6YBKBHMURHR&t=1&o=4&process_form=1&email_address="/>&password=&x=0&y=0',
+      "https://affiliate-program.amazon.com/gp/associates/help/glossary/'>\">< SCRIPT/SRC=http://kusomiso.com/xss.js></SCRIPT>" => "https://affiliate-program.amazon.com/gp/associates/help/glossary/'>\">&lt; SCRIPT/SRC=http://kusomiso.com/xss.js&gt;",
+      "https://affiliate-program.amazon.com/gp/associates/help/main.html/'>\"> <SCRIPT/SRC=http://kusomiso.com/xss.js></SCRIPT>" => "https://affiliate-program.amazon.com/gp/associates/help/main.html/'>\"> ",
+      "http://www.amazon.com/gp/daily/ref=\"/><script>alert('XSS $4.99 S&amp;H')</script>" => "http://www.amazon.com/gp/daily/ref=\"/>alert&#40;'XSS $4.99 S&H'&#41;",
+      'http://bilderdienst.bundestag.de/archives/btgpict/search/_%27-document.write%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/' => "http://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
+      'https://bilderdienst.bundestag.de/archives/btgpict/search/_%27-dOcumEnt.wRite%28String.fromCharCode%2860,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62%29%29-%27/' => "https://bilderdienst.bundestag.de/archives/btgpict/search/_'-(String.fromCharCode(60,105,109,103,32,115,114,99,61,34,104,116,116,112,58,47,47,98,108,111,103,46,102,100,105,107,46,111,114,103,47,50,48,49,51,45,48,54,47,51,56,56,57,50,49,56,55,46,106,112,103,34,32,115,116,121,108,101,61,34,112,97,100,100,105,110,103,58,32,50,53,48,112,120,32,51,51,48,112,120,59,10,112,111,115,105,116,105,111,110,58,32,97,98,115,111,108,117,116,101,59,10,122,45,105,110,100,101,120,58,32,49,48,59,34,62))-'/",
+      '<img src=x:alert(alt) onerror=eval(src) alt=0>' => '<img >',
+      '<IMG SRC="j a' . chr(0) . 'v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG alt="中文空白" SRC="j a v a ' . "\xe2\x82\xa1"  . ' ｓ c ｒ' . "\xf0\x90\x8c\xbc" . 'ｉ ｐ t:alert(\'XSS\');">' => '<IMG alt="中文空白" src="">',
+      '<script>prompt(1)</script>' => 'prompt&#40;1&#41;',
+      '<script>confirm(1)</script>' => 'confirm&#40;1&#41;',
+      '<script>var fn=window[490837..toString(1<<5)];fn(atob(\'YWxlcnQoMSk=\'));</script>' => 'var fn=window[490837..toString(1<<5)];fn(atob(\'YWxlcnQoMSk=\'));',
+      '<script>var fn=window[String.fromCharCode(101,118,97,108)];fn(atob(\'YWxlcnQoMSk=\'));</script>' => 'var fn=window[String.fromCharCode(101,118,97,108)];fn(atob(\'YWxlcnQoMSk=\'));',
+      '<script>var fn=window[atob(\'ZXZhbA==\')];fn(atob(\'YWxlcnQoMSk=\'));</script>' => 'var fn=window[atob(\'ZXZhbA==\')];fn(atob(\'YWxlcnQoMSk=\'));',
+      '<script>window[490837..toString(1<<5)](atob(\'YWxlcnQoMSk=\'))</script>' => 'window[490837..toString(1<<5)](atob(\'YWxlcnQoMSk=\'))',
+      '<script>this[490837..toString(1<<5)](atob(\'YWxlcnQoMSk=\'))</script>' => 'this[490837..toString(1<<5)](atob(\'YWxlcnQoMSk=\'))',
+      '<script>this[(+{}+[])[+!![]]+(![]+[])[!+[]+!![]]+([][+[]]+[])[!+[]+!![]+!![]]+(!![]+[])[+!![]]+(!![]+[])[+[]]](++[[]][+[]])</script>' => 'this[(+{}+[])[+!![]]+(![]+[])[!+[]+!![]]+([][+[]]+[])[!+[]+!![]+!![]]+(!![]+[])[+!![]]+(!![]+[])[+[]]](++[[]][+[]])',
+      '<script>this[(+{}+[])[-~[]]+(![]+[])[-~-~[]]+([][+[]]+[])[-~-~-~[]]+(!![]+[])[-~[]]+(!![]+[])[+[]]]((-~[]+[]))</script>' => 'this[(+{}+[])[-~[]]+(![]+[])[-~-~[]]+([][+[]]+[])[-~-~-~[]]+(!![]+[])[-~[]]+(!![]+[])[+[]]]((-~[]+[]))',
+      '<script>\'str1ng\'.replace(/1/,alert)</script>' => '\'str1ng\'.replace(/1/,alert)',
+      '<script>\'bbbalert(1)cccc\'.replace(/a\w{4}\(\d\)/,eval)</script>' => '\'bbbalert&#40;1&#41;cccc\'.replace(/a\w{4}\(\d\)/,eval)',
+      '<script>\'a1l2e3r4t6\'.replace(/(.).(.).(.).(.).(.)/, function(match,$1,$2,$3,$4,$5) { this[$1+$2+$3+$4+$5](1); })</script>' => '\'a1l2e3r4t6\'.replace(/(.).(.).(.).(.).(.)/, function(match,$1,$2,$3,$4,$5) { this[$1+$2+$3+$4+$5](1); })',
+      '<script>eval(\'\\\\u\'+\'0061\'+\'lert(1)\')</script>' => 'eval&#40;\'\\\\u\'+\'0061\'+\'lert(1&#41;\')',
+      '<script>throw~delete~typeof~prompt(1)</script>' => 'throw~delete~typeof~prompt&#40;1&#41;',
+      '<script>delete[a=alert]/prompt a(1)</script>' => 'delete[a=alert]/prompt a(1)',
+      '<script>delete[a=this[atob(\'YWxlcnQ=\')]]/prompt a(1)</script>' => 'delete[a=this[atob(\'YWxlcnQ=\')]]/prompt a(1)',
+      '<script>(()=>{return this})().alert(1)</script>' => '(()=>{return this})().alert&#40;1&#41;',
+      '<script>new function(){new.target.constructor(\'alert(1)\')();}</script>' => 'new function(){new.target.constructor(\'alert&#40;1&#41;\')();}',
+      '<script>Reflect.construct(function(){new.target.constructor(\'alert(1)\')()},[])</script>' => 'Reflect.construct(function(){new.target.constructor(\'alert&#40;1&#41;\')()},[])',
+      '<link/rel=prefetch&#10import href=data:q;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg>' => "&lt;link/rel=prefetch\nimport href=PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg&gt;",
+      '<link rel="import" href="data:x,<script>alert(1)</script>' => '&lt;link rel="import" href="data:x,alert&#40;1&#41;',
+      '<script>Array.from`1${alert}3${window}2`</script>' => 'Array.from`1${alert}3${window}2`',
+      '<script>!{x(){alert(1)}}.x()</script>' => '!{x(){alert&#40;1&#41;}}.x()',
+      '<script>Array.from`${eval}alert\`1\``</script>' => 'Array.from`${eval}alert\`1\``',
+      '<script>Array.from([1],alert)</script>' => 'Array.from([1],alert)',
+      '<script>Promise.reject("1").then(null,alert)</script>' => 'Promise.reject("1").then(null,alert)',
+      '<svg </onload ="1> (_=alert,_(1)) "">' => '&lt;svg &lt;/> (_=alert,_(1)) "">',
+      '<img onerror="location=\'javascript:=lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
+      '<img onerror="location=\'javascript:\x255Cu0061lert(1)\'" src="x" >' => '<img  src="x" >',
+      '<div data-toggle=tooltip data-html=true title=\'<script>alert(1)</script>\'></div>' => '<div data-toggle=tooltip data-html=true title=\'alert&#40;1&#41;\'></div>', // Bypassing CSP strict-dynamic via Bootstrap
+      '<div data-role=popup id=\'--><script>alert(1)</script>\'></div>' => '<div data-role=popup id=\'--&gt;alert&#40;1&#41;\'></div>', // Bypassing sanitizers via jQuery Mobile
+      '<div data-bind="html:\'<script src=&quot;//evil.com&quot;></script>\'"></div>' => '<div data-bind="html:\'\'"></div>', // Bypassing sanitizers via Knockout
+      "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n" => "\n><!-\n<b\n<c d=\"'e>&lt;iframe  src=x&gt;\n<a HREF=\"\">\n", // CodeIgniter 2017-01 - https://github.com/bcit-ci/CodeIgniter/commit/2ab1c1902711c8b0caf5c3e8f2fa825d72f6755d
+      // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
+      //
+      // Spacers
+      '<x%09onxxx=1' => '<x ',
+      '<x%0Aonxxx=1' => '<x' . "\n",
+      '<x%0Conxxx=1' => '<x',
+      '<x%0Donxxx=1' => '<x' . "\r",
+      '<x%2Fonxxx=1' => '<x/',
+      //
+      '<img alt=\'Right click and share me!\' src=% />' => '<img alt=\'Right click and share me!\' />',
+      //
+      '<IMG SRC="jav&#x0D;ascript:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG src="">',
+      '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
+      // Quotes
+      '<x 1=\'1\'onxxx=1' => '<x 1=\'1\'',
+      '<x 1="1"onxxx=1' => '<x 1="1"',
+      // Mimetism
+      '<x </onxxx=1 (closing tag)' => '<x </ (closing tag)',
+      '<http://onxxx%3D1/ (URL)' => '<http:// (URL)',
+      // Combo
+      '<x%2F1=">%22OnClick%3D1' => '<x/1=">"1',
+      // Location Based Payloads
+      //
+      // Location
+      '<svg onload=location=/javas/.source+/cript:/.source+/ale/.source+/rt/.
+source+location.hash[1]+1+location.hash[2]>#()' => '&lt;svg
+source+location.hash[1]+1+location.hash[2]&gt;#()',
+      '<svg id=t:alert(1) name=javascrip onload=location=name+id>' => '&lt;svg id=t:alert&#40;1&#41; name=javascrip &gt;',
+      '<javascript onclick=location=tagName+innerHTML+location.hash>:/*click me!
+#*/alert(1)' => '<javascript >:/*click me!
+#*/alert&#40;1&#41;', // javas + cript:"click me! + #"-alert(1)
+      '*/"<j"-alert(9)<!-- onclick=location=innerHTML+previousSibling.
+nodeValue+outerHTML>javascript:/*click me' => '*/"<j"-alert&#40;9&#41;&lt;!--
+nodeValue+outerHTML>/*click me',
+      '<alert(1)<!-- onclick=location=innerHTML+outerHTML>javascript:1/*click me!
+*/</alert(1)<!-- -->' => '&lt;alert&#40;1&#41;&lt;!-- &gt;1/*click me!
+*/&lt;/alert&#40;1&#41;&lt;!-- --&gt;',
+      '<javas onclick=location=tagName+innerHTML+URL>cript:"-\'click me!</javas>#\'-
+alert(1)' => '<javas >cript:"-\'click me!</javas>#\'-
+alert&#40;1&#41;',
+      // Location Self
+      'p=<j onclick=location=textContent>?p=%26lt;svg/onload=alert(1)>' => 'p=<j >?p=&lt;svg/&gt;',
+      'p=<svg id=?p=<svg/onload=alert(1)%2B onload=location=id>' => 'p=&lt;svg id=?p=&lt;svg/ >',
+      // Location Self Plus
+      'p=%26p=%26lt;svg/onload=alert(1)><j onclick=location%2B=document.body.
+textContent>click me!' => 'p=%26p=%26lt;svg/alert&#40;1&#41;><j
+textContent>click me!',
+      'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>' => 'p=<j >&p=&lt;svg/&gt;',
+
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertTrue($this->security->stringHasXss($before), 'testing: ' . $before);
+    }
+
+    // test for php < OR > 5.3
+
+    if (Bootup::is_php('5.4.0') !== true || defined('HHVM_VERSION')) {
+      $testArray = array(
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV >',
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a href="\'script src=//Ð.pw/script\'">CLICK</a>',
+          // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >&lt;/iframe&gt;',
+          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a href="">CLICK</a>',
+      );
+    } else {
+      $testArray = array(
+          '<DIV STYLE="background-image: url(&#1;javascript:alert(\'XSS\'))">' => '<DIV >',
+          'If you like entities... <a href="javascript&colon;&apos;<script src=/&sol;&ETH;.pw&nvgt;</script&nvgt;&apos;">CLICK</a>' => 'If you like entities... <a >⃒⃒\'">CLICK</a>', // https://twitter.com/0x6D6172696F/status/629754114084175872
+          '<iframe srcdoc="<svg onload=alert(1)&nvgt;"></iframe>' => '&lt;iframe srcdoc="&lt;svg >⃒">&lt;/iframe&gt;',
+          '<a href="javascript:&apos;<svg onload&equals;alert&lpar;1&rpar;&nvgt;&apos;">CLICK</a>' => '<a >⃒\'">CLICK</a>',
+      );
+    }
+
+    for ($i = 0; $i < 2; $i++) { // keep this loop, for quick performance tests
+      foreach ($testArray as $before => $after) {
+        self::assertTrue($this->security->stringHasXss($before), 'testing: ' . $before);
+      }
+    }
+  }
+
+  public function testStringHasNotXss()
+  {
+    $testArray = array(
+      '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>' => '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>',
+      '<a href="http://suckup.de/about" target="_blank">About</a>' => '<a href="http://suckup.de/about" target="_blank">About</a>',
+      "<a href='http://suckup.de/about' target='_blank'>About</a>" => "<a href='http://suckup.de/about' target='_blank'>About</a>",
+      '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>' => '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>',
+      '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>' => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
+      'eval is evil and xss is bad, but this is only a string : onerror ...' => 'eval is evil and xss is bad, but this is only a string : onerror ...',
+      '<a href="https://test.com?lall=123&lall=312">test&amp;</a>' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
+      '&lt;a href="https://test.com?lall=123&lall=312">test&amp;&lt;/a&gt;' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
+      '' => '',
+      ' ' => ' ',
+      null => '',
+      true => '1',
+      false => '0',
+      0 => '0',
+      '0.0' => '0.0',
+      'GOM-KC-350+550' => 'GOM-KC-350+550',
+      '3+ years of experience' => '3+ years of experience',
+      ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9" => ' foo   öäü ',
+      " foo\t foo " => ' foo   foo ',
+      'a="get";' => 'a="get";',
+      '<x 1=">" onxxx=1 (text outside tag)' => '<x 1=">" onxxx=1 (text outside tag)',
+    );
+
+    foreach ($testArray as $before => $after) {
+      self::assertFalse($this->security->stringHasXss($before), 'testing: ' . $before . ' | ' . $after);
     }
   }
 
