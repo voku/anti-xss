@@ -1912,8 +1912,6 @@ final class AntiXSS
   private function _do($str)
   {
     $str = (string)$str;
-    $strInt = (int)$str;
-    $strFloat = (float)$str;
     if ($this->stringHasXss($str) === false) {
       return $str;
     }
