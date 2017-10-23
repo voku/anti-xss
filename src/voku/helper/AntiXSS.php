@@ -1914,19 +1914,7 @@ final class AntiXSS
     $str = (string)$str;
     $strInt = (int)$str;
     $strFloat = (float)$str;
-    if (
-        !$str
-        ||
-        "$strInt" == $str
-        ||
-        "$strFloat" == $str
-    ) {
-
-      // no xss found
-      if ($this->xss_found !== true) {
-        $this->xss_found = false;
-      }
-
+    if ($this->check_for_xss($str) === false)
       return $str;
     }
 
@@ -2823,6 +2811,33 @@ final class AntiXSS
     }
 
     return 'voku::anti-xss::' . $this->_xss_hash;
+  }
+
+  /**
+   * Check if the given string has XSS code.
+   *
+   * @param string $str
+   *
+   * @return bool
+   */
+  public function stringHasXss(string $str)
+  {
+    $str = (string)$str;
+    $strInt = (int)$str;
+    $strFloat = (float)$str;
+    if (
+        !$str
+        ||
+        "$strInt" == $str
+        ||
+        "$strFloat" == $str
+    ) {
+
+      // no xss found
+      return false;
+    }
+
+    return true;
   }
 
 }
