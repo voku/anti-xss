@@ -166,7 +166,7 @@ class XssTest extends \PHPUnit\Framework\TestCase
     ];
 
     foreach ($testArray as $test => $expected) {
-      self::assertSame($expected,  $this->invokeMethod($this->security, '_remove_evil_attributes', array($test)));
+      self::assertSame($expected, $this->invokeMethod($this->security, '_remove_evil_attributes', array($test)));
     }
   }
 
