@@ -5,7 +5,7 @@ use voku\helper\AntiXSS;
 /**
  * Class JsXssTest
  */
-class JsXssTest extends PHPUnit_Framework_TestCase
+class JsXssTest extends \PHPUnit\Framework\TestCase
 {
 
   //
@@ -88,7 +88,12 @@ class JsXssTest extends PHPUnit_Framework_TestCase
 
     // 畸形属性格式
     self::assertSame('<a target = "_blank" title ="bbb">', $this->security->xss_clean('<a target = "_blank" title ="bbb">'));
+    self::assertSame('<a target = \'_blank\' title =\'bbb\'>', $this->security->xss_clean("<a target = '_blank' title ='bbb'>"));
+    self::assertSame('<a >', $this->security->xss_clean("<a target=_blank title=bbb>"));
     self::assertSame('<a target = "_blank"  title =  "bbb">', $this->security->xss_clean('<a target = "_blank" title =  title =  "bbb">'));
+    self::assertSame('<a target = " _blank "  title =  "bbb">', $this->security->xss_clean('<a target = " _blank " title =  title =  "bbb">'));
+    self::assertSame('<a   title =  "bbb">', $this->security->xss_clean('<a target = _blank title =  title =  "bbb">'));
+    self::assertSame('<a   title =  "bbb">', $this->security->xss_clean("<a target = " . 0x42 . "_blank" . 0x42 . " title =  title =  \"bbb\">"));
     self::assertSame('<img  title="xxx">', $this->security->xss_clean('<img width = 100    height     =200 title="xxx">'));
     self::assertSame('<img >', $this->security->xss_clean('<img width = 100    height     =200 title=xxx>'));
     self::assertSame('<img >', $this->security->xss_clean('<img width = 100    height     =200 title= xxx>'));

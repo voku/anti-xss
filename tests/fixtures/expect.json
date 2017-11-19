@@ -401,7 +401,7 @@
   },
   {
     "payload": "<div id=\"38\"><comment><img src=\"</comment><img src=x onerror=alert(38)//\">//[\"'`-->]]>]</div><div id=\"39\"><!-- up to Opera 11.52, FF 3.6.28 -->",
-    "expected": "<div id=\"38\">&lt;comment&gt;< >< >//[\"'`--&gt;]]>]</div><div id=\"39\">&lt;!-- up to Opera 11.52, FF 3.6.28 --&gt;"
+    "expected": "<div id=\"38\"><comment>< >< >//[\"'`--&gt;]]>]</div><div id=\"39\">&lt;!-- up to Opera 11.52, FF 3.6.28 --&gt;"
   },
   {
     "payload": "<![><img src=\"]><img src=x onerror=alert(39)//\">",
@@ -409,7 +409,7 @@
   },
   {
     "payload": "<!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  -->\n<svg><![CDATA[><image xlink:href=\"]]><img src=xx:x onerror=alert(2)//\"></svg>//[\"'`-->]]>]</div>",
-    "expected": "&lt;!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  --&gt;\n&lt;svg&gt;&lt;![CDATA[><image ><img ></>//[\"'`--&>]</>"
+    "expected": "&lt;!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  --&gt;\n&lt;svg&gt;&lt;![CDATA[><image '`--&>]</>"
   },
   {
     "payload": "<div id=\"40\"><style><img src=\"</style><img src=x onerror=alert(40)//\">//[\"'`-->]]>]</div>",
@@ -473,7 +473,7 @@
   },
   {
     "payload": "<label dataformatas=\"html\" datasrc=\"#xss\" datafld=\"payload\"></label>//[\"'`-->]]>]</div>",
-    "expected": "<label \"html\" \"#xss\" \"payload\"></label>//[\"'`--&gt;]]>]</div>"
+    "expected": "<label   ></label>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"54\"><script>[{'a':Object.prototype.__defineSetter__('b',function(){alert(arguments[0])}),'b':['secret']}]</script>//[\"'`-->]]>]</div>",
@@ -569,7 +569,7 @@
   },
   {
     "payload": "<div id=\"78\"><?xml-stylesheet type=\"text/xsl\" href=\"#\"?><img xmlns=\"x-schema:test.xdr\"/>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img >//[\"'`--&>]</>"
+    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img />//[\"'`--&>]</>"
   },
   {
     "payload": "<div id=\"79\"><object allowscriptaccess=\"always\" data=\"test.swf\"></object>//[\"'`-->]]>]</div>",
@@ -601,7 +601,7 @@
   },
   {
     "payload": "<div id=\"88\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<animation xlink:href=\"javascript:alert(88)\"/>\n<animation xlink:href=\"data:text/xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E\"/>\n\n<image xlink:href=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E\"/>\n\n<foreignObject xlink:href=\"javascript:alert(88)\"/>\n<foreignObject xlink:href=\"data:text/xml,%3Cscript xmlns='http://www.w3.org/1999/xhtml'%3Ealert(88)%3C/script%3E\"/>\n\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"88\">&lt;svg :xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<animation =\"data:text/xml,&lt;svg  ='alert&#40;88&#41;'&gt;&lt;/svg>\"/>\n\n<foreignObject =\"data:text/xml,alert&#40;88&#41;\"/>\n\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"88\">&lt;svg  xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<animation />\n<animation   >&lt;/svg&gt;\"/>\n\n<image />\n\n<foreignObject >\n<foreignObject />\n\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"89\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<set attributeName=\"onmouseover\" to=\"alert(89)\"/>\n<animate attributeName=\"onunload\" to=\"alert(89)\"/>\n</svg>//[\"'`-->]]>]</div>",
@@ -625,11 +625,11 @@
   },
   {
     "payload": "<div id=\"94\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<handler xmlns:ev=\"http://www.w3.org/2001/xml-events\" ev:event=\"load\">alert(94)</handler>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"94\">&lt;svg :ev=\"http://www.w3.org/2001/xml-events\" \"load\"&gt;alert&#40;94&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"94\">&lt;svg &gt;\n<handler xmlns:ev=\"http://www.w3.org/2001/xml-events\" \"load\">alert&#40;94&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"95\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<feImage>\n<set attributeName=\"xlink:href\" to=\"data:image/svg+xml;charset=utf-8;base64,\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D\"/>\n</feImage>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"95\">&lt;svg :xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<feImage>\n<set attributeName=\"xlink:href\" to=\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==\"/>\n</feImage>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"95\">&lt;svg  xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<feImage>\n<set attributeName=\"xlink:href\" to=\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==\"/>\n</feImage>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"96\"><iframe src=mhtml:http://html5sec.org/test.html!xss.html></iframe>\n<iframe src=mhtml:http://html5sec.org/test.gif!xss.html></iframe>//[\"'`-->]]>]</div>",
@@ -637,7 +637,7 @@
   },
   {
     "payload": "<div id=\"97\"><!-- IE 5-9 -->\n<div id=d><x xmlns=\"><iframe onload=alert(97)\"></div>\n<script>d.innerHTML+='';</script>\n<!-- IE 10 in IE5-9 Standards mode -->\n<div id=d><x xmlns='\"><iframe onload=alert(2)//'></div>\n<script>d.innerHTML+='';</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x ='\">&lt;iframe &gt;&lt;/div>\nd+='';//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x '`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"98\"><div id=d><div style=\"font-family:'sans\u0017\u0002F\u0002A\u0012\u0002A\u0002F\u0003B color\u0003Ared\u0003B'\">X</div></div>\n<script>with(document.getElementById(\"d\"))innerHTML=innerHTML</script>//[\"'`-->]]>]</div>",
@@ -661,7 +661,7 @@
   },
   {
     "payload": "<div id=\"103\"><script>history.pushState(0,0,'/i/am/somewhere_else');</script>//[\"'`-->]]>]</div><div id=\"104\"><svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\">\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Chandler%20xml%3Aid%3D%22bar%22%20type%3D%22application%2Fecmascript%22%3E alert(104) %3C%2Fhandler%3E%0A%3C%2Fsvg%3E%0A#bar\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"103\">history.pushState(0,0,'/i/am/somewhere_else');//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg =\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg >\n<handler xml:id=\"bar\" type=\"application/ecmascript\"> alert&#40;104&#41; </handler>\n&lt;/svg&gt;\n#bar\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"103\">history.pushState(0,0,'/i/am/somewhere_else');//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg  id=\"foo\"&gt;\n<x  event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg &gt;\n<handler xml:id=\"bar\" type=\"application/ecmascript\"> alert&#40;104&#41; </handler>\n&lt;/svg&gt;\n#bar\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"105\"><iframe src=\"data:image/svg-xml,%1F%8B%08%00%00%00%00%00%02%03%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2%03\"></iframe>//[\"'`-->]]>]</div>",
@@ -712,7 +712,7 @@
   {
     "title": "Drag & drop",
     "payload": "<div id=\"118\"><div draggable=\"true\" ondragstart=\"event.dataTransfer.setData('text/plain','malicious code');\">\n    <h1>Drop me</h1>\n</div>\n<iframe src=\"http://www.example.org/dropHere.html\"></iframe>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"118\"><div draggable=\"true\"  code');\">\n    <h1>Drop me</h1>\n</div>\n&lt;iframe src=\"http://www.example.org/dropHere.html\"&gt;&lt;/iframe>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"118\"><div draggable=\"true\" >\n    <h1>Drop me</h1>\n</div>\n&lt;iframe src=\"http://www.example.org/dropHere.html\"&gt;&lt;/iframe>//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "view-source",
@@ -730,7 +730,7 @@
   },
   {
     "payload": "<div id=\"121\"><html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\">\n<body style=\"background:gray\">\n<iframe src=\"http://example.com/\" style=\"width:800px; height:350px; border:none; mask: url(#maskForClickjacking);\"/>\n<svg:svg>\n<svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\">\n    <svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/>\n    <svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/>\n</svg:mask>\n</svg:svg>\n</body>\n</html>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"121\">&lt;html :svg=\"http://www.w3.org/2000/svg\"&gt;\n&lt;body &gt;\n&lt;iframe src=\"http://example.com/\" /&gt;\n&lt;svg:svg&gt;\n&lt;svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\"&gt;\n    &lt;svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/&gt;\n    &lt;svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/&gt;\n&lt;/svg:mask&gt;\n&lt;/svg:svg&gt;\n&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"121\">&lt;html \nxmlns:svg=\"http://www.w3.org/2000/svg\"&gt;\n&lt;body &gt;\n&lt;iframe src=\"http://example.com/\" /&gt;\n&lt;svg:svg&gt;\n&lt;svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\"&gt;\n    &lt;svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/&gt;\n    &lt;svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/&gt;\n&lt;/svg:mask&gt;\n&lt;/svg:svg&gt;\n&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "iframe (sandboxed)",
@@ -743,7 +743,7 @@
   },
   {
     "payload": "<div id=\"125\"><?xml version=\"1.0\"?>\n<?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?>\n<!DOCTYPE doc [\n<!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n<svg xmlns=\"http://www.w3.org/2000/svg\">\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            <iframe xmlns=\"http://www.w3.org/1999/xhtml\" src=\"javascript:alert(125)\"></iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"125\">&lt;?xml version=\"1.0\"?&gt;\n&lt;?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?&gt;\n&lt;!DOCTYPE doc [\n&lt;!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n&lt;svg :xsl=\"http://www.w3.org/1999/XSL/Transform\"&gt;\n        <xsl:template match=\"/\">\n            &lt;iframe  src=\"alert&#40;125&#41;\"&gt;&lt;/iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"125\">&lt;?xml version=\"1.0\"?&gt;\n&lt;?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?&gt;\n&lt;!DOCTYPE doc [\n&lt;!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n&lt;svg &gt;\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            &lt;iframe  src=\"alert&#40;125&#41;\"&gt;&lt;/iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"126\"><object id=\"x\" classid=\"clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598\"></object>\n<object classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" onqt_error=\"alert(126)\" style=\"behavior:url(#x);\"><param name=postdomevents /></object>//[\"'`-->]]>]</div>",
@@ -751,7 +751,7 @@
   },
   {
     "payload": "<div id=\"127\"><svg xmlns=\"http://www.w3.org/2000/svg\" id=\"x\">\n<listener event=\"load\" handler=\"#y\" xmlns=\"http://www.w3.org/2001/xml-events\" observer=\"x\"/>\n<handler id=\"y\">alert(127)</handler>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"127\">&lt;svg =\"http://www.w3.org/2001/xml-events\" observer=\"x\"/&gt;\n<handler id=\"y\">alert&#40;127&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"127\">&lt;svg  id=\"x\"&gt;\n<listener event=\"load\" handler=\"#y\"  observer=\"x\"/>\n<handler id=\"y\">alert&#40;127&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"128\"><svg><style><img/src=x onerror=alert(128)// </b>//[\"'`-->]]>]</div>",
@@ -765,7 +765,7 @@
   {
     "title": "MathML",
     "payload": "<div id=\"130\"><math href=\"javascript:alert(130)\">CLICKME</math>\n<math>\n<!-- up to FF 13 -->\n<maction actiontype=\"statusline#http://google.com\" xlink:href=\"javascript:alert(2)\">CLICKME</maction>\n\n<!-- FF 14+ -->\n<maction actiontype=\"statusline\" xlink:href=\"javascript:alert(3)\">CLICKME<mtext>http://http://google.com</mtext></maction>\n</math>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"130\">&lt;math href=\"alert&#40;130&#41;\"&gt;CLICKME&lt;/math&gt;\n&lt;math&gt;\n&lt;!-- up to FF 13 --&gt;\n<maction actiontype=\"statusline#http://google.com\" =\"alert&#40;3&#41;\">CLICKME<mtext>http://http://google.com</mtext></maction>\n&lt;/math&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"130\">&lt;math href=\"alert&#40;130&#41;\"&gt;CLICKME&lt;/math&gt;\n&lt;math&gt;\n&lt;!-- up to FF 13 --&gt;\n<maction actiontype=\"statusline#http://google.com\" >CLICKME</maction>\n\n&lt;!-- FF 14+ --&gt;\n<maction actiontype=\"statusline\" >CLICKME<mtext>http://http://google.com</mtext></maction>\n&lt;/math&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "jAvascript (case sensitive)",
@@ -813,5 +813,10 @@
     "title": "DOM clobbering: acceptCharset",
     "payload": "<input name=acceptCharset>123",
     "expected": "&lt;input name=acceptCharset&gt;123"
+  },
+  {
+  "title": "Testing support for sizes and srcset",
+  "payload": "<img src=\"small.jpg\" srcset=\"medium.jpg 1000w, large.jpg 2000w\">",
+  "expected": "<img src=\"small.jpg\" srcset=\"medium.jpg 1000w, large.jpg 2000w\">"
   }
 ]

@@ -14,14 +14,14 @@ use voku\helper\AntiXSS;
 /**
  * Class LibFilterSecurityTest
  */
-class LibFilterSecurityTest extends PHPUnit_Framework_TestCase
+class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
 {
 
   //
   // https://github.com/iamcal/lib_filter/blob/master/t/01_basics.t
   //
 
-  private $testArray = array();
+  private $testArray = [];
 
   /**
    * @return AntiXSS
@@ -35,7 +35,8 @@ class LibFilterSecurityTest extends PHPUnit_Framework_TestCase
    * @param $test
    * @param $result
    */
-  public function addToTestArray($test, $result) {
+  public function addToTestArray($test, $result)
+  {
     $this->testArray[$test] = $result;
   }
 
@@ -65,11 +66,11 @@ class LibFilterSecurityTest extends PHPUnit_Framework_TestCase
     $this->addToTestArray('<a href="mailto:foo">bar</a>', '<a href="mailto:foo">bar</a>');
     $this->addToTestArray('<a href="javascript:foo">bar</a>', '<a href="foo">bar</a>');
     $this->addToTestArray('<a href="java script:foo">bar</a>', '<a href="">bar</a>');
-    $this->addToTestArray('<a href="java'."\t".'script:foo">bar</a>', '<a href="">bar</a>');
-    $this->addToTestArray('<a href="java'."\n".'script:foo">bar</a>', '<a href="">bar</a>');
-    $this->addToTestArray('<a href="java'."\r".'script:foo">bar</a>', '<a href="">bar</a>');
-    $this->addToTestArray('<a href="java'.chr(1).'script:foo">bar</a>', '<a href="foo">bar</a>');
-    $this->addToTestArray('<a href="java'.chr(0).'script:foo">bar</a>', '<a href="foo">bar</a>');
+    $this->addToTestArray('<a href="java' . "\t" . 'script:foo">bar</a>', '<a href="">bar</a>');
+    $this->addToTestArray('<a href="java' . "\n" . 'script:foo">bar</a>', '<a href="">bar</a>');
+    $this->addToTestArray('<a href="java' . "\r" . 'script:foo">bar</a>', '<a href="">bar</a>');
+    $this->addToTestArray('<a href="java' . chr(1) . 'script:foo">bar</a>', '<a href="foo">bar</a>');
+    $this->addToTestArray('<a href="java' . chr(0) . 'script:foo">bar</a>', '<a href="foo">bar</a>');
     $this->addToTestArray('<a href="jscript:foo">bar</a>', '<a href="foo">bar</a>');
     $this->addToTestArray('<a href="vbscript:foo">bar</a>', '<a href="foo">bar</a>');
     $this->addToTestArray('<a href="view-source:foo">bar</a>', '<a href="foo">bar</a>');

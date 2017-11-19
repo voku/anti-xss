@@ -5,7 +5,7 @@ use voku\helper\AntiXSS;
 /**
  * Class XssTestArray
  */
-class XssTestArray extends PHPUnit_Framework_TestCase
+class XssTestArray extends \PHPUnit\Framework\TestCase
 {
 
   /**
@@ -21,7 +21,7 @@ class XssTestArray extends PHPUnit_Framework_TestCase
 
   public function test_array()
   {
-    $testArray = array(
+    $testArray = [
         '<a href="http://www.chaos.org/">www.chaos.org</a>',
         '<a name="X">Short \'a name\' tag</a>',
         '<td colspan="3" rowspan="5">Foo</td>',
@@ -37,9 +37,9 @@ class XssTestArray extends PHPUnit_Framework_TestCase
         '<td width="200">Long Cell</td>',
         'search.php?q=%22%3Balert(%22XSS%22)%3B&n=1093&i=410',
         'http://localhost/text.php/"><script>alert(“Gehackt!”);</script></form><form action="/...',
-    );
+    ];
 
-    $resultArray = array(
+    $resultArray = [
         '<a href="http://www.chaos.org/">www.chaos.org</a>',
         '<a name="X">Short \'a name\' tag</a>',
         '<td colspan="3" rowspan="5">Foo</td>',
@@ -55,7 +55,7 @@ class XssTestArray extends PHPUnit_Framework_TestCase
         '<td width="200">Long Cell</td>',
         'search.php?q=";alert&#40;"XSS"&#41;;&n=1093&i=410',
         'http://localhost/text.php/">alert&#40;“Gehackt!”&#41;;&lt;/form&gt;&lt;form action="/...',
-    );
+    ];
 
     self::assertSame($resultArray, $this->security->xss_clean($testArray));
   }

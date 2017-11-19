@@ -6,7 +6,7 @@ use voku\helper\UTF8;
 /**
  * Class DOMPurifyTest
  */
-class DOMPurifyTest extends PHPUnit_Framework_TestCase
+class DOMPurifyTest extends \PHPUnit\Framework\TestCase
 {
 
   //

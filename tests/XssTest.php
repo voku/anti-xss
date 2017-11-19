@@ -7,7 +7,7 @@ use voku\helper\UTF8;
 /**
  * Class XssTest
  */
-class XssTest extends PHPUnit_Framework_TestCase
+class XssTest extends \PHPUnit\Framework\TestCase
 {
 
   // INFO: here you can find some more tests
@@ -42,10 +42,10 @@ class XssTest extends PHPUnit_Framework_TestCase
   {
     $testArray = array(
       '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>' => '<nav class="top-bar" data-topbar data-options="back_text: Zurück"><ul><li>foo</li><li>bar</li></ul></nav>',
-      '<a href="http://suckup.de/about" target="_blank">About</a>' => '<a href="http://suckup.de/about" target="_blank">About</a>',
-      "<a href='http://suckup.de/about' target='_blank'>About</a>" => "<a href='http://suckup.de/about' target='_blank'>About</a>",
+      '<a href="http://suckup.de/about">About</a>' => '<a href="http://suckup.de/about">About</a>',
+      "<a href='http://suckup.de/about'>About</a>" => "<a href='http://suckup.de/about'>About</a>",
       '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>' => '<a href="http://moelleken.org/Kontakt/" class="mail"><i class="fa fa-envelope fa-3x"></i></a>',
-      '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>' => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" target="_blank" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
+      '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>' => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
       'eval is evil and xss is bad, but this is only a string : onerror ...' => 'eval is evil and xss is bad, but this is only a string : onerror ...',
       '<a href="https://test.com?lall=123&lall=312">test&amp;</a>' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
       '&lt;a href="https://test.com?lall=123&lall=312">test&amp;&lt;/a&gt;' => '<a href="https://test.com?lall=123&lall=312">test&</a>',
@@ -157,6 +157,19 @@ class XssTest extends PHPUnit_Framework_TestCase
     self::assertTrue(preg_match('#^voku::anti-xss::[0-9a-f]{32}$#iS', $this->invokeMethod($this->security, '_xss_hash')) === 1);
   }
 
+  public function test_remove_evil_attributes()
+  {
+    $testArray = [
+        '<IMG SRC=\'vbscript:msgbox("XSS")\'>' => '<IMG SRC=\'vbscript:msgbox("XSS")\'>',
+        '<form onsubmit=\'alert(1)\'><input onfocus=alert(2) name=attributes>123</form>' => '<form ><input  name=attributes>123</form>',
+        '<Video> <source onerror = "javascript: alert (XSS)">' => '<Video> <source >',
+    ];
+
+    foreach ($testArray as $test => $expected) {
+      self::assertSame($expected,  $this->invokeMethod($this->security, '_remove_evil_attributes', array($test)));
+    }
+  }
+
   public function testXssClean()
   {
     // \v (vertical whitespace) isn't working on travis-ci ?
@@ -196,7 +209,7 @@ class XssTest extends PHPUnit_Framework_TestCase
       '"><svg><script>/<@/>alert(1337)</script>' => '">&lt;svg&gt;/<@/>alert&#40;1337&#41;', // Bypassing Chrome’s Anti-XSS Filter | 2015: http://vulnerable.info/bypassing-chromes-anti-xss-filter/
       'Location: https://www.google.com%3a443%2fcse%2ftools%2fcreate_onthefly%3b%3c%2ftextarea%3e%3csvg%2fonload%3dalert%28document%2edomain%29%3e%3b%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f' => 'Location: https://www.google.com:443/cse/tools/create_onthefly;&lt;/textarea&gt;&lt;svg/>;/../../../../../../../../../../../../../../', // Google XSS in IE | 2015: http://blog.bentkowski.info/2015/04/xss-via-host-header-cse.html
       'Location: http://example.jp:xyz%27onclick%3D%27a%5Cu006c%5Cu0065%5Cu0072t(1)%27/2.php' => 'Location: http://example.jp:xyz\'\'alert&#40;1&#41;\'/2.php',
-      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D"/></feImage> </svg>' => '&lt;svg :xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to=PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D"/></feImage> </svg>' => '&lt;svg  xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to=PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
       '<a target="_blank" href="data:text/html;BASE64youdummy,PHNjcmlwdD5hbGVydCh3aW5kb3cub3BlbmVyLmRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5pbm5lckhUTUwpPC9zY3JpcHQ+">clickme in firefox</a><a/\'\'\' target="_blank" href=data:text/html;;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuYm9keS5pbm5lckhUTUwpPC9zY3JpcHQ+>firefox11</a>' => '<a target="_blank">clickme in firefox</a><a/\'\'\' target="_blank">firefox11</a>', // data: URI with base64 encoding bypass exploiting Firefox | 2012: https://bugzilla.mozilla.org/show_bug.cgi?id=255107
       'http://securitee.tk/files/chrome_xss.php?a=<script>void(\'&b=\');alert(1);</script>' => 'http://securitee.tk/files/chrome_xss.php?a=void(\'&b=\');alert&#40;1&#41;;', // Bypassing Chrome’s Anti-XSS filter | 2012: http://blog.securitee.org/?p=37
       'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\'' => 'with(document)body(createElement(\'iframe alert&#40;1&#41;>\')),body+=\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
@@ -213,7 +226,7 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>' => '<a href="http://SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
       '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>' => '<li><a href="?bypass=link rel=">alert&#40;document.domain&#41;">">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
       '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>' => 'alert&#40;1&#41;', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17
-      '<svg </onload ="1> (_=alert,_(1337)) "">' => '&lt;svg &lt;/> (_=alert,_(1337)) "">',
+      '<svg </onload ="1> (_=alert,_(1337)) "">' => '&lt;svg &lt;/">',
       '<svg><script>/<@/>alert(1)</script>' => '&lt;svg&gt;/<@/>alert&#40;1&#41;',
       '<svg/onload=alert`xss`>' => '&lt;svg/&gt;', // FF34+, Edge | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
       '<script/src=//⑭.₨>' => '', // Edge | 2016 | https://twitter.com/0x6D6172696F/status/784356959063535616
@@ -233,13 +246,13 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<h1/onclick=alert(1)>a' => '<h1/>a',
       '")}alert(/XSS/);{//' => '")}alert&#40;/XSS/&#41;;{//',
       '<svgonload=alert(1)>' => '&lt;svgalert&#40;1&#41;&gt;', // 2015: https://twitter.com/ret2libc/status/635923671681507328
-      "<style onload='execScript(/**/\"\x61lert&#40 1&#41\",\"j\x61vascript\");'>" => '&lt;style  1)","javascript");\'&gt;', // IE | 2015: https://twitter.com/soaj1664ashar/status/635040931289370624
+      "<style onload='execScript(/**/\"\x61lert&#40 1&#41\",\"j\x61vascript\");'>" => '&lt;style &gt;', // IE | 2015: https://twitter.com/soaj1664ashar/status/635040931289370624
       '<​script>alert `1`</script>' => '&lt; script&gt;alert `1`',
       '<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>' => '&lt;form id="test"&gt;&lt;/form>&lt;button  &gt;X&lt;/button&gt;',
       '<input onfocus=write(1) autofocus>' => '&lt;input  autofocus&gt;',
       '<input onblur=write(1) autofocus><input autofocus>' => '&lt;input  autofocus&gt;&lt;input autofocus>',
       '<video poster=javascript:alert(1)//></video>' => '< /></>',
-      '<Video> <source onerror = "javascript: alert (XSS)">' => '&lt;Video&gt; <  >',
+      '<Video> <source onerror = "javascript: alert (XSS)">' => '&lt;Video&gt; < >',
       '<body onscroll=alert(1)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>' => '&lt;body &gt;&lt;br><br><br><br><br><br>...<br><br><br><br>&lt;input autofocus&gt;',
       '<form id=test onforminput=alert(1)><input></form><button form=test onformchange=alert(2)>X</button>' => '&lt;form id=test &gt;&lt;input>&lt;/form&gt;&lt;button  >X&lt;/button&gt;',
       '<video><source onerror="alert(1)">' => '&lt;video&gt;&lt; >',
@@ -247,7 +260,7 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<form><button formaction="javascript:alert(1)">X</button>' => '&lt;form&gt;&lt;button >X&lt;/button&gt;',
       '<body oninput=alert(1)><input autofocus>' => '&lt;body &gt;&lt;input autofocus>',
       '<math href="javascript:alert(1)">CLICKME</math>' => '&lt;math href="alert&#40;1&#41;"&gt;CLICKME&lt;/math&gt;',
-      '<math> <!-- up to FF 13 --> <maction actiontype="statusline#http://google.com" xlink:href="javascript:alert(2)">CLICKME</maction>  <!-- FF 14+ --> <maction actiontype="statusline" xlink:href="javascript:alert(3)">CLICKME<mtext>http://http://google.com</mtext></maction> </math>' => '&lt;math&gt; &lt;!-- up to FF 13 --&gt; <maction actiontype="statusline#http://google.com" ="alert&#40;3&#41;">CLICKME<mtext>http://http://google.com</mtext></maction> &lt;/math&gt;',
+      '<math> <!-- up to FF 13 --> <maction actiontype="statusline#http://google.com" xlink:href="javascript:alert(2)">CLICKME</maction>  <!-- FF 14+ --> <maction actiontype="statusline" xlink:href="javascript:alert(3)">CLICKME<mtext>http://http://google.com</mtext></maction> </math>' => '&lt;math&gt; &lt;!-- up to FF 13 --&gt; <maction actiontype="statusline#http://google.com" >CLICKME</maction>  &lt;!-- FF 14+ --&gt; <maction actiontype="statusline" >CLICKME<mtext>http://http://google.com</mtext></maction> &lt;/math&gt;',
       '<​img[a][b]src=x[d]onerror[c]=[e]"alert(1)">' => '< img[a][b]src=x[d][e]"alert&#40;1&#41;">',
       '<a href="[a]java[b]script[c]:alert(1)">XXX</a>' => '<a href="">XXX</a>',
       '<form action="" method="post"> <input name="username" value="admin" /> <input name="password" type="password" value="secret" /> <input name="injected" value="injected" dirname="password" /> <input type="submit"> </form>' => '&lt;form action="" method="post"&gt; &lt;input name="username" value="admin" /&gt; &lt;input name="password" type="password" value="secret" /&gt; &lt;input name="injected" value="injected" dirname="password" /&gt; &lt;input type="submit"&gt; &lt;/form&gt;',
@@ -257,7 +270,7 @@ class XssTest extends PHPUnit_Framework_TestCase
       '<picture><img srcset="x" onerror="alert(1)"></picture>' => '<picture><img srcset="x" ></picture>',
       '<img srcset=",,,,,x" onerror="alert(1)">' => '<img srcset=",,,,,x" >',
       '<table background="javascript:alert(1)"></table>' => '<table background="alert&#40;1&#41;"></table>',
-      '<comment><img src="</comment><img src=x onerror=alert(1)//">' => '&lt;comment&gt;< >< >',
+      '<comment><img src="</comment><img src=x onerror=alert(1)//">' => '<comment>< >< >',
       '<![><img src="]><img src=x onerror=alert(1)//">' => '<![>< >< >', // up to Opera 11.52, FF 3.6.28
       '<svg><![CDATA[><image xlink:href="]]><img src=xx:x onerror=alert(2)//"></svg>' => '&lt;svg&gt;&lt;![CDATA[><image ><img ></>', // IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+
       '<img src onerror /" \'"= alt=alert(1)//">' => '<img >',
@@ -291,6 +304,7 @@ xmlns:x="http://www.w3.org/1999/xhtml ">alert&#40;1&#41;', // IE11
       '<​video poster=javascript:alert(1)//></video>' => '&lt; video poster=alert&#40;1&#41;//&gt;&lt;/video>',
       '<a style="-o-link:\'javascript:alert(1)\';-o-link-source:current">X</a>' => '<a >X</a>',
       '<a href="applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>' => '<a href="//com.apple.scripteditor?action=new&script=display%20dialog%20%22Hello%2C%20World%21%22">applescript</a>',
+      '<a onmouseoveronmouseover="alert(document.cookie)"onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
       '<a onmouseover="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
       '<a onmouseover=alert(document.cookie)>xxs</a>' => '<a >xxs</a>',
       '<a onerror="alert(document.cookie)">xxs</a>' => '<a >xxs</a>',
@@ -375,7 +389,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>' => '',
       '<!--#exec cmd="/bin/echo \'<SCRIPT SRC\'"--><!--#exec cmd="/bin/echo \'=http://ha.ckers.org/xss.js></SCRIPT>\'"-->' => '&lt;!--#exec cmd="/bin/echo \'\'"--&gt;',
       '<? echo(\'<SCR)\';' => '&lt;? echo(\'<SCR)\';',
-      '<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(\'XSS\')&lt;/SCRIPT&gt;">' => '&lt;META HTTP-EQUIV="Set-Cookie" Content="alert&#40;\'XSS\'&#41;"&gt;',
+      '<META HTTP-EQUIV="Set-Cookie" Content="USERID=&lt;SCRIPT&gt;alert(\'XSS\')&lt;/SCRIPT&gt;">' => '&lt;META HTTP-EQUIV="Set-Cookie" Content="&gt;',
       '<HEAD><META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> </HEAD>+ADw-SCRIPT+AD4-alert(\'XSS\');+ADw-/SCRIPT+AD4-' => '&lt;HEAD&gt;&lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"> &lt;/HEAD&gt;alert&#40;\'XSS\'&#41;;', // UTF-7
       '<img src="http://test.de/[0xE0]">
       ... foo ...
@@ -491,7 +505,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<script>Array.from`${eval}alert\`1\``</script>' => 'Array.from`${eval}alert\`1\``',
       '<script>Array.from([1],alert)</script>' => 'Array.from([1],alert)',
       '<script>Promise.reject("1").then(null,alert)</script>' => 'Promise.reject("1").then(null,alert)',
-      '<svg </onload ="1> (_=alert,_(1)) "">' => '&lt;svg &lt;/> (_=alert,_(1)) "">',
+      '<svg </onload ="1> (_=alert,_(1)) "">' => '&lt;svg &lt;/">',
       '<img onerror="location=\'javascript:=lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:%61lert(1)\'" src="x">' => '<img  src="x">',
       '<img onerror="location=\'javascript:\x2561lert(1)\'" src="x">' => '<img  src="x">',
@@ -621,8 +635,8 @@ textContent>click me!',
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.html');
 
     self::assertSame(
-        str_replace(array("\r\n", "\r"), "\n", $resultString),
-        str_replace(array("\r\n", "\r"), "\n", $this->security->xss_clean($testString)),
+        str_replace(array("\r\n", "\r"), "\n", trim($resultString)),
+        str_replace(array("\r\n", "\r"), "\n", $this->security->xss_clean(trim($testString))),
         'testing: ' . $testString
     );
   }
@@ -646,7 +660,9 @@ textContent>click me!',
     // http://blog.mindedsecurity.com/2015/08/pdf-based-polyglots-through-svg-images.html
 
     $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2.svg');
+    $testString = str_replace(array("\n\r", "\r\n", "\n"), "\n", $testString);
     $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v2_clean.svg');
+    $resultString = str_replace(array("\n\r", "\r\n", "\n"), "\n", $resultString);
 
     self::assertSame(
         $resultString,
@@ -707,7 +723,7 @@ textContent>click me!',
         '<image src=1 href=1 onerror="javascript:alert(1)"></image>' => '<image src=1 href=1 ></image>',
         '<object src=1 href=1 onerror="javascript:alert(1)"></object>' => '&lt;object src=1 href=1 &gt;&lt;/object>',
         '<script src=1 href=1 onerror="javascript:alert(1)"></script>' => '',
-        '<svg onResize svg onResize="javascript:javascript:alert(1)"></svg onResize>' => '&lt;svg onResize svg &gt;',
+        '<svg onResize svg onResize="javascript:javascript:alert(1)"></svg onResize>' => '&lt;svg onResize svg &gt;&lt;/svg onResize>',
     );
 
     foreach ($testArray as $before => $after) {
@@ -719,8 +735,8 @@ textContent>click me!',
   {
     $testArray = array(
       '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"><polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/><script type="text/javascript">alert(\'This app is probably vulnerable to XSS attacks!\');</script></svg>' => '&lt;?xml version="1.0" standalone="no"?&gt;&lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">&lt;svg version="1.1" baseProfile="full" &gt;&lt;polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/>alert&#40;\'This app is probably vulnerable to XSS attacks!\'&#41;;&lt;/svg&gt;',
-      'http://vulnerabledomain.com/xss.php?x=%3Csvg%3E%3Cuse%20height=200%20width=200%20xlink:href=%27http://vulnerabledomain.com/xss.php?x=%3Csvg%20id%3D%22rectangle%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20width%3D%22100%22%20height%3D%22100%22%3E%3Ca%20xlink%3Ahref%3D%22javascript%3Aalert%28location%29%22%3E%3Crect%20class%3D%22blue%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20%2F%3E%3C%2Fa%3E%3C%2Fsvg%3E%23rectangle%27/%3E%3C/svg%3E' => 'http://vulnerabledomain.com/xss.php?x=&lt;svg&gt;&lt;use height=200 width=200  id="rectangle" :xlink="http://www.w3.org/1999/xlink"    width="100" height="100"><a href=""><rect class="blue" x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;#rectangle\'/>&lt;/svg&gt;',
-      '<svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"><a xlink:href="javascript:alert(location)"><rect x="0" y="0" width="100" height="100" /></a></svg>' => '&lt;svg id="rectangle" :xlink="http://www.w3.org/1999/xlink"width="100" height="100"&gt;&lt;a href=""><rect x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;',
+      'http://vulnerabledomain.com/xss.php?x=%3Csvg%3E%3Cuse%20height=200%20width=200%20xlink:href=%27http://vulnerabledomain.com/xss.php?x=%3Csvg%20id%3D%22rectangle%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20width%3D%22100%22%20height%3D%22100%22%3E%3Ca%20xlink%3Ahref%3D%22javascript%3Aalert%28location%29%22%3E%3Crect%20class%3D%22blue%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20%2F%3E%3C%2Fa%3E%3C%2Fsvg%3E%23rectangle%27/%3E%3C/svg%3E' => 'http://vulnerabledomain.com/xss.php?x=&lt;svg&gt;&lt;use height=200 width=200  id="rectangle"  xmlns:xlink="http://www.w3.org/1999/xlink"    width="100" height="100"><a href=""><rect class="blue" x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;#rectangle\'/>&lt;/svg&gt;',
+      '<svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"><a xlink:href="javascript:alert(location)"><rect x="0" y="0" width="100" height="100" /></a></svg>' => '&lt;svg id="rectangle"  xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"&gt;&lt;a href=""><rect x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;',
       '<svg><use xlink:href="data:image/svg+xml;base64,PHN2ZyBpZD0icmVjdGFuZ2xlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiAgICB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg0KIDxmb3JlaWduT2JqZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNTAiDQogICAgICAgICAgICAgICAgICAgcmVxdWlyZWRFeHRlbnNpb25zPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj4NCgk8ZW1iZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiIHNyYz0iamF2YXNjcmlwdDphbGVydChsb2NhdGlvbikiIC8+DQogICAgPC9mb3JlaWduT2JqZWN0Pg0KPC9zdmc+#rectangle" /></svg>' => '&lt;svg&gt;&lt;use  />&lt;/svg&gt;',
       '
         <!DOCTYPE html>
@@ -959,7 +975,7 @@ textContent>click me!',
     self::assertSame('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
     self::assertSame('<fubar>', $this->security->xss_clean('<fubar>'));
     self::assertSame('<img &lt;svg=""&gt; src="x">', $this->security->xss_clean('<img <svg=""> src="x">'));
-    self::assertSame('<img src="b =">"x "alert&#40;1&#41;">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+    self::assertSame('<img  >">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html_attributes()
@@ -973,8 +989,8 @@ textContent>click me!',
     self::assertSame('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
     self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
     self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
-    self::assertSame('<img src="x"> alert&#40;1&#41;>', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
-    self::assertSame('<img  >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
+    self::assertSame('<img src="x" > on=&lt;svg&gt; alert&#40;1&#41;>', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
+    self::assertSame('<img >"<> >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
     self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
     self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
     self::assertSame('<img src="0" width="0" alt="src=" />', $this->security->xss_clean('<img src="0" width="0" alt="src=&quot;src=0 width=0 onerror=alert(unescape(/dang%20quotes!/.source))//\" />'));
@@ -982,7 +998,7 @@ textContent>click me!',
     self::assertSame('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
     self::assertSame('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
     self::assertSame('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
-    self::assertSame('<b a=<=" >1">', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
+    self::assertSame('<b a=<=" >', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
     self::assertSame('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
     self::assertSame('&lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;', $this->security->xss_clean('<meta http-equiv="refresh" content="0;url=javascript:document.vulnerable=true;">'));
     self::assertSame('<><&lt;meta &lt;meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">', $this->security->xss_clean('<><<meta <meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">'));

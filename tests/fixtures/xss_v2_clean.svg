@@ -1,5 +1,12 @@
 &lt;!DOCTYPE svg>
-&lt;svg :xdp="http://ns.adobe.com/xdp/"&gt;
+&lt;svg  version="1.1"&gt;
+<circle r="100" fill="blue" />
+&lt;/svg&gt;
+&lt;!--
+%PDF-1.
+1 0 obj <<>>
+stream
+<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
 <config><present><pdf><interactive>1</interactive></pdf></present></config>
 <template>
  <subform name="_">
