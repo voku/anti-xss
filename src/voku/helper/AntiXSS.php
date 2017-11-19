@@ -2582,7 +2582,7 @@ final class AntiXSS
 
       // find occurrences of illegal attribute strings with and without quotes (042 ["] and 047 ['] are octal quotes)
       $str = preg_replace(
-          '/(.*)((?:<[^>]+)(?<!\w))(?:' . $evil_attributes_string . ')(?:(?:\s*=\s*)(?:\'|\047)(?:.*?)(?:\'|\047)(.*)|(?:\s*=\s*)(?:"|\042)(?:.*?)(?:"|\042)(.*))/is',
+          '/(.*)((?:<[^>]+)(?<!\w))(?:' . $evil_attributes_string . ')(?:\s*=\s*)(?:(?:\'|\047)(?:.*?)(?:\'|\047)|(?:"|\042)(?:.*?)(?:"|\042))(.*)/is',
           '$1$2' . $this->_replacement . '$3$4',
           $str,
           -1,
