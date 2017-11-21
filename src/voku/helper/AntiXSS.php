@@ -1813,6 +1813,48 @@ final class AntiXSS
       'FSCommand',
   ];
 
+  private $_evil_html_tags = [
+      'applet',
+      'alert',
+      'audio',
+      'basefont',
+      'base',
+      'behavior',
+      'bgsound',
+      'blink',
+      'body',
+      'embed',
+      'eval',
+      'expression',
+      'form',
+      'frameset',
+      'frame',
+      'head',
+      'html',
+      'ilayer',
+      'iframe',
+      'input',
+      'button',
+      'select',
+      'isindex',
+      'layer',
+      'link',
+      'meta',
+      'keygen',
+      'object',
+      'plaintext',
+      'style',
+      'script',
+      'textarea',
+      'title',
+      'math',
+      'video',
+      'source',
+      'svg',
+      'xml',
+      'xss'
+  ];
+
   /**
    * XSS Hash - random Hash for protecting URLs.
    *
@@ -1961,11 +2003,11 @@ final class AntiXSS
     // remove evil attributes such as style, onclick and xmlns
     $str = $this->_remove_evil_attributes($str);
 
-    // sanitize naughty HTML elements
-    $str = $this->_sanitize_naughty_html($str);
-
     // sanitize naughty JavaScript elements
     $str = $this->_sanitize_naughty_javascript($str);
+
+    // sanitize naughty HTML elements
+    $str = $this->_sanitize_naughty_html($str);
 
     // final clean up
     //
@@ -2308,13 +2350,27 @@ final class AntiXSS
   /**
    * Add some strings to the "_evil_attributes"-array.
    *
-   * @param array $strings
+   * @param string[] $strings
    *
    * @return $this
    */
   public function addEvilAttributes(array $strings)
   {
     $this->_evil_attributes = array_merge($strings, $this->_evil_attributes);
+
+    return $this;
+  }
+
+  /**
+   * Add some strings to the "_evil_html_tags"-array.
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function addEvilHtmlTags(array $strings)
+  {
+    $this->_evil_html_tags = array_merge($strings, $this->_evil_html_tags);
 
     return $this;
   }
@@ -2398,8 +2454,8 @@ final class AntiXSS
     // init
     $regExForHtmlTags = '/<\w+.*+/si';
 
-    if (preg_match($regExForHtmlTags, $str, $matches) === 1) {
-      $str = preg_replace_callback(
+    if (\preg_match($regExForHtmlTags, $str, $matches) === 1) {
+      $str = \preg_replace_callback(
           $regExForHtmlTags,
           [
               $this,
@@ -2432,15 +2488,37 @@ final class AntiXSS
    * WARNING: Use this method only if you have a really good reason.
    * </p>
    *
-   * @param array $strings
+   * @param string[] $strings
    *
    * @return $this
    */
   public function removeEvilAttributes(array $strings)
   {
     $this->_evil_attributes = array_diff(
-        array_intersect($strings, $this->_evil_attributes),
-        $this->_evil_attributes
+        $this->_evil_attributes,
+        array_intersect($strings, $this->_evil_attributes)
+    );
+
+    return $this;
+  }
+
+  /**
+   * Remove some strings from the "_evil_html_tags"-array.
+   *
+   * <p>
+   * <br />
+   * WARNING: Use this method only if you have a really good reason.
+   * </p>
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function removeEvilHtmlTags(array $strings)
+  {
+    $this->_evil_html_tags = array_diff(
+        $this->_evil_html_tags,
+        array_intersect($strings, $this->_evil_html_tags)
     );
 
     return $this;
@@ -2474,8 +2552,8 @@ final class AntiXSS
     do {
       $original = $str;
 
-      if (stripos($str, '<a') !== false) {
-        $str = preg_replace_callback(
+      if (\stripos($str, '<a') !== false) {
+        $str = \preg_replace_callback(
             '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i',
             [
                 $this,
@@ -2485,8 +2563,8 @@ final class AntiXSS
         );
       }
 
-      if (stripos($str, '<img') !== false) {
-        $str = preg_replace_callback(
+      if (\stripos($str, '<img') !== false) {
+        $str = \preg_replace_callback(
             '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             [
                 $this,
@@ -2496,8 +2574,8 @@ final class AntiXSS
         );
       }
 
-      if (stripos($str, '<audio') !== false) {
-        $str = preg_replace_callback(
+      if (\stripos($str, '<audio') !== false) {
+        $str = \preg_replace_callback(
             '#<audio[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             [
                 $this,
@@ -2507,8 +2585,8 @@ final class AntiXSS
         );
       }
 
-      if (stripos($str, '<video') !== false) {
-        $str = preg_replace_callback(
+      if (\stripos($str, '<video') !== false) {
+        $str = \preg_replace_callback(
             '#<video[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             [
                 $this,
@@ -2518,8 +2596,8 @@ final class AntiXSS
         );
       }
 
-      if (stripos($str, '<source') !== false) {
-        $str = preg_replace_callback(
+      if (\stripos($str, '<source') !== false) {
+        $str = \preg_replace_callback(
             '#<source[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             [
                 $this,
@@ -2529,9 +2607,9 @@ final class AntiXSS
         );
       }
 
-      if (stripos($str, 'script') !== false) {
+      if (\stripos($str, 'script') !== false) {
         // US-ASCII: ¼ === <
-        $str = preg_replace('#(?:¼|<)/*(?:script).*(?:¾|>)#isuU', $this->_replacement, $str);
+        $str = \preg_replace('#(?:¼|<)/*(?:script).*(?:¾|>)#isuU', $this->_replacement, $str);
       }
     } while ($original !== $str);
 
@@ -2631,19 +2709,19 @@ final class AntiXSS
    */
   private function _repack_utf7_callback($str): string
   {
-    $strTmp = base64_decode($str[1]);
+    $strTmp = \base64_decode($str[1]);
 
     if ($strTmp === false) {
       return $str;
     }
 
-    $str = preg_replace_callback(
+    $str = \preg_replace_callback(
         '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
         [$this, '_repack_utf7_callback_back'],
         $strTmp
     );
 
-    return preg_replace('/\x00(.)/us', '$1', $str);
+    return \preg_replace('/\x00(.)/us', '$1', $str);
   }
 
   /**
@@ -2680,9 +2758,9 @@ final class AntiXSS
    */
   private function _sanitize_naughty_html($str): string
   {
-    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|source|svg|xml|xss|eval';
-    $str = preg_replace_callback(
-        '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#i',
+    $evil_html_tags = \implode('|', $this->_evil_html_tags);
+    $str = \preg_replace_callback(
+        '#<(/*\s*)(' . $evil_html_tags . ')([^><]*)([><]*)#i',
         [
             $this,
             '_sanitize_naughty_html_callback',

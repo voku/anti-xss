@@ -599,22 +599,22 @@ textContent>click me!',
 
   public function testRemoveEvilAttributes()
   {
-    $testString = '<li style="list-style-image: url(javascript:alert(0))">';
+    $testString = '<li FSCommand="bar" style="list-style-image: url(javascript:alert(0))">';
 
-    self::assertSame('<li >', $this->security->xss_clean($testString));
+    self::assertSame('<li  >', $this->security->xss_clean($testString));
 
     // ---
 
-    $this->security->removeEvilAttributes(array('style'));
+    $this->security->removeEvilAttributes(array('style', 'FSCommand'));
 
-    self::assertSame('<li style="list-style-image: url(alert&#40;0&#41;)">', $this->security->xss_clean($testString));
+    self::assertSame('<li "bar" style="list-style-image: url(alert&#40;0&#41;)">', $this->security->xss_clean($testString));
 
     // ---
 
     // reset
-    $this->security->addEvilAttributes(array('style'));
+    $this->security->addEvilAttributes(array('style', 'FSCommand'));
 
-    self::assertSame('<li >', $this->security->xss_clean($testString));
+    self::assertSame('<li  >', $this->security->xss_clean($testString));
   }
 
   public function testHtmlNoXssFile()
@@ -651,6 +651,56 @@ textContent>click me!',
         $this->security->xss_clean($testString),
         'testing: ' . $testString
     );
+  }
+
+  public function testAllowIframe()
+  {
+    $testString = '
+    <video autoplay="autoplay" controls="controls" width="640" height="360"> <source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /> <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> </video>
+<p><strong>Download Video:</strong> Closed Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">"MP4"</a> Open Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">"OGG"</a> / <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">"WebM"</a></p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+    ';
+
+    $resultStringOrig = '
+    &lt;video autoplay="autoplay" controls="controls" width="640" height="360"&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /&gt; <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> &lt;/video&gt;
+<p><strong>Download Video:</strong> Closed Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">"MP4"</a> Open Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">"OGG"</a> / <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">"WebM"</a></p>
+
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen&gt;&lt;/iframe>
+    ';
+
+    self::assertSame(
+        $resultStringOrig,
+        $this->security->xss_clean($testString),
+        'testing: ' . $testString
+    );
+
+    $this->security->removeEvilHtmlTags(array('video', 'source', 'iframe'));
+
+    $resultString = '
+    <video autoplay="autoplay" controls="controls" width="640" height="360"> <source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /> <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> </video>
+<p><strong>Download Video:</strong> Closed Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">"MP4"</a> Open Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">"OGG"</a> / <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">"WebM"</a></p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>
+    ';
+
+    self::assertSame(
+        $resultString,
+        $this->security->xss_clean($testString),
+        'testing: ' . $testString
+    );
+
+    // ---
+
+    // reset
+    $this->security->addEvilHtmlTags(array('video', 'source', 'iframe'));
+
+    self::assertSame(
+        $resultStringOrig,
+        $this->security->xss_clean($testString),
+        'testing: ' . $testString
+    );
+
   }
 
   public function testSvgXssFileV2()
