@@ -690,6 +690,12 @@ textContent>click me!',
         'testing: ' . $testString
     );
 
+    self::assertSame(
+      '<iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>',
+      $this->security->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
+
+    );
+
     // ---
 
     // reset
