@@ -120,6 +120,18 @@ $antiXss->isXssFound();
 // true
 ```
 
+Example 7: (allow e.g. iframes)
+
+```php
+$harm_string = "<iframe width="560" onclick="alert('xss')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>";
+
+$antiXss->removeEvilHtmlTags(array('iframe'));
+
+$harmless_string = $antiXss->xss_clean($harm_string);
+
+// <iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>
+```
+
 Unit Test:
 ==========
 

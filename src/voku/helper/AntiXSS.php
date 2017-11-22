@@ -1813,6 +1813,48 @@ final class AntiXSS
       'eval',
   );
 
+  private $_evil_html_tags = array(
+      'applet',
+      'alert',
+      'audio',
+      'basefont',
+      'base',
+      'behavior',
+      'bgsound',
+      'blink',
+      'body',
+      'embed',
+      'eval',
+      'expression',
+      'form',
+      'frameset',
+      'frame',
+      'head',
+      'html',
+      'ilayer',
+      'iframe',
+      'input',
+      'button',
+      'select',
+      'isindex',
+      'layer',
+      'link',
+      'meta',
+      'keygen',
+      'object',
+      'plaintext',
+      'style',
+      'script',
+      'textarea',
+      'title',
+      'math',
+      'video',
+      'source',
+      'svg',
+      'xml',
+      'xss',
+  );
+
   /**
    * XSS Hash - random Hash for protecting URLs.
    *
@@ -2324,6 +2366,20 @@ final class AntiXSS
     return $this;
   }
 
+
+  /**
+   * Add some strings to the "_evil_html_tags"-array.
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function addEvilHtmlTags(array $strings)
+  {
+    $this->_evil_html_tags = array_merge($strings, $this->_evil_html_tags);
+    return $this;
+  }
+
   /**
    * Compact any exploded words.
    *
@@ -2437,17 +2493,38 @@ final class AntiXSS
    * WARNING: Use this method only if you have a really good reason.
    * </p>
    *
-   * @param array $strings
+   * @param string[] $strings
    *
    * @return $this
    */
   public function removeEvilAttributes(array $strings)
   {
     $this->_evil_attributes = array_diff(
-        array_intersect($strings, $this->_evil_attributes),
-        $this->_evil_attributes
+        $this->_evil_attributes,
+        array_intersect($strings, $this->_evil_attributes)
     );
 
+    return $this;
+  }
+
+  /**
+   * Remove some strings from the "_evil_html_tags"-array.
+   *
+   * <p>
+   * <br />
+   * WARNING: Use this method only if you have a really good reason.
+   * </p>
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function removeEvilHtmlTags(array $strings)
+  {
+    $this->_evil_html_tags = array_diff(
+        $this->_evil_html_tags,
+        array_intersect($strings, $this->_evil_html_tags)
+    );
     return $this;
   }
 
@@ -2665,9 +2742,9 @@ final class AntiXSS
    */
   private function _sanitize_naughty_html($str)
   {
-    $naughty = 'alert|prompt|confirm|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|button|select|isindex|layer|link|meta|keygen|object|plaintext|style|script|textarea|title|math|video|source|svg|xml|xss|eval';
-    $str = preg_replace_callback(
-        '#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#i',
+    $evil_html_tags = \implode('|', $this->_evil_html_tags);
+    $str = \preg_replace_callback(
+        '#<(/*\s*)(' . $evil_html_tags . ')([^><]*)([><]*)#i',
         array(
             $this,
             '_sanitize_naughty_html_callback',
