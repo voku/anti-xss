@@ -2044,7 +2044,7 @@ final class AntiXSS
     $str = \str_ireplace($NEVER_ALLOWED_CACHE['keys'], $this->_never_allowed_str, $str);
 
     if (null === $NEVER_ALLOWED_CACHE['regex']) {
-      $NEVER_ALLOWED_CACHE['regex'] = implode('|', self::$_never_allowed_regex);
+      $NEVER_ALLOWED_CACHE['regex'] = \implode('|', self::$_never_allowed_regex);
     }
     $str = (string)\preg_replace('#' . $NEVER_ALLOWED_CACHE['regex'] . '#is', $this->_replacement, $str);
 
@@ -2073,7 +2073,7 @@ final class AntiXSS
       }
       unset($neverAllowedStr);
 
-      $NEVER_ALLOWED_STR_AFTERWARDS_CACHE = implode('|', self::$_never_allowed_str_afterwards);
+      $NEVER_ALLOWED_STR_AFTERWARDS_CACHE = \implode('|', self::$_never_allowed_str_afterwards);
     }
 
     $str = (string)\preg_replace('#' . $NEVER_ALLOWED_STR_AFTERWARDS_CACHE . '#isU', $this->_replacement, $str);
@@ -2168,10 +2168,10 @@ final class AntiXSS
             '&#9;'               => "\t",
         ];
 
-        $HTML_ENTITIES_CACHE = array_merge(
+        $HTML_ENTITIES_CACHE = \array_merge(
             $entitiesSecurity,
-            array_flip(get_html_translation_table(HTML_ENTITIES, $flags)),
-            array_flip(self::$entitiesFallback)
+            \array_flip(\get_html_translation_table(HTML_ENTITIES, $flags)),
+            \array_flip(self::$entitiesFallback)
         );
       }
 
@@ -2206,12 +2206,12 @@ final class AntiXSS
 
     $out = '';
     if (
-        preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)
+        \preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)
         ||
         (
             $this->_replacement
             &&
-            preg_match_all('#\s*[a-zA-Z\-]+\s*=' . preg_quote($this->_replacement, '#') . '$#', $str, $matches)
+            \preg_match_all('#\s*[a-zA-Z\-]+\s*=' . \preg_quote($this->_replacement, '#') . '$#', $str, $matches)
         )
     ) {
       foreach ($matches[0] as $match) {
