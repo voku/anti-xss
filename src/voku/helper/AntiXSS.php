@@ -1977,8 +1977,18 @@ final class AntiXSS
 
     // removes all non-UTF-8 characters
     // &&
+    // normalize whitespace
+    // &&
     // remove NULL characters (ignored by some browsers)
-    $str = UTF8::clean($str, true, true);
+    $str = UTF8::clean(
+        $str,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true
+    );
 
     // decode UTF-7 characters
     $str = $this->_repack_utf7($str);
