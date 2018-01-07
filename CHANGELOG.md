@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.0.1 (2018-01-07)
+
+- fix usage of "Portable UTF8"
+
+
 ### 4.0.0 (2017-12-23)
 - update "Portable UTF8" from v4 -> v5
   
