@@ -661,6 +661,7 @@ textContent>click me!',
         "<a href=\"https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2\">test</a>" => "<a href=\"https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2\">test</a>",
         "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm%20sorry,%20the%20Password%20Assistance%20pag e%20is%20temporarily%20unavailable.%20%20Please%20try%20again%20in%201 5%2" => "https://sellercentral.amazon.com/gp/change-password/change-password-em ail.html?errorMessage=I'm sorry, the Password Assistance pag e is temporarily unavailable.  Please try again in 1 5%2",
         'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&amp;ie=UTF8&amp;qid=1285870078&amp;sr=8-3' => 'http://www.amazon.com/script-alert-product-document-cookie/dp/B003H777 5E/ref=sr_1_3?s=gateway&ie=UTF8&qid=1285870078&sr=8-3',
+        'https://acme.com/i-ker/kiado+lakas/tegla-epitesu-lakas/budapest+1+kerulet+batthyany+ter/123454' => 'https://acme.com/i-ker/kiado+lakas/tegla-epitesu-lakas/budapest+1+kerulet+batthyany+ter/123454',
     );
 
     foreach ($testArray as $before => $after) {

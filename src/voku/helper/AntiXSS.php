@@ -1959,9 +1959,9 @@ final class AntiXSS
     if (
         !$str
         ||
-        "$strInt" == $str
+        (string)$strInt == $str
         ||
-        "$strFloat" == $str
+        (string)$strFloat == $str
     ) {
 
       // no xss found
@@ -2678,7 +2678,7 @@ final class AntiXSS
   private function _repack_utf7($str)
   {
     return preg_replace_callback(
-        '#\+([0-9a-zA-Z/]+)\-#',
+        '#\+([0-9a-zA-Z]+)\-#',
         array($this, '_repack_utf7_callback'),
         $str
     );
@@ -2897,9 +2897,11 @@ final class AntiXSS
       } else {
         $this->_xss_hash = bin2hex($rand);
       }
+
+      $this->_xss_hash = 'voku::anti-xss::' . $this->_xss_hash;
     }
 
-    return 'voku::anti-xss::' . $this->_xss_hash;
+    return $this->_xss_hash;
   }
 
 }
