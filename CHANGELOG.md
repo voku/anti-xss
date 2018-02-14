@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.0.2 (2018-02-14)
+
+- fix "URL escaping bug"
+
 ### 4.0.1 (2018-01-07)
 
 - fix usage of "Portable UTF8"
