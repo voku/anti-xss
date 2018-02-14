@@ -2729,12 +2729,12 @@ final class AntiXSS
     }
 
     $str = (string)\preg_replace_callback(
-        '/^((?:\x00.)*?)((?:[^\x00].)+)/s',
+        '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
         [$this, '_repack_utf7_callback_back'],
         $strTmp
     );
 
-    return \preg_replace('/\x00(.)/s', '$1', $str);
+    return \preg_replace('/\x00(.)/us', '$1', $str);
   }
 
   /**
