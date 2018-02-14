@@ -1962,9 +1962,9 @@ final class AntiXSS
     if (
         !$str
         ||
-        "$strInt" == $str
+        (string)$strInt == $str
         ||
-        "$strFloat" == $str
+        (string)$strFloat == $str
     ) {
 
       // no xss found
@@ -2367,7 +2367,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function addEvilAttributes(array $strings)
+  public function addEvilAttributes(array $strings): self
   {
     $this->_evil_attributes = \array_merge($strings, $this->_evil_attributes);
 
@@ -2381,7 +2381,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function addEvilHtmlTags(array $strings)
+  public function addEvilHtmlTags(array $strings): self
   {
     $this->_evil_html_tags = \array_merge($strings, $this->_evil_html_tags);
 
@@ -2505,7 +2505,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function removeEvilAttributes(array $strings)
+  public function removeEvilAttributes(array $strings): self
   {
     $this->_evil_attributes = \array_diff(
         $this->_evil_attributes,
@@ -2527,7 +2527,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function removeEvilHtmlTags(array $strings)
+  public function removeEvilHtmlTags(array $strings): self
   {
     $this->_evil_html_tags = \array_diff(
         $this->_evil_html_tags,
@@ -2707,7 +2707,7 @@ final class AntiXSS
   private function _repack_utf7($str): string
   {
     return \preg_replace_callback(
-        '#\+([0-9a-zA-Z/]+)\-#',
+        '#\+([0-9a-zA-Z]+)\-#',
         [$this, '_repack_utf7_callback'],
         $str
     );
@@ -2729,12 +2729,12 @@ final class AntiXSS
     }
 
     $str = (string)\preg_replace_callback(
-        '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
+        '/^((?:\x00.)*?)((?:[^\x00].)+)/s',
         [$this, '_repack_utf7_callback_back'],
         $strTmp
     );
 
-    return \preg_replace('/\x00(.)/us', '$1', $str);
+    return \preg_replace('/\x00(.)/s', '$1', $str);
   }
 
   /**
@@ -2825,7 +2825,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function setReplacement($string)
+  public function setReplacement($string): self
   {
     $this->_replacement = (string)$string;
 
@@ -2846,7 +2846,7 @@ final class AntiXSS
    *
    * @return $this
    */
-  public function setStripe4byteChars($bool)
+  public function setStripe4byteChars($bool): self
   {
     $this->_stripe_4byte_chars = (bool)$bool;
 
@@ -2913,22 +2913,25 @@ final class AntiXSS
 
   /**
    * Generates the XSS hash if needed and returns it.
-   *
-   * @return string <p>XSS hash</p>
    */
-  private function _xss_hash(): string
+  private function _xss_hash()
   {
     if ($this->_xss_hash === null) {
-      $rand = Bootup::get_random_bytes(16);
+
+      try {
+        $rand = \random_bytes(16);
+      } catch (\Exception $e) {
+        $rand = false;
+      }
 
       if (!$rand) {
         $this->_xss_hash = \md5(\uniqid(\mt_rand(), true));
       } else {
         $this->_xss_hash = \bin2hex($rand);
       }
-    }
 
-    return 'voku::anti-xss::' . $this->_xss_hash;
+      $this->_xss_hash = 'voku::anti-xss::' . $this->_xss_hash;
+    }
   }
 
 }

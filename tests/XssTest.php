@@ -18,13 +18,13 @@ class XssTest extends \PHPUnit\Framework\TestCase
   // - http://hackingforsecurity.blogspot.de/2013/11/xss-cheat-sheet-huge-list.html
 
   /**
-   * @var $security AntiXSS
+   * @var $antiXss AntiXSS
    */
-  public $security;
+  public $antiXss;
 
   public function setUp()
   {
-    $this->security = new AntiXSS();
+    $this->antiXss = new AntiXSS();
   }
 
   public function test_no_xss_url_with_json()
@@ -34,7 +34,7 @@ class XssTest extends \PHPUnit\Framework\TestCase
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -65,8 +65,8 @@ class XssTest extends \PHPUnit\Framework\TestCase
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
-      self::assertFalse($this->security->isXssFound(), 'testing: ' . $before . ' | ' . $after);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+      self::assertFalse($this->antiXss->isXssFound(), 'testing: ' . $before . ' | ' . $after);
     }
   }
 
@@ -74,7 +74,7 @@ class XssTest extends \PHPUnit\Framework\TestCase
   {
     $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
 
-    $harmless_string = $this->security->xss_clean($harm_string);
+    $harmless_string = $this->antiXss->xss_clean($harm_string);
 
     self::assertSame("Hello, i try to alert&#40;'Hack'&#41;; your site", $harmless_string);
   }
@@ -93,15 +93,15 @@ class XssTest extends \PHPUnit\Framework\TestCase
         '<li style="list-style-image: url(alert&#40;0&#41;)">' => '<li [removed]>',
     );
 
-    $this->security->setReplacement('[removed]');
-    $this->security->setStripe4byteChars(true);
+    $this->antiXss->setReplacement('[removed]');
+    $this->antiXss->setStripe4byteChars(true);
 
     foreach ($harmStrings as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
 
     // reset
-    $this->security->setReplacement('')->setStripe4byteChars(false);
+    $this->antiXss->setReplacement('')->setStripe4byteChars(false);
   }
 
   public function test_xss_clean_string_array()
@@ -124,21 +124,21 @@ class XssTest extends \PHPUnit\Framework\TestCase
         '<a href="http://test.com?param1=lall&colon;=foo;">test</a>' => '<a href="http://test.com?param1=lall:=foo;">test</a>',
     );
 
-    $this->security->setReplacement('[removed]');
+    $this->antiXss->setReplacement('[removed]');
 
     foreach ($harmStrings as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
 
     // reset
-    $this->security->setReplacement('');
+    $this->antiXss->setReplacement('');
   }
 
   public function test_xss_clean_image_valid()
   {
     $harm_string = '<img src="test.png">';
 
-    $xss_clean_return = $this->security->xss_clean($harm_string);
+    $xss_clean_return = $this->antiXss->xss_clean($harm_string);
 
     self::assertTrue($xss_clean_return === $harm_string);
   }
@@ -147,14 +147,39 @@ class XssTest extends \PHPUnit\Framework\TestCase
   {
     $harm_string = '<img src=javascript:alert(String.fromCharCode(88,83,83))>';
 
-    $xss_clean_return = $this->security->xss_clean($harm_string);
+    $xss_clean_return = $this->antiXss->xss_clean($harm_string);
 
     self::assertFalse($xss_clean_return === $harm_string);
   }
 
   public function test_xss_hash()
   {
-    self::assertTrue(preg_match('#^voku::anti-xss::[0-9a-f]{32}$#iS', $this->invokeMethod($this->security, '_xss_hash')) === 1);
+    $antiXss = new AntiXSS();
+    self::assertSame(null, $antiXss->isXssFound());
+
+    // init the "_xss_hash"-property
+    $result = $antiXss->xss_clean('<void class="bar">foo</ onclick="foobar();" void>');
+    self::assertSame('<void class="bar">foo</  void>', $result);
+    self::assertSame(true, $antiXss->isXssFound());
+
+    // ---
+
+    $value = $this->invokeProperty($antiXss, '_xss_hash');
+
+    self::assertSame(
+        1,
+        preg_match(
+            '#^voku::anti-xss::[0-9a-f]{32}$#iS',
+            $value
+        ),
+        'tested: ' . $value
+    );
+
+    // ---
+
+    $result = $antiXss->xss_clean('<void class="bar">foo</void>');
+    self::assertSame('<void class="bar">foo</void>', $result);
+    self::assertSame(false, $antiXss->isXssFound());
   }
 
   public function test_remove_evil_attributes()
@@ -166,7 +191,7 @@ class XssTest extends \PHPUnit\Framework\TestCase
     ];
 
     foreach ($testArray as $test => $expected) {
-      self::assertSame($expected, $this->invokeMethod($this->security, '_remove_evil_attributes', array($test)));
+      self::assertSame($expected, $this->invokeMethod($this->antiXss, '_remove_evil_attributes', array($test)));
     }
   }
 
@@ -567,8 +592,8 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
-      self::assertTrue($this->security->isXssFound(), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+      self::assertTrue($this->antiXss->isXssFound(), 'testing: ' . $before);
     }
 
     // test for php < OR > 5.3
@@ -592,7 +617,7 @@ textContent>click me!',
 
     for ($i = 0; $i < 2; $i++) { // keep this loop, for quick performance tests
       foreach ($testArray as $before => $after) {
-        self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+        self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
       }
     }
   }
@@ -601,20 +626,20 @@ textContent>click me!',
   {
     $testString = '<li FSCommand="bar" style="list-style-image: url(javascript:alert(0))">';
 
-    self::assertSame('<li  >', $this->security->xss_clean($testString));
+    self::assertSame('<li  >', $this->antiXss->xss_clean($testString));
 
     // ---
 
-    $this->security->removeEvilAttributes(array('style', 'FSCommand'));
+    $this->antiXss->removeEvilAttributes(array('style', 'FSCommand'));
 
-    self::assertSame('<li "bar" style="list-style-image: url(alert&#40;0&#41;)">', $this->security->xss_clean($testString));
+    self::assertSame('<li "bar" style="list-style-image: url(alert&#40;0&#41;)">', $this->antiXss->xss_clean($testString));
 
     // ---
 
     // reset
-    $this->security->addEvilAttributes(array('style', 'FSCommand'));
+    $this->antiXss->addEvilAttributes(array('style', 'FSCommand'));
 
-    self::assertSame('<li  >', $this->security->xss_clean($testString));
+    self::assertSame('<li  >', $this->antiXss->xss_clean($testString));
   }
 
   public function testHtmlNoXssFile()
@@ -624,7 +649,7 @@ textContent>click me!',
 
     self::assertSame(
         str_replace(array("\r\n", "\r"), "\n", $resultString),
-        str_replace(array("\r\n", "\r"), "\n", $this->security->xss_clean($testString)),
+        str_replace(array("\r\n", "\r"), "\n", $this->antiXss->xss_clean($testString)),
         'testing: ' . $testString
     );
   }
@@ -636,7 +661,7 @@ textContent>click me!',
 
     self::assertSame(
         str_replace(array("\r\n", "\r"), "\n", trim($resultString)),
-        str_replace(array("\r\n", "\r"), "\n", $this->security->xss_clean(trim($testString))),
+        str_replace(array("\r\n", "\r"), "\n", $this->antiXss->xss_clean(trim($testString))),
         'testing: ' . $testString
     );
   }
@@ -648,7 +673,7 @@ textContent>click me!',
 
     self::assertSame(
         $resultString,
-        $this->security->xss_clean($testString),
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
   }
@@ -671,11 +696,11 @@ textContent>click me!',
 
     self::assertSame(
         $resultStringOrig,
-        $this->security->xss_clean($testString),
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
 
-    $this->security->removeEvilHtmlTags(array('video', 'source', 'iframe'));
+    $this->antiXss->removeEvilHtmlTags(array('video', 'source', 'iframe'));
 
     $resultString = '
     <video autoplay="autoplay" controls="controls" width="640" height="360"> <source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /> <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> </video>
@@ -686,24 +711,24 @@ textContent>click me!',
 
     self::assertSame(
         $resultString,
-        $this->security->xss_clean($testString),
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
 
     self::assertSame(
       '<iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>',
-      $this->security->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
+      $this->antiXss->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
 
     );
 
     // ---
 
     // reset
-    $this->security->addEvilHtmlTags(array('video', 'source', 'iframe'));
+    $this->antiXss->addEvilHtmlTags(array('video', 'source', 'iframe'));
 
     self::assertSame(
         $resultStringOrig,
-        $this->security->xss_clean($testString),
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
 
@@ -722,7 +747,7 @@ textContent>click me!',
 
     self::assertSame(
         $resultString,
-        $this->security->xss_clean($testString),
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
   }
@@ -737,7 +762,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -750,7 +775,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -766,7 +791,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -784,7 +809,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -829,7 +854,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
     }
   }
 
@@ -935,33 +960,33 @@ textContent>click me!',
     );
 
     foreach ($testArray as $test) {
-      self::assertSame('<img >', $this->security->xss_clean($test));
+      self::assertSame('<img >', $this->antiXss->xss_clean($test));
     }
 
     $testString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';\u006F\u006E\u0065rror=\u0063onfirm;throw\'XSSposed';
     $resultString = 'http://www.buick.com/encore-luxury-small-crossover/build-your-own.html ?x-zipcode=\';confirm;throw\'XSSposed';
-    self::assertSame($resultString, $this->security->xss_clean($testString));
+    self::assertSame($resultString, $this->antiXss->xss_clean($testString));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="foo">';
-    self::assertSame('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="http://moelleken.org/test.png" alt="bar" title="foo">', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src=www.example.com/smiley.gif >';
-    self::assertSame('<img  >', $this->security->xss_clean($testString));
+    self::assertSame('<img  >', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src="www.example.com/smiley.gif" >';
-    self::assertSame('<img src="www.example.com/smiley.gif" >', $this->security->xss_clean($testString));
+    self::assertSame('<img src="www.example.com/smiley.gif" >', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src=\'www.example.com/smiley.gif\' >';
-    self::assertSame('<img src=\'www.example.com/smiley.gif\' >', $this->security->xss_clean($testString));
+    self::assertSame('<img src=\'www.example.com/smiley.gif\' >', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertSame('<img src="">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="">', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="foo">';
-    self::assertSame('<img src="&lt;?php echo " alt="bar" title="foo">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="&lt;?php echo " alt="bar" title="foo">', $this->antiXss->xss_clean($testString));
 
     $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
-    self::assertSame('<img src="">', $this->security->xss_clean($testString));
+    self::assertSame('<img src="">', $this->antiXss->xss_clean($testString));
   }
 
   public function test_xss_url_decode()
@@ -974,7 +999,7 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), $before);
     }
   }
 
@@ -990,75 +1015,75 @@ textContent>click me!',
     );
 
     foreach ($testArray as $before => $after) {
-      self::assertSame($after, $this->security->xss_clean($before), $before);
+      self::assertSame($after, $this->antiXss->xss_clean($before), $before);
     }
   }
 
   public function test_xss_clean_js_img_removal()
   {
     $input = '<img src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertSame('<img src="">Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<img src="">Clickhere', $this->antiXss->xss_clean($input), $input);
   }
 
   public function test_xss_clean_js_a_removal()
   {
     $input = '<a src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertSame('<a src="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<a src="confirm&#40;1&#41;">Clickhere', $this->antiXss->xss_clean($input), $input);
   }
 
   public function test_xss_clean_js_div_removal()
   {
     $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere', $this->antiXss->xss_clean($input), $input);
 
     $input = '<div test="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
-    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere</div>', $this->security->xss_clean($input), $input);
+    self::assertSame('<div test="confirm&#40;1&#41;">Clickhere</div>', $this->antiXss->xss_clean($input), $input);
 
     $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</div>';
-    self::assertSame('<div >Clickhere</div>', $this->security->xss_clean($input), $input);
+    self::assertSame('<div >Clickhere</div>', $this->antiXss->xss_clean($input), $input);
 
     $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
-    self::assertSame('<div >Clickhere', $this->security->xss_clean($input), $input);
+    self::assertSame('<div >Clickhere', $this->antiXss->xss_clean($input), $input);
   }
 
   public function test_naughty_html_plus_evil_attributes()
   {
-    self::assertSame('&lt;svg&lt;img > src="">', $this->security->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
+    self::assertSame('&lt;svg&lt;img > src="">', $this->antiXss->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html()
   {
-    self::assertSame('<unclosedTag', $this->security->xss_clean('<unclosedTag'));
-    self::assertSame('&lt;blink&gt;', $this->security->xss_clean('<blink>'));
-    self::assertSame('<fubar>', $this->security->xss_clean('<fubar>'));
-    self::assertSame('<img &lt;svg=""&gt; src="x">', $this->security->xss_clean('<img <svg=""> src="x">'));
-    self::assertSame('<img  >">', $this->security->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+    self::assertSame('<unclosedTag', $this->antiXss->xss_clean('<unclosedTag'));
+    self::assertSame('&lt;blink&gt;', $this->antiXss->xss_clean('<blink>'));
+    self::assertSame('<fubar>', $this->antiXss->xss_clean('<fubar>'));
+    self::assertSame('<img &lt;svg=""&gt; src="x">', $this->antiXss->xss_clean('<img <svg=""> src="x">'));
+    self::assertSame('<img  >">', $this->antiXss->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
   }
 
   public function test_xss_clean_sanitize_naughty_html_attributes()
   {
-    self::assertSame('"bar"', $this->security->xss_clean('onAttribute="bar"'));
-    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttribute="bar">'));
-    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttributeNoQuotes=bar>'));
-    self::assertSame('<foo >', $this->security->xss_clean('<foo onAttributeWithSpaces = bar>'));
-    self::assertSame('<foo prefix"bar">', $this->security->xss_clean('<foo prefixOnAttribute="bar">'));
-    self::assertSame('<foo>onOutsideOfTag=test</foo>', $this->security->xss_clean('<foo>onOutsideOfTag=test</foo>'));
-    self::assertSame('onNoTagAtAll = true', $this->security->xss_clean('onNoTagAtAll = true'));
-    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
-    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->security->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
-    self::assertSame('<img src="x" > on=&lt;svg&gt; alert&#40;1&#41;>', $this->security->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
-    self::assertSame('<img >"<> >', $this->security->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
-    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
-    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->security->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
-    self::assertSame('<img src="0" width="0" alt="src=" />', $this->security->xss_clean('<img src="0" width="0" alt="src=&quot;src=0 width=0 onerror=alert(unescape(/dang%20quotes!/.source))//\" />'));
-    self::assertSame('<a< >', $this->security->xss_clean('<a< onmouseover="alert(1)">'));
-    self::assertSame('<img src="x"> on=\'x\' ,xssm()>', $this->security->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
-    self::assertSame('<image src="<>" \'alert&#40;1&#41;\'>', $this->security->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
-    self::assertSame('<b "=<= >', $this->security->xss_clean('<b "=<= onmouseover=alert(1)>'));
-    self::assertSame('<b a=<=" >', $this->security->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
-    self::assertSame('<b "="< x=" >', $this->security->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
-    self::assertSame('&lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;', $this->security->xss_clean('<meta http-equiv="refresh" content="0;url=javascript:document.vulnerable=true;">'));
-    self::assertSame('<><&lt;meta &lt;meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">', $this->security->xss_clean('<><<meta <meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">'));
+    self::assertSame('"bar"', $this->antiXss->xss_clean('onAttribute="bar"'));
+    self::assertSame('<foo >', $this->antiXss->xss_clean('<foo onAttribute="bar">'));
+    self::assertSame('<foo >', $this->antiXss->xss_clean('<foo onAttributeNoQuotes=bar>'));
+    self::assertSame('<foo >', $this->antiXss->xss_clean('<foo onAttributeWithSpaces = bar>'));
+    self::assertSame('<foo prefix"bar">', $this->antiXss->xss_clean('<foo prefixOnAttribute="bar">'));
+    self::assertSame('<foo>onOutsideOfTag=test</foo>', $this->antiXss->xss_clean('<foo>onOutsideOfTag=test</foo>'));
+    self::assertSame('onNoTagAtAll = true', $this->antiXss->xss_clean('onNoTagAtAll = true'));
+    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->antiXss->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
+    self::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->antiXss->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
+    self::assertSame('<img src="x" > on=&lt;svg&gt; alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
+    self::assertSame('<img >"<> >', $this->antiXss->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
+    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
+    self::assertSame('<img src="x"> on=\'x\' ``,alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
+    self::assertSame('<img src="0" width="0" alt="src=" />', $this->antiXss->xss_clean('<img src="0" width="0" alt="src=&quot;src=0 width=0 onerror=alert(unescape(/dang%20quotes!/.source))//\" />'));
+    self::assertSame('<a< >', $this->antiXss->xss_clean('<a< onmouseover="alert(1)">'));
+    self::assertSame('<img src="x"> on=\'x\' ,xssm()>', $this->antiXss->xss_clean('<img src="x"> on=\'x\' onerror=,xssm()>'));
+    self::assertSame('<image src="<>" \'alert&#40;1&#41;\'>', $this->antiXss->xss_clean('<image src="<>" onerror=\'alert(1)\'>'));
+    self::assertSame('<b "=<= >', $this->antiXss->xss_clean('<b "=<= onmouseover=alert(1)>'));
+    self::assertSame('<b a=<=" >', $this->antiXss->xss_clean('<b a=<=" onmouseover="alert(1),1>1">'));
+    self::assertSame('<b "="< x=" >', $this->antiXss->xss_clean('<b "="< x=" onmouseover=alert(1)//">'));
+    self::assertSame('&lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;', $this->antiXss->xss_clean('<meta http-equiv="refresh" content="0;url=javascript:document.vulnerable=true;">'));
+    self::assertSame('<><&lt;meta &lt;meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">', $this->antiXss->xss_clean('<><<meta <meta http-equiv="refresh" content="5; URL=https://foo.bar?hacked=1/">'));
   }
 
   /**
@@ -1386,7 +1411,7 @@ textContent>click me!',
     );
 
     foreach ($cases as $caseArray) {
-      self::assertSame($caseArray[1], $this->security->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
+      self::assertSame($caseArray[1], $this->antiXss->xss_clean($caseArray[0]), 'error by: ' . $caseArray[0]);
     }
   }
 
@@ -1401,10 +1426,27 @@ textContent>click me!',
    */
   public function invokeMethod(&$object, $methodName, array $parameters = array())
   {
-    $reflection = new \ReflectionClass(get_class($object));
+    $reflection = new \ReflectionObject($object);
     $method = $reflection->getMethod($methodName);
     $method->setAccessible(true);
 
     return $method->invokeArgs($object, $parameters);
+  }
+
+  /**
+   * Call protected/private method of a class.
+   *
+   * @param object &$object      Instantiated object that we will run method on.
+   * @param string $propertyName Property name
+   *
+   * @return mixed Method return.
+   */
+  public function invokeProperty(&$object, $propertyName)
+  {
+    $reflection = new \ReflectionObject($object);
+    $property = $reflection->getProperty($propertyName);
+    $property->setAccessible(true);
+
+    return $property->getValue($object);
   }
 }
