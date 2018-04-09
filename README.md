@@ -92,7 +92,7 @@ Example 5.1: (non Inline CSS)
 
 ```php
 $harm_string = '<li style="list-style-image: url(javascript:alert(0))">';
-$harmless_string = $this->security->xss_clean($harm_string);
+$harmless_string = $antiXss->xss_clean($harm_string);
 
 // <li >
 ```
