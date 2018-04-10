@@ -62,12 +62,18 @@ class XssTest extends PHPUnit_Framework_TestCase
       " foo\t foo " => ' foo	 foo ',
       'a="get";' => 'a="get";',
       '<x 1=">" onxxx=1 (text outside tag)' => '<x 1=">" onxxx=1 (text outside tag)',
+      '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>' => '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>',
+      '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>' => '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>',
     );
+
+    $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
 
     foreach ($testArray as $before => $after) {
       self::assertSame($after, $this->security->xss_clean($before), 'testing: ' . $before);
       self::assertFalse($this->security->isXssFound(), 'testing: ' . $before . ' | ' . $after);
     }
+
+    $this->antiXss->addEvilAttributes((['style'])); // re-disallow style-attributes
   }
 
   public function test_xss_clean()
