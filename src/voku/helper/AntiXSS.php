@@ -2295,6 +2295,15 @@ final class AntiXSS
       return '';
     }
 
+    // hack for style attributes v1
+    if ($search === 'href') {
+      \preg_match("/style=\".*?\"/i", $match[0], $match_style);
+      $match_style_matched = (\count($match_style) > 0);
+      if ($match_style_matched) {
+        $match[0] = \str_replace($match_style[0], $this->_xss_hash . '::STYLE', $match[0]);
+      }
+    }
+    
     // init
     $replacer = $this->_filter_attributes(\str_replace(['<', '>',], '', $match[1]));
     $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
@@ -2309,7 +2318,16 @@ final class AntiXSS
       );
     }
 
-    return \str_ireplace($match[1], $replacer, $match[0]);
+    $return = \str_ireplace($match[1], $replacer, $match[0]);
+
+    // hack for style attributes v2
+    if ($search === 'href') {
+      if ($match_style_matched) {
+        $return = \str_replace($this->_xss_hash . '::STYLE', $match_style[0], $return);
+      }
+    }
+
+    return $return;
   }
 
   /**
