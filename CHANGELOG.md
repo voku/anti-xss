@@ -1,8 +1,12 @@
 # Changelog
 
+### 4.0.3 (2018-04-12)
+
+- fix "href is getting stripped" #30
+
 ### 4.0.2 (2018-02-14)
 
-- fix "URL escaping bug"
+- fix "URL escaping bug" #29
 
 ### 4.0.1 (2018-01-07)
 
