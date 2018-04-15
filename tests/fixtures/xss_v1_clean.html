@@ -5,9 +5,9 @@
 
   &lt;META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-7"&gt;
 
-  &lt;meta http-equiv="refresh" content="document.vulnerable=true;"&gt;
+  &lt;meta http-equiv="refresh" content="0;url=document.vulnerable=true;"&gt;
 
-  &lt;META HTTP-EQUIV="Set-Cookie" Content="document.vulnerable=true"&gt;
+  &lt;META HTTP-EQUIV="Set-Cookie" Content="USERID=document.vulnerable=true"&gt;
 
   &lt;BASE HREF="document.vulnerable=true;//"&gt;
 
@@ -151,15 +151,15 @@ exp/*<A >XSS</A>
 
 &lt;xml id="X"&gt;&lt;a><b>document.vulnerable=true;;</b></a>&lt;/xml&gt;
 
-&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">]]</C></X>&lt;/xml&gt;&lt;SPAN #I C HTML></SPAN>
+&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">]]</C></X>&lt;/xml&gt;&lt;SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
 
-&lt;XML ID="xss"&gt;&lt;I><B><IMG src=""></B></I>&lt;/XML&gt;&lt;SPAN "#xss" "B" "HTML"></SPAN>
+&lt;XML ID="xss"&gt;&lt;I><B><IMG src=""></B></I>&lt;/XML&gt;&lt;SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"></SPAN>
 
 &lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time">&lt;?import namespace="t" implementation="#default#time2">< attributeName="innerHTML" to="XSSdocument.vulnerable=true">
 
 &lt;!-- div --&gt;
 
-<div "b" "html" "#X"></div>
+<div datafld="b" dataformatas="html" datasrc="#X"></div>
 
 <DIV >
   <DIV >XSS</DIV>
@@ -184,9 +184,7 @@ exp/*<A >XSS</A>
 
 &lt;!-- text --&gt;
 
-<p>alert&#40;1&#41;</p>
-
-<p><img src="">
+<p>"alert&#40;1&#41;"</p>
 
 &lt;XSS &gt;
 
@@ -198,11 +196,7 @@ exp/*<A >XSS</A>
 
 <p><a >alert&#40;1&#41;">link3</a></p>
 
-<p><a >alert&#40;1&#41;">link4 >alert&#40;1&#41;</a></p>
-
-&lt;!-- images + text --&gt;
-
-<p><img src="" /></p>
+<p><a >alert&#40;1&#41;">link4 &gt;"" /></p>
 
 <p><img src="" /></p>
 

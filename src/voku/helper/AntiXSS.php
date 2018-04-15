@@ -1787,13 +1787,10 @@ final class AntiXSS
       'onWebKitTransitionEnd',
       'onWheel',
       'seekSegmentTime',
-      'userid',
-      'datasrc',
-      'datafld',
-      'dataformatas',
       'ev:handler',
       'ev:event',
-      '0;url',
+      '&lt;script&gt;',
+      '&lt;/script&gt;',
   );
 
   /**
@@ -1856,13 +1853,6 @@ final class AntiXSS
   );
 
   /**
-   * XSS Hash - random Hash for protecting URLs.
-   *
-   * @var  string
-   */
-  private $_xss_hash;
-
-  /**
    * The replacement-string for not allowed strings.
    *
    * @var string
@@ -1911,7 +1901,7 @@ final class AntiXSS
    */
   private function _compact_exploded_words_callback($matches)
   {
-    return preg_replace('/(?:\s+|"|\042|\'|\047|\+)*+/', '', $matches[1]) . $matches[2];
+    return \preg_replace('/(?:\s+|"|\042|\'|\047|\+)*+/', '', $matches[1]) . $matches[2];
   }
 
   /**
@@ -1924,26 +1914,26 @@ final class AntiXSS
   private function _decode_entity($match)
   {
     // init
-    $this->_xss_hash();
+    $str = $match[0];
 
-    $match = $match[0];
+    // protect GET variables without XSS in URLs
+    if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(\"|\042|'|\047)([^\\1]*?)\\1/", $str, $matches)) {
+      if (isset($matches[2])) {
+        foreach ($matches[2] as $matchInner) {
+          $tmpAntiXss = clone $this;
 
-    // protect GET variables in URLs
-    $match = preg_replace('|\?([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_FIRST' . '\\1=\\2', $match);
-    $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_NEXT' . '\\1=\\2', $match);
+          $urlPartDecoded = $this->_entity_decode($matchInner);
+          $tmpAntiXss->xss_clean($urlPartDecoded);
+          if ($tmpAntiXss->isXssFound() === true) {
+            $str = \str_replace($matchInner, $urlPartDecoded, $str);
+          }
+        }
+      }
+    } else {
+      $str = $this->_entity_decode(UTF8::rawurldecode($str));
+    }
 
-    // un-protect URL GET vars
-    return str_replace(
-        array(
-            $this->_xss_hash . '::GET_FIRST',
-            $this->_xss_hash . '::GET_NEXT',
-        ),
-        array(
-            '?',
-            '&',
-        ),
-        $this->_entity_decode($match)
-    );
+    return $str;
   }
 
   /**
@@ -2066,7 +2056,7 @@ final class AntiXSS
 
     if (null === $NEVER_ALLOWED_STR_AFTERWARDS_CACHE) {
       foreach (self::$_never_allowed_str_afterwards as &$neverAllowedStr) {
-        $neverAllowedStr .= '.*=';
+        $neverAllowedStr .= '.*(?:=|%3D)';
       }
 
       $NEVER_ALLOWED_STR_AFTERWARDS_CACHE = implode('|', self::$_never_allowed_str_afterwards);
@@ -2096,11 +2086,7 @@ final class AntiXSS
         ENT_QUOTES;
 
     // decode
-    if (strpos($str, $this->_xss_hash) !== false) {
-      $str = UTF8::html_entity_decode($str, $flags);
-    } else {
-      $str = UTF8::rawurldecode($str);
-    }
+    $str = UTF8::html_entity_decode($str, $flags);
 
     // decode-again, for e.g. HHVM, PHP 5.3, miss configured applications ...
     if (preg_match_all('/&[A-Za-z]{2,}[;]{0}/', $str, $matches)) {
@@ -2206,15 +2192,7 @@ final class AntiXSS
     }
 
     $out = '';
-    if (
-        preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)
-        ||
-        (
-            $this->_replacement
-            &&
-            preg_match_all('#\s*[a-zA-Z\-]+\s*=' . preg_quote($this->_replacement, '#') . '$#', $str, $matches)
-        )
-    ) {
+    if (preg_match_all('#\s*[A-Za-z0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)) {
       foreach ($matches[0] as $match) {
         $out .= $match;
       }
@@ -2263,7 +2241,7 @@ final class AntiXSS
    */
   private function _js_link_removal_callback($match)
   {
-    return $this->_js_removal_calback($match, 'href');
+    return $this->_js_removal_callback($match, 'href');
   }
 
   /**
@@ -2281,7 +2259,7 @@ final class AntiXSS
    *
    * @return string
    */
-  private function _js_removal_calback($match, $search)
+  private function _js_removal_callback($match, $search)
   {
     if (!$match[0]) {
       return '';
@@ -2292,7 +2270,7 @@ final class AntiXSS
       \preg_match("/style=\".*?\"/i", $match[0], $match_style);
       $match_style_matched = (\count($match_style) > 0);
       if ($match_style_matched) {
-        $match[0] = \str_replace($match_style[0], $this->_xss_hash . '::STYLE', $match[0]);
+        $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
       }
     }
 
@@ -2315,7 +2293,7 @@ final class AntiXSS
     // hack for style attributes v2
     if ($search === 'href') {
       if ($match_style_matched) {
-        $return = \str_replace($this->_xss_hash . '::STYLE', $match_style[0], $return);
+        $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
       }
     }
 
@@ -2338,7 +2316,7 @@ final class AntiXSS
    */
   private function _js_src_removal_callback($match)
   {
-    return $this->_js_removal_calback($match, 'src');
+    return $this->_js_removal_callback($match, 'src');
   }
 
   /**
@@ -2419,6 +2397,7 @@ final class AntiXSS
     $words = array(
         'javascript',
         'expression',
+        'ｅｘｐｒｅｓｓｉｏｎ',
         'view-source',
         'vbscript',
         'jscript',
@@ -2891,35 +2870,20 @@ final class AntiXSS
       return $str;
     }
 
+    $old_str_backup = $str;
+
     // process
     do {
       $old_str = $str;
       $str = $this->_do($str);
     } while ($old_str !== $str);
 
-    return $str;
-  }
-
-  /**
-   * Generates the XSS hash if needed and returns it.
-   *
-   * @return string <p>XSS hash</p>
-   */
-  private function _xss_hash()
-  {
-    if ($this->_xss_hash === null) {
-      $rand = Bootup::get_random_bytes(16);
-
-      if (!$rand) {
-        $this->_xss_hash = md5(uniqid(mt_rand(), true));
-      } else {
-        $this->_xss_hash = bin2hex($rand);
-      }
-
-      $this->_xss_hash = 'voku::anti-xss::' . $this->_xss_hash;
+    // keep the old encoding, if there wasn't any XSS attack
+    if ($this->xss_found !== true) {
+      $str = $old_str_backup;
     }
 
-    return $this->_xss_hash;
+    return (string)$str;
   }
 
 }
