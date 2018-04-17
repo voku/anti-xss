@@ -1788,9 +1788,8 @@ final class AntiXSS
       'onWebKitFullScreenError',
       'onWebKitTransitionEnd',
       'onWheel',
-      'ev:handler',
-      'ev:event',
-      '0;url',
+      '&lt;script&gt;',
+      '&lt;/script&gt;',
   ];
 
   /**
@@ -1806,10 +1805,6 @@ final class AntiXSS
       'form',
       'xlink:href',
       'seekSegmentTime',
-      'userid',
-      'datasrc',
-      'datafld',
-      'dataformatas',
       'FSCommand',
   ];
 
@@ -1857,13 +1852,6 @@ final class AntiXSS
       'xml',
       'xss',
   ];
-
-  /**
-   * XSS Hash - random Hash for protecting URLs.
-   *
-   * @var  string
-   */
-  private $_xss_hash;
 
   /**
    * The replacement-string for not allowed strings.
@@ -1927,26 +1915,26 @@ final class AntiXSS
   private function _decode_entity(array $match): string
   {
     // init
-    $this->_xss_hash();
-
     $str = $match[0];
 
-    // protect GET variables in URLs
-    $str = (string)\preg_replace('|\?([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_FIRST' . '\\1=\\2', $str);
-    $str = (string)\preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->_xss_hash . '::GET_NEXT' . '\\1=\\2', $str);
+    // protect GET variables without XSS in URLs
+    if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(\"|\042|'|\047)([^\\1]*?)\\1/", $str, $matches)) {
+      if (isset($matches[2])) {
+        foreach ($matches[2] as $matchInner) {
+          $tmpAntiXss = clone $this;
 
-    // un-protect URL GET vars
-    return \str_replace(
-        [
-            $this->_xss_hash . '::GET_FIRST',
-            $this->_xss_hash . '::GET_NEXT',
-        ],
-        [
-            '?',
-            '&',
-        ],
-        $this->_entity_decode($str)
-    );
+          $urlPartDecoded = $this->_entity_decode($matchInner);
+          $tmpAntiXss->xss_clean($urlPartDecoded);
+          if ($tmpAntiXss->isXssFound() === true) {
+            $str = \str_replace($matchInner, $urlPartDecoded, $str);
+          }
+        }
+      }
+    } else {
+      $str = $this->_entity_decode(UTF8::rawurldecode($str));
+    }
+
+    return $str;
   }
 
   /**
@@ -2079,7 +2067,7 @@ final class AntiXSS
 
     if (null === $NEVER_ALLOWED_STR_AFTERWARDS_CACHE) {
       foreach (self::$_never_allowed_str_afterwards as &$neverAllowedStr) {
-        $neverAllowedStr .= '.*=';
+        $neverAllowedStr .= '.*(?:=|%3D)';
       }
       unset($neverAllowedStr);
 
@@ -2105,11 +2093,7 @@ final class AntiXSS
     $flags = ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE;
 
     // decode
-    if (strpos($str, $this->_xss_hash) !== false) {
-      $str = UTF8::html_entity_decode($str, $flags);
-    } else {
-      $str = UTF8::rawurldecode($str);
-    }
+    $str = UTF8::html_entity_decode($str, $flags);
 
     // decode-again, for e.g. HHVM or miss configured applications ...
     if (preg_match_all('/&[A-Za-z]{2,}[;]{0}/', $str, $matches)) {
@@ -2215,15 +2199,7 @@ final class AntiXSS
     }
 
     $out = '';
-    if (
-        \preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)
-        ||
-        (
-            $this->_replacement
-            &&
-            \preg_match_all('#\s*[a-zA-Z\-]+\s*=' . \preg_quote($this->_replacement, '#') . '$#', $str, $matches)
-        )
-    ) {
+    if (\preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)) {
       foreach ($matches[0] as $match) {
         $out .= $match;
       }
@@ -2300,10 +2276,10 @@ final class AntiXSS
       \preg_match("/style=\".*?\"/i", $match[0], $match_style);
       $match_style_matched = (\count($match_style) > 0);
       if ($match_style_matched) {
-        $match[0] = \str_replace($match_style[0], $this->_xss_hash . '::STYLE', $match[0]);
+        $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
       }
     }
-    
+
     // init
     $replacer = $this->_filter_attributes(\str_replace(['<', '>',], '', $match[1]));
     $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
@@ -2323,7 +2299,7 @@ final class AntiXSS
     // hack for style attributes v2
     if ($search === 'href') {
       if ($match_style_matched) {
-        $return = \str_replace($this->_xss_hash . '::STYLE', $match_style[0], $return);
+        $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
       }
     }
 
@@ -2427,6 +2403,7 @@ final class AntiXSS
     $words = [
         'javascript',
         'expression',
+        'ｅｘｐｒｅｓｓｉｏｎ',
         'view-source',
         'vbscript',
         'jscript',
@@ -2898,13 +2875,9 @@ final class AntiXSS
    *    vulnerabilities along with a few other hacks I've
    *    harvested from examining vulnerabilities in other programs.
    *
-   * @param string|array $str <p>input data e.g. string or array</p>
+   * @param mixed|array $str <p>input data e.g. string or array of strings</p>
    *
-   * @return string|array|boolean <p>
-   *                              boolean: will return a boolean, if the "is_image"-parameter is true<br />
-   *                              string: will return a string, if the input is a string<br />
-   *                              array: will return a array, if the input is a array<br />
-   *                              </p>
+   * @return mixed
    */
   public function xss_clean($str)
   {
@@ -2920,36 +2893,19 @@ final class AntiXSS
       return $str;
     }
 
+    $old_str_backup = $str;
+
     // process
     do {
       $old_str = $str;
       $str = $this->_do($str);
     } while ($old_str !== $str);
 
+    // keep the old value, if there wasn't any XSS attack
+    if ($this->xss_found !== true) {
+      $str = $old_str_backup;
+    }
+
     return $str;
   }
-
-  /**
-   * Generates the XSS hash if needed and returns it.
-   */
-  private function _xss_hash()
-  {
-    if ($this->_xss_hash === null) {
-
-      try {
-        $rand = \random_bytes(16);
-      } catch (\Exception $e) {
-        $rand = false;
-      }
-
-      if (!$rand) {
-        $this->_xss_hash = \md5(\uniqid(\mt_rand(), true));
-      } else {
-        $this->_xss_hash = \bin2hex($rand);
-      }
-
-      $this->_xss_hash = 'voku::anti-xss::' . $this->_xss_hash;
-    }
-  }
-
 }

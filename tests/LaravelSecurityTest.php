@@ -91,7 +91,7 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         ],
         [
             '<iframe/src="data:text/html,<iframe%09onload=confirm(1);>">',
-            '&lt;iframe/src="data:text/html,&lt;iframe	[removed]>">',
+            '&lt;iframe/src="data:text/html,&lt;iframe	[removed]confirm&#40;1&#41;;>">',
         ],
         [
             '<math><a/xlink:href=javascript:prompt(1)>X',
@@ -147,7 +147,7 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         ],
         [
             '<meta/http-equiv="refresh"/content="0;url=javascript&Tab;:&Tab;void(alert(0))?0:0,0,prompt(0)">',
-            '&lt;meta/http-equiv="refresh"/content="[removed][removed]	void(alert&#40;0&#41;)?0:0,0,prompt&#40;0&#41;"&gt;'
+            '&lt;meta/http-equiv="refresh"/content="0;url=[removed]	void(alert&#40;0&#41;)?0:0,0,prompt&#40;0&#41;"&gt;'
         ],
         [
             '<script src="h&Tab;t&Tab;t&Tab;p&Tab;s&colon;/&Tab;/&Tab;http://dl.dropbox.com/u/13018058/js.js"></script>',

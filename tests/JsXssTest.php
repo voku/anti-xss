@@ -32,12 +32,12 @@ class JsXssTest extends \PHPUnit\Framework\TestCase
 
     // 兼容各种奇葩输入
     self::assertSame('', $this->security->xss_clean(''));
-    self::assertSame('', $this->security->xss_clean(null));
-    self::assertSame('123', $this->security->xss_clean(123));
+    self::assertSame(null, $this->security->xss_clean(null));
+    self::assertSame(123, $this->security->xss_clean(123));
     self::assertSame('{a: 1111}', $this->security->xss_clean('{a: 1111}'));
 
     // 清除不可见字符
-    self::assertSame("a\r\n b", $this->security->xss_clean("a\u0000\u0001\u0002\u0003\r\n b"));
+    self::assertSame("a\u0000\u0001\u0002\u0003\r\n b", $this->security->xss_clean("a\u0000\u0001\u0002\u0003\r\n b"));
 
     // 过滤不在白名单的标签
     self::assertSame('<b>abcd</b>', $this->security->xss_clean('<b>abcd</b>'));
@@ -196,7 +196,7 @@ class JsXssTest extends \PHPUnit\Framework\TestCase
     // HTML5新增实体编码 冒号&colon; 换行&NewLine;
     self::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
     self::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
-    self::assertSame("<a href=\"a\nb\">", $this->security->xss_clean('<a href="a&NewLine;b">'));
+    self::assertSame("<a href=\"a&NewLine;b\">", $this->security->xss_clean('<a href="a&NewLine;b">'));
     self::assertSame('<a href="a&NewLineb">', $this->security->xss_clean('<a href="a&NewLineb">'));
     self::assertSame('<a href="">', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
 
