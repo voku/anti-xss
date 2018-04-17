@@ -2848,13 +2848,9 @@ final class AntiXSS
    *    vulnerabilities along with a few other hacks I've
    *    harvested from examining vulnerabilities in other programs.
    *
-   * @param string|array $str <p>input data e.g. string or array</p>
+   * @param mixed $str <p>input data e.g. string or array of strings</p>
    *
-   * @return string|array|boolean <p>
-   *                              boolean: will return a boolean, if the "is_image"-parameter is true<br />
-   *                              string: will return a string, if the input is a string<br />
-   *                              array: will return a array, if the input is a array<br />
-   *                              </p>
+   * @return mixed
    */
   public function xss_clean($str)
   {
@@ -2862,7 +2858,7 @@ final class AntiXSS
     $this->xss_found = null;
 
     // check for an array of strings
-    if (is_array($str) === true) {
+    if (\is_array($str) === true) {
       foreach ($str as $key => &$value) {
         $str[$key] = $this->xss_clean($value);
       }
