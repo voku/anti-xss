@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.0 (2018-04-17)
+
+- keep the input value (+ encoding), if no xss was detected #32
+
 ### 4.0.3 (2018-04-12)
 
 - fix "href is getting stripped" #30
