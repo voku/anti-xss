@@ -2711,7 +2711,7 @@ final class AntiXSS
   /**
    * Additional UTF-7 decoding function.
    *
-   * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
+   * @param array $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
    *
    * @return string
    */
@@ -2720,7 +2720,10 @@ final class AntiXSS
     $strTmp = \base64_decode($str[1]);
 
     if ($strTmp === false) {
-      return $str;
+      return $str[0]; //return original string insted of array
+    }
+    if(base64_encode($strTmp)!==$str){ //if reencoded != original  - string is not utf7
+      return $str[0]; //return original string insted of array
     }
 
     $str = (string)\preg_replace_callback(
