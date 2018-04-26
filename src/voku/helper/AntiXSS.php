@@ -2275,7 +2275,7 @@ final class AntiXSS
 
     // hack for style attributes v1
     if ($search === 'href') {
-      \preg_match("/style=\".*?\"/i", $match[0], $match_style);
+      \preg_match('/style=".*?"/i', $match[0], $match_style);
       $match_style_matched = (\count($match_style) > 0);
       if ($match_style_matched) {
         $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
