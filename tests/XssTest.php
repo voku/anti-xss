@@ -61,6 +61,7 @@ class XssTest extends \PHPUnit\Framework\TestCase
       0 => 0,
       '0.0' => '0.0',
       'GOM-KC-350+550' => 'GOM-KC-350+550',
+      'Chassis+FanTray10G-VSS' => 'Chassis+FanTray10G-VSS', // issue #34
       '3+ years of experience' => '3+ years of experience',
       ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9" => ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9",
       " foo\t foo " => ' foo	 foo ',
