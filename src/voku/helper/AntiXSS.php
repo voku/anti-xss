@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace voku\helper;
 
 /**
@@ -11,7 +13,7 @@ namespace voku\helper;
  * @author      Lars Moelleken
  * @copyright   Copyright (c) 2008 - 2014, EllisLab, Inc. (http://ellislab.com/)
  * @copyright   Copyright (c) 2014 - 2015, British Columbia Institute of Technology (http://bcit.ca/)
- * @copyright   Copyright (c) 2015 - 2017, Lars Moelleken (https://moelleken.org/)
+ * @copyright   Copyright (c) 2015 - 2018, Lars Moelleken (https://moelleken.org/)
  *
  * @license     http://opensource.org/licenses/MIT	MIT License
  */
@@ -1543,7 +1545,7 @@ final class AntiXSS
     // default javascript
     'javascript\s*:',
     // default javascript
-    '(document|(document\.)?window)\.(location|on\w*)',
+    '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
     // Java: jar-protocol is an XSS hazard
     'jar\s*:',
     // Mac (will not run the script, but open it in AppleScript Editor)
@@ -2207,20 +2209,22 @@ final class AntiXSS
   private function _initNeverAllowedStr()
   {
     $this->_never_allowed_str = array(
-        'document.cookie' => $this->_replacement,
-        'document.write'  => $this->_replacement,
-        '.parentNode'     => $this->_replacement,
-        '.innerHTML'      => $this->_replacement,
-        '.appendChild'    => $this->_replacement,
-        '-moz-binding'    => $this->_replacement,
-        '<!--'            => '&lt;!--',
-        '-->'             => '--&gt;',
-        '<?'              => '&lt;?',
-        '?>'              => '?&gt;',
-        '<![CDATA['       => '&lt;![CDATA[',
-        '<!ENTITY'        => '&lt;!ENTITY',
-        '<!DOCTYPE'       => '&lt;!DOCTYPE',
-        '<!ATTLIST'       => '&lt;!ATTLIST',
+        'document.cookie'   => $this->_replacement,
+        '(document).cookie' => $this->_replacement,
+        'document.write'    => $this->_replacement,
+        '(document).write'  => $this->_replacement,
+        '.parentNode'       => $this->_replacement,
+        '.innerHTML'        => $this->_replacement,
+        '.appendChild'      => $this->_replacement,
+        '-moz-binding'      => $this->_replacement,
+        '<!--'              => '&lt;!--',
+        '-->'               => '--&gt;',
+        '<?'                => '&lt;?',
+        '?>'                => '?&gt;',
+        '<![CDATA['         => '&lt;![CDATA[',
+        '<!ENTITY'          => '&lt;!ENTITY',
+        '<!DOCTYPE'         => '&lt;!DOCTYPE',
+        '<!ATTLIST'         => '&lt;!ATTLIST',
         '<comment>'       => '&lt;comment&gt;',
     );
   }
@@ -2276,7 +2280,7 @@ final class AntiXSS
 
     // init
     $replacer = $this->_filter_attributes(str_replace(array('<', '>',), '', $match[1]));
-    $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|document\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
+    $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
 
     $matchInner = array();
     preg_match($pattern, $match[1], $matchInner);
@@ -2684,25 +2688,29 @@ final class AntiXSS
   /**
    * Additional UTF-7 decoding function.
    *
-   * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
+   * @param string[] $strings <p>Array of strings for recode ASCII part of UTF-7 back to ASCII.</p>
    *
    * @return string
    */
-  private function _repack_utf7_callback($str)
+  private function _repack_utf7_callback($strings)
   {
-    $strTmp = base64_decode($str[1]);
+    $strTmp = \base64_decode($strings[1]);
 
     if ($strTmp === false) {
-      return $str;
+      return $strings[0];
     }
 
-    $str = preg_replace_callback(
+    if (\rtrim(\base64_encode($strTmp), '=') !== \rtrim($strings[1], '=')) {
+      return $strings[0];
+    }
+
+    $strings = (string)\preg_replace_callback(
         '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
         array($this, '_repack_utf7_callback_back'),
         $strTmp
     );
 
-    return preg_replace('/\x00(.)/us', '$1', $str);
+    return \preg_replace('/\x00(.)/us', '$1', $strings);
   }
 
   /**
