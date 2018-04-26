@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace voku\helper;
 
 /**
@@ -2435,7 +2433,7 @@ final class AntiXSS
 
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
-      $str = preg_replace_callback(
+      $str = (string)\preg_replace_callback(
           '#(' . $word . ')(\W)#is',
           array(
               $this,
@@ -2461,7 +2459,7 @@ final class AntiXSS
     $regExForHtmlTags = '/<\w+.*+/si';
 
     if (preg_match($regExForHtmlTags, $str, $matches) === 1) {
-      $str = preg_replace_callback(
+      $str = (string)\preg_replace_callback(
           $regExForHtmlTags,
           array(
               $this,
@@ -2558,7 +2556,7 @@ final class AntiXSS
       $original = $str;
 
       if (stripos($str, '<a') !== false) {
-        $str = preg_replace_callback(
+        $str = (string)\preg_replace_callback(
             '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i',
             array(
                 $this,
@@ -2569,7 +2567,7 @@ final class AntiXSS
       }
 
       if (stripos($str, '<img') !== false) {
-        $str = preg_replace_callback(
+        $str = (string)\preg_replace_callback(
             '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             array(
                 $this,
@@ -2580,7 +2578,7 @@ final class AntiXSS
       }
 
       if (stripos($str, '<audio') !== false) {
-        $str = preg_replace_callback(
+        $str = (string)\preg_replace_callback(
             '#<audio[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             array(
                 $this,
@@ -2591,7 +2589,7 @@ final class AntiXSS
       }
 
       if (stripos($str, '<video') !== false) {
-        $str = preg_replace_callback(
+        $str = (string)\preg_replace_callback(
             '#<video[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             array(
                 $this,
@@ -2602,7 +2600,7 @@ final class AntiXSS
       }
 
       if (stripos($str, '<source') !== false) {
-        $str = preg_replace_callback(
+        $str = (string)\preg_replace_callback(
             '#<source[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
             array(
                 $this,
@@ -2678,7 +2676,7 @@ final class AntiXSS
    */
   private function _repack_utf7($str)
   {
-    return preg_replace_callback(
+    return (string)\preg_replace_callback(
         '#\+([0-9a-zA-Z]+)\-#',
         array($this, '_repack_utf7_callback'),
         $str
@@ -2748,7 +2746,7 @@ final class AntiXSS
   private function _sanitize_naughty_html($str)
   {
     $evil_html_tags = \implode('|', $this->_evil_html_tags);
-    $str = \preg_replace_callback(
+    $str = (string)\preg_replace_callback(
         '#<(/*\s*)(' . $evil_html_tags . ')([^><]*)([><]*)#i',
         array(
             $this,
