@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.1 (2018-04-26)
+
+- "UTF7 repack corrected" | thx @alechner #34
+
 ### 4.1.0 (2018-04-17)
 
 - keep the input value (+ encoding), if no xss was detected #32
