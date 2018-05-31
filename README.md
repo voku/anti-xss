@@ -49,6 +49,11 @@ Usage:
 ======
 
 ```php
+
+use voku\helper\AntiXSS;
+
+require_once __DIR__ . '/vendor/autoload.php'; // example path
+
 $antiXss = new AntiXSS();
 ```
 
