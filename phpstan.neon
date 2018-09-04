@@ -1,0 +1,8 @@
+parameters:
+    excludes_analyse:
+        - %rootDir%/vendor/*
+        - %rootDir%/tests/*
+    autoload_files:
+        - %rootDir%/vendor/autoload.php
+    ignoreErrors:
+        - '#Casting to .* something .* already#'

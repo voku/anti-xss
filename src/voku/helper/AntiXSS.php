@@ -2273,11 +2273,15 @@ final class AntiXSS
       return '';
     }
 
+    // init
+    $match_style_matched = false;
+    $match_style = array();
+
     // hack for style attributes v1
     if ($search === 'href') {
       \preg_match('/style=".*?"/i', $match[0], $match_style);
       $match_style_matched = (\count($match_style) > 0);
-      if ($match_style_matched) {
+      if ($match_style_matched === true) {
         $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
       }
     }
@@ -2296,11 +2300,11 @@ final class AntiXSS
       );
     }
 
-    $return = \str_ireplace($match[1], $replacer, $match[0]);
+    $return = \str_ireplace($match[1], $replacer, (string)$match[0]);
 
     // hack for style attributes v2
     if ($search === 'href') {
-      if ($match_style_matched) {
+      if ($match_style_matched === true) {
         $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
       }
     }
@@ -2483,7 +2487,7 @@ final class AntiXSS
   /**
    * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
    *
-   * @return bool|null <p>Will return null if the "xss_clean()" wan't running at all.</p>
+   * @return bool|null Will return null if the "xss_clean()" wan't running at all.
    */
   public function isXssFound()
   {
@@ -2645,7 +2649,7 @@ final class AntiXSS
    *
    * @param string $str <p>The string to check.</p>
    *
-   * @return string <p>The string with the evil attributes removed.</p>
+   * @return string The string with the evil attributes removed.
    */
   private function _remove_evil_attributes($str): string
   {
@@ -2843,7 +2847,7 @@ final class AntiXSS
    * INFO: use it if your DB (MySQL) can't use "utf8mb4" -> preventing stored XSS-attacks
    * </p>
    *
-   * @param $bool
+   * @param bool $bool
    *
    * @return $this
    */
