@@ -3,8 +3,12 @@ language: php
 
 sudo: false
 
-php:
-  - nightly
+git:
+  depth: 2
+
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 matrix:
   fast_finish: true
@@ -22,6 +26,10 @@ matrix:
     - php: 7.2
       env: extension='true'
     - php: 7.2
+      env: extension='false'
+    - php: nightly
+      env: extension='true'
+    - php: nightly
       env: extension='false'
 
 before_script:
