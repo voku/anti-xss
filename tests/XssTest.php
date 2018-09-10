@@ -537,6 +537,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
       '<div data-role=popup id=\'--><script>alert(1)</script>\'></div>' => '<div data-role=popup id=\'--&gt;alert&#40;1&#41;\'></div>', // Bypassing sanitizers via jQuery Mobile
       '<div data-bind="html:\'<script src=&quot;//evil.com&quot;></script>\'"></div>' => '<div data-bind="html:\'\'"></div>', // Bypassing sanitizers via Knockout
       "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n" => "\n><!-\n<b\n<c d=\"'e>&lt;iframe  src=x&gt;\n<a HREF=\"\">\n", // CodeIgniter 2017-01 - https://github.com/bcit-ci/CodeIgniter/commit/2ab1c1902711c8b0caf5c3e8f2fa825d72f6755d
+      "<x/><title>&amp;lt;/title&amp;gt;&amp;lt;img src=1 onerror=alert(1)&amp;gt;" => '<x/>&lt;title&gt;&lt;/title><img >', // "Bypassing DOMPurify with mXSS" - http://www.thespanner.co.uk/2018/07/29/bypassing-dompurify-with-mxss/
       // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
       //
       // Spacers
