@@ -685,7 +685,7 @@ textContent>click me!',
     );
   }
 
-  public function testAwsomeXssCollection() {
+  public function testAwesomeXssCollection() {
     $testString = '
     <details open ontoggle=confirm()>
     <script y="><">/*<script* */prompt()</script
