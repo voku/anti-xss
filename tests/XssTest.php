@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use voku\helper\AntiXSS;
 use voku\helper\Bootup;
 use voku\helper\UTF8;
@@ -587,7 +589,13 @@ alert&#40;1&#41;',
 textContent>click me!' => 'p=%26p=%26lt;svg/alert&#40;1&#41;><j 
 textContent>click me!',
       'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>' => 'p=<j >&p=&lt;svg/&gt;',
-
+      '<object data=javascript:confirm()><a href=javascript:confirm()>click here<script src=//14.rs></script><script>confirm()</script>' => '&lt;object data=confirm&#40;&#41;&gt;&lt;a >click hereconfirm&#40;&#41;', // Without event handlers
+      '<svg/onload=confirm()><iframe/src=javascript:alert(1)>' => '&lt;svg/&gt;&lt;iframe/src=alert&#40;1&#41;>', // Without space (https://github.com/s0md3v/AwesomeXSS)
+      '<svg onload=confirm()><img src=x onerror=confirm()>' => '&lt;svg &gt;&lt;img >', // Without slash (/)
+      '<script>confirm()</script>' => 'confirm&#40;&#41;', // Without equal sign (=)
+      '<svg onload=confirm()//' => '&lt;svg ', // Without closing angular bracket (>)
+      '<script src=//14.rs></script><svg onload=co\u006efirm()><svg onload=z=co\u006efir\u006d,z()>' => '&lt;svg &gt;&lt;svg >', // Without alert, confirm, prompt
+      '<x onclick=confirm()>click here <x ondrag=aconfirm()>drag it' => '<x >click here <x >drag it', // Without a Valid HTML tag
     );
 
     foreach ($testArray as $before => $after) {
@@ -673,6 +681,48 @@ textContent>click me!',
     self::assertSame(
         str_replace(array("\n\r", "\r\n", "\n"), "\n", $resultString),
         str_replace(array("\n\r", "\r\n", "\n"), "\n", $this->antiXss->xss_clean($testString)),
+        'testing: ' . $testString
+    );
+  }
+
+  public function testAwsomeXssCollection() {
+    $testString = '
+    <details open ontoggle=confirm()>
+    <script y="><">/*<script* */prompt()</script
+    <w="/x="y>"/ondblclick=`<`[confir\u006d``]>z
+    <a href="javascript%26colon;alert(1)">click
+    <script/"<a"/src=data:=".<a,[8].some(confirm)>
+    <svg/x=">"/onload=confirm()//
+    <--`<img/src=` onerror=confirm``> --!>
+    <svg%0Aonload=%09((pro\u006dpt))()//
+    <sCript x>(((confirm)))``</scRipt x>
+    <svg </onload ="1> (_=prompt,_(1)) "">
+    <!--><script src=//14.rs>
+    <embed src=//14.rs>
+    <script x=">" src=//15.rs></script>
+    <!\'/*"/*/\'/*/"/*--></Script><Image SrcSet=K */; OnError=confirm`1` //>
+    <iframe/src \/\/onload = prompt(1)
+    <x oncut=alert()>x
+    <svg onload=write()>
+    ';
+
+    $resultStringOrig = '
+    <details open >
+    <">/*"/`<`[confir\u006d``]>z
+    <a href="">click
+    
+    &lt;svg/x="&gt;"/confirm&#40;&#41;//
+    <--`<img/> --!>
+    <> (_=>
+    &>
+    " >
+    <!\'/*"/*/\'/*/"/*--&/>
+    <>>
+    ';
+
+    self::assertSame(
+        $resultStringOrig,
+        $this->antiXss->xss_clean($testString),
         'testing: ' . $testString
     );
   }

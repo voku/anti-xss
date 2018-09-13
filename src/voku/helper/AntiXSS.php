@@ -1589,12 +1589,14 @@ final class AntiXSS
       'onAfterPrint',
       'onAfterScriptExecute',
       'onAfterUpdate',
+      'onAnimationCancel',
       'onAnimationEnd',
       'onAnimationIteration',
       'onAnimationStart',
       'onAriaRequest',
       'onAutoComplete',
       'onAutoCompleteError',
+      'onAuxClick',
       'onBeforeActivate',
       'onBeforeCopy',
       'onBeforeCut',
@@ -1776,6 +1778,10 @@ final class AntiXSS
       'onTrackChange',
       'onTransitionEnd',
       'onToggle',
+      'onTouchCancel',
+      'onTouchStart',
+      'onTransitionCancel',
+      'onTransitionEnd',
       'onUnload',
       'onURLFlip',
       'onUserProximity',
@@ -2178,7 +2184,7 @@ final class AntiXSS
       }
 
       if (\count($replace) > 0) {
-        $str = \str_replace(\array_keys($replace), \array_values($replace), $str);
+        $str = \str_replace(\array_keys($replace), $replace, $str);
       }
     }
 
