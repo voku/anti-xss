@@ -1,20 +1,31 @@
 # Changelog
 
+### 4.1.2 (2018-09-13)
+
+- use new version of "Portable UTF8"
+- add some more event listener
+- use PHPStan
+
+
 ### 4.1.1 (2018-04-26)
 
 - "UTF7 repack corrected" | thx @alechner #34
+
 
 ### 4.1.0 (2018-04-17)
 
 - keep the input value (+ encoding), if no xss was detected #32
 
+
 ### 4.0.3 (2018-04-12)
 
 - fix "href is getting stripped" #30
 
+
 ### 4.0.2 (2018-02-14)
 
 - fix "URL escaping bug" #29
+
 
 ### 4.0.1 (2018-01-07)
 
