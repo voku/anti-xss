@@ -27,6 +27,10 @@ matrix:
       env: extension='true'
     - php: 7.2
       env: extension='false'
+    - php: 7.3
+      env: extension='true'
+    - php: 7.3
+      env: extension='false'
     - php: nightly
       env: extension='true'
     - php: nightly
