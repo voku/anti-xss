@@ -2608,7 +2608,7 @@ final class AntiXSS
    */
   private function _repack_utf7(string $str): string
   {
-    return \preg_replace_callback(
+    return (string)\preg_replace_callback(
         '#\+([0-9a-zA-Z]+)\-#',
         [$this, '_repack_utf7_callback'],
         $str
@@ -2640,7 +2640,7 @@ final class AntiXSS
         $strTmp
     );
 
-    return \preg_replace('/\x00(.)/us', '$1', $string);
+    return (string)\preg_replace('/\x00(.)/us', '$1', $string);
   }
 
   /**
