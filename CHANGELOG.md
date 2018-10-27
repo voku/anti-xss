@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.3 (2018-10-28)
+
+- fix for url-decoded stored-xss
+- fix return type (?string -> string)
+
+
 ### 4.1.2 (2018-09-13)
 
 - use new version of "Portable UTF8"
