@@ -91,7 +91,7 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         ],
         [
             '<iframe/src="data:text/html,<iframe%09onload=confirm(1);>">',
-            '&lt;iframe/src="data:text/html,&lt;iframe	[removed]confirm&#40;1&#41;;>">',
+            '&lt;iframe/src="data:text/html,&lt;iframe	[removed]>">',
         ],
         [
             '<math><a/xlink:href=javascript:prompt(1)>X',
@@ -220,11 +220,11 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         ],
         [
             '<foo prefixOnAttribute="bar">',
-            '<foo prefix[removed]"bar">',
+            '<foo prefix[removed]="bar">',
         ],
         [
             "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n",
-            "\n><!-\n<b\n<c d=\"'e>&lt;iframe [removed] src=x&gt;\n<a HREF=\"\">\n",
+            "\n><!-\n<b\n<c d=\"'e>&lt;iframe [removed] src=x&gt;\n<a \"\">\n",
         ],
     ];
   }

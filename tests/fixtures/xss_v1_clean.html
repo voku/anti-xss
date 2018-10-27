@@ -55,7 +55,7 @@
   &document.vulnerable=true;
 
 &lt;/head&gt;document.vulnerable=true;
-&lt;BODY BACKGROUND="document.vulnerable=true;" document.vulnerable=true;&gt;
+&lt;BODY BACKGROUND="document.vulnerable=true;" !#$%&()*~+-_.,:;?@[/|\]^`=document.vulnerable=true;&gt;
 
 &lt;!-- link --&gt;
 
@@ -69,7 +69,7 @@ exp/*<A >XSS</A>
 
 <a href=""></a>
 
-<a >document.vulnerable=true;"></a>
+<a href=""></a>
 
 <A ></A>
 
@@ -121,7 +121,7 @@ exp/*<A >XSS</A>
 
 <img src="">
 
-<img >" ">
+<img >" =">
 
 < dynsrc="">
 
@@ -184,21 +184,27 @@ exp/*<A >XSS</A>
 
 &lt;!-- text --&gt;
 
-<p>"alert&#40;1&#41;"</p>
+<p>alert&#40;1&#41;</p>
+
+<p>&lt;img src="alert&#40;1&#41;"</p>
 
 &lt;XSS &gt;
 
 &lt;!-- link + text --&gt;
 
-<p>foo<a href="">link</a></p>
+<p>foo<a href="http://example.com">link</a></p>
 
-<p><a href="">link2</a></p>
+<p><a href="http://example.com" title="title">link2</a></p>
 
 <p><a >alert&#40;1&#41;">link3</a></p>
 
-<p><a >alert&#40;1&#41;">link4 &gt;"" /></p>
+<p><a >alert&#40;1&#41;">link4 &gt;alert&#40;1&#41;</a></p>
 
-<p><img src="" /></p>
+&lt;!-- images + text --&gt;
+
+<p><img src="http://example.com" alt="img" /></p>
+
+<p><img src="http://example.com" alt="img2" title="text" /></p>
 
 <p><img > alt="img3" /></p>
 

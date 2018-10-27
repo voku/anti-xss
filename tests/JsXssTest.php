@@ -145,7 +145,7 @@ class JsXssTest extends \PHPUnit\Framework\TestCase
 
     self::assertSame('', $this->security->xss_clean('<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'));
 
-    self::assertSame('&lt;BODY alert&#40;"XSS"&#41;&gt;', $this->security->xss_clean('<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>'));
+    self::assertSame('&lt;BODY !#$%&()*~+-_.,:;?@[/|\]^`=alert&#40;"XSS"&#41;&gt;', $this->security->xss_clean('<BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert("XSS")>'));
 
     self::assertSame('&lt;alert&#40;"XSS"&#41;;//&lt;', $this->security->xss_clean('<<SCRIPT>alert("XSS");//<</SCRIPT>'));
 
@@ -210,7 +210,7 @@ class JsXssTest extends \PHPUnit\Framework\TestCase
     self::assertSame('<img src="">', $this->security->xss_clean('<img src="data: aaa/text;">'));
     self::assertSame('<img src="">', $this->security->xss_clean('<img src="data:image/png; base64; ofdkofiodiofl">'));
 
-    self::assertSame('<img >', $this->security->xss_clean('<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">'));
+    self::assertSame('<img src="PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">', $this->security->xss_clean('<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">'));
 
     // HTML备注处理
     self::assertSame('&lt;!--                               --&gt;', $this->security->xss_clean('<!--                               -->'));

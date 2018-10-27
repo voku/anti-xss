@@ -1880,7 +1880,6 @@ final class AntiXSS
    * @var bool
    */
   private $_stripe_4byte_chars = false;
-
   /**
    * @var bool|null
    */
@@ -1892,6 +1891,74 @@ final class AntiXSS
   public function __construct()
   {
     $this->_initNeverAllowedStr();
+  }
+
+  /**
+   * Compact any exploded words.
+   *
+   * <p>
+   * <br />
+   * INFO: This corrects words like:  j a v a s c r i p t
+   * <br />
+   * These words are compacted back to their correct state.
+   * </p>
+   *
+   * @param string $str
+   *
+   * @return string
+   */
+  private function _compact_exploded_javascript(string $str): string
+  {
+    static $WORDS_CACHE;
+
+    $words = [
+        'javascript',
+        'expression',
+        'ｅｘｐｒｅｓｓｉｏｎ',
+        'view-source',
+        'vbscript',
+        'jscript',
+        'wscript',
+        'vbs',
+        'script',
+        'base64',
+        'applet',
+        'alert',
+        'document',
+        'write',
+        'cookie',
+        'window',
+        'confirm',
+        'prompt',
+        'eval',
+    ];
+
+    foreach ($words as $word) {
+
+      if (!isset($WORDS_CACHE[$word])) {
+        $regex = '(?:\s|\+|"|\042|\'|\047)*';
+        $word = $WORDS_CACHE[$word] = \substr(
+            \chunk_split($word, 1, $regex),
+            0,
+            -\strlen($regex)
+        );
+      } else {
+        $word = $WORDS_CACHE[$word];
+      }
+
+      // We only want to do this when it is followed by a non-word character
+      // That way valid stuff like "dealer to" does not become "dealerto".
+      $str = (string)\preg_replace_callback(
+          '#(' . $word . ')(\W)#is',
+          [
+              $this,
+              '_compact_exploded_words_callback',
+          ],
+          $str
+      );
+    }
+
+    return $str;
   }
 
   /**
@@ -1908,7 +1975,11 @@ final class AntiXSS
    */
   private function _compact_exploded_words_callback($matches): string
   {
-    return \preg_replace('/(?:\s+|"|\042|\'|\047|\+)*+/', '', $matches[1]) . $matches[2];
+    return \preg_replace(
+               '/(?:\s+|"|\042|\'|\047|\+)*+/',
+               '',
+               $matches[1]
+           ) . $matches[2];
   }
 
   /**
@@ -1925,19 +1996,51 @@ final class AntiXSS
 
     // protect GET variables without XSS in URLs
     if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(\"|\042|'|\047)([^\\1]*?)\\1/", $str, $matches)) {
+
       if (isset($matches[2])) {
         foreach ($matches[2] as $matchInner) {
           $tmpAntiXss = clone $this;
 
-          $urlPartDecoded = $this->_entity_decode($matchInner);
-          $tmpAntiXss->xss_clean($urlPartDecoded);
+          $urlPartClean = $tmpAntiXss->xss_clean($matchInner);
+
           if ($tmpAntiXss->isXssFound() === true) {
-            $str = \str_replace($matchInner, $urlPartDecoded, $str);
+
+            $this->xss_found = true;
+
+            $str = \str_replace($matchInner, UTF8::rawurldecode($urlPartClean), $str);
           }
         }
       }
     } else {
       $str = $this->_entity_decode(UTF8::rawurldecode($str));
+    }
+
+    return $str;
+  }
+
+  /**
+   * Decode the html-tags via "UTF8::html_entity_decode()" or the string via "UTF8::rawurldecode()".
+   *
+   * @param string $str
+   *
+   * @return string
+   */
+  private function _decode_string(string $str): string
+  {
+    // init
+    $regExForHtmlTags = '/<\w+.*+/si';
+
+    if (\preg_match($regExForHtmlTags, $str, $matches) === 1) {
+      $str = (string)\preg_replace_callback(
+          $regExForHtmlTags,
+          [
+              $this,
+              '_decode_entity',
+          ],
+          $str
+      );
+    } else {
+      $str = UTF8::rawurldecode($str);
     }
 
     return $str;
@@ -2069,18 +2172,11 @@ final class AntiXSS
    */
   private function _do_never_allowed_afterwards(string $str): string
   {
-    static $NEVER_ALLOWED_STR_AFTERWARDS_CACHE;
-
-    if (null === $NEVER_ALLOWED_STR_AFTERWARDS_CACHE) {
-      foreach (self::$_never_allowed_str_afterwards as &$neverAllowedStr) {
-        $neverAllowedStr .= '.*(?:=|%3D)';
-      }
-      unset($neverAllowedStr);
-
-      $NEVER_ALLOWED_STR_AFTERWARDS_CACHE = \implode('|', self::$_never_allowed_str_afterwards);
-    }
-
-    $str = (string)\preg_replace('#' . $NEVER_ALLOWED_STR_AFTERWARDS_CACHE . '#isU', $this->_replacement, $str);
+    $str = (string)\str_ireplace(
+        self::$_never_allowed_str_afterwards,
+        $this->_replacement,
+        $str
+    );
 
     return $str;
   }
@@ -2281,7 +2377,7 @@ final class AntiXSS
 
     // init
     $match_style_matched = false;
-    $match_style = array();
+    $match_style = [];
 
     // hack for style attributes v1
     if ($search === 'href') {
@@ -2309,10 +2405,12 @@ final class AntiXSS
     $return = \str_ireplace($match[1], $replacer, (string)$match[0]);
 
     // hack for style attributes v2
-    if ($search === 'href') {
-      if ($match_style_matched === true) {
-        $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
-      }
+    if (
+        $match_style_matched === true
+        &&
+        $search === 'href'
+    ) {
+      $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
     }
 
     return $return;
@@ -2335,213 +2433,6 @@ final class AntiXSS
   private function _js_src_removal_callback(array $match): string
   {
     return $this->_js_removal_callback($match, 'src');
-  }
-
-  /**
-   * Sanitize naughty HTML.
-   *
-   * <p>
-   * <br />
-   * Callback method for AntiXSS->sanitize_naughty_html() to remove naughty HTML elements.
-   * </p>
-   *
-   * @param array $matches
-   *
-   * @return string
-   */
-  private function _sanitize_naughty_html_callback(array $matches): string
-  {
-    return '&lt;' . $matches[1] . $matches[2] . $matches[3] // encode opening brace
-           // encode captured opening or closing brace to prevent recursive vectors:
-           . \str_replace(
-               [
-                   '>',
-                   '<',
-               ],
-               [
-                   '&gt;',
-                   '&lt;',
-               ],
-               $matches[4]
-           );
-  }
-
-  /**
-   * Add some strings to the "_evil_attributes"-array.
-   *
-   * @param string[] $strings
-   *
-   * @return $this
-   */
-  public function addEvilAttributes(array $strings): self
-  {
-    $this->_evil_attributes = \array_merge($strings, $this->_evil_attributes);
-
-    return $this;
-  }
-
-  /**
-   * Add some strings to the "_evil_html_tags"-array.
-   *
-   * @param string[] $strings
-   *
-   * @return $this
-   */
-  public function addEvilHtmlTags(array $strings): self
-  {
-    $this->_evil_html_tags = \array_merge($strings, $this->_evil_html_tags);
-
-    return $this;
-  }
-
-  /**
-   * Compact any exploded words.
-   *
-   * <p>
-   * <br />
-   * INFO: This corrects words like:  j a v a s c r i p t
-   * <br />
-   * These words are compacted back to their correct state.
-   * </p>
-   *
-   * @param string $str
-   *
-   * @return string
-   */
-  private function _compact_exploded_javascript(string $str): string
-  {
-    static $WORDS_CACHE;
-
-    $words = [
-        'javascript',
-        'expression',
-        'ｅｘｐｒｅｓｓｉｏｎ',
-        'view-source',
-        'vbscript',
-        'jscript',
-        'wscript',
-        'vbs',
-        'script',
-        'base64',
-        'applet',
-        'alert',
-        'document',
-        'write',
-        'cookie',
-        'window',
-        'confirm',
-        'prompt',
-        'eval',
-    ];
-
-    foreach ($words as $word) {
-
-      if (!isset($WORDS_CACHE[$word])) {
-        $regex = '(?:\s|\+|"|\042|\'|\047)*';
-        $word = $WORDS_CACHE[$word] = \substr(
-            \chunk_split($word, 1, $regex),
-            0,
-            -\strlen($regex)
-        );
-      } else {
-        $word = $WORDS_CACHE[$word];
-      }
-
-      // We only want to do this when it is followed by a non-word character
-      // That way valid stuff like "dealer to" does not become "dealerto".
-      $str = (string)\preg_replace_callback(
-          '#(' . $word . ')(\W)#is',
-          [
-              $this,
-              '_compact_exploded_words_callback',
-          ],
-          $str
-      );
-    }
-
-    return $str;
-  }
-
-  /**
-   * Decode the html-tags via "UTF8::html_entity_decode()" or the string via "UTF8::rawurldecode()".
-   *
-   * @param string $str
-   *
-   * @return string
-   */
-  private function _decode_string(string $str): string
-  {
-    // init
-    $regExForHtmlTags = '/<\w+.*+/si';
-
-    if (\preg_match($regExForHtmlTags, $str, $matches) === 1) {
-      $str = (string)\preg_replace_callback(
-          $regExForHtmlTags,
-          [
-              $this,
-              '_decode_entity',
-          ],
-          $str
-      );
-    } else {
-      $str = UTF8::rawurldecode($str);
-    }
-
-    return $str;
-  }
-
-  /**
-   * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
-   *
-   * @return bool|null Will return null if the "xss_clean()" wan't running at all.
-   */
-  public function isXssFound()
-  {
-    return $this->xss_found;
-  }
-
-  /**
-   * Remove some strings from the "_evil_attributes"-array.
-   *
-   * <p>
-   * <br />
-   * WARNING: Use this method only if you have a really good reason.
-   * </p>
-   *
-   * @param string[] $strings
-   *
-   * @return $this
-   */
-  public function removeEvilAttributes(array $strings): self
-  {
-    $this->_evil_attributes = \array_diff(
-        $this->_evil_attributes,
-        \array_intersect($strings, $this->_evil_attributes)
-    );
-
-    return $this;
-  }
-
-  /**
-   * Remove some strings from the "_evil_html_tags"-array.
-   *
-   * <p>
-   * <br />
-   * WARNING: Use this method only if you have a really good reason.
-   * </p>
-   *
-   * @param string[] $strings
-   *
-   * @return $this
-   */
-  public function removeEvilHtmlTags(array $strings): self
-  {
-    $this->_evil_html_tags = \array_diff(
-        $this->_evil_html_tags,
-        \array_intersect($strings, $this->_evil_html_tags)
-    );
-
-    return $this;
   }
 
   /**
@@ -2629,7 +2520,11 @@ final class AntiXSS
 
       if (\stripos($str, 'script') !== false) {
         // US-ASCII: ¼ === <
-        $str = (string)\preg_replace('#(?:¼|<)/*(?:script).*(?:¾|>)#isuU', $this->_replacement, $str);
+        $str = (string)\preg_replace(
+            '#(?:¼|<)/*(?:script).*(?:¾|>)#isuU',
+            $this->_replacement,
+            $str
+        );
       }
     } while ($original !== $str);
 
@@ -2739,13 +2634,13 @@ final class AntiXSS
       return $strings[0];
     }
 
-    $strings = (string)\preg_replace_callback(
+    $string = (string)\preg_replace_callback(
         '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
         [$this, '_repack_utf7_callback_back'],
         $strTmp
     );
 
-    return \preg_replace('/\x00(.)/us', '$1', $strings);
+    return \preg_replace('/\x00(.)/us', '$1', $string);
   }
 
   /**
@@ -2796,6 +2691,35 @@ final class AntiXSS
   }
 
   /**
+   * Sanitize naughty HTML.
+   *
+   * <p>
+   * <br />
+   * Callback method for AntiXSS->sanitize_naughty_html() to remove naughty HTML elements.
+   * </p>
+   *
+   * @param array $matches
+   *
+   * @return string
+   */
+  private function _sanitize_naughty_html_callback(array $matches): string
+  {
+    return '&lt;' . $matches[1] . $matches[2] . $matches[3] // encode opening brace
+           // encode captured opening or closing brace to prevent recursive vectors:
+           . \str_replace(
+               [
+                   '>',
+                   '<',
+               ],
+               [
+                   '&gt;',
+                   '&lt;',
+               ],
+               $matches[4]
+           );
+  }
+
+  /**
    * Sanitize naughty scripting elements
    *
    * <p>
@@ -2827,6 +2751,88 @@ final class AntiXSS
     );
 
     return (string)$str;
+  }
+
+  /**
+   * Add some strings to the "_evil_attributes"-array.
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function addEvilAttributes(array $strings): self
+  {
+    $this->_evil_attributes = \array_merge($strings, $this->_evil_attributes);
+
+    return $this;
+  }
+
+  /**
+   * Add some strings to the "_evil_html_tags"-array.
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function addEvilHtmlTags(array $strings): self
+  {
+    $this->_evil_html_tags = \array_merge($strings, $this->_evil_html_tags);
+
+    return $this;
+  }
+
+  /**
+   * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
+   *
+   * @return bool|null Will return null if the "xss_clean()" wan't running at all.
+   */
+  public function isXssFound()
+  {
+    return $this->xss_found;
+  }
+
+  /**
+   * Remove some strings from the "_evil_attributes"-array.
+   *
+   * <p>
+   * <br />
+   * WARNING: Use this method only if you have a really good reason.
+   * </p>
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function removeEvilAttributes(array $strings): self
+  {
+    $this->_evil_attributes = \array_diff(
+        $this->_evil_attributes,
+        \array_intersect($strings, $this->_evil_attributes)
+    );
+
+    return $this;
+  }
+
+  /**
+   * Remove some strings from the "_evil_html_tags"-array.
+   *
+   * <p>
+   * <br />
+   * WARNING: Use this method only if you have a really good reason.
+   * </p>
+   *
+   * @param string[] $strings
+   *
+   * @return $this
+   */
+  public function removeEvilHtmlTags(array $strings): self
+  {
+    $this->_evil_html_tags = \array_diff(
+        $this->_evil_html_tags,
+        \array_intersect($strings, $this->_evil_html_tags)
+    );
+
+    return $this;
   }
 
   /**
