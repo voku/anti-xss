@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use voku\helper\AntiXSS;
-use voku\helper\Bootup;
 use voku\helper\UTF8;
 
 /**
