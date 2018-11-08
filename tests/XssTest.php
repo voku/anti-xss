@@ -608,6 +608,8 @@ textContent>click me!',
       '<svg onload=confirm()//' => '&lt;svg ', // Without closing angular bracket (>)
       '<script src=//14.rs></script><svg onload=co\u006efirm()><svg onload=z=co\u006efir\u006d,z()>' => '&lt;svg &gt;&lt;svg >', // Without alert, confirm, prompt
       '<x onclick=confirm()>click here <x ondrag=aconfirm()>drag it' => '<x >click here <x >drag it', // Without a Valid HTML tag
+      '<dETAILS%0aopen%0aonToGgle%0a=%0aa=prompt,a() x>' => "<dETAILS\nopen\n x>", // Akamai GHost XSS bypass (2018) (https://twitter.com/s0md3v/status/1056447131362324480)
+      '%0ajavascript:`/*\"/*-->&lt;svg onload=\'/*</template></noembed></noscript></style></title></textarea></script><html onmouseover="/**/ alert()//\'">`' => "\n`/*\\\"/*--&gt;&lt;svg ='/*&lt;/template></noembed></noscript>&lt;/style&gt;&lt;/title>&lt;/textarea&gt;&lt;html >`", // Awesome Polyglots (https://github.com/s0md3v/AwesomeXSS)
     );
 
     foreach ($testArray as $before => $after) {
