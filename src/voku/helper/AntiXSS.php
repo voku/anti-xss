@@ -1949,7 +1949,7 @@ final class AntiXSS
       // We only want to do this when it is followed by a non-word character
       // That way valid stuff like "dealer to" does not become "dealerto".
       $str = (string)\preg_replace_callback(
-          '#(' . $word . ')(\W)#is',
+          '#(?<word>' . $word . ')(?<rest>\W)#is',
           [
               $this,
               '_compact_exploded_words_callback',
@@ -1978,8 +1978,8 @@ final class AntiXSS
     return \preg_replace(
                '/(?:\s+|"|\042|\'|\047|\+)*+/',
                '',
-               $matches[1]
-           ) . $matches[2];
+               $matches['word']
+           ) . $matches['rest'];
   }
 
   /**
@@ -1995,10 +1995,10 @@ final class AntiXSS
     $str = $match[0];
 
     // protect GET variables without XSS in URLs
-    if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(\"|\042|'|\047)([^\\1]*?)\\1/", $str, $matches)) {
+    if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/", $str, $matches)) {
 
-      if (isset($matches[2])) {
-        foreach ($matches[2] as $matchInner) {
+      if (isset($matches['attr'])) {
+        foreach ($matches['attr'] as $matchInner) {
           $tmpAntiXss = clone $this;
 
           $urlPartClean = $tmpAntiXss->xss_clean($matchInner);
@@ -2198,7 +2198,7 @@ final class AntiXSS
     $str = UTF8::html_entity_decode($str, $flags);
 
     // decode-again, for e.g. HHVM or miss configured applications ...
-    if (preg_match_all('/&[A-Za-z]{2,}[;]{0}/', $str, $matches)) {
+    if (preg_match_all('/(?<html_entity>&[A-Za-z]{2,}[;]{0})/', $str, $matches)) {
 
       if (null === $HTML_ENTITIES_CACHE) {
 
@@ -2272,7 +2272,7 @@ final class AntiXSS
       }
 
       $replace = [];
-      foreach ($matches[0] as $match) {
+      foreach ($matches['html_entity'] as $match) {
         $match .= ';';
         if (isset($HTML_ENTITIES_CACHE[$match])) {
           $replace[$match] = $HTML_ENTITIES_CACHE[$match];
@@ -2301,7 +2301,8 @@ final class AntiXSS
     }
 
     $out = '';
-    if (\preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)([^\\1]*?)\\1#', $str, $matches)) {
+    if (\preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#', $str, $matches)) {
+
       foreach ($matches[0] as $match) {
         $out .= $match;
       }
@@ -2560,7 +2561,7 @@ final class AntiXSS
         $count = $temp_count = 0;
 
         $str = (string)\preg_replace(
-            '/(<[^>]+)(?<!\w)(style\s*=\s*"(:?[^"]*?)"|style\s*=\s*\'(:?[^\']*?)\')/i',
+            '/(<[^>]+)(?<!\w)(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/i',
             '$1' . $this->_replacement,
             $str,
             -1,
@@ -2679,7 +2680,7 @@ final class AntiXSS
   {
     $evil_html_tags = \implode('|', $this->_evil_html_tags);
     $str = (string)\preg_replace_callback(
-        '#<(/*\s*)(' . $evil_html_tags . ')([^><]*)([><]*)#i',
+        '#<(?<start>/*\s*)(?<content>' . $evil_html_tags . ')(?<end>[^><]*)(?<rest>[><]*)#i',
         [
             $this,
             '_sanitize_naughty_html_callback',
@@ -2704,7 +2705,7 @@ final class AntiXSS
    */
   private function _sanitize_naughty_html_callback(array $matches): string
   {
-    return '&lt;' . $matches[1] . $matches[2] . $matches[3] // encode opening brace
+    return '&lt;' . $matches['start'] . $matches['content'] . $matches['end'] // encode opening brace
            // encode captured opening or closing brace to prevent recursive vectors:
            . \str_replace(
                [
@@ -2715,7 +2716,7 @@ final class AntiXSS
                    '&gt;',
                    '&lt;',
                ],
-               $matches[4]
+               $matches['rest']
            );
   }
 
