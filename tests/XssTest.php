@@ -179,18 +179,18 @@ class XssTest extends \PHPUnit\Framework\TestCase
   public function test_xss_hash()
   {
     $antiXss = new AntiXSS();
-    self::assertSame(null, $antiXss->isXssFound());
+    self::assertNull($antiXss->isXssFound());
 
     // init the "_xss_hash"-property
     $result = $antiXss->xss_clean('<void class="bar">foo</ onclick="foobar();" void>');
     self::assertSame('<void class="bar">foo</  void>', $result);
-    self::assertSame(true, $antiXss->isXssFound());
+    self::assertTrue($antiXss->isXssFound());
 
     // ---
 
     $result = $antiXss->xss_clean('<void class="bar">foo</void>');
     self::assertSame('<void class="bar">foo</void>', $result);
-    self::assertSame(false, $antiXss->isXssFound());
+    self::assertFalse($antiXss->isXssFound());
   }
 
   public function test_remove_evil_attributes()
@@ -1095,6 +1095,9 @@ textContent>click me!',
     self::assertSame('<div >Clickhere</div>', $this->antiXss->xss_clean($input), $input);
 
     $input = '<div onClick="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
+    self::assertSame('<div >Clickhere', $this->antiXss->xss_clean($input), $input);
+
+    $input = '<div onClick=&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49>Clickhere';
     self::assertSame('<div >Clickhere', $this->antiXss->xss_clean($input), $input);
   }
 

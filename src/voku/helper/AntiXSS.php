@@ -1995,7 +1995,7 @@ final class AntiXSS
     $str = $match[0];
 
     // protect GET variables without XSS in URLs
-    if (\preg_match_all("/[\?|&]?[A-Za-z0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/", $str, $matches)) {
+    if (\preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
 
       if (isset($matches['attr'])) {
         foreach ($matches['attr'] as $matchInner) {
@@ -2301,7 +2301,7 @@ final class AntiXSS
     }
 
     $out = '';
-    if (\preg_match_all('#\s*[A-Za-z\-]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#', $str, $matches)) {
+    if (\preg_match_all('#\s*[\\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
 
       foreach ($matches[0] as $match) {
         $out .= $match;
@@ -2610,7 +2610,7 @@ final class AntiXSS
   private function _repack_utf7(string $str): string
   {
     return (string)\preg_replace_callback(
-        '#\+([0-9a-zA-Z]+)\-#',
+        '#\+([\\p{L}0-9]+)\-#ui',
         [$this, '_repack_utf7_callback'],
         $str
     );
