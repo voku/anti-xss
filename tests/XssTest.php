@@ -813,7 +813,7 @@ textContent>click me!',
 
     self::assertSame(
         $resultString,
-        str_replace(array("\n\r", "\r\n", "\n"), "\n",$this->antiXss->xss_clean($testString)),
+        str_replace(array("\n\r", "\r\n", "\n"), "\n", $this->antiXss->xss_clean($testString)),
         'testing: ' . $testString
     );
   }
