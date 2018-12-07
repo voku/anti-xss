@@ -804,6 +804,20 @@ textContent>click me!',
     );
   }
 
+  public function testXssFileV3()
+  {
+    $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v3.html');
+    $testString = str_replace(array("\n\r", "\r\n", "\n"), "\n", $testString);
+    $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v3_clean.html');
+    $resultString = str_replace(array("\n\r", "\r\n", "\n"), "\n", $resultString);
+
+    self::assertSame(
+        $resultString,
+        str_replace(array("\n\r", "\r\n", "\n"), "\n",$this->antiXss->xss_clean($testString)),
+        'testing: ' . $testString
+    );
+  }
+
   public function testUrls()
   {
     $testArray = array(
