@@ -2,6 +2,7 @@
 
 /tests export-ignore
 /.editorconfig export-ignore
+/.php_cs.cache export-ignore
 /.scrutinizer.yml export-ignore
 /.styleci.yml export-ignore
 /.gitattributes export-ignore
