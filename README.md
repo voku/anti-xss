@@ -7,7 +7,7 @@
 [![License](https://poser.pugx.org/voku/anti-xss/license)](https://packagist.org/packages/voku/anti-xss)
 
 
-㊙ AntiXSS | via PHP
+:secret: AntiXSS | via PHP
 =============
 
 "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in Web applications. XSS enables 
