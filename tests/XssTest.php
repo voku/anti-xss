@@ -585,15 +585,18 @@ alert&#40;1&#41;',
             'p=%26p=%26lt;svg/onload=alert(1)><j onclick=location%2B=document.body.
 textContent>click me!' => 'p=%26p=%26lt;svg/=alert&#40;1&#41;><j 
 textContent>click me!',
-            'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>'                                                                                  => 'p=<j >&p=&lt;svg/&gt;',
-            '<object data=javascript:confirm()><a href=javascript:confirm()>click here<script src=//14.rs></script><script>confirm()</script>'                      => '&lt;object data=confirm&#40;&#41;&gt;&lt;a >click hereconfirm&#40;&#41;', // Without event handlers
-            '<svg/onload=confirm()><iframe/src=javascript:alert(1)>'                                                                                                => '&lt;svg/&gt;&lt;iframe/src=alert&#40;1&#41;>', // Without space (https://github.com/s0md3v/AwesomeXSS)
-            '<svg onload=confirm()><img src=x onerror=confirm()>'                                                                                                   => '&lt;svg &gt;&lt;img >', // Without slash (/)
-            '<script>confirm()</script>'                                                                                                                            => 'confirm&#40;&#41;', // Without equal sign (=)
-            '<svg onload=confirm()//'                                                                                                                               => '&lt;svg ', // Without closing angular bracket (>)
-            '<script src=//14.rs></script><svg onload=co\u006efirm()><svg onload=z=co\u006efir\u006d,z()>'                                                          => '&lt;svg &gt;&lt;svg >', // Without alert, confirm, prompt
-            '<x onclick=confirm()>click here <x ondrag=aconfirm()>drag it'                                                                                          => '<x >click here <x >drag it', // Without a Valid HTML tag
-            '<dETAILS%0aopen%0aonToGgle%0a=%0aa=prompt,a() x>'                                                                                                      => "<dETAILS\nopen\n x>", // Akamai GHost XSS bypass (2018) (https://twitter.com/s0md3v/status/1056447131362324480)
+            'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>'                                                             => 'p=<j >&p=&lt;svg/&gt;',
+            '<object data=javascript:confirm()><a href=javascript:confirm()>click here<script src=//14.rs></script><script>confirm()</script>' => '&lt;object data=confirm&#40;&#41;&gt;&lt;a >click hereconfirm&#40;&#41;', // Without event handlers
+            '<svg/onload=confirm()><iframe/src=javascript:alert(1)>'                                                                           => '&lt;svg/&gt;&lt;iframe/src=alert&#40;1&#41;>', // Without space (https://github.com/s0md3v/AwesomeXSS)
+            '<svg onload=confirm()><img src=x onerror=confirm()>'                                                                              => '&lt;svg &gt;&lt;img >', // Without slash (/)
+            '<script>confirm()</script>'                                                                                                       => 'confirm&#40;&#41;', // Without equal sign (=)
+            '<svg onload=confirm()//'                                                                                                          => '&lt;svg ', // Without closing angular bracket (>)
+            '<script src=//14.rs></script><svg onload=co\u006efirm()><svg onload=z=co\u006efir\u006d,z()>'                                     => '&lt;svg &gt;&lt;svg >', // Without alert, confirm, prompt
+            '<x onclick=confirm()>click here <x ondrag=aconfirm()>drag it'                                                                     => '<x >click here <x >drag it', // Without a Valid HTML tag
+            '<dETAILS%0aopen%0aonToGgle%0a=%0aa=prompt,a() x>'                                                                                 => "<dETAILS\nopen\n x>", // Akamai GHost XSS bypass (2018) (https://twitter.com/s0md3v/status/1056447131362324480)
+
+            '<iframe srcdoc=\'&lt;meta http-equiv="refresh" content="5;url=(link: https://www.google.com/) google.com " /&gt;&lt;script&gt;alert(document.domain + "\n\n" + document.cookie);</script>\'/>' => '&lt;iframe srcdoc=\'&lt;meta http-equiv="refresh" content="5;url=(link: https://www.google.com/) google.com " />alert&#40;document.domain + "\n\n" + &#41;;\'/>', // MS Edge Iframe srcdoc UXSS POC (2018) (https://mobile.twitter.com/Windowsrcer/status/1071131620856320000?s=19)
+
             '%0ajavascript:`/*\"/*-->&lt;svg onload=\'/*</template></noembed></noscript></style></title></textarea></script><html onmouseover="/**/ alert()//\'">`' => "\n`/*\\\"/*--&gt;&lt;svg ='/*&lt;/template></noembed></noscript>&lt;/style&gt;&lt;/title>&lt;/textarea&gt;&lt;html >`", // Awesome Polyglots (https://github.com/s0md3v/AwesomeXSS)
         ];
 
