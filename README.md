@@ -1,17 +1,13 @@
-[![Stories in Ready](https://badge.waffle.io/voku/anti-xss.png?label=ready&title=Ready)](https://waffle.io/voku/anti-xss)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss?ref=badge_shield)
 [![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
-[![Coverage Status](https://coveralls.io/repos/voku/anti-xss/badge.svg?branch=master&service=github)](https://coveralls.io/github/voku/anti-xss?branch=master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss?ref=badge_shield)
 [![codecov.io](http://codecov.io/github/voku/anti-xss/coverage.svg?branch=master)](http://codecov.io/github/voku/anti-xss?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/anti-xss/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/anti-xss/?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8e3c9da417124971b8d8e0c1046c24c7)](https://www.codacy.com/app/voku/anti-xss)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484/mini.png)](https://insight.sensiolabs.com/projects/03a4657f-8b27-4387-93f6-9d2a63713484)
 [![Latest Stable Version](https://poser.pugx.org/voku/anti-xss/v/stable)](https://packagist.org/packages/voku/anti-xss) 
 [![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads)](https://packagist.org/packages/voku/anti-xss)
 [![License](https://poser.pugx.org/voku/anti-xss/license)](https://packagist.org/packages/voku/anti-xss)
 
 
-🉑 AntiXSS | via PHP
+:secret: AntiXSS | via PHP
 =============
 
 "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in Web applications. XSS enables 
