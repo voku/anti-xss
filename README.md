@@ -1,26 +1,23 @@
 [![Build Status](https://travis-ci.org/voku/anti-xss.svg)](https://travis-ci.org/voku/anti-xss)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss?ref=badge_shield)
 [![codecov.io](http://codecov.io/github/voku/anti-xss/coverage.svg?branch=master)](http://codecov.io/github/voku/anti-xss?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8e3c9da417124971b8d8e0c1046c24c7)](https://www.codacy.com/app/voku/anti-xss)
 [![Latest Stable Version](https://poser.pugx.org/voku/anti-xss/v/stable)](https://packagist.org/packages/voku/anti-xss) 
 [![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads)](https://packagist.org/packages/voku/anti-xss)
 [![License](https://poser.pugx.org/voku/anti-xss/license)](https://packagist.org/packages/voku/anti-xss)
+[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/moelleken)
+[![Donate to this project using Patreon](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/voku)
 
-
-:secret: AntiXSS
-=============
+# :secret: AntiXSS
 
 "Cross-site scripting (XSS) is a type of computer security vulnerability typically found in Web applications. XSS enables 
 attackers to inject client-side script into Web pages viewed by other users. A cross-site scripting vulnerability may be 
 used by attackers to bypass access controls such as the same origin policy. Cross-site scripting carried out on websites 
 accounted for roughly 84% of all security vulnerabilities documented by Symantec as of 2007." - http://en.wikipedia.org/wiki/Cross-site_scripting
 
-DEMO:
-=====
+### DEMO:
 [http://anti-xss-demo.suckup.de/](http://anti-xss-demo.suckup.de/)
 
-NOTES:
-======
+### NOTES:
 1) Use [filter_input()](http://php.net/manual/de/function.filter-input.php) - don't use GLOBAL-Array (e.g. $_SESSION, $_GET, $_POST, $_SERVER) directly
 
 2) Use [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
@@ -33,14 +30,12 @@ NOTES:
 
 6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
-Install via "composer require"
-======
+### Install via "composer require"
 ```shell
 composer require voku/anti-xss
 ```
 
-Usage:
-======
+### Usage:
 
 ```php
 
@@ -132,8 +127,7 @@ $harmless_string = $antiXss->xss_clean($harm_string);
 ```
 
 
-Unit Test:
-==========
+### Unit Test:
 
 1) [Composer](https://getcomposer.org) is a prerequisite for running the tests.
 
@@ -147,6 +141,21 @@ composer install
 ./vendor/bin/phpunit
 ```
 
+### Support
 
-## License
+For support and donations please visit [Github](https://github.com/voku/portable-utf8/) | [Issues](https://github.com/voku/portable-utf8/issues) | [PayPal](https://paypal.me/moelleken) | [Patreon](https://www.patreon.com/voku).
+
+For status updates and release announcements please visit [Releases](https://github.com/voku/portable-utf8/releases) | [Twitter](https://twitter.com/suckup_de) | [Patreon](https://www.patreon.com/voku/posts).
+
+For professional support please contact [me](https://about.me/voku).
+
+### Thanks
+
+- Thanks to [GitHub](https://github.com) (Microsoft) for hosting the code and a good infrastructure including Issues-Managment, etc.
+- Thanks to [IntelliJ](https://www.jetbrains.com) as they make the best IDEs for PHP and they gave me an open source license for PhpStorm!
+- Thanks to [Travis CI](https://travis-ci.com/) for being the most awesome, easiest continous integration tool out there!
+- Thanks to [StyleCI](https://styleci.io/) for the simple but powerfull code style check.
+- Thanks to [PHPStan](https://github.com/phpstan/phpstan) && [Psalm](https://github.com/vimeo/psalm) for relly great Static analysis tools and for discover bugs in the code!
+
+### License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss?ref=badge_large)
