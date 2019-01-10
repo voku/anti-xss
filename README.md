@@ -143,9 +143,9 @@ composer install
 
 ### Support
 
-For support and donations please visit [Github](https://github.com/voku/portable-utf8/) | [Issues](https://github.com/voku/portable-utf8/issues) | [PayPal](https://paypal.me/moelleken) | [Patreon](https://www.patreon.com/voku).
+For support and donations please visit [Github](https://github.com/voku/anti-xss/) | [Issues](https://github.com/voku/anti-xss/issues) | [PayPal](https://paypal.me/moelleken) | [Patreon](https://www.patreon.com/voku).
 
-For status updates and release announcements please visit [Releases](https://github.com/voku/portable-utf8/releases) | [Twitter](https://twitter.com/suckup_de) | [Patreon](https://www.patreon.com/voku/posts).
+For status updates and release announcements please visit [Releases](https://github.com/voku/anti-xss/releases) | [Twitter](https://twitter.com/suckup_de) | [Patreon](https://www.patreon.com/voku/posts).
 
 For professional support please contact [me](https://about.me/voku).
 
