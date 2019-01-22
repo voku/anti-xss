@@ -13,8 +13,6 @@ env:
   global:
     - PHP_COMPOSER_SETUP=basic
     - PHP_EXTENSION=true
-    - PHP_MBSTRING_FUNC_OVERLOAD=false
-    - PHP_CS_FIXER_IGNORE=false
 
 git:
   depth: 2
@@ -32,9 +30,6 @@ matrix:
     - php: 7.0
     - php: 7.0
       env:
-        - PHP_MBSTRING_FUNC_OVERLOAD=true
-    - php: 7.0
-      env:
         - PHP_EXTENSION=false
     - php: 7.0
       env:
@@ -43,9 +38,6 @@ matrix:
     - php: 7.1
     - php: 7.1
       env:
-        - PHP_MBSTRING_FUNC_OVERLOAD=true
-    - php: 7.1
-      env:
         - PHP_EXTENSION=false
     - php: 7.1
       env:
@@ -54,30 +46,19 @@ matrix:
     - php: 7.2
     - php: 7.2
       env:
-        - PHP_MBSTRING_FUNC_OVERLOAD=true
-    - php: 7.2
-      env:
         - PHP_EXTENSION=false
     - php: 7.2
       env:
         - PHP_COMPOSER_SETUP=lowest
         - PHP_EXTENSION=false
     - php: 7.3
-      env:
-        - PHP_CS_FIXER_IGNORE=true
-    - php: 7.3
-      env:
-        - PHP_MBSTRING_FUNC_OVERLOAD=true
-        - PHP_CS_FIXER_IGNORE=true
     - php: 7.3
       env:
         - PHP_EXTENSION=false
-        - PHP_CS_FIXER_IGNORE=true
     - php: 7.3
       env:
         - PHP_COMPOSER_SETUP=lowest
         - PHP_EXTENSION=false
-        - PHP_CS_FIXER_IGNORE=true
 
 before_script:
   - stty cols 120
@@ -92,7 +73,6 @@ before_script:
   - if [[ $PHP_EXTENSION = true ]]; then phpenv config-add mbstring.ini || echo "mbstring not available"; fi
   - if [[ $PHP_EXTENSION = true ]]; then phpenv config-add intl.ini || echo "intl not available"; fi
   - if [[ $PHP_EXTENSION = true ]]; then phpenv config-add iconv.ini || echo "iconv not available"; fi
-  - if [[ $PHP_MBSTRING_FUNC_OVERLOAD = true ]]; then echo "mbstring.func_overload = 7" >> $TRAVIS_PHP_INI_FILE; fi
   - echo "php-config -> new"
   - cat $TRAVIS_PHP_INI_FILE
   - cat $MAIN_PHP_INI_FILE
@@ -100,7 +80,6 @@ before_script:
   - travis_retry composer self-update
   - travis_retry composer require satooshi/php-coveralls
   - travis_retry composer require phpstan/phpstan-shim
-  - if [[ $PHP_CS_FIXER_IGNORE = false ]]; then travis_retry composer require friendsofphp/php-cs-fixer; fi
   - if [[ $PHP_COMPOSER_SETUP = 'basic' ]]; then travis_retry composer install --prefer-dist --no-interaction; fi
   - if [[ $PHP_COMPOSER_SETUP = 'lowest' ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable; fi
   - composer dump-autoload -o
