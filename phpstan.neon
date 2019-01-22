@@ -5,4 +5,3 @@ parameters:
     autoload_files:
         - %rootDir%/vendor/autoload.php
     ignoreErrors:
-        - '#Casting to .* something .* already#'
