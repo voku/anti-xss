@@ -659,10 +659,10 @@ textContent>click me!',
         $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_no_v1_clean.html');
 
         static::assertSame(
-        \str_replace(["\r\n", "\r"], "\n", $resultString),
-        \str_replace(["\r\n", "\r"], "\n", $this->antiXss->xss_clean($testString)),
-        'testing: ' . $testString
-    );
+            \str_replace(["\r\n", "\r"], "\n", $resultString),
+            \str_replace(["\r\n", "\r"], "\n", $this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
     }
 
     public function testHtmlXssFile()
@@ -671,10 +671,22 @@ textContent>click me!',
         $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.html');
 
         static::assertSame(
-        \str_replace(["\r\n", "\r"], "\n", \trim($resultString)),
-        \str_replace(["\r\n", "\r"], "\n", $this->antiXss->xss_clean(\trim($testString))),
-        'testing: ' . $testString
-    );
+            \str_replace(["\r\n", "\r"], "\n", \trim($resultString)),
+            \str_replace(["\r\n", "\r"], "\n", $this->antiXss->xss_clean(\trim($testString))),
+            'testing: ' . $testString
+        );
+    }
+
+    public function testHtmlXssFileIssue41()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post.html');
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post_clean.html');
+
+        static::assertSame(
+            \str_replace(["\r\n", "\r"], "\n", \trim($resultString)),
+            \str_replace(["\r\n", "\r"], "\n", html_entity_decode($this->antiXss->xss_clean(\trim($testString)))),
+            'testing: ' . $testString
+        );
     }
 
     public function testSvgXssFileV1()
