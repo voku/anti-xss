@@ -550,20 +550,17 @@ final class AntiXSS
             return $str;
         }
 
-        // removes all non-UTF-8 characters
-        // &&
-        // normalize whitespace
-        // &&
-        // remove NULL characters (ignored by some browsers)
-        $str = UTF8::clean(
-            $str,
-            true,
-            true,
-            false,
-            false,
-            true,
-            true
-        );
+        // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
+        $str = UTF8::remove_bom($str);
+
+        // replace the diamond question mark (�) and invalid-UTF8 chars
+        $str = UTF8::replace_diamond_question_mark($str, '');
+
+        // replace invisible characters with one single space
+        $str = UTF8::remove_invisible_characters($str, true, ' ');
+
+        // normalize the whitespace
+        $str = UTF8::normalize_whitespace($str);
 
         // decode UTF-7 characters
         $str = $this->_repack_utf7($str);

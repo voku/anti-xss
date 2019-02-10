@@ -172,7 +172,7 @@
   {
     "title": "Img inside style inside broken option element",
     "payload": "\u0001<option><style></option></select><b><img src=xx: onerror=alert(1)></style></option>",
-    "expected": "<option>&lt;style&gt;&lt;/option>&lt;/select&gt;&lt;b><img ></></>"
+    "expected": " <option>&lt;style&gt;&lt;/option>&lt;/select&gt;&lt;b><img ></></>"
   },
   {
     "title": "Iframe inside option element",
@@ -541,7 +541,7 @@
   },
   {
     "payload": "<div id=\"71\"><// style=x:expression\u00028alert(71)\u00029>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"71\"><// >//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"71\"><//  8alert&#40;71&#41; 9>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"72\"><form><button formaction=\"javascript:alert(72)\">X</button>//[\"'`-->]]>]</div>",
@@ -702,7 +702,7 @@
   {
     "title": "XML",
     "payload": "<div id=\"116\"><div id=\"x\">x</div>\n<xml:namespace prefix=\"t\">\n<import namespace=\"t\" implementation=\"#default#time2\">\n<t:set attributeName=\"innerHTML\" targetElement=\"x\" to=\"<img\u000Bsrc=x:x\u000Bonerror\u000B=alert(116)>\">//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"116\"><div id=\"x\">x</div>\n&lt;xml:namespace prefix=\"t\"&gt;\n<import namespace=\"t\" implementation=\"#default#time2\">\n<t:set attributeName=\"innerHTML\" targetElement=\"x\" to=\"<imgsrc=x:x=alert&#40;116&#41;>\">//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"116\"><div id=\"x\">x</div>\n&lt;xml:namespace prefix=\"t\"&gt;\n<import namespace=\"t\" implementation=\"#default#time2\">\n<t:set attributeName=\"innerHTML\" targetElement=\"x\" to=\"<img >\">//[\"'`--&>]</>"
   },
   {
     "title": "iframe",
