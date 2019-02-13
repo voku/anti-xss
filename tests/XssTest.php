@@ -679,8 +679,8 @@ textContent>click me!',
 
     public function testHtmlXssFileIssue41()
     {
-        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post.html');
-        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post_clean.html');
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post_small.html');
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_issue_sample_post_small.html');
 
         static::assertSame(
             \str_replace(["\r\n", "\r"], "\n", \trim($resultString)),
@@ -1059,13 +1059,13 @@ textContent>click me!',
         static::assertSame('<img src=\'www.example.com/smiley.gif\' >', $this->antiXss->xss_clean($testString));
 
         $testString = '<img src="http://moelleken.org/test.png" alt="bar" title="javascript:alert(\'XSS\');">';
-        static::assertSame('<img src="">', $this->antiXss->xss_clean($testString));
+        static::assertSame('<img src="http://moelleken.org/test.png" alt="bar" title="alert&#40;\'XSS\'&#41;;">', $this->antiXss->xss_clean($testString));
 
         $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="foo">';
         static::assertSame('<img src="&lt;?php echo " alt="bar" title="foo">', $this->antiXss->xss_clean($testString));
 
         $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
-        static::assertSame('<img src="">', $this->antiXss->xss_clean($testString));
+        static::assertSame('<img src="&lt;?php echo " alt="bar" title="alert&#40;\'XSS\'&#41;;">', $this->antiXss->xss_clean($testString));
     }
 
     public function testXssUrlDecode()
@@ -1130,7 +1130,7 @@ textContent>click me!',
 
     public function testNaughtyHtmlPlusEvilAttributes()
     {
-        static::assertSame('&lt;svg&lt;img > src="">', $this->antiXss->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
+        static::assertSame('&lt;svg&lt;img > src="x">', $this->antiXss->xss_clean('<svg<img > src="x" onerror="location=/javascript/.source+/:alert/.source+/(1)/.source">'));
     }
 
     public function testXssCleanSanitizeNaughtyHtml()

@@ -569,7 +569,7 @@ final class AntiXSS
         $str = $this->_decode_string($str);
 
         // remove all >= 4-Byte chars if needed
-        if ($this->_stripe_4byte_chars === true) {
+        if ($this->_stripe_4byte_chars) {
             $str = (string) \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
         }
 
@@ -868,32 +868,51 @@ final class AntiXSS
 
         // hack for style attributes v1
         if ($search === 'href') {
-            \preg_match('/style=".*?"/i', $match[0], $match_style);
+            \preg_match('/style=".*?"/i',  $match[0], $match_style);
             $match_style_matched = (\count($match_style) > 0);
-            if ($match_style_matched === true) {
+            if ($match_style_matched) {
                 $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
             }
         }
 
-        // init
         $replacer = $this->_filter_attributes(\str_replace(['<', '>'], '', $match[1]));
-        $pattern = '#' . $search . '=.*(?:\(.+([^\)]*?)(?:\)|$)|javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
 
+        // filter for "(.*)" but only in the "$search"-attribute
+        $pattern = '#' . $search . '=(?<wrapper>(?:\'|\047)|(?:"|\042)).*(?:\g{wrapper})#isU';
         $matchInner = [];
+        $foundSomethingBad = false;
         \preg_match($pattern, $match[1], $matchInner);
         if (\count($matchInner) > 0) {
-            $replacer = (string) \preg_replace(
-                $pattern,
-                $search . '="' . $this->_replacement . '"',
-                $replacer
-            );
+            if (\preg_match('#(?:\(.*([^\)]*?)(?:\)))#s', $matchInner[0])) {
+                $foundSomethingBad = true;
+
+                $replacer = (string) \preg_replace(
+                    $pattern,
+                    $search . '="' . $this->_replacement . '"',
+                    $replacer
+                );
+            }
+        }
+
+        if (!$foundSomethingBad) {
+            // filter for javascript
+            $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
+            $matchInner = [];
+            \preg_match($pattern, $match[1], $matchInner);
+            if (\count($matchInner) > 0) {
+                $replacer = (string) \preg_replace(
+                    $pattern,
+                    $search . '="' . $this->_replacement . '"',
+                    $replacer
+                );
+            }
         }
 
         $return = \str_ireplace($match[1], $replacer, (string) $match[0]);
 
         // hack for style attributes v2
         if (
-            $match_style_matched === true
+            $match_style_matched
             &&
             $search === 'href'
         ) {
@@ -1391,7 +1410,7 @@ final class AntiXSS
         $this->xss_found = null;
 
         // check for an array of strings
-        if (\is_array($str) === true) {
+        if (\is_array($str)) {
             foreach ($str as $key => &$value) {
                 $str[$key] = $this->xss_clean($value);
             }

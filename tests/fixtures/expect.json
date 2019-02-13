@@ -227,7 +227,7 @@
   {
     "title": "Bypass using DOM bugs when dealing with JS URIs in arbitrary attributes",
     "payload": "<a href=\"javascript:123\" onclick=\"alert(1)\">CLICK ME (bypass by @shafigullin)</a>",
-    "expected": "<a href=\"\">CLICK ME (bypass by @shafigullin)</a>"
+    "expected": "<a href=\"123\">CLICK ME (bypass by @shafigullin)</a>"
   },
   {
     "title": "Bypass using DOM bugs when dealing with JS URIs in arbitrary attributes (II)",
@@ -252,7 +252,7 @@
   {
     "title": "Bypass using JS URI in href",
     "payload": "<a href=\"javascript:123\" onclick=\"alert(1)\">CLICK ME (bypass by @shafigullin)</a>",
-    "expected": "<a href=\"\">CLICK ME (bypass by @shafigullin)</a>"
+    "expected": "<a href=\"123\">CLICK ME (bypass by @shafigullin)</a>"
   },
   {
     "title": "Javasctip with break",
@@ -726,7 +726,7 @@
   {
     "title": "window.open",
     "payload": "<div id=\"120\"><script>\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n</script>\n<body>\n<a href=\"#\" onclick=\"makePopups()\">Spam</a>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"120\">\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n\n&lt;body&gt;\n<a href=\"\">Spam</a>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"120\">\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n\n&lt;body&gt;\n<a href=\"#\">Spam</a>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"121\"><html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\">\n<body style=\"background:gray\">\n<iframe src=\"http://example.com/\" style=\"width:800px; height:350px; border:none; mask: url(#maskForClickjacking);\"/>\n<svg:svg>\n<svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\">\n    <svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/>\n    <svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/>\n</svg:mask>\n</svg:svg>\n</body>\n</html>//[\"'`-->]]>]</div>",
