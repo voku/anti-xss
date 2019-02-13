@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.5 (2019-02-13)
+
+- fix issue with "()" in some html attributes (issue #41)
+
+
 ### 4.1.4 (2019-01-22)
 
 - use new version of "Portable UTF8"
