@@ -20,7 +20,7 @@ accounted for roughly 84% of all security vulnerabilities documented by Symantec
 ### NOTES:
 1) Use [filter_input()](http://php.net/manual/de/function.filter-input.php) - don't use GLOBAL-Array (e.g. $_SESSION, $_GET, $_POST, $_SERVER) directly
 
-2) Use [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
+2) Use [html-sanitizer](https://github.com/tgalopin/html-sanitizer) or [HTML Purifier](http://htmlpurifier.org/) if you need a more configurable solution
 
 3) Add "Content Security Policy's" -> [Introduction to Content Security Policy](http://www.html5rocks.com/en/tutorials/security/content-security-policy/)
 
