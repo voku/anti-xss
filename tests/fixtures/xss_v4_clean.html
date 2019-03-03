@@ -1,0 +1,82 @@
+&lt;?xml version="not-even-close"?&gt;
+
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Test File For HtmlLexer &amp; HtmlParser&lt;/title&gt;
+&lt;link rel=stylesheet type="text/css" src=foo/bar.css /&gt;
+&lt;body
+bgcolor=white
+linkcolor = "blue"
+&lt;p>properly escaped code in a handler</p>");"
+>
+
+&lt;!--
+
+ln("<p>Some initialization code in global context</p>");
+
+--&gt;
+
+
+// hi there
+ln("<p>More initialization</p>");
+
+
+<div id=clickydiv 
+>
+Clicky
+</div>
+
+&lt;input id=foo&gt;
+<gxp:attr name="">alert&#40;"&lt;b&gt;hi&lt;/b&gt;"&#41;;</gxp:attr>
+&lt;/input&gt;
+
+<pre>&lt;div id=notarealtag =notcode()&gt;</pre>
+
+&lt;!-- some tokenization corner cases --&gt;
+
+< notatag<atag/>
+
+</ notatag> t</redundantlyclosed/>
+
+<messyattributes a=b=c d="e"f=g h =i j= k l = m checked n="o"/>
+
+< < < all in one text block > > >
+
+<xmp>Make sure that &lt;!-- comments don't obscure the xmp close</xmp>
+
+<% # some php code here
+write("<pre>$horriblySyntacticConstruct1</pre>\n\n");
+%>
+
+&lt;!--
+alert&#40;"hello world"&#41;;
+// --&gt;
+
+/*  */alert&#40;'hi'&#41;;
+&lt;!--/*  */alert&#40;'hi'&#41;;--&gt;
+
+<xmp >&lt;!--/* </xmp> */alert&#40;'hi'&#41;;--&gt;</xmp>
+
+&lt;style&gt;&lt;!-- p { contentf: '&lt;/style&gt;' } --&gt;&lt;/style&gt;
+
+&lt;style&gt;Foo&lt;!-- > &lt;/style&gt; --&gt;&lt;/style&gt;
+
+&lt;textarea&gt;&lt;!-- Zoicks &lt;/textarea&gt;--&gt;&lt;/textarea&gt;
+
+&lt;!-- An escaping text span start may share its U+002D HYPHEN-MINUS characters
+- with its corresponding escaping text span end. --&gt;
+&lt;!--&gt;
+&lt;!---&gt;
+&lt;!----&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+
+&lt;![CDATA[ No such thing as a CDATA> section in HTML ]]>
+a<b
+
+<img  />< >< >
+
+< >>

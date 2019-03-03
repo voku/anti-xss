@@ -825,10 +825,24 @@ textContent>click me!',
         $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
 
         static::assertSame(
-        $resultString,
-        \str_replace(["\n\r", "\r\n", "\n"], "\n", $this->antiXss->xss_clean($testString)),
-        'testing: ' . $testString
-    );
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", $this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
+    public function testXssFileV4()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v4.html');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v4_clean.html');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", $this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
     }
 
     public function testUrls()
