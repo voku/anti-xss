@@ -673,7 +673,7 @@ final class AntiXSS
         if (\stripos($str, 'on') !== false) {
             foreach (self::$_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
-                    $regex = '(?:' . $event . ')(\s*[\ \(\[=+&%>:;.!]|$)';
+                    $regex = '(?:' . $event . ')(\s*\W|$)';
 
                     do {
                         $count = $temp_count = 0;

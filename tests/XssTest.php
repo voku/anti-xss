@@ -74,6 +74,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>'                                                                                                                                                     => '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>',
             'foo Mondragon bar'                                                                                                                                                                                                                       => 'foo Mondragon bar',
             'Mondragon'                                                                                                                                                                                                                               => 'Mondragon',
+            'alert || document || write || Mondragon'                                                                                                                                                                                                 => 'alert || document || write || Mondragon',
         ];
 
         $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
