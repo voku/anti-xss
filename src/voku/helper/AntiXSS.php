@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace voku\helper;
 
+use const ENT_DISALLOWED;
+use const ENT_HTML5;
+use const ENT_QUOTES;
+use const ENT_SUBSTITUTE;
+use const HTML_ENTITIES;
+
 /**
  * AntiXSS
  *
@@ -40,8 +46,6 @@ final class AntiXSS
         'vbs\s*:',
         // https://html5sec.org/#behavior
         'behavior\s:',
-        // ?
-        'Redirect\s+30\d',
         // data-attribute + base64
         "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
         // remove Netscape 4 JS entities
@@ -61,8 +65,7 @@ final class AntiXSS
      *
      * @var array
      */
-    private static $_never_allowed_str_afterwards = [
-        'FSCommand',
+    private static $_never_allowed_on_events_afterwards = [
         'onAbort',
         'onActivate',
         'onAttribute',
@@ -274,6 +277,13 @@ final class AntiXSS
         'onWebKitFullScreenError',
         'onWebKitTransitionEnd',
         'onWheel',
+    ];
+
+    /**
+     * @var array
+     */
+    private static $_never_allowed_str_afterwards = [
+        'FSCOMMAND',
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
@@ -283,10 +293,10 @@ final class AntiXSS
      *
      * @var array
      */
-    private $_evil_attributes = [
+    private $_evil_attributes_regex = [
         'on\w*',
         'style',
-        'xmlns',
+        'xmlns:xdp',
         'formaction',
         'form',
         'xlink:href',
@@ -338,6 +348,8 @@ final class AntiXSS
         'xml',
         'xss',
     ];
+
+    const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
 
     /**
      * The replacement-string for not allowed strings.
@@ -416,7 +428,7 @@ final class AntiXSS
 
         foreach ($words as $word) {
             if (!isset($WORDS_CACHE[$word])) {
-                $regex = '(?:\s|\+|"|\042|\'|\047)*';
+                $regex = '(?:^|"|\042|\'|\047|\s+|\ |\.|\+|)*';
                 $word = $WORDS_CACHE[$word] = \substr(
                     \chunk_split($word, 1, $regex),
                     0,
@@ -449,17 +461,17 @@ final class AntiXSS
      * INFO: Callback method for xss_clean() to remove whitespace from things like 'j a v a s c r i p t'.
      * </p>
      *
-     * @param  array $matches
+     * @param array $matches
      *
      * @return  string
      */
     private function _compact_exploded_words_callback($matches): string
     {
         return \preg_replace(
-                   '/(?:\s+|"|\042|\'|\047|\+)*+/',
-                   '',
-                   $matches['word']
-               ) . $matches['rest'];
+                '/(?:\s+|"|\042|\'|\047|\+)*+/',
+                '',
+                $matches['word']
+            ) . $matches['rest'];
     }
 
     /**
@@ -506,7 +518,7 @@ final class AntiXSS
     private function _decode_string(string $str): string
     {
         // init
-        $regExForHtmlTags = '/<\w+.*+/si';
+        $regExForHtmlTags = '/<\w+.*+/s';
 
         if (\preg_match($regExForHtmlTags, $str, $matches) === 1) {
             $str = (string) \preg_replace_callback(
@@ -617,18 +629,29 @@ final class AntiXSS
     private function _do_never_allowed(string $str): string
     {
         static $NEVER_ALLOWED_CACHE = [];
+
         $NEVER_ALLOWED_CACHE['keys'] = null;
         $NEVER_ALLOWED_CACHE['regex'] = null;
 
         if ($NEVER_ALLOWED_CACHE['keys'] === null) {
             $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
         }
-        $str = \str_ireplace($NEVER_ALLOWED_CACHE['keys'], $this->_never_allowed_str, $str);
+
+        $str = \str_ireplace(
+            $NEVER_ALLOWED_CACHE['keys'],
+            $this->_never_allowed_str,
+            $str
+        );
 
         if ($NEVER_ALLOWED_CACHE['regex'] === null) {
             $NEVER_ALLOWED_CACHE['regex'] = \implode('|', self::$_never_allowed_regex);
         }
-        $str = (string) \preg_replace('#' . $NEVER_ALLOWED_CACHE['regex'] . '#is', $this->_replacement, $str);
+
+        $str = (string) \preg_replace(
+            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#is',
+            $this->_replacement,
+            $str
+        );
 
         return $str;
     }
@@ -647,6 +670,27 @@ final class AntiXSS
      */
     private function _do_never_allowed_afterwards(string $str): string
     {
+        if (\stripos($str, 'on') !== false) {
+            foreach (self::$_never_allowed_on_events_afterwards as $event) {
+                if (\stripos($str, $event) !== false) {
+                    $regex = '(?:' . $event . ')(\s*[\ \(\[=+&%>:;.!]|$)';
+
+                    do {
+                        $count = $temp_count = 0;
+
+                        $str = (string) \preg_replace(
+                            '#' . $regex . '#is',
+                            $this->_replacement . '$1',
+                            $str,
+                            -1,
+                            $temp_count
+                        );
+                        $count += $temp_count;
+                    } while ($count);
+                }
+            }
+        }
+
         return (string) \str_ireplace(
             self::$_never_allowed_str_afterwards,
             $this->_replacement,
@@ -665,7 +709,7 @@ final class AntiXSS
     {
         static $HTML_ENTITIES_CACHE;
 
-        $flags = \ENT_QUOTES | \ENT_HTML5 | \ENT_DISALLOWED | \ENT_SUBSTITUTE;
+        $flags = ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE;
 
         // decode
         $str = UTF8::html_entity_decode($str, $flags);
@@ -738,7 +782,7 @@ final class AntiXSS
 
                 $HTML_ENTITIES_CACHE = \array_merge(
                     $entitiesSecurity,
-                    \array_flip(\get_html_translation_table(\HTML_ENTITIES, $flags)),
+                    \array_flip(\get_html_translation_table(HTML_ENTITIES, $flags)),
                     \array_flip(self::_get_data('entities_fallback'))
                 );
             }
@@ -867,23 +911,31 @@ final class AntiXSS
         $match_style = [];
 
         // hack for style attributes v1
-        if ($search === 'href') {
+        if (
+            $search === 'href'
+            &&
+            \stripos($match[0], 'style') !== false
+        ) {
             \preg_match('/style=".*?"/i', $match[0], $match_style);
             $match_style_matched = (\count($match_style) > 0);
             if ($match_style_matched) {
-                $match[0] = \str_replace($match_style[0], 'voku::anti-xss::STYLE', $match[0]);
+                $match[0] = \str_replace($match_style[0], self::VOKU_ANTI_XSS_STYLE, $match[0]);
             }
         }
 
         $replacer = $this->_filter_attributes(\str_replace(['<', '>'], '', $match[1]));
 
         // filter for "(.*)" but only in the "$search"-attribute
-        $pattern = '#' . $search . '=(?<wrapper>(?:\'|\047)|(?:"|\042)).*(?:\g{wrapper})#isU';
-        $matchInner = [];
-        $foundSomethingBad = false;
-        \preg_match($pattern, $match[1], $matchInner);
-        if (\count($matchInner) > 0) {
-            if (\preg_match('#(?:\(.*([^\)]*?)(?:\)))#s', $matchInner[0])) {
+        if (\stripos($replacer, $search) !== false) {
+            $pattern = '#' . $search . '=(?<wrapper>(?:\'|\047)|(?:"|\042)).*(?:\g{wrapper})#isU';
+            $matchInner = [];
+            $foundSomethingBad = false;
+            \preg_match($pattern, $match[1], $matchInner);
+            if (
+                \count($matchInner) > 0
+                &&
+                \preg_match('#(?:\(.*([^\)]*?)(?:\)))#s', $matchInner[0])
+            ) {
                 $foundSomethingBad = true;
 
                 $replacer = (string) \preg_replace(
@@ -892,19 +944,19 @@ final class AntiXSS
                     $replacer
                 );
             }
-        }
 
-        if (!$foundSomethingBad) {
-            // filter for javascript
-            $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
-            $matchInner = [];
-            \preg_match($pattern, $match[1], $matchInner);
-            if (\count($matchInner) > 0) {
-                $replacer = (string) \preg_replace(
-                    $pattern,
-                    $search . '="' . $this->_replacement . '"',
-                    $replacer
-                );
+            if (!$foundSomethingBad) {
+                // filter for javascript
+                $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
+                $matchInner = [];
+                \preg_match($pattern, $match[1], $matchInner);
+                if (\count($matchInner) > 0) {
+                    $replacer = (string) \preg_replace(
+                        $pattern,
+                        $search . '="' . $this->_replacement . '"',
+                        $replacer
+                    );
+                }
             }
         }
 
@@ -916,7 +968,7 @@ final class AntiXSS
             &&
             $search === 'href'
         ) {
-            $return = \str_replace('voku::anti-xss::STYLE', $match_style[0], $return);
+            $return = \str_replace(self::VOKU_ANTI_XSS_STYLE, $match_style[0], $return);
         }
 
         return $return;
@@ -1061,7 +1113,11 @@ final class AntiXSS
     private function _remove_evil_attributes($str): string
     {
         // replace style-attribute, first (if needed)
-        if (\in_array('style', $this->_evil_attributes, true)) {
+        if (
+            \stripos($str, 'style') !== false
+            &&
+            \in_array('style', $this->_evil_attributes_regex, true)
+        ) {
             do {
                 $count = $temp_count = 0;
 
@@ -1076,7 +1132,7 @@ final class AntiXSS
             } while ($count);
         }
 
-        $evil_attributes_string = \implode('|', $this->_evil_attributes);
+        $evil_attributes_string = \implode('|', $this->_evil_attributes_regex);
         do {
             $count = $temp_count = 0;
 
@@ -1144,7 +1200,11 @@ final class AntiXSS
             $strTmp
         );
 
-        return (string) \preg_replace('/\x00(.)/us', '$1', $string);
+        return (string) \preg_replace(
+            '/\x00(.)/us',
+            '$1',
+            $string
+        );
     }
 
     /**
@@ -1209,18 +1269,18 @@ final class AntiXSS
     private function _sanitize_naughty_html_callback(array $matches): string
     {
         return '&lt;' . $matches['start'] . $matches['content'] . $matches['end'] // encode opening brace
-               // encode captured opening or closing brace to prevent recursive vectors:
-               . \str_replace(
-                   [
-                       '>',
-                       '<',
-                   ],
-                   [
-                       '&gt;',
-                       '&lt;',
-                   ],
-                   $matches['rest']
-               );
+            // encode captured opening or closing brace to prevent recursive vectors:
+            . \str_replace(
+                [
+                    '>',
+                    '<',
+                ],
+                [
+                    '&gt;',
+                    '&lt;',
+                ],
+                $matches['rest']
+            );
     }
 
     /**
@@ -1266,7 +1326,10 @@ final class AntiXSS
      */
     public function addEvilAttributes(array $strings): self
     {
-        $this->_evil_attributes = \array_merge($strings, $this->_evil_attributes);
+        $this->_evil_attributes_regex = \array_merge(
+            $strings,
+            $this->_evil_attributes_regex
+        );
 
         return $this;
     }
@@ -1309,9 +1372,9 @@ final class AntiXSS
      */
     public function removeEvilAttributes(array $strings): self
     {
-        $this->_evil_attributes = \array_diff(
-            $this->_evil_attributes,
-            \array_intersect($strings, $this->_evil_attributes)
+        $this->_evil_attributes_regex = \array_diff(
+            $this->_evil_attributes_regex,
+            \array_intersect($strings, $this->_evil_attributes_regex)
         );
 
         return $this;

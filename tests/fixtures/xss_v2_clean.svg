@@ -1,12 +1,12 @@
-&lt;!DOCTYPE svg>
-&lt;svg  version="1.1"&gt;
+<!DOCTYPE svg>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
 <circle r="100" fill="blue" />
-&lt;/svg&gt;
-&lt;!--
+</svg>
+<!--
 %PDF-1.
 1 0 obj <<>>
 stream
-<xdp:xdp xmlns:xdp="http://ns.adobe.com/xdp/">
+<xdp:xdp >
 <config><present><pdf><interactive>1</interactive></pdf></present></config>
 <template>
  <subform name="_">
@@ -41,4 +41,4 @@ trailer <<
  /Pages <<>>
  >>
 >>
---&gt;
+-->

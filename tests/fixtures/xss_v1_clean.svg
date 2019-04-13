@@ -1,6 +1,6 @@
 &lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-&lt;svg  version="1.1" id="Layer_1"  xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="600px" height="600px" viewBox="0 0 600 600" enable-background="new 0 0 600 600" xml:space="preserve"&gt;
+&lt;svg  version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="600px" height="600px" viewBox="0 0 600 600" enable-background="new 0 0 600 600" xml:space="preserve"&gt;
     <line  fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
     <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="111.212" y1="102.852" x2="112.032" y2="476.623" />
     <line fill="none" stroke="#000000" stroke-miterlimit="10" x1="198.917" y1="510.229" x2="486.622" y2="501.213" />
@@ -14,32 +14,32 @@
     <line  fill="none" stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
     <line  stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
     <line  stroke="#000000" stroke-miterlimit="10" testing="gone" x1="541.54" y1="299.573" x2="543.179" y2="536.458" />
-    <line  alert&#40;1&#41;" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
     <line  fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
+    <line  alert&#40;1&#41;" fill="none" stroke="#000000" stroke-miterlimit="10" x1="119" y1="84.5" x2="454" y2="84.5" />
     <image width="100" height="100"  />
     <g  />
     <a xlink="http://www.w3.org/1999/xlink"href="">test
     </a>
     <animation  />
-    <animation  />
+    <animation 
+        xmlns='http://www.w3.org/2000/svg' >&lt;/svg&gt;" />
     <set attributeName="" to="alert&#40;89&#41;" />
     <animate attributeName="" to="alert&#40;89&#41;" />
     <handler xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load">alert&#40;94&#41;
 
     </handler>
-    <image 
-             >&lt;/svg&gt;" />
+    <image  />
     <foreignObject  />
     <foreignObject  />
     <feImage>
         <set attributeName="xlink:href" to="
 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==" />
     </feImage>
-    <x  event="load" observer="foo" handler="data:image/svg+xml,&lt;svg &gt;
-<handler xml:id="bar" type="application/ecmascript"> alert&#40;104&#41; </handler>
+    <x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;handler xml:id="bar" type="application/ecmascript"&gt; alert&#40;104&#41; &lt;/handler&gt;
 &lt;/svg&gt;
-#bar" />
-    <path d="M0,0"  />
+#bar" /&gt;
+    &lt;path d="M0,0"  /&gt;
     &lt;iframe src="http://example.com/"  /&gt;
     &lt;svg:svg&gt;
         &lt;svg:mask id="maskForClickjacking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox"&gt;
@@ -47,27 +47,27 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
             &lt;svg:circle cx="0.45" cy="0.7" r="0.075" fill="white" /&gt;
         &lt;/svg:mask&gt;
     &lt;/svg:svg&gt;
-    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-        <xsl:template match="/">
-            &lt;iframe  src="alert&#40;125&#41;"&gt;
+    &lt;xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+        &lt;xsl:template match="/"&gt;
+            &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="alert&#40;125&#41;"&gt;
             &lt;/iframe&gt;
-        </xsl:template>
-    </xsl:stylesheet>
-    <circle fill="red" r="40"></circle>
-    <listener event="load" handler="#y"  observer="x" />
-    <handler id="y">alert&#40;127&#41;</handler>
-    <image xmlns:xlink="http://www.w3.org/1999/xlink">
-        <set attributeName="xlink:href" begin="accessKey(a)" to="//example.com/?a" />
-        <set attributeName="xlink:href" begin="accessKey(b)" to="//example.com/?b" />
-        <set attributeName="xlink:href" begin="accessKey(c)" to="//example.com/?c" />
-        <set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" />
-    </image>
-    <animate attributeName="xlink:href" begin="0" from="alert&#40;137&#41;" to="1" />
-    <a href="">test 1</a>
-    <a href="">test 2</a>
-    <a href="#test3">test 3</a>
-    <a href="#test">test 4</a>
+        &lt;/xsl:template&gt;
+    &lt;/xsl:stylesheet&gt;
+    &lt;circle fill="red" r="40"&gt;&lt;/circle&gt;
+    &lt;listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x" /&gt;
+    &lt;handler id="y"&gt;alert&#40;127&#41;&lt;/handler&gt;
+    &lt;image xmlns:xlink="http://www.w3.org/1999/xlink"&gt;
+        &lt;set attributeName="xlink:href" begin="accessKey(a)" to="//example.com/?a" /&gt;
+        &lt;set attributeName="xlink:href" begin="accessKey(b)" to="//example.com/?b" /&gt;
+        &lt;set attributeName="xlink:href" begin="accessKey(c)" to="//example.com/?c" /&gt;
+        &lt;set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" /&gt;
+    &lt;/image&gt;
+    &lt;animate attributeName="xlink:href" begin="0" from="alert&#40;137&#41;" to="1" /&gt;
+    &lt;a href=""&gt;test 1&lt;/a&gt;
+    &lt;a href=""&gt;test 2&lt;/a&gt;
+    &lt;a href="#test3"&gt;test 3&lt;/a&gt;
+    &lt;a href="#test"&gt;test 4&lt;/a&gt;
 
-    <a >&lt;/svg&gt;">test 5</a>
-    <a >&lt;/svg&gt;">test 6</a>
+    &lt;a  xmlns='http://www.w3.org/2000/svg'&gt;&lt;/svg&gt;"&gt;test 5&lt;/a&gt;
+    &lt;a  xmlns='http://www.w3.org/2000/svg'&gt;&lt;/svg&gt;"&gt;test 6&lt;/a&gt;
 &lt;/svg&gt;

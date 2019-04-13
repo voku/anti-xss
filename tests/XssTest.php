@@ -72,6 +72,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<x 1=">" onxxx=1 (text outside tag)'                                                                                                                                                                                                     => '<x 1=">" onxxx=1 (text outside tag)',
             '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>'                                                                                                                    => '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>',
             '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>'                                                                                                                                                     => '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>',
+            'foo Mondragon bar'                                                                                                                                                                                                                       => 'foo Mondragon bar',
+            'Mondragon'                                                                                                                                                                                                                               => 'Mondragon',
         ];
 
         $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -175,7 +177,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertNull($antiXss->isXssFound());
 
         // init the "_xss_hash"-property
-        $result = $antiXss->xss_clean('<void class="bar">foo</ onclick="foobar();" void>');
+        $result = $antiXss->xss_clean('<void class="bar">foo</ onclick  = "foobar();" void>');
         static::assertSame('<void class="bar">foo</  void>', $result);
         static::assertTrue($antiXss->isXssFound());
 
@@ -231,7 +233,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '"><svg><script>/<@/>alert(1337)</script>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  => '">&lt;svg&gt;/<@/>alert&#40;1337&#41;', // Bypassing Chrome’s Anti-XSS Filter | 2015: http://vulnerable.info/bypassing-chromes-anti-xss-filter/
             'Location: https://www.google.com%3a443%2fcse%2ftools%2fcreate_onthefly%3b%3c%2ftextarea%3e%3csvg%2fonload%3dalert%28document%2edomain%29%3e%3b%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           => 'Location: https://www.google.com:443/cse/tools/create_onthefly;&lt;/textarea&gt;&lt;svg/>;/../../../../../../../../../../../../../../', // Google XSS in IE | 2015: http://blog.bentkowski.info/2015/04/xss-via-host-header-cse.html
             'Location: http://example.jp:xyz%27onclick%3D%27a%5Cu006c%5Cu0065%5Cu0072t(1)%27/2.php'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     => 'Location: http://example.jp:xyz\'=\'alert&#40;1&#41;\'/2.php',
-            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> </svg>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         => '&lt;svg  xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><feImage> <set attributeName="xlink:href" to="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> </svg>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         => '&lt;svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;feImage> <set attributeName="xlink:href" to="PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg=="/></feImage> &lt;/svg&gt;', // SVG-XSS | https://html5sec.org/#95
             '<a target="_blank" href="data:text/html;BASE64youdummy,PHNjcmlwdD5hbGVydCh3aW5kb3cub3BlbmVyLmRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5pbm5lckhUTUwpPC9zY3JpcHQ+">clickme in firefox</a><a/\'\'\' target="_blank" href=data:text/html;;base64,PHNjcmlwdD5hbGVydChvcGVuZXIuZG9jdW1lbnQuYm9keS5pbm5lckhUTUwpPC9zY3JpcHQ+>firefox11</a>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               => '<a target="_blank" href="PHNjcmlwdD5hbGVydCh3aW5kb3cub3BlbmVyLmRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5pbm5lckhUTUwpPC9zY3JpcHQ+">clickme in firefox</a><a/\'\'\' target="_blank">firefox11</a>', // data: URI with base64 encoding bypass exploiting Firefox | 2012: https://bugzilla.mozilla.org/show_bug.cgi?id=255107
             'http://securitee.tk/files/chrome_xss.php?a=<script>void(\'&b=\');alert(1);</script>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       => 'http://securitee.tk/files/chrome_xss.php?a=void(\'&b=\');alert&#40;1&#41;;', // Bypassing Chrome’s Anti-XSS filter | 2012: http://blog.securitee.org/?p=37
             'with(document)body.appendChild(createElement(\'iframe onload=&#97&#108&#101&#114&#116(1)>\')),body.innerHTML+=\'\''                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        => 'with(document)body(createElement(\'iframe =alert&#40;1&#41;>\')),body+=\'\'', // IE11 in IE8 docmode #mxss | https://twitter.com/0x6D6172696F/status/626379000181596160
@@ -684,7 +686,7 @@ textContent>click me!',
 
         static::assertSame(
             \str_replace(["\r\n", "\r"], "\n", \trim($resultString)),
-            \str_replace(["\r\n", "\r"], "\n", html_entity_decode($this->antiXss->xss_clean(\trim($testString)))),
+            \str_replace(["\r\n", "\r"], "\n", \html_entity_decode($this->antiXss->xss_clean(\trim($testString)))),
             'testing: ' . $testString
         );
     }
@@ -793,10 +795,10 @@ textContent>click me!',
         $this->antiXss->addEvilHtmlTags(['video', 'source', 'iframe']);
 
         static::assertSame(
-        $resultStringOrig,
-        $this->antiXss->xss_clean($testString),
-        'testing: ' . $testString
-    );
+            $resultStringOrig,
+            $this->antiXss->xss_clean($testString),
+            'testing: ' . $testString
+        );
     }
 
     public function testSvgXssFileV2()
@@ -811,10 +813,24 @@ textContent>click me!',
         $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
 
         static::assertSame(
-        $resultString,
-        $this->antiXss->xss_clean($testString),
-        'testing: ' . $testString
-    );
+            $resultString,
+            \html_entity_decode($this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
+    public function testSvgXssFileV3()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v3.svg');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v3_clean.svg');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \html_entity_decode($this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
     }
 
     public function testXssFileV3()
@@ -909,9 +925,9 @@ textContent>click me!',
     public function testSvgXss()
     {
         $testArray = [
-            '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"><polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/><script type="text/javascript">alert(\'This app is probably vulnerable to XSS attacks!\');</script></svg>'                                                                                                                                                                                 => '&lt;?xml version="1.0" standalone="no"?&gt;&lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">&lt;svg version="1.1" baseProfile="full" &gt;&lt;polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/>alert&#40;\'This app is probably vulnerable to XSS attacks!\'&#41;;&lt;/svg&gt;',
-            'http://vulnerabledomain.com/xss.php?x=%3Csvg%3E%3Cuse%20height=200%20width=200%20xlink:href=%27http://vulnerabledomain.com/xss.php?x=%3Csvg%20id%3D%22rectangle%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20width%3D%22100%22%20height%3D%22100%22%3E%3Ca%20xlink%3Ahref%3D%22javascript%3Aalert%28location%29%22%3E%3Crect%20class%3D%22blue%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20%2F%3E%3C%2Fa%3E%3C%2Fsvg%3E%23rectangle%27/%3E%3C/svg%3E'                  => 'http://vulnerabledomain.com/xss.php?x=&lt;svg&gt;&lt;use height=200 width=200  id="rectangle"  xmlns:xlink="http://www.w3.org/1999/xlink"    width="100" height="100"><a href=""><rect class="blue" x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;#rectangle\'/>&lt;/svg&gt;',
-            '<svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"><a xlink:href="javascript:alert(location)"><rect x="0" y="0" width="100" height="100" /></a></svg>'                                                                                                                                                                                                                                                                                                                                                             => '&lt;svg id="rectangle"  xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"&gt;&lt;a href=""><rect x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;',
+            '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"><polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/><script type="text/javascript">alert(\'This app is probably vulnerable to XSS attacks!\');</script></svg>'                                                                                                                                                                                 => '&lt;?xml version="1.0" standalone="no"?&gt;&lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">&lt;svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"&gt;&lt;polygon id="triangle" points="0,0 0,50 50,0" fill="#009900" stroke="#004400"/>alert&#40;\'This app is probably vulnerable to XSS attacks!\'&#41;;&lt;/svg&gt;',
+            'http://vulnerabledomain.com/xss.php?x=%3Csvg%3E%3Cuse%20height=200%20width=200%20xlink:href=%27http://vulnerabledomain.com/xss.php?x=%3Csvg%20id%3D%22rectangle%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%20%20%20width%3D%22100%22%20height%3D%22100%22%3E%3Ca%20xlink%3Ahref%3D%22javascript%3Aalert%28location%29%22%3E%3Crect%20class%3D%22blue%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20%2F%3E%3C%2Fa%3E%3C%2Fsvg%3E%23rectangle%27/%3E%3C/svg%3E'                  => 'http://vulnerabledomain.com/xss.php?x=&lt;svg&gt;&lt;use height=200 width=200 />&lt;/svg&gt;',
+            '<svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"><a xlink:href="javascript:alert(location)"><rect x="0" y="0" width="100" height="100" /></a></svg>'                                                                                                                                                                                                                                                                                                                                                             => '&lt;svg id="rectangle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"width="100" height="100"&gt;&lt;a href=""><rect x="0" y="0" width="100" height="100" /></a>&lt;/svg&gt;',
             '<svg><use xlink:href="data:image/svg+xml;base64,PHN2ZyBpZD0icmVjdGFuZ2xlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiAgICB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg0KIDxmb3JlaWduT2JqZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNTAiDQogICAgICAgICAgICAgICAgICAgcmVxdWlyZWRFeHRlbnNpb25zPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hodG1sIj4NCgk8ZW1iZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiIHNyYz0iamF2YXNjcmlwdDphbGVydChsb2NhdGlvbikiIC8+DQogICAgPC9mb3JlaWduT2JqZWN0Pg0KPC9zdmc+#rectangle" /></svg>' => '&lt;svg&gt;&lt;use  />&lt;/svg&gt;',
             '
             <!DOCTYPE html>

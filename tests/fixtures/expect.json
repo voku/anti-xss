@@ -297,7 +297,7 @@
   },
   {
     "payload": "<div id=\"11\"><svg xmlns=\"http://www.w3.org/2000/svg\"><g onload=\"javascript:alert(11)\"></g></svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"11\">&lt;svg &gt;&lt;g ></g>&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"11\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;&lt;g ></g>&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"12\"><body onscroll=alert(12)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>//[\"'`-->]]>]</div>",
@@ -349,7 +349,7 @@
   },
   {
     "payload": "<div id=\"24\">1<set/xmlns=`urn:schemas-microsoft-com:time` style=`behAvior:url(#default#time2)` attributename=`innerhtml` to=`<img/src=\"x\"onerror=alert(24)>`>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"24\">1<set/  attributename=`innerhtml` to=`<img/src=\"x\">`>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"24\">1<set/xmlns=`urn:schemas-microsoft-com:time`  attributename=`innerhtml` to=`<img/src=\"x\">`>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"25\"><script src=\"#\">{alert(25)}</script>;1//[\"'`-->]]>]</div>",
@@ -361,7 +361,7 @@
   },
   {
     "payload": "<div id=\"27\"><style>p[foo=bar{}*{-o-link:'javascript:alert(27)'}{}*{-o-link-source:current}*{background:red}]{background:green};</style>//[\"'`-->]]>]</div><div id=\"28\">1<animate/xmlns=urn:schemas-microsoft-com:time style=behavior:url(#default#time2)  attributename=innerhtml values=<img/src=\".\"onerror=alert(28)>>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"27\">&lt;style&gt;p[foo=bar{}*{-o-link:'alert&#40;27&#41;'}{}*{-o-link-source:current}*{background:red}]{background:green};&lt;/style&gt;//[\"'`--&gt;]]>]</div><div id=\"28\">1<animate/   attributename=innerhtml values=<img/src=\".\">>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"27\">&lt;style&gt;p[foo=bar{}*{-o-link:'alert&#40;27&#41;'}{}*{-o-link-source:current}*{background:red}]{background:green};&lt;/style&gt;//[\"'`--&gt;]]>]</div><div id=\"28\">1<animate/xmlns=urn:schemas-microsoft-com:time   attributename=innerhtml values=<img/src=\".\">>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"29\"><link rel=stylesheet href=data:,*%7bx:expression(alert(29))%7d//[\"'`-->]]>]</div>",
@@ -385,11 +385,11 @@
   },
   {
     "payload": "<div id=\"34\">1<vmlframe xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute;width:100%;height:100% src=test.vml#xss></vmlframe>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"34\">1<vmlframe   src=test.vml#xss></vmlframe>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"34\">1<vmlframe xmlns=urn:schemas-microsoft-com:vml  src=test.vml#xss></vmlframe>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"35\">1<a href=#><line xmlns=urn:schemas-microsoft-com:vml style=behavior:url(#default#vml);position:absolute href=javascript:alert(35) strokecolor=white strokeweight=1000px from=0 to=1000 /></a>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"35\">1<a ><line   href=alert&#40;35&#41; strokecolor=white strokeweight=1000px from=0 to=1000 /></a>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"35\">1<a ><line xmlns=urn:schemas-microsoft-com:vml  href=alert&#40;35&#41; strokecolor=white strokeweight=1000px from=0 to=1000 /></a>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"36\"><a style=\"behavior:url(#default#AnchorClick);\" folder=\"javascript:alert(36)\">XXX</a>//[\"'`-->]]>]</div>",
@@ -433,7 +433,7 @@
   },
   {
     "payload": "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<style type=\"text/css\">\n@font-face {font-family: y; src: url(\"font.svg#x\") format(\"svg\");} body {font: 100px \"y\";}\n</style>\n</head>\n<body>Hello</body>\n</html>//[\"'`-->]]>]</div>",
-    "expected": "&lt;html &gt;\n&lt;head&gt;\n&lt;style type=\"text/css\"&gt;\n@font-face {font-family: y; src: url(\"font.svg#x\") format(\"svg\");} body {font: 100px \"y\";}\n&lt;/style&gt;\n&lt;/head&gt;\n&lt;body&gt;Hello&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "&lt;html xmlns=\"http://www.w3.org/1999/xhtml\"&gt;\n&lt;head&gt;\n&lt;style type=\"text/css\"&gt;\n@font-face {font-family: y; src: url(\"font.svg#x\") format(\"svg\");} body {font: 100px \"y\";}\n&lt;/style&gt;\n&lt;/head&gt;\n&lt;body&gt;Hello&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"44\"><style>*[{}@import'test.css?]{color: green;}</style>X//[\"'`-->]]>]</div>",
@@ -449,7 +449,7 @@
   },
   {
     "payload": "<div id=\"47\"><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(47)</script></svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"47\">&lt;svg &gt;alert&#40;47&#41;&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"47\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;alert&#40;47&#41;&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"48\"><SCRIPT FOR=document EVENT=onreadystatechange>alert(48)</SCRIPT>//[\"'`-->]]>]</div>",
@@ -521,7 +521,7 @@
   },
   {
     "payload": "<div id=\"65\"><svg onload=\"javascript:alert(65)\" xmlns=\"http://www.w3.org/2000/svg\"></svg>//[\"'`-->]]>]</div><div id=\"66\"><?xml version=\"1.0\"?>",
-    "expected": "<div id=\"65\">&lt;svg  &gt;&lt;/svg>//[\"'`--&gt;]]>]</div><div id=\"66\">&lt;?xml version=\"1.0\"?&gt;"
+    "expected": "<div id=\"65\">&lt;svg  xmlns=\"http://www.w3.org/2000/svg\"&gt;&lt;/svg>//[\"'`--&gt;]]>]</div><div id=\"66\">&lt;?xml version=\"1.0\"?&gt;"
   },
   {
     "payload": "<?xml-stylesheet type=\"text/xsl\" href=\"data:,%3Cxsl:transform version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' id='xss'%3E%3Cxsl:output method='html'/%3E%3Cxsl:template match='/'%3E%3Cscript%3Ealert(66)%3C/script%3E%3C/xsl:template%3E%3C/xsl:transform%3E\"?>\n<root/>//[\"'`-->]]>]</div>\n<div id=\"67\"><!DOCTYPE x [\n    <!ATTLIST img xmlns CDATA \"http://www.w3.org/1999/xhtml\" src CDATA \"xx:x\"\n onerror CDATA \"alert(67)\"\n onload CDATA \"alert(2)\">\n]><img />//[\"'`-->]]>]</div>",
@@ -533,7 +533,7 @@
   },
   {
     "payload": "<div id=\"69\"><card xmlns=\"http://www.wapforum.org/2001/wml\"><onevent type=\"ontimer\"><go href=\"javascript:alert(69)\"/></onevent><timer value=\"1\"/></card>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"69\"><card ><onevent type=\"ontimer\"><go href=\"alert&#40;69&#41;\"/></onevent><timer value=\"1\"/></card>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"69\"><card xmlns=\"http://www.wapforum.org/2001/wml\"><onevent type=\"ontimer\"><go href=\"alert&#40;69&#41;\"/></onevent><timer value=\"1\"/></card>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"70\"><div style=width:1px;filter:glow onfilterchange=alert(70)>x</div>//[\"'`-->]]>]</div>",
@@ -569,7 +569,7 @@
   },
   {
     "payload": "<div id=\"78\"><?xml-stylesheet type=\"text/xsl\" href=\"#\"?><img xmlns=\"x-schema:test.xdr\"/>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img />//[\"'`--&>]</>"
+    "expected": "<div id=\"78\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\"?&gt;<img xmlns=\"x-schema:test.xdr\"/>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"79\"><object allowscriptaccess=\"always\" data=\"test.swf\"></object>//[\"'`-->]]>]</div>",
@@ -597,15 +597,15 @@
   },
   {
     "payload": "<div id=\"86\"><body oninput=alert(86)><input autofocus>//[\"'`-->]]>]</div><div id=\"87\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<a xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"javascript:alert(87)\"><rect width=\"1000\" height=\"1000\" fill=\"white\"/></a>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"86\">&lt;body &gt;&lt;input autofocus>//[\"'`--&gt;]]>]</div><div id=\"87\">&lt;svg &gt;\n<a xlink=\"http://www.w3.org/1999/xlink\"href=\"\"><rect width=\"1000\" height=\"1000\" fill=\"white\"/></a>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"86\">&lt;body &gt;&lt;input autofocus>//[\"'`--&gt;]]>]</div><div id=\"87\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n<a xlink=\"http://www.w3.org/1999/xlink\"href=\"\"><rect width=\"1000\" height=\"1000\" fill=\"white\"/></a>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"88\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<animation xlink:href=\"javascript:alert(88)\"/>\n<animation xlink:href=\"data:text/xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E\"/>\n\n<image xlink:href=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(88)'%3E%3C/svg%3E\"/>\n\n<foreignObject xlink:href=\"javascript:alert(88)\"/>\n<foreignObject xlink:href=\"data:text/xml,%3Cscript xmlns='http://www.w3.org/1999/xhtml'%3Ealert(88)%3C/script%3E\"/>\n\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"88\">&lt;svg  xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<animation />\n<animation   >&lt;/svg&gt;\"/>\n\n<image />\n\n<foreignObject >\n<foreignObject />\n\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"88\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<animation />\n<animation  xmlns='http://www.w3.org/2000/svg' >&lt;/svg&gt;\"/>\n\n<image />\n\n<foreignObject >\n<foreignObject />\n\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"89\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<set attributeName=\"onmouseover\" to=\"alert(89)\"/>\n<animate attributeName=\"onunload\" to=\"alert(89)\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"89\">&lt;svg &gt;\n<set attributeName=\"\" to=\"alert&#40;89&#41;\"/>\n<animate attributeName=\"\" to=\"alert&#40;89&#41;\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"89\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n<set attributeName=\"\" to=\"alert&#40;89&#41;\"/>\n<animate attributeName=\"\" to=\"alert&#40;89&#41;\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"90\"><!-- Up to Opera 10.63 -->\n<div style=content:url(test2.svg)></div>\n\n<!-- Up to Opera 11.64 - see link below -->\n\n<!-- Up to Opera 12.x -->\n<div style=\"background:url(test5.svg)\">PRESS ENTER</div>//[\"'`-->]]>]</div>",
@@ -625,11 +625,11 @@
   },
   {
     "payload": "<div id=\"94\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<handler xmlns:ev=\"http://www.w3.org/2001/xml-events\" ev:event=\"load\">alert(94)</handler>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"94\">&lt;svg &gt;\n<handler xmlns:ev=\"http://www.w3.org/2001/xml-events\" ev:event=\"load\">alert&#40;94&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"94\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n<handler xmlns:ev=\"http://www.w3.org/2001/xml-events\" ev:event=\"load\">alert&#40;94&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"95\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<feImage>\n<set attributeName=\"xlink:href\" to=\"data:image/svg+xml;charset=utf-8;base64,\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ%2BYWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg%3D%3D\"/>\n</feImage>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"95\">&lt;svg  xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<feImage>\n<set attributeName=\"xlink:href\" to=\"\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==\"/>\n</feImage>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"95\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;\n<feImage>\n<set attributeName=\"xlink:href\" to=\"\nPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==\"/>\n</feImage>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"96\"><iframe src=mhtml:http://html5sec.org/test.html!xss.html></iframe>\n<iframe src=mhtml:http://html5sec.org/test.gif!xss.html></iframe>//[\"'`-->]]>]</div>",
@@ -637,7 +637,7 @@
   },
   {
     "payload": "<div id=\"97\"><!-- IE 5-9 -->\n<div id=d><x xmlns=\"><iframe onload=alert(97)\"></div>\n<script>d.innerHTML+='';</script>\n<!-- IE 10 in IE5-9 Standards mode -->\n<div id=d><x xmlns='\"><iframe onload=alert(2)//'></div>\n<script>d.innerHTML+='';</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x >&lt;iframe \"&gt;&lt;/div>\nd+='';\n&lt;!-- IE 10 in IE5-9 Standards mode --&gt;\n<div id=d><x ></div>\nd+='';//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x xmlns=\">&lt;iframe \"&gt;&lt;/div&gt;\nd+='';\n&lt;!-- IE 10 in IE5-9 Standards mode --&gt;\n&lt;div id=d&gt;&lt;x xmlns='\"&gt;&lt;iframe '&gt;&lt;/div&gt;\nd+='';//[\"'`--&gt;]]&gt;]&lt;/div>"
   },
   {
     "payload": "<div id=\"98\"><div id=d><div style=\"font-family:'sans\u0017\u0002F\u0002A\u0012\u0002A\u0002F\u0003B color\u0003Ared\u0003B'\">X</div></div>\n<script>with(document.getElementById(\"d\"))innerHTML=innerHTML</script>//[\"'`-->]]>]</div>",
@@ -661,7 +661,7 @@
   },
   {
     "payload": "<div id=\"103\"><script>history.pushState(0,0,'/i/am/somewhere_else');</script>//[\"'`-->]]>]</div><div id=\"104\"><svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\">\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Chandler%20xml%3Aid%3D%22bar%22%20type%3D%22application%2Fecmascript%22%3E alert(104) %3C%2Fhandler%3E%0A%3C%2Fsvg%3E%0A#bar\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"103\">history.pushState(0,0,'/i/am/somewhere_else');//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg  id=\"foo\"&gt;\n<x  event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg &gt;\n<handler xml:id=\"bar\" type=\"application/ecmascript\"> alert&#40;104&#41; </handler>\n&lt;/svg&gt;\n#bar\"/>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"103\">history.pushState(0,0,'/i/am/somewhere_else');//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\"&gt;\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n&lt;handler xml:id=\"bar\" type=\"application/ecmascript\"&gt; alert&#40;104&#41; &lt;/handler&gt;\n&lt;/svg&gt;\n#bar\"/&gt;\n&lt;/svg&gt;//[\"'`--&gt;]]&gt;]&lt;/div&gt;"
   },
   {
     "payload": "<div id=\"105\"><iframe src=\"data:image/svg-xml,%1F%8B%08%00%00%00%00%00%02%03%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2%03\"></iframe>//[\"'`-->]]>]</div>",
@@ -681,11 +681,11 @@
   },
   {
     "payload": "<div id=\"109\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<a id=\"x\"><rect fill=\"white\" width=\"1000\" height=\"1000\"/></a>\n<rect  fill=\"white\" style=\"clip-path:url(test3.svg#a);fill:url(#b);filter:url(#c);marker:url(#d);mask:url(#e);stroke:url(#f);\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"109\">&lt;svg &gt;\n<a id=\"x\"><rect fill=\"white\" width=\"1000\" height=\"1000\"/></a>\n<rect  fill=\"white\" />\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"109\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n<a id=\"x\"><rect fill=\"white\" width=\"1000\" height=\"1000\"/></a>\n<rect  fill=\"white\" />\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"110\"><svg xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M0,0\" style=\"marker-start:url(test4.svg#a)\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"110\">&lt;svg &gt;\n<path d=\"M0,0\" />\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"110\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n<path d=\"M0,0\" />\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"111\"><div style=\"background:url(/f#[a]oo/;color:red/*/foo.jpg);\">X</div>//[\"'`-->]]>]</div>",
@@ -730,7 +730,7 @@
   },
   {
     "payload": "<div id=\"121\"><html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\">\n<body style=\"background:gray\">\n<iframe src=\"http://example.com/\" style=\"width:800px; height:350px; border:none; mask: url(#maskForClickjacking);\"/>\n<svg:svg>\n<svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\">\n    <svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/>\n    <svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/>\n</svg:mask>\n</svg:svg>\n</body>\n</html>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"121\">&lt;html \nxmlns:svg=\"http://www.w3.org/2000/svg\"&gt;\n&lt;body &gt;\n&lt;iframe src=\"http://example.com/\" /&gt;\n&lt;svg:svg&gt;\n&lt;svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\"&gt;\n    &lt;svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/&gt;\n    &lt;svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/&gt;\n&lt;/svg:mask&gt;\n&lt;/svg:svg&gt;\n&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"121\">&lt;html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\"&gt;\n&lt;body &gt;\n&lt;iframe src=\"http://example.com/\" /&gt;\n&lt;svg:svg&gt;\n&lt;svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\"&gt;\n    &lt;svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/&gt;\n    &lt;svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/&gt;\n&lt;/svg:mask&gt;\n&lt;/svg:svg&gt;\n&lt;/body&gt;\n&lt;/html&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "iframe (sandboxed)",
@@ -743,7 +743,7 @@
   },
   {
     "payload": "<div id=\"125\"><?xml version=\"1.0\"?>\n<?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?>\n<!DOCTYPE doc [\n<!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n<svg xmlns=\"http://www.w3.org/2000/svg\">\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            <iframe xmlns=\"http://www.w3.org/1999/xhtml\" src=\"javascript:alert(125)\"></iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"125\">&lt;?xml version=\"1.0\"?&gt;\n&lt;?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?&gt;\n&lt;!DOCTYPE doc [\n&lt;!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n&lt;svg &gt;\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            &lt;iframe  src=\"alert&#40;125&#41;\"&gt;&lt;/iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"125\">&lt;?xml version=\"1.0\"?&gt;\n&lt;?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?&gt;\n&lt;!DOCTYPE doc [\n&lt;!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            &lt;iframe xmlns=\"http://www.w3.org/1999/xhtml\" src=\"alert&#40;125&#41;\"&gt;&lt;/iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"126\"><object id=\"x\" classid=\"clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598\"></object>\n<object classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" onqt_error=\"alert(126)\" style=\"behavior:url(#x);\"><param name=postdomevents /></object>//[\"'`-->]]>]</div>",
@@ -751,7 +751,7 @@
   },
   {
     "payload": "<div id=\"127\"><svg xmlns=\"http://www.w3.org/2000/svg\" id=\"x\">\n<listener event=\"load\" handler=\"#y\" xmlns=\"http://www.w3.org/2001/xml-events\" observer=\"x\"/>\n<handler id=\"y\">alert(127)</handler>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"127\">&lt;svg  id=\"x\"&gt;\n<listener event=\"load\" handler=\"#y\"  observer=\"x\"/>\n<handler id=\"y\">alert&#40;127&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"127\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" id=\"x\"&gt;\n<listener event=\"load\" handler=\"#y\" xmlns=\"http://www.w3.org/2001/xml-events\" observer=\"x\"/>\n<handler id=\"y\">alert&#40;127&#41;</handler>\n&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"128\"><svg><style><img/src=x onerror=alert(128)// </b>//[\"'`-->]]>]</div>",
@@ -788,7 +788,7 @@
   {
     "title": "SVG",
     "payload": "<div id=\"135\"><?xml-stylesheet type=\"text/xsl\" href=\"#\" ?>\n<stylesheet xmlns=\"http://www.w3.org/TR/WD-xsl\">\n<template match=\"/\">\n<eval>new ActiveXObject('htmlfile').parentWindow.alert(135)</eval>\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert(2)\"></if>\n</template>\n</stylesheet>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet &gt;\n<template match=\"/\">\n&lt;eval&gt;new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;&lt;/eval&gt;\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"135\">&lt;?xml-stylesheet type=\"text/xsl\" href=\"#\" ?&gt;\n&lt;stylesheet xmlns=\"http://www.w3.org/TR/WD-xsl\"&gt;\n<template match=\"/\">\n&lt;eval&gt;new ActiveXObject('htmlfile').parentWindow.alert&#40;135&#41;&lt;/eval&gt;\n<if expr=\"new ActiveXObject('htmlfile').parentWindow.alert&#40;2&#41;\"></if>\n</template>\n&lt;/stylesheet&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"136\"><form action=\"\" method=\"post\">\n<input name=\"username\" value=\"admin\" />\n<input name=\"password\" type=\"password\" value=\"secret\" />\n<input name=\"injected\" value=\"injected\" dirname=\"password\" />\n<input type=\"submit\">\n</form>//[\"'`-->]]>]</div>",
