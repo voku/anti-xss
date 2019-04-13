@@ -29,35 +29,43 @@ final class AntiXSS
      */
     private static $_never_allowed_regex = [
         // default javascript
-        'javascript\s*:',
-        // default javascript
         '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
-        // Java: jar-protocol is an XSS hazard
-        'jar\s*:',
-        // Mac (will not run the script, but open it in AppleScript Editor)
-        'applescript\s*:',
-        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
-        'vbscript\s*:',
-        // IE, surprise!
-        'wscript\s*:',
-        // IE
-        'jscript\s*:',
-        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
-        'vbs\s*:',
-        // https://html5sec.org/#behavior
-        'behavior\s:',
         // data-attribute + base64
         "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
         // remove Netscape 4 JS entities
         '&\s*\{[^}]*(\}\s*;?|$)',
         // old IE, old Netscape
         'expression\s*(\(|&\#40;)',
+    ];
+
+    /**
+     * List of never allowed call statements.
+     *
+     * @var array
+     */
+    private static $_never_allowed_call = [
+        // default javascript
+        'javascript',
+        // Java: jar-protocol is an XSS hazard
+        'jar',
+        // Mac (will not run the script, but open it in AppleScript Editor)
+        'applescript',
+        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
+        'vbscript',
+        // IE, surprise!
+        'wscript',
+        // IE
+        'jscript',
+        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
+        'vbs',
+        // https://html5sec.org/#behavior
+        'behavior',
         // old Netscape
-        'mocha\s*:',
+        'mocha',
         // old Netscape
-        'livescript\s*:',
+        'livescript',
         // default view source
-        'view-source\s*:',
+        'view-source',
     ];
 
     /**
@@ -346,7 +354,6 @@ final class AntiXSS
         'source',
         'svg',
         'xml',
-        'xss',
     ];
 
     const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
@@ -403,6 +410,8 @@ final class AntiXSS
     private function _compact_exploded_javascript(string $str): string
     {
         static $WORDS_CACHE;
+        $WORDS_CACHE['chunk'] = [];
+        $WORDS_CACHE['split'] = [];
 
         $words = [
             'javascript',
@@ -427,21 +436,28 @@ final class AntiXSS
         ];
 
         foreach ($words as $word) {
-            if (!isset($WORDS_CACHE[$word])) {
+
+            if (!isset($WORDS_CACHE['chunk'][$word])) {
                 $regex = '(?:^|"|\042|\'|\047|\s+|\ |\.|\+|)*';
-                $word = $WORDS_CACHE[$word] = \substr(
+                $WORDS_CACHE['chunk'][$word] = \substr(
                     \chunk_split($word, 1, $regex),
                     0,
                     -\strlen($regex)
                 );
-            } else {
-                $word = $WORDS_CACHE[$word];
+
+                $WORDS_CACHE['split'][$word] = \str_split($word, 1);
+            }
+
+            foreach ($WORDS_CACHE['split'][$word] as $charTmp) {
+                if (\stripos($str, $charTmp) === false) {
+                    continue 2;
+                }
             }
 
             // We only want to do this when it is followed by a non-word character
             // That way valid stuff like "dealer to" does not become "dealerto".
             $str = (string) \preg_replace_callback(
-                '#(?<word>' . $word . ')(?<rest>\W)#is',
+                '#(?<word>' . $WORDS_CACHE['chunk'][$word] . ')(?<rest>\W)#is',
                 [
                     $this,
                     '_compact_exploded_words_callback',
@@ -520,7 +536,11 @@ final class AntiXSS
         // init
         $regExForHtmlTags = '/<\w+.*+/s';
 
-        if (\preg_match($regExForHtmlTags, $str, $matches) === 1) {
+        if (
+            \strpos($str, '<') !== false
+            &&
+            \preg_match($regExForHtmlTags, $str, $matches) === 1
+        ) {
             $str = (string) \preg_replace_callback(
                 $regExForHtmlTags,
                 [
@@ -642,6 +662,20 @@ final class AntiXSS
             $this->_never_allowed_str,
             $str
         );
+
+        // ---
+
+        foreach (self::$_never_allowed_call as $call) {
+            if (stripos($str, $call) !== false) {
+                $str = (string) \preg_replace(
+                    '#' . $call . '\s*:#is',
+                    $this->_replacement,
+                    $str
+                );
+            }
+        }
+
+        // ---
 
         if ($NEVER_ALLOWED_CACHE['regex'] === null) {
             $NEVER_ALLOWED_CACHE['regex'] = \implode('|', self::$_never_allowed_regex);

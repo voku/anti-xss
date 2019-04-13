@@ -47,8 +47,8 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<b>abcd</o>', $this->security->xss_clean('<b>abcd</o>'));
         static::assertSame('<b><o>abcd</b></o>', $this->security->xss_clean('<b><o>abcd</b></o>'));
         static::assertSame('<hr>', $this->security->xss_clean('<hr>'));
-        static::assertSame('&lt;xss&gt;', $this->security->xss_clean('<xss>'));
-        static::assertSame('&lt;xss o="x"&gt;', $this->security->xss_clean('<xss o="x">'));
+        static::assertSame('<xss>', $this->security->xss_clean('<xss>'));
+        static::assertSame('<xss o="x">', $this->security->xss_clean('<xss o="x">'));
         static::assertSame('<a><b>c</b></a>', $this->security->xss_clean('<a><b>c</b></a>'));
         static::assertSame('<a><c>b</c></a>', $this->security->xss_clean('<a><c>b</c></a>'));
 
@@ -113,7 +113,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('>">\'>alert&#40;String.fromCharCode(88,83,83&#41;)', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
 
-        static::assertSame(';!--"&lt;XSS&gt;=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
+        static::assertSame(';!--"<XSS>=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>'));
 
