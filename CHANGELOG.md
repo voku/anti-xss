@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.6 (2019-04-12)
+
+- fix replacing of false-positive xss words e.g. "Mondragon" (issue #43)
+
 ### 4.1.5 (2019-02-13)
 
 - fix issue with "()" in some html attributes (issue #41)
