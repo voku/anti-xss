@@ -17,7 +17,7 @@ use const HTML_ENTITIES;
  *
  * @copyright   Copyright (c) 2008 - 2014, EllisLab, Inc. (http://ellislab.com/)
  * @copyright   Copyright (c) 2014 - 2015, British Columbia Institute of Technology (http://bcit.ca/)
- * @copyright   Copyright (c) 2015 - 2018, Lars Moelleken (https://moelleken.org/)
+ * @copyright   Copyright (c) 2015 - 2019, Lars Moelleken (https://moelleken.org/)
  * @license     http://opensource.org/licenses/MIT	MIT License
  */
 final class AntiXSS
