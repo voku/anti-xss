@@ -681,7 +681,7 @@ final class AntiXSS
         foreach (self::$_never_allowed_call as $call) {
             if (\stripos($str, $call) !== false) {
                 $str = (string) \preg_replace(
-                    '#' . $call . '\s*:#is',
+                    '#' . $call . '\s*:#ius',
                     $this->_replacement,
                     $str
                 );
@@ -695,7 +695,7 @@ final class AntiXSS
         }
 
         $str = (string) \preg_replace(
-            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#is',
+            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#ius',
             $this->_replacement,
             $str
         );
@@ -994,7 +994,7 @@ final class AntiXSS
 
             if (!$foundSomethingBad) {
                 // filter for javascript
-                $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#is';
+                $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#ius';
                 $matchInner = [];
                 \preg_match($pattern, $match[1], $matchInner);
                 if (\count($matchInner) > 0) {
@@ -1289,7 +1289,7 @@ final class AntiXSS
     {
         $evil_html_tags = \implode('|', $this->_evil_html_tags);
         $str = (string) \preg_replace_callback(
-            '#<(?<start>/*\s*)(?<content>' . $evil_html_tags . ')(?<end>[^><]*)(?<rest>[><]*)#i',
+            '#<(?<start>/*\s*)(?<content>' . $evil_html_tags . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
             function ($matches) {
                 return $this->_sanitize_naughty_html_callback($matches);
             },
@@ -1354,7 +1354,7 @@ final class AntiXSS
     private function _sanitize_naughty_javascript($str): string
     {
         $str = (string) \preg_replace(
-            '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#siU',
+            '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#uisU',
             '\\1\\2&#40;\\3&#41;',
             $str
         );
