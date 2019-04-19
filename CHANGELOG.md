@@ -1,8 +1,14 @@
 # Changelog
 
+### 4.1.7 (2019-04-19)
+
+- fix replacing of false-positive xss words e.g. "DE VAL HERNANDEZ" (issue #43)
+
+
 ### 4.1.6 (2019-04-12)
 
 - fix replacing of false-positive xss words e.g. "Mondragon" (issue #43)
+
 
 ### 4.1.5 (2019-02-13)
 
