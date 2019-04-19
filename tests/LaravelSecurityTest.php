@@ -220,7 +220,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<foo prefixOnAttribute="bar">',
-                '<foo prefix[removed]="bar">',
+                '<foo prefixOnAttribute="bar">',
             ],
             [
                 "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n",

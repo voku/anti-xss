@@ -470,7 +470,7 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to" does not become "dealerto".
 
-            $regex = '#(?<before>[^\w])(?<word>' . \str_replace('#', '\#', $WORDS_CACHE['chunk'][$word]) . ')(?<after>\W)#is';
+            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace('#', '\#', $WORDS_CACHE['chunk'][$word]) . ')(?<after>\P{L}|@|$)#ius';
             $str = (string) \preg_replace_callback(
                 $regex,
                 function ($matches) {
@@ -548,7 +548,7 @@ final class AntiXSS
     private function _decode_string(string $str): string
     {
         // init
-        $regExForHtmlTags = '/<\w+.*+/s';
+        $regExForHtmlTags = '/<\p{L}+.*+/us';
 
         if (
             \strpos($str, '<') !== false
@@ -720,14 +720,14 @@ final class AntiXSS
         if (\stripos($str, 'on') !== false) {
             foreach (self::$_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
-                    $regex = '(?:' . $event . ')(\s*\W|$)';
+                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|@|$)';
 
                     do {
                         $count = $temp_count = 0;
 
                         $str = (string) \preg_replace(
-                            '#' . $regex . '#is',
-                            $this->_replacement . '$1',
+                            '#' . $regex . '#ius',
+                            '$1' . $this->_replacement . '$2',
                             $str,
                             -1,
                             $temp_count
@@ -1164,7 +1164,7 @@ final class AntiXSS
                 $count = $temp_count = 0;
 
                 $str = (string) \preg_replace(
-                    '/(<[^>]+)(?<!\w)(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/i',
+                    '/(<[^>]+)(?<!\p{L})(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/iu',
                     '$1' . $this->_replacement,
                     $str,
                     -1,
@@ -1180,7 +1180,7 @@ final class AntiXSS
 
             // find occurrences of illegal attribute strings with and without quotes (042 ["] and 047 ['] are octal quotes)
             $str = (string) \preg_replace(
-                '/(.*)((?:<[^>]+)(?<!\w))(?:' . $evil_attributes_string . ')(?:\s*=\s*)(?:(?:\'|\047)(?:.*?)(?:\'|\047)|(?:"|\042)(?:.*?)(?:"|\042))(.*)/is',
+                '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $evil_attributes_string . ')(?:\s*=\s*)(?:(?:\'|\047)(?:.*?)(?:\'|\047)|(?:"|\042)(?:.*?)(?:"|\042))(.*)/ius',
                 '$1$2' . $this->_replacement . '$3$4',
                 $str,
                 -1,
@@ -1189,7 +1189,7 @@ final class AntiXSS
             $count += $temp_count;
 
             $str = (string) \preg_replace(
-                '/(.*)(<[^>]+)(?<!\w)(?:' . $evil_attributes_string . ')\s*=\s*(?:[^\s>]*)(.*)/is',
+                '/(.*)(<[^>]+)(?<!\p{L})(?:' . $evil_attributes_string . ')\s*=\s*(?:[^\s>]*)(.*)/ius',
                 '$1$2' . $this->_replacement . '$3',
                 $str,
                 -1,

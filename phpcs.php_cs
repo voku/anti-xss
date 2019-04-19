@@ -24,7 +24,7 @@ return PhpCsFixer\Config::create()
                                     'space' => 'single',
                                 ],
                                 'class_attributes_separation'                   => true,
-                                'class_keyword_remove'                          => false,
+                                'class_keyword_remove'                          => true,
                                 'combine_consecutive_issets'                    => true,
                                 'combine_consecutive_unsets'                    => true,
                                 'combine_nested_dirname'                        => true,
@@ -32,7 +32,7 @@ return PhpCsFixer\Config::create()
                                 'concat_space'                                  => [
                                     'spacing' => 'one',
                                 ],
-                                'date_time_immutable'                           => false,
+                                'date_time_immutable'                           => true,
                                 'declare_equal_normalize'                       => true,
                                 'declare_strict_types'                          => false, // some tests need declare_strict_types === 0
                                 'dir_constant'                                  => true,
@@ -58,8 +58,8 @@ return PhpCsFixer\Config::create()
                                         'version',
                                     ],
                                 ],
-                                'heredoc_to_nowdoc'                             => false,
-                                'implode_call'                                  => false,
+                                'heredoc_to_nowdoc'                             => true,
+                                'implode_call'                                  => true,
                                 'include'                                       => true,
                                 'increment_style'                               => false, // maybe better for readability, so keep it ...
                                 'indentation_type'                              => true,
@@ -185,7 +185,7 @@ return PhpCsFixer\Config::create()
                                 'php_unit_test_case_static_method_calls'        => true,
                                 'php_unit_test_class_requires_covers'           => false,
                                 'pow_to_exponentiation'                         => true,
-                                'pre_increment'                                 => false,
+                                'pre_increment'                                 => true,
                                 'protected_to_private'                          => true,
                                 'return_assignment'                             => true,
                                 'return_type_declaration'                       => true,
@@ -206,7 +206,7 @@ return PhpCsFixer\Config::create()
                                 'space_after_semicolon'                         => true,
                                 'standardize_increment'                         => false, // maybe better for readability, so keep it ...
                                 'standardize_not_equals'                        => true,
-                                'static_lambda'                                 => false,
+                                'static_lambda'                                 => true,
                                 'strict_comparison'                             => true,
                                 'strict_param'                                  => true,
                                 'string_line_ending'                            => true,
