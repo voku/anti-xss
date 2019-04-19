@@ -361,7 +361,7 @@ final class AntiXSS
     /**
      * @var string
      */
-    private $_spacing_regex = '(?:\s|"|\042|\'|\047|\+|&#x09;|&#x0[A-F];)*+';
+    private $_spacing_regex = '(?:\s|"|\042|\'|\047|\+|&#x09;|&#x0[A-F];|%0a)*+';
 
     /**
      * The replacement-string for not allowed strings.
@@ -388,7 +388,7 @@ final class AntiXSS
     /**
      * @var bool|null
      */
-    private $xss_found;
+    private $_xss_found;
 
     /**
      * __construct()
@@ -420,21 +420,10 @@ final class AntiXSS
 
         $words = [
             'javascript',
-            'expression',
-            'view-source',
-            'vbscript',
-            'jscript',
-            'wscript',
-            'script',
+            '<script',
+            '</script>',
             'base64',
-            'applet',
-            'alert',
             'document',
-            'write',
-            'cookie',
-            'window',
-            'confirm',
-            'prompt',
             'eval',
         ];
 
@@ -470,7 +459,7 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to" does not become "dealerto".
 
-            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace('#', '\#', $WORDS_CACHE['chunk'][$word]) . ')(?<after>\P{L}|@|$)#ius';
+            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>\P{L}|@|$)#ius';
             $str = (string) \preg_replace_callback(
                 $regex,
                 function ($matches) {
@@ -525,7 +514,7 @@ final class AntiXSS
                     $urlPartClean = $tmpAntiXss->xss_clean($matchInner);
 
                     if ($tmpAntiXss->isXssFound() === true) {
-                        $this->xss_found = true;
+                        $this->_xss_found = true;
 
                         $str = \str_replace($matchInner, UTF8::rawurldecode($urlPartClean), $str);
                     }
@@ -588,8 +577,8 @@ final class AntiXSS
         ) {
 
             // no xss found
-            if ($this->xss_found !== true) {
-                $this->xss_found = false;
+            if ($this->_xss_found !== true) {
+                $this->_xss_found = false;
             }
 
             return $str;
@@ -645,8 +634,8 @@ final class AntiXSS
         $str = $this->_do_never_allowed_afterwards($str);
 
         // check for xss
-        if ($this->xss_found !== true) {
-            $this->xss_found = !($str_backup === $str);
+        if ($this->_xss_found !== true) {
+            $this->_xss_found = !($str_backup === $str);
         }
 
         return $str;
@@ -1400,7 +1389,7 @@ final class AntiXSS
      */
     public function isXssFound()
     {
-        return $this->xss_found;
+        return $this->_xss_found;
     }
 
     /**
@@ -1515,7 +1504,7 @@ final class AntiXSS
     public function xss_clean($str)
     {
         // reset
-        $this->xss_found = null;
+        $this->_xss_found = null;
 
         // check for an array of strings
         if (\is_array($str)) {
@@ -1535,7 +1524,7 @@ final class AntiXSS
         } while ($old_str !== $str);
 
         // keep the old value, if there wasn't any XSS attack
-        if ($this->xss_found !== true) {
+        if ($this->_xss_found !== true) {
             $str = $old_str_backup;
         }
 
