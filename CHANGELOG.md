@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.9 (2019-04-19)
+
+- optimize the spacing regex 
+
+
 ### 4.1.8 (2019-04-19)
 
 - fix replacing of false-positive xss words e.g. "MONDRAGÓN" (issue #43)
