@@ -457,9 +457,9 @@ final class AntiXSS
             // We only want to do this when it is followed by a non-word character.
             // And if there are no char at the start of the string.
             //
-            // That way valid stuff like "dealer to" does not become "dealerto".
+            // That way valid stuff like "dealer to!" does not become "dealerto".
 
-            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>\P{L}|@|$)#ius';
+            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius';
             $str = (string) \preg_replace_callback(
                 $regex,
                 function ($matches) {
@@ -709,7 +709,7 @@ final class AntiXSS
         if (\stripos($str, 'on') !== false) {
             foreach (self::$_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
-                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|@|$)';
+                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|$)';
 
                     do {
                         $count = $temp_count = 0;
