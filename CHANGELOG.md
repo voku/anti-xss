@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.10 (2019-04-19)
+
+- fix replacing of false-positive xss words e.g. "ANAMNESI E VAL!DEFINITE BREVI ORTO" (issue #43)
+
+
 ### 4.1.9 (2019-04-19)
 
 - optimize the spacing regex 
