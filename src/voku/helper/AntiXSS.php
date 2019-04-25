@@ -52,12 +52,11 @@ final class AntiXSS
         'applescript',
         // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
         'vbscript',
+        'vbs',
         // IE, surprise!
         'wscript',
         // IE
         'jscript',
-        // IE: https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#VBscript_in_an_image
-        'vbs',
         // https://html5sec.org/#behavior
         'behavior',
         // old Netscape
@@ -670,8 +669,8 @@ final class AntiXSS
         foreach (self::$_never_allowed_call as $call) {
             if (\stripos($str, $call) !== false) {
                 $str = (string) \preg_replace(
-                    '#' . $call . '\s*:#ius',
-                    $this->_replacement,
+                    '#([^\p{L}]|^)' . $call . '\s*:#ius',
+                    '$1' . $this->_replacement,
                     $str
                 );
             }
