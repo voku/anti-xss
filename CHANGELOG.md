@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.11 (2019-05-28)
+
+- fix replacing of false-positive xss words e.g. "<styler_tester@gmail.com>" (issue #44)
+
+
 ### 4.1.10 (2019-04-19)
 
 - fix replacing of false-positive xss words e.g. "ANAMNESI E VAL!DEFINITE BREVI ORTO" (issue #43)
