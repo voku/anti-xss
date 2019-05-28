@@ -316,7 +316,6 @@ final class AntiXSS
      */
     private $_evil_html_tags = [
         'applet',
-        'alert',
         'audio',
         'basefont',
         'base',
@@ -486,9 +485,9 @@ final class AntiXSS
     private function _compact_exploded_words_callback($matches): string
     {
         return $matches['before'] . \preg_replace(
-                '/' . $this->_spacing_regex . '/is',
-                '',
-                $matches['word']
+            '/' . $this->_spacing_regex . '/is',
+            '',
+            $matches['word']
             ) . $matches['after'];
     }
 
@@ -1198,6 +1197,10 @@ final class AntiXSS
      */
     private function _repack_utf7(string $str): string
     {
+        if (\strpos($str, '-') === false) {
+            return $str;
+        }
+
         return (string) \preg_replace_callback(
             '#\+([\\p{L}0-9]+)\-#ui',
             function ($matches) {
@@ -1275,6 +1278,10 @@ final class AntiXSS
      */
     private function _sanitize_naughty_html($str): string
     {
+        if (\strpos($str, '<') === false) {
+            return $str;
+        }
+
         $evil_html_tags = \implode('|', $this->_evil_html_tags);
         $str = (string) \preg_replace_callback(
             '#<(?<start>/*\s*)(?<content>' . $evil_html_tags . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
@@ -1301,6 +1308,31 @@ final class AntiXSS
      */
     private function _sanitize_naughty_html_callback(array $matches): string
     {
+        $fullMatch = $matches[0];
+
+        // skip some edge-cases
+        if (
+            $fullMatch !== '<' . $matches['content']
+            &&
+            \strpos($fullMatch, '=') === false
+            &&
+            \strpos($fullMatch, ' ') === false
+            &&
+            \strpos($fullMatch, ':') === false
+            &&
+            \strpos($fullMatch, '/') === false
+            &&
+            \strpos($fullMatch, '\\') === false
+            &&
+            \strpos($fullMatch, '<' . $matches['content'] . '>') !== 0
+            &&
+            \strpos($fullMatch, '</' . $matches['content'] . '>') !== 0
+            &&
+            \strpos($fullMatch, '<' . $matches['content'] . '<') !== 0
+        ) {
+            return $fullMatch;
+        }
+
         return '&lt;' . $matches['start'] . $matches['content'] . $matches['end'] // encode opening brace
             // encode captured opening or closing brace to prevent recursive vectors:
             . \str_replace(

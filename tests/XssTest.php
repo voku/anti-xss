@@ -90,6 +90,9 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             'ANAMNESI E VAL?DEFINITE BREVI ORTO'                                                                                                                                                                                                      => 'ANAMNESI E VAL?DEFINITE BREVI ORTO',
             'ANAMNESI E VAL DEFINITE BREVI ORTO'                                                                                                                                                                                                      => 'ANAMNESI E VAL DEFINITE BREVI ORTO',
             'ANAMNESI E VALDEFINITE BREVI ORTO'                                                                                                                                                                                                       => 'ANAMNESI E VALDEFINITE BREVI ORTO',
+            '<styler_tester@gmail.com>'                                                                                                                                                                                                               => '<styler_tester@gmail.com>',
+            'styler_tester@gmail.com'                                                                                                                                                                                                                 => 'styler_tester@gmail.com',
+            '<xxxnonstop@gmail.com>'                                                                                                                                                                                                                  => '<xxxnonstop@gmail.com>',
             'xxxnonstop@hotmail.com'                                                                                                                                                                                                                  => 'xxxnonstop@hotmail.com',
             ' xxxnonstop@hotmail.com '                                                                                                                                                                                                                => ' xxxnonstop@hotmail.com ',
             'cyyhqLRMvBs:APA91bH1ueQlBr8GXbQxNw9SpzldRAeYK4mw-Yqhw44v7oEoRgxyoFAfQc_2A3dc6X_vp3HpmPGh4NAItAAyv9pvoQbJZXUotjX0427y1hG_vCtr34UnEecqAGsXwkevitdHZIp9juRC'                                                                                => 'cyyhqLRMvBs:APA91bH1ueQlBr8GXbQxNw9SpzldRAeYK4mw-Yqhw44v7oEoRgxyoFAfQc_2A3dc6X_vp3HpmPGh4NAItAAyv9pvoQbJZXUotjX0427y1hG_vCtr34UnEecqAGsXwkevitdHZIp9juRC',
@@ -288,7 +291,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<x contextmenu=">"><acronym%0Cx=""%09oncut+=%09d=document;a=d.createElement("a");a.href="img/hacked1.jpg";a.download="open.me";d.body.appendChild(a);a.click()+><option><input type=submit>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               => '<x contextmenu=">"><acronym x=""%09+=%09d=document;a=d.createElement("a");a.href="img/hacked1.jpg";a.download="open.me";d.body(a);a.click()+><option>&lt;input type=submit&gt;', // http://brutelogic.com.br/webgun/
             '<h1/onclick=alert(1)>a'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    => '<h1/>a',
             '")}alert(/XSS/);{//'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       => '")}alert&#40;/XSS/&#41;;{//',
-            '<svgonload=alert(1)>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      => '&lt;svgonload=alert&#40;1&#41;&gt;', // 2015: https://twitter.com/ret2libc/status/635923671681507328
+            '<svg onload=alert(1)>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     => '&lt;svg &gt;', // 2015: https://twitter.com/ret2libc/status/635923671681507328
             "<style onload='execScript(/**/\"\x61lert&#40 1&#41\",\"j\x61vascript\");'>"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                => '&lt;style &gt;', // IE | 2015: https://twitter.com/soaj1664ashar/status/635040931289370624
             '<​script>alert `1`</script>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               => 'alert `1`',
             '<form id="test"></form><button form="test" formaction="javascript:alert(1)">X</button>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    => '&lt;form id="test"&gt;&lt;/form>&lt;button  &gt;X&lt;/button&gt;',
@@ -594,8 +597,8 @@ source+location.hash[1]+1+location.hash[2]&gt;#()',
 nodeValue+outerHTML>javascript:/*click me' => '*/"<j"-alert&#40;9&#41;&lt;!-- 
 nodeValue+outerHTML>/*click me',
             '<alert(1)<!-- onclick=location=innerHTML+outerHTML>javascript:1/*click me!
-*/</alert(1)<!-- -->' => '&lt;alert&#40;1&#41;&lt;!-- &gt;1/*click me!
-*/&lt;/alert&#40;1&#41;&lt;!-- --&gt;',
+*/</alert(1)<!-- -->' => '<alert&#40;1&#41;&lt;!-- >1/*click me!
+*/</alert&#40;1&#41;&lt;!-- --&gt;',
             '<javas onclick=location=tagName+innerHTML+URL>cript:"-\'click me!</javas>#\'-
 alert(1)' => '<javas >cript:"-\'click me!</javas>#\'-
 alert&#40;1&#41;',
@@ -766,9 +769,9 @@ textContent>click me!',
         ';
 
         static::assertSame(
-        $resultStringOrig,
-        $this->antiXss->xss_clean($testString),
-        'testing: ' . $testString
+            $resultStringOrig,
+            $this->antiXss->xss_clean($testString),
+            'testing: ' . $testString
     );
     }
 
@@ -789,9 +792,9 @@ textContent>click me!',
     ';
 
         static::assertSame(
-        $resultStringOrig,
-        $this->antiXss->xss_clean($testString),
-        'testing: ' . $testString
+            $resultStringOrig,
+            $this->antiXss->xss_clean($testString),
+            'testing: ' . $testString
     );
 
         $this->antiXss->removeEvilHtmlTags(['video', 'source', 'iframe']);
@@ -804,14 +807,14 @@ textContent>click me!',
     ';
 
         static::assertSame(
-        $resultString,
-        $this->antiXss->xss_clean($testString),
-        'testing: ' . $testString
+            $resultString,
+            $this->antiXss->xss_clean($testString),
+            'testing: ' . $testString
     );
 
         static::assertSame(
-      '<iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>',
-      $this->antiXss->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
+            '<iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>',
+            $this->antiXss->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
 
     );
 
@@ -922,7 +925,7 @@ textContent>click me!',
             '<script src=http://www.example.com/malicious-code.js></script>'                             => '',
             '%3cscript src=http://www.example.com/malicious-code.js%3e%3c/script%3e'                     => '',
             "\x3cscript src=http://www.example.com/malicious-code.js\x3e\x3c/script\x3e"                 => '',
-            "'`\"><\x3Cscript>javascript:alert(1)</script>'`\"><\x00script>javascript:alert(1)</script>" => "'`\">&lt;alert&#40;1&#41;'`\"&gt;alert&#40;1&#41;",
+            "'`\"><\x3Cscript>javascript:alert(1)</script>'`\"><\x00script>javascript:alert(1)</script>" => "'`\"><alert&#40;1&#41;'`\">alert&#40;1&#41;",
         ];
 
         foreach ($testArray as $before => $after) {
@@ -1122,6 +1125,9 @@ textContent>click me!',
 
         $testString = '<img src="<?php echo "http://moelleken.org/test.png" ?>" alt="bar" title="javascript:alert(\'XSS\');">';
         static::assertSame('<img src="&lt;?php echo " alt="bar" title="alert&#40;\'XSS\'&#41;;">', $this->antiXss->xss_clean($testString));
+
+        $testString = '<img/src/onerror=alert(1)>';
+        static::assertSame('<img/>', $this->antiXss->xss_clean($testString));
     }
 
     public function testXssUrlDecode()
@@ -1282,7 +1288,19 @@ textContent>click me!',
             ],
             [
                 '<<script>alert(0);//<</script>',
-                '&lt;alert&#40;0&#41;;//&lt;',
+                '<alert&#40;0&#41;;//<',
+                'script',
+                'HTML tag stripping evasion -- double opening brackets.',
+            ],
+            [
+                '< <script >alert(0);//<</ script >',
+                '< alert&#40;0&#41;;//<',
+                'script',
+                'HTML tag stripping evasion -- double opening brackets.',
+            ],
+            [
+                '< <script< >alert(0);//<</ script >',
+                '< alert&#40;0&#41;;//<',
                 'script',
                 'HTML tag stripping evasion -- double opening brackets.',
             ],
