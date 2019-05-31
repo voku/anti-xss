@@ -866,7 +866,7 @@ final class AntiXSS
         }
 
         $out = '';
-        if (\preg_match_all('#\s*[\\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
+        if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
             foreach ($matches[0] as $match) {
                 $out .= $match;
             }
@@ -1057,7 +1057,7 @@ final class AntiXSS
 
             if (\stripos($str, '<a') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<a[^a-z0-9>]+([^>]*?)(?:>|$)#i',
+                    '#<a[^\p{L}@>]+([^>]*?)(?:>|$)#iu',
                     function ($matches) {
                         return $this->_js_link_removal_callback($matches);
                     },
@@ -1067,7 +1067,7 @@ final class AntiXSS
 
             if (\stripos($str, '<img') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
+                    '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
@@ -1077,7 +1077,7 @@ final class AntiXSS
 
             if (\stripos($str, '<audio') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<audio[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
+                    '#<audio[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
@@ -1087,7 +1087,7 @@ final class AntiXSS
 
             if (\stripos($str, '<video') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<video[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
+                    '#<video[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
@@ -1097,7 +1097,7 @@ final class AntiXSS
 
             if (\stripos($str, '<source') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<source[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#i',
+                    '#<source[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
@@ -1202,7 +1202,7 @@ final class AntiXSS
         }
 
         return (string) \preg_replace_callback(
-            '#\+([\\p{L}0-9]+)\-#ui',
+            '#\+([\p{L}0-9]+)\-#ui',
             function ($matches) {
                 return $this->_repack_utf7_callback($matches);
             },
