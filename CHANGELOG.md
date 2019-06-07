@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.13 (2019-06-08)
+
+- fix replacing of false-positive xss words e.g. "<script@gmail.com>" (issue #44)
+
+
 ### 4.1.12 (2019-05-31)
 
 - fix replacing of false-positive xss words e.g. "<video@gmail.com>" (issue #44)
