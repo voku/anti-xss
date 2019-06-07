@@ -58,7 +58,7 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
             '<td width="75">Bar!</td>',
             '<td width="200">Long Cell</td>',
             'search.php?q=";alert&#40;"XSS"&#41;;&n=1093&i=410',
-            'http://localhost/text.php/">alert&#40;“Gehackt!”&#41;;&lt;/form&gt;&lt;form action="/...',
+            'http://localhost/text.php/">&lt;/form&gt;&lt;form action="/...',
         ];
 
         static::assertSame($resultArray, $this->security->xss_clean($testArray));

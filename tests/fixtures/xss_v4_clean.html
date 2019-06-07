@@ -9,22 +9,16 @@
 &lt;body
 bgcolor=white
 linkcolor = "blue"
-&lt;p>properly escaped code in a handler</p>");"
+
+"&lt;p>properly escaped code in a handler</p>");"
 >
 
 &lt;!--
 
 ln("<p>Some initialization code in global context</p>");
 
---&gt;
+--&gt;More initialization</p>");
 
-
-// hi there
-ln("<p>More initialization</p>");
-
-
-<div id=clickydiv 
->
 Clicky
 </div>
 
@@ -53,11 +47,7 @@ write("<pre>$horriblySyntacticConstruct1</pre>\n\n");
 &lt;!--
 alert&#40;"hello world"&#41;;
 // --&gt;
-
-/*  */alert&#40;'hi'&#41;;
-&lt;!--/*  */alert&#40;'hi'&#41;;--&gt;
-
-<xmp >&lt;!--/* </xmp> */alert&#40;'hi'&#41;;--&gt;</xmp>
+ */alert&#40;'hi'&#41;;--&gt;&lt;!--/* </xmp> */alert&#40;'hi'&#41;;--&gt;</xmp>
 
 &lt;style&gt;&lt;!-- p { contentf: '&lt;/style&gt;' } --&gt;&lt;/style&gt;
 
@@ -67,15 +57,15 @@ alert&#40;"hello world"&#41;;
 
 &lt;!-- An escaping text span start may share its U+002D HYPHEN-MINUS characters
 - with its corresponding escaping text span end. --&gt;
-&lt;!--&gt;
-&lt;!---&gt;
-&lt;!----&gt;
+
+
+
 
 &lt;/body&gt;
 &lt;/html&gt;
 
 &lt;![CDATA[ No such thing as a CDATA> section in HTML ]]>
-a<b
+
 
 <img  />< >< >
 

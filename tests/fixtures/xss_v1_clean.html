@@ -7,11 +7,11 @@
 
   &lt;meta http-equiv="refresh" content="0;url=document.vulnerable=true;"&gt;
 
-  &lt;META HTTP-EQUIV="Set-Cookie" Content="USERID=document.vulnerable=true"&gt;
+  &lt;META HTTP-EQUIV="Set-Cookie" Content="USERID="&gt;
 
   &lt;BASE HREF="document.vulnerable=true;//"&gt;
 
-  &lt;title&gt;XSS&lt;/TITLE&gt;document.vulnerable=true;
+  &lt;title&gt;XSS&lt;/TITLE&gt;
 
   &lt;!-- style --&gt;
 
@@ -27,34 +27,31 @@
 
   &lt;!-- script --&gt;
 
-  &lt;style&gt;&lt;!--&lt;/style&gt;document.vulnerable=true;//--&gt;
+  &lt;style&gt;&lt;!--&lt;/style&gt;
 
   
-    document.vulnerable=true;
-    \";document.vulnerable=true;;//
-  
 
-  &lt;!-- -- --&gt;document.vulnerable=true;&lt;!-- -- --&gt;
+  &lt;!-- -- --&gt;&lt;!-- -- --&gt;
 
-  &lt;![CDATA[&lt;!--]]document.vulnerable=true;//--&gt;
+  &lt;![CDATA[&lt;!--]]
 
-  <document.vulnerable=true;
+  <
 
-  &lt;!--[if gte IE 4]>document.vulnerable=true;<![endif]--&gt;
+  &lt;!--[if gte IE 4]><![endif]--&gt;
 
-  <document.vulnerable=true;//<
+  <
 
   [\xC0][\xBC]script>document.vulnerable=true;[\xC0][\xBC]/script>
 
+  
+
   document.vulnerable=true;
 
-  document.vulnerable=true;</B>
+  
 
-  a=/XSS/\ndocument.vulnerable=true;
+  &
 
-  &document.vulnerable=true;
-
-&lt;/head&gt;document.vulnerable=true;
+&lt;/head&gt;
 &lt;BODY BACKGROUND="document.vulnerable=true;" !#$%&()*~+-_.,:;?@[/|\]^`=document.vulnerable=true;&gt;
 
 &lt;!-- link --&gt;
@@ -69,7 +66,7 @@ exp/*<A >XSS</A>
 
 <a href=""></a>
 
-<a href=""></a>
+<a href="about:"></a>
 
 <A ></A>
 
@@ -149,7 +146,7 @@ exp/*<A >XSS</A>
 
 &lt;xml src="document.vulnerable=true;"&gt;&lt;/xml>
 
-&lt;xml id="X"&gt;&lt;a><b>document.vulnerable=true;;</b></a>&lt;/xml&gt;
+&lt;xml id="X"&gt;&lt;a><b>;</b></a>&lt;/xml&gt;
 
 &lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">]]</C></X>&lt;/xml&gt;&lt;SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
 
@@ -180,11 +177,7 @@ exp/*<A >XSS</A>
 
 &lt;!-- php --&gt;
 
-&lt;? echo('<SCR)';echo('IPT>document.vulnerable=true'); ?&gt;
-
-&lt;!-- text --&gt;
-
-<p>alert&#40;1&#41;</p>
+&lt;? echo('<SCR)';echo('IPT>document.vulnerable=truealert&#40;1&#41;</p>
 
 <p>&lt;img src="alert&#40;1&#41;"</p>
 
@@ -196,9 +189,9 @@ exp/*<A >XSS</A>
 
 <p><a href="http://example.com" title="title">link2</a></p>
 
-<p><a >alert&#40;1&#41;">link3</a></p>
+<p><a >">link3</a></p>
 
-<p><a >alert&#40;1&#41;">link4 &gt;alert&#40;1&#41;</a></p>
+<p><a >">link4 &gt;alert&#40;1&#41;</a></p>
 
 &lt;!-- images + text --&gt;
 
@@ -206,7 +199,7 @@ exp/*<A >XSS</A>
 
 <p><img src="http://example.com" alt="img2" title="text" /></p>
 
-<p><img > alt="img3" /></p>
+<p><img >" alt="img3" /></p>
 
 &lt;/body&gt;
 &lt;/html&gt;

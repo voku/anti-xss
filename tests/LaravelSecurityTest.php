@@ -31,7 +31,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 'Hello, try to <script>alert(\'Hack\');</script> this site',
-                'Hello, try to [removed]alert&#40;\'Hack\'&#41;;[removed] this site',
+                'Hello, try to [removed] this site',
             ],
             [
                 '<a href="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</a>',
@@ -63,7 +63,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<svg/contentScriptType=text/vbs><script>Execute(MsgBox(chr(88)&chr(83)&chr(83)))',
-                '&lt;svg/contentScriptType=text/vbs&gt;[removed]Execute(MsgBox(chr(88)&chr(83)&chr(83)))',
+                '&lt;svg/contentScriptType=text/vbs&gt;[removed]',
             ],
             [
                 '<iframe/src="javascript:a=[alert&lpar;1&rpar;,confirm&#40;2&#41;,prompt%283%29];eval(a[0]);">',
@@ -75,7 +75,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<script>Object.defineProperties(window,{w:{value:{f:function(){return 1}}}});confirm(w.f())</script>',
-                '[removed]Object.defineProperties(window,{w:{value:{f:function(){return 1}}}});confirm&#40;w.f(&#41;)[removed]',
+                '[removed]',
             ],
             [
                 '<keygen/onfocus=prompt(1);>',
@@ -115,7 +115,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<object/type="text/x-scriptlet"/data="data:X,&#60script&#62setInterval&lpar;\'prompt(1)\',10&rpar;&#60/script&#62"></object>',
-                '&lt;object/type="text/x-scriptlet"/data="data:X,[removed]setInterval(\'prompt&#40;1&#41;\',10)[removed]"&gt;&lt;/object>',
+                '&lt;object/type="text/x-scriptlet"/data="data:X,[removed]"&gt;&lt;/object>',
             ],
             [
                 '<i<f<r<a<m<e><iframe/onload=confirm(1);></i>f>r>a>m>e>',
@@ -135,7 +135,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<object/data="data&colon;X&comma;&lt;script&gt;alert&#40;1&#41;%3c&sol;script%3e">',
-                '&lt;object/data="data:X,[removed]alert&#40;1&#41;[removed]"&gt;',
+                '&lt;object/data="data:X,[removed]"&gt;',
             ],
             [
                 '<form/action=javascript&#x3A;void(1)&quest;void(1)&colon;alert(1)><input/type=\'submit\'>',
@@ -163,7 +163,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<math><solve i.e., x=2+2*2-2/2=? href="data:text/html,<script>prompt(1)</script>">X',
-                '&lt;math&gt;&lt;solve i.e., x=2+2*2-2/2=? href="data:text/html,[removed]prompt&#40;1&#41;[removed]">X',
+                '&lt;math&gt;&lt;solve i.e., x=2+2*2-2/2=? href="data:text/html,[removed]">X',
             ],
             [
                 '<iframe/src="j&Tab;AVASCRIP&NewLine;t:\u0061ler\u0074&#x28;1&#x29;">',
@@ -195,7 +195,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<script>x=\'con\';s=\'firm\';S=\'(1)\';setTimeout(x+s+S,0);</script>',
-                '[removed]x=\'con\';s=\'firm\';S=\'(1)\';setTimeout(x+s+S,0);[removed]',
+                '[removed]',
             ],
             [
                 '<img/id="confirm&lpar;1&#x29;"/alt="/"src="/"onerror=eval(id&#x29;>',
@@ -203,7 +203,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<iframe/src="data&colon;text&sol;html,<s&Tab;cr&Tab;ip&Tab;t>confirm(1)</script>">',
-                '&lt;iframe/src="data:text/html,[removed]confirm&#40;1&#41;[removed]"&gt;',
+                '&lt;iframe/src="data:text/html,[removed]"&gt;',
             ],
             [
                 '<foo fscommand=case-insensitive><foo seekSegmentTime=whatever>',

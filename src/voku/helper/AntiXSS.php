@@ -1106,13 +1106,22 @@ final class AntiXSS
             }
 
             if (\stripos($str, 'script') !== false) {
-                // US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
-                    '#(?:¼|<)/*(?:script).*(?:¾|>)#isuU',
+                $str = (string)\preg_replace(
+                    '#<script[^\p{L}@]+(?:[^>]*?)(?:\s?/?>|$)#iu',
                     $this->_replacement,
                     $str
                 );
             }
+
+            if (\stripos($str, 'script') !== false) {
+                // US-ASCII: ¼ === <
+                $str = (string) \preg_replace(
+                    '#(?:¼|<)/*(?:script[^\p{L}@]+).*(?:¾|>)#isuU',
+                    $this->_replacement,
+                    $str
+                );
+            }
+
         } while ($original !== $str);
 
         return (string) $str;

