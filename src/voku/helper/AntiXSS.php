@@ -280,7 +280,7 @@ final class AntiXSS
         'onTransitionEnd',
         'onToggle',
         'onTouchCancel',
-        'onTouchend',
+        'onTouchEnd',
         'onTouchLeave',
         'onTouchMove',
         'onTouchStart',
