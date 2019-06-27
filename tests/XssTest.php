@@ -115,6 +115,31 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $this->antiXss->addEvilAttributes((['style'])); // re-disallow style-attributes
     }
 
+    public function testRemoveAddEvents()
+    {
+        $testArray = [
+            '<x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x 1=">" onxxx=1 onAbort="alert&#40;\'foo\'&#41;;" (text outside tag)',
+        ];
+
+        $this->antiXss->removeNeverAllowedOnEventsAfterwards(['onAbort']); // allow
+
+        foreach ($testArray as $before => $after) {
+            static::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+        }
+
+        $this->antiXss->addNeverAllowedOnEventsAfterwards((['onAbort'])); // re-disallow
+
+        // ---
+
+        $testArray = [
+            '<x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag)',
+        ];
+
+        foreach ($testArray as $before => $after) {
+            static::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+        }
+    }
+
     public function testXssCleanStringWith3bytes()
     {
         $harmStrings = [

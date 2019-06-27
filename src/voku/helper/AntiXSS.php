@@ -22,10 +22,12 @@ use const HTML_ENTITIES;
  */
 final class AntiXSS
 {
+    const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
+
     /**
      * List of never allowed regex replacements.
      *
-     * @var array
+     * @var string[]
      */
     private static $_never_allowed_regex = [
         // default javascript
@@ -41,7 +43,7 @@ final class AntiXSS
     /**
      * List of never allowed call statements.
      *
-     * @var array
+     * @var string[]
      */
     private static $_never_allowed_call = [
         // default javascript
@@ -68,11 +70,20 @@ final class AntiXSS
     ];
 
     /**
+     * @var string[]
+     */
+    private static $_never_allowed_str_afterwards = [
+        'FSCOMMAND',
+        '&lt;script&gt;',
+        '&lt;/script&gt;',
+    ];
+
+    /**
      * List of never allowed strings, afterwards.
      *
-     * @var array
+     * @var string[]
      */
-    private static $_never_allowed_on_events_afterwards = [
+    private $_never_allowed_on_events_afterwards = [
         'onAbort',
         'onActivate',
         'onAttribute',
@@ -269,6 +280,9 @@ final class AntiXSS
         'onTransitionEnd',
         'onToggle',
         'onTouchCancel',
+        'onTouchend',
+        'onTouchLeave',
+        'onTouchMove',
         'onTouchStart',
         'onTransitionCancel',
         'onTransitionEnd',
@@ -287,18 +301,9 @@ final class AntiXSS
     ];
 
     /**
-     * @var array
-     */
-    private static $_never_allowed_str_afterwards = [
-        'FSCOMMAND',
-        '&lt;script&gt;',
-        '&lt;/script&gt;',
-    ];
-
-    /**
      * https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Event_Handlers
      *
-     * @var array
+     * @var string[]
      */
     private $_evil_attributes_regex = [
         'on\w*',
@@ -312,7 +317,7 @@ final class AntiXSS
     ];
 
     /**
-     * @var array
+     * @var string[]
      */
     private $_evil_html_tags = [
         'applet',
@@ -354,8 +359,6 @@ final class AntiXSS
         'xml',
     ];
 
-    const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
-
     /**
      * @var string
      */
@@ -371,7 +374,7 @@ final class AntiXSS
     /**
      * List of never allowed strings.
      *
-     * @var array
+     * @var string[]
      */
     private $_never_allowed_str = [];
 
@@ -457,9 +460,15 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
-            $regex = '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(['#', '.'], ['\#', '\.'], $WORDS_CACHE['chunk'][$word]) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius';
             $str = (string) \preg_replace_callback(
-                $regex,
+                '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
+                    ['#', '.'],
+                    [
+                        '\#',
+                        '\.',
+                    ],
+                    $WORDS_CACHE['chunk'][$word]
+                ) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius',
                 function ($matches) {
                     return $this->_compact_exploded_words_callback($matches);
                 },
@@ -514,7 +523,7 @@ final class AntiXSS
                     if ($tmpAntiXss->isXssFound() === true) {
                         $this->_xss_found = true;
 
-                        $str = \str_replace($matchInner, UTF8::rawurldecode($urlPartClean), $str);
+                        $str = \str_ireplace($matchInner, UTF8::rawurldecode($urlPartClean), $str);
                     }
                 }
             }
@@ -705,7 +714,7 @@ final class AntiXSS
     private function _do_never_allowed_afterwards(string $str): string
     {
         if (\stripos($str, 'on') !== false) {
-            foreach (self::$_never_allowed_on_events_afterwards as $event) {
+            foreach ($this->_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
                     $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\s|[^\p{L}]|$)';
 
@@ -832,24 +841,11 @@ final class AntiXSS
             }
 
             if (\count($replace) > 0) {
-                $str = \str_replace($search, $replace, $str);
+                $str = \str_ireplace($search, $replace, $str);
             }
         }
 
         return $str;
-    }
-
-    /**
-     * get data from "/data/*.php"
-     *
-     * @param string $file
-     *
-     * @return mixed
-     */
-    private static function _get_data(string $file)
-    {
-        /** @noinspection PhpIncludeInspection */
-        return include __DIR__ . '/data/' . $file . '.php';
     }
 
     /**
@@ -873,6 +869,19 @@ final class AntiXSS
         }
 
         return $out;
+    }
+
+    /**
+     * get data from "/data/*.php"
+     *
+     * @param string $file
+     *
+     * @return mixed
+     */
+    private static function _get_data(string $file)
+    {
+        /** @noinspection PhpIncludeInspection */
+        return include __DIR__ . '/data/' . $file . '.php';
     }
 
     /**
@@ -953,7 +962,7 @@ final class AntiXSS
             \preg_match('/style=".*?"/i', $match[0], $match_style);
             $match_style_matched = (\count($match_style) > 0);
             if ($match_style_matched) {
-                $match[0] = \str_replace($match_style[0], self::VOKU_ANTI_XSS_STYLE, $match[0]);
+                $match[0] = \str_ireplace($match_style[0], self::VOKU_ANTI_XSS_STYLE, $match[0]);
             }
         }
 
@@ -1106,7 +1115,7 @@ final class AntiXSS
             }
 
             if (\stripos($str, 'script') !== false) {
-                $str = (string)\preg_replace(
+                $str = (string) \preg_replace(
                     '#<script[^\p{L}@]+(?:[^>]*?)(?:\s?/?>|$)#iu',
                     $this->_replacement,
                     $str
@@ -1121,7 +1130,6 @@ final class AntiXSS
                     $str
                 );
             }
-
         } while ($original !== $str);
 
         return (string) $str;
@@ -1333,28 +1341,28 @@ final class AntiXSS
             &&
             \strpos($fullMatch, '\\') === false
             &&
-            \strpos($fullMatch, '<' . $matches['content'] . '>') !== 0
+            \stripos($fullMatch, '<' . $matches['content'] . '>') !== 0
             &&
-            \strpos($fullMatch, '</' . $matches['content'] . '>') !== 0
+            \stripos($fullMatch, '</' . $matches['content'] . '>') !== 0
             &&
-            \strpos($fullMatch, '<' . $matches['content'] . '<') !== 0
+            \stripos($fullMatch, '<' . $matches['content'] . '<') !== 0
         ) {
             return $fullMatch;
         }
 
         return '&lt;' . $matches['start'] . $matches['content'] . $matches['end'] // encode opening brace
-            // encode captured opening or closing brace to prevent recursive vectors:
-            . \str_replace(
-                [
-                    '>',
-                    '<',
-                ],
-                [
-                    '&gt;',
-                    '&lt;',
-                ],
-                $matches['rest']
-            );
+               // encode captured opening or closing brace to prevent recursive vectors:
+               . \str_replace(
+                   [
+                       '>',
+                       '<',
+                   ],
+                   [
+                       '&gt;',
+                       '&lt;',
+                   ],
+                   $matches['rest']
+               );
     }
 
     /**
@@ -1430,6 +1438,45 @@ final class AntiXSS
     public function isXssFound()
     {
         return $this->_xss_found;
+    }
+
+    /**
+     * Add some strings to the "_never_allowed_on_events_afterwards"-array.
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function addNeverAllowedOnEventsAfterwards(array $strings): self
+    {
+        $this->_never_allowed_on_events_afterwards = \array_merge(
+            $strings,
+            $this->_never_allowed_on_events_afterwards
+        );
+
+        return $this;
+    }
+
+    /**
+     * Remove some strings from the "_never_allowed_on_events_afterwards"-array.
+     *
+     * <p>
+     * <br />
+     * WARNING: Use this method only if you have a really good reason.
+     * </p>
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function removeNeverAllowedOnEventsAfterwards(array $strings): self
+    {
+        $this->_never_allowed_on_events_afterwards = \array_diff(
+            $this->_never_allowed_on_events_afterwards,
+            \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
+        );
+
+        return $this;
     }
 
     /**
