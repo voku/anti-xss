@@ -132,7 +132,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         // ---
 
         $testArray = [
-            '<x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag)',
+            '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag)',
         ];
 
         foreach ($testArray as $before => $after) {
