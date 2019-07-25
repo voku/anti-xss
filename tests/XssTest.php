@@ -150,6 +150,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="http://test.com?param1="+on💩MouseOver💩%3D"alert%281%29%3B&step=2&param12=A">test</a>' => '<a href="http://test.com?param1=">test</a>',
             '<a href="http://test.com?param1=lall&colon=foo;">test</a>'                                     => '<a href="http://test.com?param1=lall&colon=foo;">test</a>',
             '<a href="http://test.com?param1=lall&colon;=foo;">test</a>'                                    => '<a href="http://test.com?param1=lall&colon;=foo;">test</a>',
+            '<a href="http://test.com?param1=lall&colon+lall;">test</a>'                                    => '<a href="http://test.com?param1=lall&colon+lall;">test</a>',
             '<a href="javascript:alert(\'xss\')">xss</a>'                                                   => '<a href="[removed]">xss</a>',
             '<li style="list-style-image: url(alert&#40;0&#41;)">'                                          => '<li [removed]>',
         ];
