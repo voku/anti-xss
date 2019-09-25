@@ -33,7 +33,7 @@ final class AntiXSS
         // default javascript
         '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
         // data-attribute + base64
-        "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?",
+        "([\"'])?data\s*:[^\1]*?base64[^\1]*?,[^\1]*?\1?",
         // remove Netscape 4 JS entities
         '&\s*\{[^}]*(\}\s*;?|$)',
         // old IE, old Netscape
@@ -362,7 +362,7 @@ final class AntiXSS
     /**
      * @var string
      */
-    private $_spacing_regex = '(?:\s|"|\042|\'|\047|\+|&#x09;|&#x0[A-F];|%0a)*+';
+    private $_spacing_regex = '(?:\s|"|\'|\+|&#x09;|&#x0[A-F];|%0a)*+';
 
     /**
      * The replacement-string for not allowed strings.
@@ -468,7 +468,7 @@ final class AntiXSS
                         '\.',
                     ],
                     $WORDS_CACHE['chunk'][$word]
-                ) . ')(?<after>[^\p{L}|@|.|!|?| ]|$)#ius',
+                ) . ')(?<after>[^\p{L}@.!? ]|$)#ius',
                 function ($matches) {
                     return $this->_compact_exploded_words_callback($matches);
                 },
@@ -497,7 +497,7 @@ final class AntiXSS
             '/' . $this->_spacing_regex . '/is',
             '',
             $matches['word']
-            ) . $matches['after'];
+        ) . $matches['after'];
     }
 
     /**
@@ -513,7 +513,7 @@ final class AntiXSS
         $str = $match[0];
 
         // protect GET variables without XSS in URLs
-        if (\preg_match_all("/[\?|&]?[\\p{L}0-9_\-\[\]]+\s*=\s*(?<wrapped>\"|\042|'|\047)(?<attr>[^\\1]*?)\\g{wrapped}/ui", $str, $matches)) {
+        if (\preg_match_all("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/ui", $str, $matches)) {
             if (isset($matches['attr'])) {
                 foreach ($matches['attr'] as $matchInner) {
                     $tmpAntiXss = clone $this;
@@ -862,7 +862,7 @@ final class AntiXSS
         }
 
         $out = '';
-        if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*("|\042|\'|\047)(?:[^\\1]*?)\\1#ui', $str, $matches)) {
+        if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#ui', $str, $matches)) {
             foreach ($matches[0] as $match) {
                 $out .= $match;
             }
@@ -977,7 +977,7 @@ final class AntiXSS
             if (
                 \count($matchInner) > 0
                 &&
-                \preg_match('#(?:\(.*([^\)]*?)(?:\)))#s', $matchInner[0])
+                \preg_match('#(?:\(.*([^)]*?)(?:\)))#s', $matchInner[0])
             ) {
                 $foundSomethingBad = true;
 
@@ -1114,7 +1114,7 @@ final class AntiXSS
                 );
             }
 
-            if (\stripos($str, 'script') !== false) {
+            if (\stripos($str, '<script') !== false) {
                 $str = (string) \preg_replace(
                     '#<script[^\p{L}@]+(?:[^>]*?)(?:\s?/?>|$)#iu',
                     $this->_replacement,
@@ -1125,7 +1125,7 @@ final class AntiXSS
             if (\stripos($str, 'script') !== false) {
                 // US-ASCII: ¼ === <
                 $str = (string) \preg_replace(
-                    '#(?:¼|<)/*(?:script[^\p{L}@]+).*(?:¾|>)#isuU',
+                    '#[¼<][^\p{L}@]*?/*?[^\p{L}@]*?(?:script[^\p{L}@]+).*[¾>]#iuU',
                     $this->_replacement,
                     $str
                 );
@@ -1182,9 +1182,9 @@ final class AntiXSS
         do {
             $count = $temp_count = 0;
 
-            // find occurrences of illegal attribute strings with and without quotes (042 ["] and 047 ['] are octal quotes)
+            // find occurrences of illegal attribute strings with and without quotes (" and ' are octal quotes)
             $str = (string) \preg_replace(
-                '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $evil_attributes_string . ')(?:\s*=\s*)(?:(?:\'|\047)(?:.*?)(?:\'|\047)|(?:"|\042)(?:.*?)(?:"|\042))(.*)/ius',
+                '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $evil_attributes_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")(.*)/ius',
                 '$1$2' . $this->_replacement . '$3$4',
                 $str,
                 -1,
@@ -1219,7 +1219,7 @@ final class AntiXSS
         }
 
         return (string) \preg_replace_callback(
-            '#\+([\p{L}0-9]+)\-#ui',
+            '#\+([\p{L}0-9]+)-#ui',
             function ($matches) {
                 return $this->_repack_utf7_callback($matches);
             },
@@ -1391,7 +1391,7 @@ final class AntiXSS
     private function _sanitize_naughty_javascript($str): string
     {
         $str = (string) \preg_replace(
-            '#(alert|eval|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#uisU',
+            '#(alert|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#uisU',
             '\\1\\2&#40;\\3&#41;',
             $str
         );

@@ -177,7 +177,11 @@ exp/*<A >XSS</A>
 
 &lt;!-- php --&gt;
 
-&lt;? echo('<SCR)';echo('IPT>document.vulnerable=truealert&#40;1&#41;</p>
+&lt;? echo('<SCR)';echo('IPT>document.vulnerable=true'); ?&gt;
+
+&lt;!-- text --&gt;
+
+<p>alert&#40;1&#41;</p>
 
 <p>&lt;img src="alert&#40;1&#41;"</p>
 

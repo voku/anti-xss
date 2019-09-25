@@ -649,6 +649,7 @@ textContent>click me!',
             '<svg onload=confirm()//'                                                                                                          => '&lt;svg ', // Without closing angular bracket (>)
             '<script src=//14.rs></script><svg onload=co\u006efirm()><svg onload=z=co\u006efir\u006d,z()>'                                     => '&lt;svg &gt;', // Without alert, confirm, prompt
             '<x onclick=confirm()>click here <x ondrag=aconfirm()>drag it'                                                                     => '<x >click here <x >drag it', // Without a Valid HTML tag
+            '<svg></p><style><a id="</style><img src=1 onerror=alert(1)>">'                                                                    => '&lt;svg&gt;&lt;/p>&lt;style&gt;&lt;a ><img >">', // DOMPurify 2.0.0 bypass using mutation XSS (2019) (https://research.securitum.com/dompurify-bypass-using-mxss/)
             '<dETAILS%0aopen%0aonToGgle%0a=%0aa=prompt,a() x>'                                                                                 => "<dETAILS\nopen\n x>", // Akamai GHost XSS bypass (2018) (https://twitter.com/s0md3v/status/1056447131362324480)
 
             '<iframe srcdoc=\'&lt;meta http-equiv="refresh" content="5;url=(link: https://www.google.com/) google.com " /&gt;&lt;script&gt;alert(document.domain + "\n\n" + document.cookie);</script>\'/>' => '&lt;iframe srcdoc=\'&lt;meta http-equiv="refresh" content="5;url=(link: https://www.google.com/) google.com " />\'/>', // MS Edge Iframe srcdoc UXSS POC (2018) (https://mobile.twitter.com/Windowsrcer/status/1071131620856320000?s=19)
@@ -803,7 +804,7 @@ textContent>click me!',
             $resultStringOrig,
             $this->antiXss->xss_clean($testString),
             'testing: ' . $testString
-    );
+        );
     }
 
     public function testAllowIframe()
@@ -826,7 +827,7 @@ textContent>click me!',
             $resultStringOrig,
             $this->antiXss->xss_clean($testString),
             'testing: ' . $testString
-    );
+        );
 
         $this->antiXss->removeEvilHtmlTags(['video', 'source', 'iframe']);
 
@@ -841,13 +842,12 @@ textContent>click me!',
             $resultString,
             $this->antiXss->xss_clean($testString),
             'testing: ' . $testString
-    );
+        );
 
         static::assertSame(
             '<iframe width="560"  height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>',
             $this->antiXss->xss_clean('<iframe width="560" onclick="alert(\'xss\')" height="315" src="https://www.youtube.com/embed/foobar?rel=0&controls=0&showinfo=0" frameborder="0" allowfullscreen></iframe>')
-
-    );
+        );
 
         // ---
 
@@ -974,6 +974,7 @@ textContent>click me!',
             '<image src=1 href=1 onerror="javascript:alert(1)"></image>'                  => '<image src=1 href=1 ></image>',
             '<object src=1 href=1 onerror="javascript:alert(1)"></object>'                => '&lt;object src=1 href=1 &gt;&lt;/object>',
             '<script src=1 href=1 onerror="javascript:alert(1)"></script>'                => '',
+            '< /  script src=1 href=1 onerror="javascript:alert(1)"></script>'            => '',
             '<svg onResize svg onResize="javascript:javascript:alert(1)"></svg onResize>' => '&lt;svg  svg &gt;&lt;/svg >',
         ];
 
