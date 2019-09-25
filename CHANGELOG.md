@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.15 (2019-09-26)
+
+- optimize regex
+- update vendor lib (Portable UTF-8)
+
+
 ### 4.1.14 (2019-06-27)
 
 - add "removeNeverAllowedOnEventsAfterwards()" && "addNeverAllowedOnEventsAfterwards()"
