@@ -362,7 +362,7 @@ final class AntiXSS
     /**
      * @var string
      */
-    private $_spacing_regex = '(?:\s|"|\'|\+|&#x09;|&#x0[A-F];|%0a)*+';
+    private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*+';
 
     /**
      * The replacement-string for not allowed strings.
@@ -1425,7 +1425,10 @@ final class AntiXSS
      */
     public function addEvilHtmlTags(array $strings): self
     {
-        $this->_evil_html_tags = \array_merge($strings, $this->_evil_html_tags);
+        $this->_evil_html_tags = \array_merge(
+            $strings,
+            $this->_evil_html_tags
+        );
 
         return $this;
     }
