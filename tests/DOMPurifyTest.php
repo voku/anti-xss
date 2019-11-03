@@ -11,8 +11,8 @@ use voku\helper\UTF8;
 final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
 {
 
-  //
-    // https://github.com/cure53/DOMPurify/edit/master/test/expect.json
+    //
+    // https://github.com/cure53/DOMPurify/blob/master/test/fixtures/expect.js
     //
 
     /**
@@ -20,28 +20,32 @@ final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
      */
     public $security;
 
-    /**
-     * @var array
-     */
-    public $testArray;
-
     protected function setUp()
     {
         $this->security = new AntiXSS();
-        $this->setTestArray();
     }
 
     public function testFromDOMPurify()
     {
-        foreach ($this->testArray as $test) {
-            static::assertSame($test['expected'], $this->security->xss_clean($test['payload']), 'testing: ' . $test['payload']);
+        // init
+        $expected = require __DIR__ . '/fixtures/expect_result.php';
+        $result = [];
+
+        foreach ($this->xssProvider() as $test) {
+            $result[] = $this->security->xss_clean($test['payload']);
         }
+
+        // DEBUG
+        //var_export($result);
+
+        static::assertTrue(count($result) > 0);
+        static::assertSame($expected, $result);
     }
 
-    public function setTestArray()
+    public function xssProvider()
     {
         $jsonString = UTF8::file_get_contents(__DIR__ . '/fixtures/expect.json');
 
-        $this->testArray = \json_decode($jsonString, true);
+        yield from \json_decode($jsonString, true);
     }
 }

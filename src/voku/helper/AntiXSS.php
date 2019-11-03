@@ -29,16 +29,7 @@ final class AntiXSS
      *
      * @var string[]
      */
-    private static $_never_allowed_regex = [
-        // default javascript
-        '(\(?document\)?|\(?window\)?(\.document)?)\.(location|on\w*)',
-        // data-attribute + base64
-        "([\"'])?data\s*:[^\1]*?base64[^\1]*?,[^\1]*?\1?",
-        // remove Netscape 4 JS entities
-        '&\s*\{[^}]*(\}\s*;?|$)',
-        // old IE, old Netscape
-        'expression\s*(\(|&\#40;)',
-    ];
+    private $_never_allowed_regex = [];
 
     /**
      * List of never allowed call statements.
@@ -353,6 +344,8 @@ final class AntiXSS
         'textarea',
         'title',
         'math',
+        'noscript',
+        'vmlframe',
         'video',
         'source',
         'svg',
@@ -362,7 +355,7 @@ final class AntiXSS
     /**
      * @var string
      */
-    private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*+';
+    private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*?';
 
     /**
      * The replacement-string for not allowed strings.
@@ -397,6 +390,7 @@ final class AntiXSS
     public function __construct()
     {
         $this->_initNeverAllowedStr();
+        $this->_initNeverAllowedRegex();
     }
 
     /**
@@ -463,10 +457,7 @@ final class AntiXSS
             $str = (string) \preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
-                    [
-                        '\#',
-                        '\.',
-                    ],
+                    ['\#', '\.',],
                     $WORDS_CACHE['chunk'][$word]
                 ) . ')(?<after>[^\p{L}@.!? ]|$)#ius',
                 function ($matches) {
@@ -660,7 +651,6 @@ final class AntiXSS
         static $NEVER_ALLOWED_CACHE = [];
 
         $NEVER_ALLOWED_CACHE['keys'] = null;
-        $NEVER_ALLOWED_CACHE['regex'] = null;
 
         if ($NEVER_ALLOWED_CACHE['keys'] === null) {
             $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
@@ -686,15 +676,29 @@ final class AntiXSS
 
         // ---
 
-        if ($NEVER_ALLOWED_CACHE['regex'] === null) {
-            $NEVER_ALLOWED_CACHE['regex'] = \implode('|', self::$_never_allowed_regex);
+        $regex_combined = [];
+        foreach ($this->_never_allowed_regex as $regex => $replacement) {
+            if ($replacement === $this->_replacement) {
+                $regex_combined[] = $regex;
+
+                continue;
+            }
+
+            $str = (string) \preg_replace(
+                '#' . $regex . '#iUus',
+                $replacement,
+                $str
+            );
+
         }
 
-        $str = (string) \preg_replace(
-            '#' . $NEVER_ALLOWED_CACHE['regex'] . '#ius',
-            $this->_replacement,
-            $str
-        );
+        if ($regex_combined !== []) {
+            $str = (string) \preg_replace(
+                '#' . implode('|', $regex_combined) . '#ius',
+                $this->_replacement,
+                $str
+            );
+        }
 
         return $str;
     }
@@ -898,14 +902,32 @@ final class AntiXSS
             '.innerHTML'        => $this->_replacement,
             '.appendChild'      => $this->_replacement,
             '-moz-binding'      => $this->_replacement,
-            '<!--'              => '&lt;!--',
-            '-->'               => '--&gt;',
             '<?'                => '&lt;?',
             '?>'                => '?&gt;',
             '<![CDATA['         => '&lt;![CDATA[',
             '<!ENTITY'          => '&lt;!ENTITY',
             '<!DOCTYPE'         => '&lt;!DOCTYPE',
             '<!ATTLIST'         => '&lt;!ATTLIST',
+        ];
+    }
+
+    /**
+     * initialize "$this->_never_allowed_regex"
+     */
+    private function _initNeverAllowedRegex()
+    {
+        $this->_never_allowed_regex = [
+            // default javascript
+            '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $this->_replacement,
+            // data-attribute + base64
+            "(?:[\"'])?data\s*:[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
+            // remove Netscape 4 JS entities
+            '&\s*\{[^}]*(?:\}\s*;?|$)' => $this->_replacement,
+            // old IE, old Netscape
+            'expression\s*(?:\(|&\#40;)' => $this->_replacement,
+            // comments
+            '<!--(.*)-->' => '&lt;!--$1--&gt;',
+            '<!--' => '&lt;!--',
         ];
     }
 
@@ -1434,16 +1456,6 @@ final class AntiXSS
     }
 
     /**
-     * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
-     *
-     * @return bool|null will return null if the "xss_clean()" wan't running at all
-     */
-    public function isXssFound()
-    {
-        return $this->_xss_found;
-    }
-
-    /**
      * Add some strings to the "_never_allowed_on_events_afterwards"-array.
      *
      * @param string[] $strings
@@ -1461,25 +1473,13 @@ final class AntiXSS
     }
 
     /**
-     * Remove some strings from the "_never_allowed_on_events_afterwards"-array.
+     * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
      *
-     * <p>
-     * <br />
-     * WARNING: Use this method only if you have a really good reason.
-     * </p>
-     *
-     * @param string[] $strings
-     *
-     * @return $this
+     * @return bool|null will return null if the "xss_clean()" wan't running at all
      */
-    public function removeNeverAllowedOnEventsAfterwards(array $strings): self
+    public function isXssFound()
     {
-        $this->_never_allowed_on_events_afterwards = \array_diff(
-            $this->_never_allowed_on_events_afterwards,
-            \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
-        );
-
-        return $this;
+        return $this->_xss_found;
     }
 
     /**
@@ -1527,6 +1527,28 @@ final class AntiXSS
     }
 
     /**
+     * Remove some strings from the "_never_allowed_on_events_afterwards"-array.
+     *
+     * <p>
+     * <br />
+     * WARNING: Use this method only if you have a really good reason.
+     * </p>
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function removeNeverAllowedOnEventsAfterwards(array $strings): self
+    {
+        $this->_never_allowed_on_events_afterwards = \array_diff(
+            $this->_never_allowed_on_events_afterwards,
+            \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
+        );
+
+        return $this;
+    }
+
+    /**
      * Set the replacement-string for not allowed strings.
      *
      * @param string $string
@@ -1538,6 +1560,7 @@ final class AntiXSS
         $this->_replacement = (string) $string;
 
         $this->_initNeverAllowedStr();
+        $this->_initNeverAllowedRegex();
 
         return $this;
     }
