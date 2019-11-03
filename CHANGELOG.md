@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.16 (2019-11-03)
+
+- fix replacing of "-->" (issue #50)
+- update vendor lib (Portable UTF-8)
+
+
 ### 4.1.15 (2019-09-26)
 
 - optimize regex
