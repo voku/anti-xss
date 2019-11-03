@@ -38,7 +38,7 @@ final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
         // DEBUG
         //var_export($result);
 
-        static::assertTrue(count($result) > 0);
+        static::assertTrue(\count($result) > 0);
         static::assertSame($expected, $result);
     }
 

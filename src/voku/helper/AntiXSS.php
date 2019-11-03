@@ -457,7 +457,7 @@ final class AntiXSS
             $str = (string) \preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
-                    ['\#', '\.',],
+                    ['\#', '\.'],
                     $WORDS_CACHE['chunk'][$word]
                 ) . ')(?<after>[^\p{L}@.!? ]|$)#ius',
                 function ($matches) {
@@ -689,12 +689,11 @@ final class AntiXSS
                 $replacement,
                 $str
             );
-
         }
 
         if ($regex_combined !== []) {
             $str = (string) \preg_replace(
-                '#' . implode('|', $regex_combined) . '#ius',
+                '#' . \implode('|', $regex_combined) . '#ius',
                 $this->_replacement,
                 $str
             );
@@ -927,7 +926,7 @@ final class AntiXSS
             'expression\s*(?:\(|&\#40;)' => $this->_replacement,
             // comments
             '<!--(.*)-->' => '&lt;!--$1--&gt;',
-            '<!--' => '&lt;!--',
+            '<!--'        => '&lt;!--',
         ];
     }
 
