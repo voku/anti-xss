@@ -64,7 +64,6 @@ final class AntiXSS
      * @var string[]
      */
     private static $_never_allowed_str_afterwards = [
-        'FSCOMMAND',
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
@@ -485,10 +484,10 @@ final class AntiXSS
     private function _compact_exploded_words_callback($matches): string
     {
         return $matches['before'] . \preg_replace(
-            '/' . $this->_spacing_regex . '/is',
-            '',
-            $matches['word']
-        ) . $matches['after'];
+                '/' . $this->_spacing_regex . '/is',
+                '',
+                $matches['word']
+            ) . $matches['after'];
     }
 
     /**
@@ -1429,6 +1428,10 @@ final class AntiXSS
      */
     public function addEvilAttributes(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_evil_attributes_regex = \array_merge(
             $strings,
             $this->_evil_attributes_regex
@@ -1446,9 +1449,60 @@ final class AntiXSS
      */
     public function addEvilHtmlTags(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_evil_html_tags = \array_merge(
             $strings,
             $this->_evil_html_tags
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add some strings to the "_never_allowed_regex"-array.
+     *
+     * @param array $strings
+     *
+     * @return $this
+     */
+    public function addNeverAllowedRegex(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_never_allowed_regex = \array_merge(
+            $strings,
+            $this->_never_allowed_regex
+        );
+
+        return $this;
+    }
+
+    /**
+     * Remove some strings from the "_never_allowed_regex"-array.
+     *
+     * <p>
+     * <br />
+     * WARNING: Use this method only if you have a really good reason.
+     * </p>
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function removeNeverAllowedRegex(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_never_allowed_regex = \array_diff(
+            $this->_never_allowed_regex,
+            \array_intersect($strings, $this->_never_allowed_regex)
         );
 
         return $this;
@@ -1463,6 +1517,10 @@ final class AntiXSS
      */
     public function addNeverAllowedOnEventsAfterwards(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_never_allowed_on_events_afterwards = \array_merge(
             $strings,
             $this->_never_allowed_on_events_afterwards
@@ -1495,6 +1553,10 @@ final class AntiXSS
      */
     public function removeEvilAttributes(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_evil_attributes_regex = \array_diff(
             $this->_evil_attributes_regex,
             \array_intersect($strings, $this->_evil_attributes_regex)
@@ -1517,6 +1579,10 @@ final class AntiXSS
      */
     public function removeEvilHtmlTags(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_evil_html_tags = \array_diff(
             $this->_evil_html_tags,
             \array_intersect($strings, $this->_evil_html_tags)
@@ -1539,6 +1605,10 @@ final class AntiXSS
      */
     public function removeNeverAllowedOnEventsAfterwards(array $strings): self
     {
+        if ($strings === []) {
+            return $this;
+        }
+
         $this->_never_allowed_on_events_afterwards = \array_diff(
             $this->_never_allowed_on_events_afterwards,
             \array_intersect($strings, $this->_never_allowed_on_events_afterwards)

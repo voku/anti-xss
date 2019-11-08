@@ -128,12 +128,37 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             static::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
         }
 
-        $this->antiXss->addNeverAllowedOnEventsAfterwards((['onAbort'])); // re-disallow
+        $this->antiXss->addNeverAllowedOnEventsAfterwards(['onAbort']); // re-disallow
 
         // ---
 
         $testArray = [
             '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag)',
+        ];
+
+        foreach ($testArray as $before => $after) {
+            static::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+        }
+    }
+
+    public function testRemoveAddRegex()
+    {
+        $testArray = [
+            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag) -->',
+        ];
+
+        $this->antiXss->removeNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;',]); // allow
+
+        foreach ($testArray as $before => $after) {
+            static::assertSame($after, $this->antiXss->xss_clean($before), 'testing: ' . $before);
+        }
+
+        $this->antiXss->addNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;',]); // re-disallow
+
+        // ---
+
+        $testArray = [
+            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag) --&gt;',
         ];
 
         foreach ($testArray as $before => $after) {
@@ -708,7 +733,7 @@ textContent>click me!',
 
         $this->antiXss->removeEvilAttributes(['style', 'FSCommand']);
 
-        static::assertSame('<li ="bar" style="list-style-image: url(alert&#40;0&#41;)">', $this->antiXss->xss_clean($testString));
+        static::assertSame('<li FSCommand="bar" style="list-style-image: url(alert&#40;0&#41;)">', $this->antiXss->xss_clean($testString));
 
         // ---
 
