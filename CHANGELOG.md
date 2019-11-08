@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.17 (2019-11-08)
+
+- add "addNeverAllowedRegex()"
+- add "removeNeverAllowedRegex()"
+
+
 ### 4.1.16 (2019-11-03)
 
 - fix replacing of "-->" (issue #50)
@@ -41,7 +47,7 @@
 
 ### 4.1.9 (2019-04-19)
 
-- optimize the spacing regex 
+- optimize the spacing regex
 
 
 ### 4.1.8 (2019-04-19)
@@ -109,8 +115,8 @@
 
 ### 4.0.0 (2017-12-23)
 - update "Portable UTF8" from v4 -> v5
-  
-  -> this is a breaking change without API-changes - but the requirement 
+
+  -> this is a breaking change without API-changes - but the requirement
      from "Portable UTF8" has been changed (it no longer requires all polyfills from Symfony)
 
 
@@ -125,5 +131,5 @@
 
 
 ### 3.0.0 (2017-11-19)
-- "php": ">=7.0" 
+- "php": ">=7.0"
   * drop support for PHP < 7.0
