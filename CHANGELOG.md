@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.18 (2019-11-11)
+
+- fix open tags problem e.g. "<img/"
+
+
 ### 4.1.17 (2019-11-08)
 
 - add "addNeverAllowedRegex()"
