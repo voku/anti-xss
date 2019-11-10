@@ -35,13 +35,13 @@
 
   &lt;![CDATA[&lt;!--]]
 
-  <
+  &lt;
 
-  &lt;!--[if gte IE 4]><![endif]--&gt;
+  &lt;!--[if gte IE 4]&gt;&lt;![endif]--&gt;
 
-  <
+  &lt;
 
-  [\xC0][\xBC]script>document.vulnerable=true;[\xC0][\xBC]/script>
+  [\xC0][\xBC]script&gt;document.vulnerable=true;[\xC0][\xBC]/script&gt;
 
   
 
@@ -62,21 +62,21 @@
 
 &lt;!-- a --&gt;
 
-exp/*<A >XSS</A>
+exp/*&lt;A &gt;XSS&lt;/A&gt;
 
-<a href=""></a>
+&lt;a href=""&gt;&lt;/a&gt;
 
-<a href="about:"></a>
+&lt;a href="about:"&gt;&lt;/a&gt;
 
-<A ></A>
+&lt;A &gt;&lt;/A&gt;
 
 &lt;!-- layer --&gt;
 
-&lt;LAYER SRC="document.vulnerable=true;"&gt;&lt;/LAYER>
+&lt;LAYER SRC="document.vulnerable=true;"&gt;&lt;/LAYER&gt;
 
 &lt;!-- br --&gt;
 
-<BR SIZE="">
+&lt;BR SIZE=""&gt;
 
 &lt;!-- input --&gt;
 
@@ -88,122 +88,122 @@ exp/*<A >XSS</A>
 
 &lt;BGSOUND SRC="document.vulnerable=true;"&gt;foo&lt;/BGSOUND&gt;
 
-&lt;bgsound src="document.vulnerable=true;"&gt;&lt;/bgsound>
+&lt;bgsound src="document.vulnerable=true;"&gt;&lt;/bgsound&gt;
 
 &lt;!-- frameset --&gt;
 
-&lt;FRAMESET&gt;&lt;FRAME SRC="document.vulnerable=true;">&lt;/FRAMESET&gt;
+&lt;FRAMESET&gt;&lt;FRAME SRC="document.vulnerable=true;"&gt;&lt;/FRAMESET&gt;
 
 &lt;!-- images --&gt;
 
-<IMG >
+&lt;IMG &gt;
 
-< LOWsrc="">
+&lt; LOWsrc=""&gt;
 
-<IMG DYNsrc="">
+&lt;IMG DYNsrc=""&gt;
 
-<img >
+&lt;img &gt;
 
-< src="">
+&lt; src=""&gt;
 
-<IMG src="">
+&lt;IMG src=""&gt;
 
-<img src="">
+&lt;img src=""&gt;
 
-<IMG src="">
+&lt;IMG src=""&gt;
 
-<img src="">
+&lt;img src=""&gt;
 
-<img src="">
+&lt;img src=""&gt;
 
-<img src="">
+&lt;img src=""&gt;
 
-<img >" =">
+&lt;img &gt;" ="&gt;
 
-< dynsrc="">
+&lt; dynsrc=""&gt;
 
-<IMG src="">
+&lt;IMG src=""&gt;
 
 &lt;!-- object --&gt;
 
-&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=document.vulnerable=true>&lt;/OBJECT&gt;
+&lt;OBJECT classid=clsid:ae24fdae-03c6-11d1-8b76-0080c744f389&gt;&lt;param name=url value=document.vulnerable=true&gt;&lt;/OBJECT&gt;
 
-&lt;object classid="clsid:..." codebase="document.vulnerable=true;"&gt;&lt;/object>
+&lt;object classid="clsid:..." codebase="document.vulnerable=true;"&gt;&lt;/object&gt;
 
 &lt;!-- iframe --&gt;
 
-&lt;IFRAME SRC="document.vulnerable=true;"&gt;&lt;/IFRAME>
+&lt;IFRAME SRC="document.vulnerable=true;"&gt;&lt;/IFRAME&gt;
 
-&lt;iframe src="document.vulnerable=true; "&gt;&lt;/iframe>
+&lt;iframe src="document.vulnerable=true; "&gt;&lt;/iframe&gt;
 
 &lt;!-- table --&gt;
 
-<TABLE BACKGROUND="document.vulnerable=true;"></TABLE>
+&lt;TABLE BACKGROUND="document.vulnerable=true;"&gt;&lt;/TABLE&gt;
 
-<TABLE><TD BACKGROUND="document.vulnerable=true;"></TD></TABLE>
+&lt;TABLE&gt;&lt;TD BACKGROUND="document.vulnerable=true;"&gt;&lt;/TD&gt;&lt;/TABLE&gt;
 
 &lt;!-- xml --&gt;
 
-&lt;xml src="document.vulnerable=true;"&gt;&lt;/xml>
+&lt;xml src="document.vulnerable=true;"&gt;&lt;/xml&gt;
 
-&lt;xml id="X"&gt;&lt;a><b>;</b></a>&lt;/xml&gt;
+&lt;xml id="X"&gt;&lt;a&gt;&lt;b&gt;;&lt;/b&gt;&lt;/a&gt;&lt;/xml&gt;
 
-&lt;XML ID=I&gt;&lt;X><C>&lt;![CDATA[<IMG src="">]]</C></X>&lt;/xml&gt;&lt;SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML></SPAN>
+&lt;XML ID=I&gt;&lt;X&gt;&lt;C&gt;&lt;![CDATA[&lt;IMG src=""&gt;]]&lt;/C&gt;&lt;/X&gt;&lt;/xml&gt;&lt;SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML&gt;&lt;/SPAN&gt;
 
-&lt;XML ID="xss"&gt;&lt;I><B><IMG src=""></B></I>&lt;/XML&gt;&lt;SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"></SPAN>
+&lt;XML ID="xss"&gt;&lt;I&gt;&lt;B&gt;&lt;IMG src=""&gt;&lt;/B&gt;&lt;/I&gt;&lt;/XML&gt;&lt;SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"&gt;&lt;/SPAN&gt;
 
-&lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time">&lt;?import namespace="t" implementation="#default#time2">< attributeName="innerHTML" to="XSSdocument.vulnerable=true">
+&lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"&gt;&lt;?import namespace="t" implementation="#default#time2"&gt;&lt; attributeName="innerHTML" to="XSSdocument.vulnerable=true"&gt;
 
 &lt;!-- div --&gt;
 
-<div datafld="b" dataformatas="html" datasrc="#X"></div>
+&lt;div datafld="b" dataformatas="html" datasrc="#X"&gt;&lt;/div&gt;
 
-<DIV >
-  <DIV >XSS</DIV>
-  <DIV ></DIV>
-</DIV>
+&lt;DIV &gt;
+  &lt;DIV &gt;XSS&lt;/DIV&gt;
+  &lt;DIV &gt;&lt;/DIV&gt;
+&lt;/DIV&gt;
 
-<div >XSS</div>
+&lt;div &gt;XSS&lt;/div&gt;
 
-<div ></div>
+&lt;div &gt;&lt;/div&gt;
 
-<div ></div>
+&lt;div &gt;&lt;/div&gt;
 
-<div ></div>
+&lt;div &gt;&lt;/div&gt;
 
 &lt;!-- list --&gt;
 
-&lt;STYLE&gt;li {list-style-image: url("document.vulnerable=true;");&lt;/STYLE&gt;&lt;UL><LI>XSS</LI></UL>
+&lt;STYLE&gt;li {list-style-image: url("document.vulnerable=true;");&lt;/STYLE&gt;&lt;UL&gt;&lt;LI&gt;XSS&lt;/LI&gt;&lt;/UL&gt;
 
 &lt;!-- php --&gt;
 
-&lt;? echo('<SCR)';echo('IPT>document.vulnerable=true'); ?&gt;
+&lt;? echo('&lt;SCR)';echo('IPT&gt;document.vulnerable=true'); ?&gt;
 
 &lt;!-- text --&gt;
 
-<p>alert&#40;1&#41;</p>
+&lt;p&gt;alert&#40;1&#41;&lt;/p&gt;
 
-<p>&lt;img src="alert&#40;1&#41;"</p>
+&lt;p&gt;&lt;img src=""&gt;
 
-<XSS >
+&lt;XSS &gt;
 
 &lt;!-- link + text --&gt;
 
-<p>foo<a href="http://example.com">link</a></p>
+&lt;p&gt;foo&lt;a href="http://example.com"&gt;link&lt;/a&gt;&lt;/p&gt;
 
-<p><a href="http://example.com" title="title">link2</a></p>
+&lt;p&gt;&lt;a href="http://example.com" title="title"&gt;link2&lt;/a&gt;&lt;/p&gt;
 
-<p><a >">link3</a></p>
+&lt;p&gt;&lt;a &gt;"&gt;link3&lt;/a&gt;&lt;/p&gt;
 
-<p><a >">link4 &gt;alert&#40;1&#41;</a></p>
+&lt;p&gt;&lt;a &gt;"&gt;link4 &gt;alert&#40;1&#41;&lt;/a&gt;&lt;/p&gt;
 
 &lt;!-- images + text --&gt;
 
-<p><img src="http://example.com" alt="img" /></p>
+&lt;p&gt;&lt;img src="http://example.com" alt="img" /&gt;&lt;/p&gt;
 
-<p><img src="http://example.com" alt="img2" title="text" /></p>
+&lt;p&gt;&lt;img src="http://example.com" alt="img2" title="text" /&gt;&lt;/p&gt;
 
-<p><img >" alt="img3" /></p>
+&lt;p&gt;&lt;img &gt;" alt="img3" /&gt;&lt;/p&gt;
 
 &lt;/body&gt;
 &lt;/html&gt;

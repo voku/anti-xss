@@ -33,7 +33,7 @@
         <set attributeName="xlink:href" to="
 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==" />
     </feImage>
-    <x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
 &lt;handler xml:id="bar" type="application/ecmascript"&gt; alert&#40;104&#41; &lt;/handler&gt;
 &lt;/svg&gt;
 #bar" /&gt;

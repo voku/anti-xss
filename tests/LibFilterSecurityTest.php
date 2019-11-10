@@ -57,10 +57,10 @@ final class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
         $this->addToTestArray('<script woo="yay<b>', '');
         $this->addToTestArray('<script woo="yay<b>hello', 'hello');
         $this->addToTestArray('<script<script>>', '>');
-        $this->addToTestArray('<<script>script<script>>', '<>');
-        $this->addToTestArray('<<script><script>>', '<>');
-        $this->addToTestArray('<<script>script>>', '<>');
-        $this->addToTestArray('<<script<script>>', '<>');
+        $this->addToTestArray('<<script>script<script>>', '&lt;&gt;');
+        $this->addToTestArray('<<script><script>>', '&lt;&gt;');
+        $this->addToTestArray('<<script>script>>', '&lt;&gt;');
+        $this->addToTestArray('<<script<script>>', '&lt;&gt;');
 
         // bad protocols
         $this->addToTestArray('<a href="http://foo">bar</a>', '<a href="http://foo">bar</a>');

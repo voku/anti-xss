@@ -51,7 +51,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<img/src=%00 id=confirm(1) onerror=eval(id)',
-                '<img/',
+                '&lt;img/',
             ],
             [
                 '<div id=confirm(1) onmouseover=eval(id)>X</div>',
@@ -83,11 +83,11 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<img/src=`%00` id=confirm(1) onerror=eval(id)',
-                '<img/',
+                '&lt;img/',
             ],
             [
                 '<img/src=`%00` onerror=this.onerror=confirm(1)',
-                '<img/',
+                '&lt;img/',
             ],
             [
                 '<iframe/src="data:text/html,<iframe%09onload=confirm(1);>">',
@@ -119,7 +119,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<i<f<r<a<m<e><iframe/onload=confirm(1);></i>f>r>a>m>e>',
-                '<i<f<r<a<>&lt;iframe/[removed]&gt;&lt;/i>f>r>a>m>e>',
+                '<i&lt;f&lt;r&lt;a&lt;>&lt;iframe/[removed]&gt;&lt;/i>f>r>a>m>e>',
             ],
             [
                 'http://www.<script abc>setTimeout(\'confirm(1)\',1)</script .com>',
@@ -224,7 +224,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n",
-                "\n><!-\n<b\n<c d=\"'e>&lt;iframe [removed] src=x&gt;\n<a \"\">\n",
+                "\n>&lt;!-\n&lt;b\n&lt;c d=\"'e&gt;&lt;iframe [removed] src=x&gt;\n&lt;a \"\"&gt;\n",
             ],
         ];
     }

@@ -37,28 +37,28 @@ Clicky
 
 &lt;!-- some tokenization corner cases --&gt;
 
-< notatag<atag/>
+< notatag&lt;atag/>
 
 </ notatag> t</redundantlyclosed/>
 
 <messyattributes a=b=c d="e"f=g h =i j= k l = m checked n="o"/>
 
-< < < all in one text block > > >
+&lt; &lt; &lt; all in one text block &gt; &gt; &gt;
 
-<xmp>Make sure that &lt;!-- comments don't obscure the xmp close</xmp>
+&lt;xmp&gt;Make sure that &lt;!-- comments don't obscure the xmp close&lt;/xmp&gt;
 
-<% # some php code here
-write("<pre>$horriblySyntacticConstruct1</pre>\n\n");
-%>
+&lt;% # some php code here
+write("&lt;pre&gt;$horriblySyntacticConstruct1&lt;/pre&gt;\n\n");
+%&gt;
 
 &lt;!--
 alert&#40;"hello world"&#41;;
 // --&gt;
- */alert&#40;'hi'&#41;;--&gt;&lt;!--/* </xmp> */alert&#40;'hi'&#41;;--&gt;</xmp>
+ */alert&#40;'hi'&#41;;--&gt;&lt;!--/* &lt;/xmp&gt; */alert&#40;'hi'&#41;;--&gt;&lt;/xmp&gt;
 
 &lt;style&gt;&lt;!-- p { contentf: '&lt;/style&gt;' } --&gt;&lt;/style&gt;
 
-&lt;style&gt;Foo&lt;!-- > &lt;/style&gt; --&gt;&lt;/style&gt;
+&lt;style&gt;Foo&lt;!-- &gt; &lt;/style&gt; --&gt;&lt;/style&gt;
 
 &lt;textarea&gt;&lt;!-- Zoicks &lt;/textarea&gt;--&gt;&lt;/textarea&gt;
 
@@ -67,9 +67,9 @@ alert&#40;"hello world"&#41;;
 
 &lt;/html&gt;
 
-&lt;![CDATA[ No such thing as a CDATA> section in HTML ]]>
+&lt;![CDATA[ No such thing as a CDATA&gt; section in HTML ]]&gt;
 
 
-<img  />< >< >
+&lt;img  /&gt;&lt; &gt;&lt; &gt;
 
-< >>
+&lt; &gt;Bar&lt;/span&gt;

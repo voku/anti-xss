@@ -53,11 +53,11 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<a><c>b</c></a>', $this->security->xss_clean('<a><c>b</c></a>'));
 
         // 过滤不是标签的<>
-        static::assertSame('<>>', $this->security->xss_clean('<>>'));
+        static::assertSame('&lt;&gt;&gt;', $this->security->xss_clean('<>>'));
         static::assertSame("'", $this->security->xss_clean("'<scri' + 'pt>'"));
         static::assertSame("'", $this->security->xss_clean("'<script' + '>'"));
-        static::assertSame('<<a>b>', $this->security->xss_clean('<<a>b>'));
-        static::assertSame('<<<a>>b</a><x>', $this->security->xss_clean('<<<a>>b</a><x>'));
+        static::assertSame('&lt;&lt;a&gt;b&gt;', $this->security->xss_clean('<<a>b>'));
+        static::assertSame('&lt;&lt;&lt;a&gt;&gt;b&lt;/a&gt;&lt;x&gt;', $this->security->xss_clean('<<<a>>b</a><x>'));
 
         // 过滤不在白名单中的属性
         static::assertSame('<a oo="1" xx="2" title="3">yy</a>', $this->security->xss_clean('<a oo="1" xx="2" title="3">yy</a>'));
@@ -125,7 +125,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=`javascript:alert("RSnake says, \'XSS\'")`>'));
 
-        static::assertSame('<IMG """><>', $this->security->xss_clean('<IMG """><SCRIPT>alert("XSS")</SCRIPT>">'));
+        static::assertSame('<IMG """>&lt;&gt;', $this->security->xss_clean('<IMG """><SCRIPT>alert("XSS")</SCRIPT>">'));
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>'));
 
@@ -157,7 +157,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT SRC=//ha.ckers.org/.j'));
 
-        static::assertSame('<IMG src=""', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
+        static::assertSame('&lt;IMG src=""', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
 
         static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html &lt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
 
@@ -194,8 +194,8 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         // 这个暂时不知道怎么处理
         //self::assertSame($this->security->xss_clean('¼script¾alert(¢XSS¢)¼/script¾'), '');
 
-        static::assertSame('&lt;!--[if gte IE 4]><![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT>alert(\'XSS\');</SCRIPT><![endif]--> END'));
-        static::assertSame('&lt;!--[if gte IE 4]><![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
+        static::assertSame('&lt;!--[if gte IE 4]>&lt;![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT>alert(\'XSS\');</SCRIPT><![endif]--> END'));
+        static::assertSame('&lt;!--[if gte IE 4]>&lt;![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
 
         // HTML5新增实体编码 冒号&colon; 换行&NewLine;
         static::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
