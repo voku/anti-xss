@@ -99,6 +99,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ' xxxnonstop@hotmail.com '                                                                                                                                                                                                                => ' xxxnonstop@hotmail.com ',
             'cyyhqLRMvBs:APA91bH1ueQlBr8GXbQxNw9SpzldRAeYK4mw-Yqhw44v7oEoRgxyoFAfQc_2A3dc6X_vp3HpmPGh4NAItAAyv9pvoQbJZXUotjX0427y1hG_vCtr34UnEecqAGsXwkevitdHZIp9juRC'                                                                                => 'cyyhqLRMvBs:APA91bH1ueQlBr8GXbQxNw9SpzldRAeYK4mw-Yqhw44v7oEoRgxyoFAfQc_2A3dc6X_vp3HpmPGh4NAItAAyv9pvoQbJZXUotjX0427y1hG_vCtr34UnEecqAGsXwkevitdHZIp9juRC',
             'product/category%bf%27'                                                                                                                                                                                                                  => 'product/category%bf%27',
+            'product/category%0b' . "\0"                                                                                                                                                                                                              => 'product/category%0b' . "\0",
             'foo --> bar'                                                                                                                                                                                                                             => 'foo --> bar',
         ];
 
