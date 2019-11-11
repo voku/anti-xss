@@ -20,7 +20,7 @@ return [
     4  => '&lt;svg&gt;&lt;defs><filter id="f1"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter></defs><rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)" />&lt;/svg&gt;',
     5  => '<b href="alert&#40;1&#41;" title="alert&#40;2&#41;"></b>',
     6  => '<img src="">&lt;audio src=""&gt;&lt;/audio>&lt;video src=""&gt;&lt;/video>&lt;source src=""&gt;&lt;div src="data:,345">',
-    7  => '&lt; &gt;&lt; &gt;',
+    7  => '<img ><img >',
     8  => '<img >',
     9  => '123<a href="">I am a dolphin!</a>',
     10 => '123<a href="">I am a dolphin too!</a>',
@@ -45,16 +45,16 @@ return [
     29 => '<p>hello</p>',
     30 => '<listing>&lt;img ="alert&#40;1&#41;;//" src=x&gt;<t t></listing>',
     31 => '<img >',
-    32 => '&lt;textarea&gt;@shafigullin&lt;/textarea&gt;&lt;!--&lt;/textarea&gt;&lt;img >--&',
+    32 => '&lt;textarea&gt;@shafigullin&lt;/textarea&gt;&lt;!--&lt;/textarea&gt;&lt;img >--&gt;',
     33 => '<b>&lt;noscript&gt;&lt;!-- &lt;/noscript&gt;&lt;img >',
-    34 => '<b>&lt;noscript&gt;&lt;a ><img >">&lt;/&gt;',
-    35 => '&lt;body&gt;&lt;template><s><template><s><img >>&lt;/&gt;&lt;/&gt;&lt;/&gt;',
+    34 => '<b>&lt;noscript&gt;&lt;a ><img >">&lt;/noscript&gt;',
+    35 => '&lt;body&gt;&lt;template><s><template><s><img >@shafigullin/s></template></s></template>',
     36 => '<a href="">@shafigullin<a>',
-    37 => ' <option>&lt;style&gt;&lt;/option>&lt;/select&gt;&lt;b><img >&lt;/&gt;&lt;/&gt;',
+    37 => ' <option>&lt;style&gt;&lt;/option>&lt;/select&gt;&lt;b><img >&lt;/style&gt;&lt;/option>',
     38 => '<option>&lt;iframe&gt;&lt;/select><b>',
     39 => '&lt;/iframe&gt;&lt;/option>',
     40 => '<b>&lt;style&gt;&lt;style/><img >',
-    41 => '<b>&lt;style&gt;&lt;style////><img >&lt;/&gt;',
+    41 => '<b>&lt;style&gt;&lt;style////><img >&lt;/style&gt;',
     42 => '&lt;math xmlns="http://www.w3.org/1998/Math/MathML" display="block"&gt;
   <mrow>
     <menclose notation="box"><mi>a</mi></menclose><mo>,</mo>
@@ -88,7 +88,7 @@ return [
     63 => '<div id="8">&lt;input  autofocus&gt;&lt;input autofocus>//["\'`-->]]>]</div>',
     64 => '<div id="9"><a >X</a>//["\'`-->]]>]</div>
 
-<div id="10">&lt; /&gt;&lt;/&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
+<div id="10">&lt;video /&gt;&lt;/video>//["\'`-->]]>]</div>',
     65 => '<div id="11">&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;&lt;g ></g>&lt;/svg&gt;//["\'`-->]]>]</div>',
     66 => '<div id="12">&lt;body &gt;&lt;br><br><br><br><br><br>...<br><br><br><br>&lt;input autofocus&gt;//["\'`-->]]>]</div>',
     67 => '<div id="13"><x repeat="template" repeat-start="999999">0<y repeat="template" repeat-start="999999">1</y></x>//["\'`-->]]>]</div>',
@@ -115,11 +115,11 @@ return [
     88 => '<div id="35">1<a ><line xmlns=urn:schemas-microsoft-com:vml  href=alert&#40;35&#41; strokecolor=white strokeweight=1000px from=0 to=1000 /></a>//["\'`-->]]>]</div>',
     89 => '<div id="36"><a  folder="alert&#40;36&#41;">XXX</a>//["\'`-->]]>]</div>',
     90 => '<div id="37">&lt;!--<img src="--&gt;img ">//["\'`-->]]>]</div>',
-    91 => '<div id="38"><comment><img >& id="39"',
-    92 => '&lt;![&gt;&lt;img &gt;&lt;&gt;',
+    91 => '<div id="38"><comment><img ><img ">//["\'`-->]]>]</div><div id="39">&lt;!-- up to Opera 11.52, FF 3.6.28 --&gt;',
+    92 => '&lt;![&gt;&lt;img &gt;&lt;img "&gt;',
     93 => '&lt;!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  --&gt;
-&lt;svg&gt;&lt;![CDATA[><image >&lt;/&gt;//["\'`--&gt;]]&gt;]&lt;/&gt;',
-    94 => '<div id="40">&lt;style&gt;&lt;img >&lt;&gt;//["\'`--&gt;]]&gt;]&lt;/&gt;',
+&lt;svg&gt;&lt;![CDATA[><image >&lt;/svg&gt;//["\'`-->]]>]</div>',
+    94 => '<div id="40">&lt;style&gt;&lt;img ><img ">//["\'`-->]]>]</div>',
     95 => '<div id="41"><li  ></li>',
     96 => '<div >);visibility:hidden =alert&#40;41&#41;></div>//["\'`-->]]>]</div>',
     97 => '<div id="42">&lt;head&gt;&lt;base href="//"/>&lt;/head&gt;&lt;body><a href="">XXX</a>&lt;/body&gt;//["\'`-->]]>]</div>',
@@ -144,15 +144,15 @@ return [
     109 => '<label dataformatas="html" datasrc="#xss" datafld="payload"></label>//["\'`-->]]>]</div>',
     110 => '<div id="54">//["\'`-->]]>]</div>',
     111 => '<div id="55">&lt;video&gt;&lt; >//["\'`-->]]>]</div>',
-    112 => '<div id="56">&lt;video &gt;&lt;&gt;&lt;/>&lt;/video&gt;//["\'`-->]]>]</div>',
+    112 => '<div id="56">&lt;video &gt;&lt;source>&lt;/source&gt;&lt;/video>//["\'`-->]]>]</div>',
     113 => '<div id="57"><b 0//["\'`-->]]>]</div>',
     114 => '<div id="58"><b></b><alert&#40;58&#41;&lt;/b>//["\'`-->]]>]</div>',
     115 => '<div id="59"><div id="div1">&lt;input value="``=alert&#40;59&#41;"&gt;&lt;/div> <div id="div2"></div>//["\'`-->]]>]</div>',
     116 => '<div id="60"><div >XXX</div>//["\'`-->]]>]</div>',
     117 => '<div id="62">&lt;!-- IE 6-8 --&gt;
-<x \'="foo"><x foo=\'>&lt;&gt;
-&&gt;&lt;&gt;&lt;&gt;
-&&gt;&lt;&gt;&lt;img \'&',
+<x \'="foo"><x foo=\'><img \'>
+&>&lt;&gt;&lt;img \'&gt;
+&&gt;&lt;&gt;&lt;img \'&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     118 => '<div id="63">&lt;embed src="alert&#40;63&#41;"&gt;&lt;/embed> // O10.10↓, OM10.0↓, GC6↓, FF
 <img src="">
 <image src="alert&#40;2&#41;"> // IE6, O10.10↓, OM10.0↓
@@ -165,7 +165,7 @@ return [
     &lt;!ATTLIST img xmlns CDATA "http://www.w3.org/1999/xhtml" src CDATA "xx"
   CDATA "alert&#40;67&#41;"
   CDATA "alert&#40;2&#41;">
-]><img />//["\'`-->]]>]&',
+]><img />//["\'`-->]]>]</div>',
     122 => '<div id="68"><doc xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:html="http://www.w3.org/1999/xhtml">
     &lt;html:style /&gt;&lt;x  xlink:type="simple">XXX</x>
 </doc>//["\'`-->]]>]</div>',
@@ -240,7 +240,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
 *{background:url(xx //**/' . "\r" . 'ed/*)} /* IE 6-7 Standards mode */
 
 &lt;/style&gt;//["\'`--&gt;]]>]</div>',
-    151 => '<div id="100"><img[>//["\'`-->]]>]&',
+    151 => '<div id="100"><img[>//["\'`-->]]>]</div>',
     152 => '<div id="101"><a href="">XXX</a>//["\'`-->]]>]</div>',
     153 => '<div id="102"><img src="x` `">//["\'`-->]]>]</div>',
     154 => '<div id="103">//["\'`-->]]>]</div><div id="104">&lt;svg xmlns="http://www.w3.org/2000/svg" id="foo"&gt;
@@ -250,12 +250,13 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
 #bar"/&gt;
 &lt;/svg&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     155 => '<div id="105">&lt;iframe src="data:image/svg-xml,%8B%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2"&gt;&lt;/iframe>//["\'`-->]]>]</div>',
-    156 => '<div id="106"><img >//["\'`-->]]>]&',
+    156 => '<div id="106"><img >//["\'`-->]]>]</div>',
     157 => '<div id="107">&lt;title &gt;&lt;/title>&lt;title title=&gt;&lt;/title>//["\'`-->]]>]</div>',
     158 => '<div id="108">&lt;!-- IE 5-8 standards mode --&gt;
-<a ></a>&lt; &gt;&lt; &gt;&lt;/&gt;"&gt;
-&&gt;&lt; &gt;&lt;&gt;
-&&gt;&lt; &gt;&lt;&gt;//["\'`--&gt;]]&gt;]&lt;/&gt;',
+<a ></a><img ><img ></a>">
+&lt;!-- IE 5-9 standards mode --&gt;
+&lt;!a foo=x=`y&gt;&lt;img &gt;&lt;img "&gt;
+&&gt;&lt;img &gt;&lt;img "&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     159 => '<div id="109">&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
 <a id="x"><rect fill="white" width="1000" height="1000"/></a>
 <rect  fill="white" />
@@ -276,7 +277,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
     164 => '<div id="116"><div id="x">x</div>
 &lt;xml:namespace prefix="t"&gt;
 <import namespace="t" implementation="#default#time2">
-<t:set attributeName="innerHTML" targetElement="x" to="&lt;img >">//["\'`-->]]>]&lt;/&gt;',
+<t:set attributeName="innerHTML" targetElement="x" to="&lt;img >">//["\'`-->]]>]</div>',
     165 => '<div id="117"><a href="http://attacker.org">
     &lt;iframe src="http://example.org/"&gt;&lt;/iframe>
 </a>//["\'`-->]]>]</div>',
@@ -314,7 +315,7 @@ xmlns:svg="http://www.w3.org/2000/svg"&gt;
 <listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x"/>
 <handler id="y">alert&#40;127&#41;</handler>
 &lt;/svg&gt;//["\'`-->]]>]</div>',
-    177 => '<div id="128">&lt;svg&gt;&lt;style><img/>//["\'`-->]]>]&',
+    177 => '<div id="128">&lt;svg&gt;&lt;style><img/>//["\'`-->]]>]</div>',
     178 => '<div id="129">&lt;svg&gt;&lt;image >
 &lt;!--
 Same effect with
@@ -343,18 +344,22 @@ Same effect with
 <set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" />
 </image>
 &lt;/svg&gt;//["\'`-->]]>]</div>',
-    181 => '<div id="133">&lt;!-- `<img/>//["\'`--&>]&',
+    181 => '<div id="133">&lt;!-- `<img/>//["\'`--&gt;]]>]</div>',
     182 => '<div id="134"><xmp>
 &lt;%
 &lt;/xmp&gt;
-&lt;img &gt;&lt;/&gt;&lt;&gt;
+&lt;img &gt;&lt;/xmp&gt;&lt;img \'&gt;
 
-&lt;&gt;
-&gt;
+ %&gt;/
+alert&#40;2&#41;
+/script&gt;
 
-&gt;
-*[\'&&gt;
---&&gt;//["\'`--&gt;]]&gt;]&lt;/&gt;',
+XXX
+&lt;style&gt;
+*[\'&lt;!--\']{}
+&lt;/style&gt;
+--&gt;{}
+*{color:red}&lt;/style&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     183 => '<div id="135">&lt;?xml-stylesheet type="text/xsl" href="#" ?&gt;
 &lt;stylesheet xmlns="http://www.w3.org/TR/WD-xsl"&gt;
 <template match="/">
@@ -379,12 +384,12 @@ Same effect with
     189 => '<img src="small.jpg" srcset="medium.jpg 1000w, large.jpg 2000w">',
     190 => '<div &nbsp;=""></div>',
     191 => '<x/>&lt;title&gt;&lt;/title><img >',
-    192 => '&lt;svg&gt;&lt;/p>&lt;textarea&gt;&lt;title>&lt;style&gt;&lt;/textarea><img >&lt;/&gt;&lt;/&gt;&lt;/&gt;',
-    193 => '&lt;math&gt;&lt;/p>&lt;textarea&gt;&lt;mi>&lt;style&gt;&lt;/textarea><img >&lt;/&gt;&lt;/&gt;',
+    192 => '&lt;svg&gt;&lt;/p>&lt;textarea&gt;&lt;title>&lt;style&gt;&lt;/textarea><img >&lt;/style&gt;&lt;/title>&lt;/svg&gt;',
+    193 => '&lt;math&gt;&lt;/p>&lt;textarea&gt;&lt;mi>&lt;style&gt;&lt;/textarea><img ></mi>&lt;/math&gt;',
     194 => '&lt;svg&gt;&lt;/p>&lt;title&gt;&lt;template>&lt;style&gt;&lt;/title><img >',
     195 => '&lt;math&gt;&lt;/br>&lt;textarea&gt;&lt;mtext><template>&lt;style&gt;&lt;/textarea><img >',
     196 => '&lt;form&gt;&lt;input name=namespaceURI>',
-    197 => '&lt;svg&gt;&lt;/p>&lt;math&gt;&lt;title>&lt;style&gt;&lt;img >&lt;/&gt;&lt;/&gt;',
+    197 => '&lt;svg&gt;&lt;/p>&lt;math&gt;&lt;title>&lt;style&gt;&lt;img >&lt;/style&gt;&lt;/title>',
     198 => '&lt;svg&gt;&lt;/p>&lt;style&gt;&lt;g title="&lt;/style&gt;&lt;img >">',
     199 => '&lt;svg&gt;&lt;foreignobject><p>&lt;style&gt;&lt;p title="&lt;/style&gt;&lt;iframe ">&lt;/style&gt;',
     200 => '&lt;math&gt;&lt;annotation-xml encoding="text/html"><p>&lt;style&gt;&lt;p title="&lt;/style&gt;&lt;iframe ">&lt;/style&gt;',

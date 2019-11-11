@@ -502,7 +502,11 @@ final class AntiXSS
         $str = $match[0];
 
         // protect GET variables without XSS in URLs
-        if (\preg_match_all("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/ui", $str, $matches)) {
+        if (
+            \strpos($str, '=') !== false
+            &&
+            \preg_match_all("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/ui", $str, $matches)
+        ) {
             if (isset($matches['attr'])) {
                 foreach ($matches['attr'] as $matchInner) {
                     $tmpAntiXss = clone $this;
@@ -765,7 +769,11 @@ final class AntiXSS
         $str = UTF8::html_entity_decode($str, $flags);
 
         // decode-again, for e.g. HHVM or miss configured applications ...
-        if (\preg_match_all('/(?<html_entity>&[A-Za-z]{2,}[;]{0})/', $str, $matches)) {
+        if (
+            \strpos($str, '&') !== false
+            &&
+            \preg_match_all('/(?<html_entity>&[A-Za-z]{2,}[;]{0})/', $str, $matches)
+        ) {
             if ($HTML_ENTITIES_CACHE === null) {
 
                 // links:
@@ -868,11 +876,15 @@ final class AntiXSS
             return '';
         }
 
-        $out = '';
-        if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#ui', $str, $matches)) {
-            foreach ($matches[0] as $match) {
-                $out .= $match;
+        if (\strpos($str, '=') !== false) {
+            $out = '';
+            if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#ui', $str, $matches)) {
+                foreach ($matches[0] as $match) {
+                    $out .= $match;
+                }
             }
+        } else {
+            $out = $str;
         }
 
         return $out;
@@ -996,7 +1008,11 @@ final class AntiXSS
         $replacer = $this->_filter_attributes(\str_replace(['<', '>'], '', $match[1]));
 
         // filter for "(.*)" but only in the "$search"-attribute
-        if (\stripos($replacer, $search) !== false) {
+        if (
+            \stripos($replacer, $search) !== false
+            &&
+            \strpos($match[1], '=') !== false
+        ) {
             $pattern = '#' . $search . '=(?<wrapper>[\'|"]).*(?:\g{wrapper})#isU';
             $matchInner = [];
             $foundSomethingBad = false;
@@ -1015,9 +1031,17 @@ final class AntiXSS
                 );
             }
 
-            if (!$foundSomethingBad) {
+            if (
+                !$foundSomethingBad
+                &&
+                \strpos($match[1], '=') !== false
+            ) {
                 // filter for javascript
-                $pattern = '#' . $search . '=.*(?:javascript:|view-source:|livescript:|wscript:|vbscript:|mocha:|charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#ius';
+                $patternTmp = '';
+                foreach (self::$_never_allowed_call as $callTmp) {
+                    $patternTmp .= $callTmp . ':|';
+                }
+                $pattern = '#' . $search . '=.*(?:' . $patternTmp . 'charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#ius';
                 $matchInner = [];
                 \preg_match($pattern, $match[1], $matchInner);
                 if (\count($matchInner) > 0) {
@@ -1323,6 +1347,8 @@ final class AntiXSS
     private function _sanitize_naughty_html($str)
     {
         do {
+            $original = $str;
+
             if (\strpos($str, '<') === false) {
                 return $str;
             }
@@ -1340,7 +1366,6 @@ final class AntiXSS
                 return $str;
             }
 
-            $original = $str;
             $str = (string) \preg_replace_callback(
                 '#<((?<start>/*\s*)((?<tagName>[\p{L}]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS',
                 function ($matches) {

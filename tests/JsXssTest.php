@@ -61,8 +61,8 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         // 过滤不在白名单中的属性
         static::assertSame('<a oo="1" xx="2" title="3">yy</a>', $this->security->xss_clean('<a oo="1" xx="2" title="3">yy</a>'));
-        static::assertSame('<a >pp</a>', $this->security->xss_clean('<a title xx oo>pp</a>'));
-        static::assertSame('<a >pp</a>', $this->security->xss_clean('<a title "">pp</a>'));
+        static::assertSame('<a title xx oo>pp</a>', $this->security->xss_clean('<a title xx oo>pp</a>'));
+        static::assertSame('<a title "">pp</a>', $this->security->xss_clean('<a title "">pp</a>'));
         static::assertSame('<a t="">', $this->security->xss_clean('<a t="">'));
 
         // 属性内的特殊字符
@@ -82,9 +82,9 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<a >', $this->security->xss_clean('<a title=abc(\'d\')>'));
 
         // 单个闭合标签
-        static::assertSame('<img />', $this->security->xss_clean('<img src/>'));
-        static::assertSame('<img  />', $this->security->xss_clean('<img src />'));
-        static::assertSame('<img />', $this->security->xss_clean('<img src//>'));
+        static::assertSame('<img src/>', $this->security->xss_clean('<img src/>'));
+        static::assertSame('<img src />', $this->security->xss_clean('<img src />'));
+        static::assertSame('<img src//>', $this->security->xss_clean('<img src//>'));
         static::assertSame('<br />', $this->security->xss_clean('<br />'));
         static::assertSame('<br/>', $this->security->xss_clean('<br/>'));
 
@@ -125,7 +125,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=`javascript:alert("RSnake says, \'XSS\'")`>'));
 
-        static::assertSame('<IMG """>&lt;&gt;', $this->security->xss_clean('<IMG """><SCRIPT>alert("XSS")</SCRIPT>">'));
+        static::assertSame('<IMG """>">', $this->security->xss_clean('<IMG """><SCRIPT>alert("XSS")</SCRIPT>">'));
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>'));
 
