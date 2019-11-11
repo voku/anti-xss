@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.19 (2019-11-11)
+
+- keep more non XSS content from html input
+
+
 ### 4.1.18 (2019-11-11)
 
 - fix open tags problem e.g. "<img/"
