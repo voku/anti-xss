@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/voku/anti-xss/v/stable)](https://packagist.org/packages/voku/anti-xss) 
 [![Total Downloads](https://poser.pugx.org/voku/anti-xss/downloads)](https://packagist.org/packages/voku/anti-xss)
 [![License](https://poser.pugx.org/voku/anti-xss/license)](https://packagist.org/packages/voku/anti-xss)
-[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/moelleken)
+[![Financial Contributors on Open Collective](https://opencollective.com/anti-xss/all/badge.svg?label=financial+contributors)](https://opencollective.com/anti-xss) [![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/moelleken)
 [![Donate to this project using Patreon](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/voku)
 
 # :secret: AntiXSS
@@ -156,6 +156,36 @@ For professional support please contact [me](https://about.me/voku).
 - Thanks to [Travis CI](https://travis-ci.com/) for being the most awesome, easiest continous integration tool out there!
 - Thanks to [StyleCI](https://styleci.io/) for the simple but powerfull code style check.
 - Thanks to [PHPStan](https://github.com/phpstan/phpstan) && [Psalm](https://github.com/vimeo/psalm) for relly great Static analysis tools and for discover bugs in the code!
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/voku/anti-xss/graphs/contributors"><img src="https://opencollective.com/anti-xss/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/anti-xss/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/anti-xss"><img src="https://opencollective.com/anti-xss/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/anti-xss/contribute)]
+
+<a href="https://opencollective.com/anti-xss/organization/0/website"><img src="https://opencollective.com/anti-xss/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/1/website"><img src="https://opencollective.com/anti-xss/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/2/website"><img src="https://opencollective.com/anti-xss/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/3/website"><img src="https://opencollective.com/anti-xss/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/4/website"><img src="https://opencollective.com/anti-xss/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/5/website"><img src="https://opencollective.com/anti-xss/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/6/website"><img src="https://opencollective.com/anti-xss/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/7/website"><img src="https://opencollective.com/anti-xss/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/8/website"><img src="https://opencollective.com/anti-xss/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/anti-xss/organization/9/website"><img src="https://opencollective.com/anti-xss/organization/9/avatar.svg"></a>
 
 ### License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvoku%2Fanti-xss?ref=badge_large)
