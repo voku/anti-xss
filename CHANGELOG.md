@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.20 (2019-12-07)
+
+- fix additional false positives in string (issue #52)
+- remove support for "Netscape 4 JS entities"
+
+
 ### 4.1.19 (2019-11-11)
 
 - keep more non XSS content from html input
