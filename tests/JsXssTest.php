@@ -113,7 +113,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('>\'>', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
 
-        static::assertSame(';!--"<XSS>=', $this->security->xss_clean(';!--"<XSS>=&{()}'));
+        static::assertSame(';!--"<XSS>=&{()}', $this->security->xss_clean(';!--"<XSS>=&{()}'));
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>'));
 
