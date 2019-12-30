@@ -70,7 +70,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<a title="">', $this->security->xss_clean('<a title=""">'));
         static::assertSame('<a title="oo">', $this->security->xss_clean('<a h=title="oo">'));
         static::assertSame('<a  title="oo">', $this->security->xss_clean('<a h= title="oo">'));
-        static::assertSame('<a title="alert&#40;/xss/&#41;">', $this->security->xss_clean('<a title="javascript&colon;alert(/xss/)">'));
+        static::assertSame('<a title="(/xss/)">', $this->security->xss_clean('<a title="javascript&colon;alert(/xss/)">'));
 
         // 自动将属性值的单引号转为双引号
         static::assertSame('<a title=\'abcd\'>', $this->security->xss_clean('<a title=\'abcd\'>'));
@@ -111,13 +111,13 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         // 增加白名单标签及属性
         static::assertSame('<ooxx yy="ok" cc="no">uu</ooxx>', $this->security->xss_clean('<ooxx yy="ok" cc="no">uu</ooxx>'));
 
-        static::assertSame('>\'>', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
+        static::assertSame('>">\'>', $this->security->xss_clean('></SCRIPT>">\'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>'));
 
         static::assertSame(';!--"<XSS>=&{()}', $this->security->xss_clean(';!--"<XSS>=&{()}'));
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>'));
 
-        static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\');">'));
+        static::assertSame('<IMG SRC="(\'XSS\');">', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\');">'));
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=javascript:alert(\'XSS\')>'));
 
@@ -135,15 +135,15 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>'));
 
-        static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav ascript:alert(\'XSS\');">'));
+        static::assertSame('<IMG SRC="(\'XSS\');">', $this->security->xss_clean('<IMG SRC="jav ascript:alert(\'XSS\');">'));
 
-        static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">'));
+        static::assertSame('<IMG SRC="(\'XSS\');">', $this->security->xss_clean('<IMG SRC="jav&#x09;ascript:alert(\'XSS\');">'));
 
         static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC="jav\nascript:alert(\'XSS\');">'));
 
         static::assertSame('<IMG >', $this->security->xss_clean('<IMG SRC=java\0script:alert(\"XSS\")>'));
 
-        static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC=" &#14;  javascript:alert(\'XSS\');">'));
+        static::assertSame('<IMG SRC=" &#14;  (\'XSS\');">', $this->security->xss_clean('<IMG SRC=" &#14;  javascript:alert(\'XSS\');">'));
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'));
 
@@ -157,13 +157,13 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('', $this->security->xss_clean('<SCRIPT SRC=//ha.ckers.org/.j'));
 
-        static::assertSame('&lt;IMG src=""', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
+        static::assertSame('&lt;IMG SRC="(\'XSS\')"', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
 
         static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html &lt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
 
         // 过滤 javascript:
         static::assertSame('<a >', $this->security->xss_clean('<a style="url(\'javascript:alert(1)\')">'));
-        static::assertSame('<td background="url(\'alert&#40;1&#41;\')">', $this->security->xss_clean('<td background="url(\'javascript:alert(1)\')">'));
+        static::assertSame('<td background="url(\'(1)\')">', $this->security->xss_clean('<td background="url(\'javascript:alert(1)\')">'));
 
         // 过滤 style
         static::assertSame('<DIV >', $this->security->xss_clean('<DIV STYLE="width: \nexpression(alert(1));">'));
@@ -174,15 +174,15 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         // 正常的url
         static::assertSame('<DIV >', $this->security->xss_clean('<DIV STYLE="background: url (ooxx);">'));
 
-        static::assertSame('<IMG src="">', $this->security->xss_clean('<IMG SRC=\'vbscript:msgbox("XSS")\'>'));
+        static::assertSame('<IMG SRC=\'("XSS")\'>', $this->security->xss_clean('<IMG SRC=\'vbscript:msgbox("XSS")\'>'));
 
-        static::assertSame('<IMG SRC="[code]">', $this->security->xss_clean('<IMG SRC="livescript:[code]">'));
+        static::assertSame('<IMG SRC="">', $this->security->xss_clean('<IMG SRC="livescript:[code]">'));
 
-        static::assertSame('<IMG SRC="[code]">', $this->security->xss_clean('<IMG SRC="mocha:[code]">'));
+        static::assertSame('<IMG SRC="">', $this->security->xss_clean('<IMG SRC="mocha:[code]">'));
 
         static::assertSame('<a href="">', $this->security->xss_clean('<a href="javas/**/cript:alert(\'XSS\');">'));
 
-        static::assertSame('<a href="test">', $this->security->xss_clean('<a href="javascript:test">'));
+        static::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript:test">'));
         static::assertSame('<a href="/javascript/a">', $this->security->xss_clean('<a href="/javascript/a">'));
         static::assertSame('<a href="/javascript/a">', $this->security->xss_clean('<a href="/javascript/a">'));
         static::assertSame('<a href="http://aa.com">', $this->security->xss_clean('<a href="http://aa.com">'));
@@ -198,11 +198,11 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('&lt;!--[if gte IE 4]>&lt;![endif]--&gt; END', $this->security->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
 
         // HTML5新增实体编码 冒号&colon; 换行&NewLine;
-        static::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
+        static::assertSame('<a href="(/xss/)">', $this->security->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
         static::assertSame('<a href="">', $this->security->xss_clean('<a href="javascript&colonalert(/xss/)">'));
         static::assertSame('<a href="a&NewLine;b">', $this->security->xss_clean('<a href="a&NewLine;b">'));
         static::assertSame('<a href="a&NewLineb">', $this->security->xss_clean('<a href="a&NewLineb">'));
-        static::assertSame('<a href="">', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
+        static::assertSame('<a href="(1)">', $this->security->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));
 
         // data URI 协议过滤
         static::assertSame('<a href="">', $this->security->xss_clean('<a href="data:">'));

@@ -66,28 +66,28 @@ final class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
         $this->addToTestArray('<a href="http://foo">bar</a>', '<a href="http://foo">bar</a>');
         $this->addToTestArray('<a href="ftp://foo">bar</a>', '<a href="ftp://foo">bar</a>');
         $this->addToTestArray('<a href="mailto:foo">bar</a>', '<a href="mailto:foo">bar</a>');
-        $this->addToTestArray('<a href="javascript:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java' . "\t" . 'script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java' . "\n" . 'script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java' . "\r" . 'script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java' . \chr(1) . 'script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="java' . \chr(0) . 'script:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="jscript:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="vbscript:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="view-source:foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="  javascript:foo">bar</a>', '<a href="  foo">bar</a>');
-        $this->addToTestArray('<a href="jAvAsCrIpT:foo">bar</a>', '<a href="foo">bar</a>');
+        $this->addToTestArray('<a href="javascript:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java' . "\t" . 'script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java' . "\n" . 'script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java' . "\r" . 'script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java' . \chr(1) . 'script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="java' . \chr(0) . 'script:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="jscript:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="vbscript:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="view-source:foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="  javascript:foo">bar</a>', '<a href="  ">bar</a>');
+        $this->addToTestArray('<a href="jAvAsCrIpT:foo">bar</a>', '<a href="">bar</a>');
 
         // bad protocols with entities (semicolons)
-        $this->addToTestArray('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="&#0000106;&#0000097;&#0000118;&#0000097;&#0000115;&#0000099;&#0000114;&#0000105;&#0000112;&#0000116;&#0000058;foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3A;foo">bar</a>', '<a href="foo">bar</a>');
+        $this->addToTestArray('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#0000106;&#0000097;&#0000118;&#0000097;&#0000115;&#0000099;&#0000114;&#0000105;&#0000112;&#0000116;&#0000058;foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3A;foo">bar</a>', '<a href="">bar</a>');
 
         // bad protocols with entities (no semicolons)
-        $this->addToTestArray('<a href="&#106&#97&#118&#97&#115&#99&#114&#105&#112&#116&#58;foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058foo">bar</a>', '<a href="foo">bar</a>');
-        $this->addToTestArray('<a href="&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A;foo">bar</a>', '<a href="foo">bar</a>');
+        $this->addToTestArray('<a href="&#106&#97&#118&#97&#115&#99&#114&#105&#112&#116&#58;foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A;foo">bar</a>', '<a href="">bar</a>');
 
         $security = $this->getSecurity();
 

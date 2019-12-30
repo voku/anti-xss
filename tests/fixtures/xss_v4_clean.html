@@ -9,8 +9,7 @@
 &lt;body
 bgcolor=white
 linkcolor = "blue"
-
-"&lt;p>properly escaped code in a handler</p>");"
+&lt;p>properly escaped code in a handler</p>");"
 >
 
 &lt;!--
@@ -54,7 +53,11 @@ write("&lt;pre&gt;$horriblySyntacticConstruct1&lt;/pre&gt;\n\n");
 &lt;!--
 alert&#40;"hello world"&#41;;
 // --&gt;
- */alert&#40;'hi'&#41;;--&gt;&lt;!--/* &lt;/xmp&gt; */alert&#40;'hi'&#41;;--&gt;&lt;/xmp&gt;
+
+ */alert&#40;'hi'&#41;;
+ */alert&#40;'hi'&#41;;--&gt;
+
+&lt;xmp &gt;&lt;!--/* &lt;/xmp&gt; */alert&#40;'hi'&#41;;--&gt;&lt;/xmp&gt;
 
 &lt;style&gt;&lt;!-- p { contentf: '&lt;/style&gt;' } --&gt;&lt;/style&gt;
 
@@ -65,6 +68,10 @@ alert&#40;"hello world"&#41;;
 &lt;!-- An escaping text span start may share its U+002D HYPHEN-MINUS characters
 - with its corresponding escaping text span end. --&gt;
 
+
+
+
+&lt;/body&gt;
 &lt;/html&gt;
 
 &lt;![CDATA[ No such thing as a CDATA&gt; section in HTML ]]&gt;

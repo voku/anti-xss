@@ -346,6 +346,7 @@ final class AntiXSS
         'title',
         'math',
         'noscript',
+        'event-source',
         'vmlframe',
         'video',
         'source',
@@ -612,14 +613,14 @@ final class AntiXSS
         // backup the string (for later comparision)
         $str_backup = $str;
 
-        // remove strings that are never allowed
-        $str = $this->_do_never_allowed($str);
-
         // corrects words before the browser will do it
         $str = $this->_compact_exploded_javascript($str);
 
         // remove disallowed javascript calls in links, images etc.
         $str = $this->_remove_disallowed_javascript($str);
+
+        // remove strings that are never allowed
+        $str = $this->_do_never_allowed($str);
 
         // remove evil attributes such as style, onclick and xmlns
         $str = $this->_remove_evil_attributes($str);
@@ -678,8 +679,8 @@ final class AntiXSS
         }
         if ($replaceNeverAllowedCall) {
             $str = (string) \preg_replace(
-                '#([^\p{L}]|^)(?:' . \implode('|', self::$_never_allowed_call) . ')\s*:#ius',
-                '$1' . $this->_replacement,
+                '#([^\p{L}]|^)(?:' . \implode('|', self::$_never_allowed_call) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
+                '$1' . $this->_replacement . '$2',
                 $str
             );
         }
@@ -1013,7 +1014,7 @@ final class AntiXSS
 
         $foundEqualSign = \strpos($match[1], '=') !== false;
 
-        // filter for "(.*)" but only in the "$search"-attribute
+        // filter for "$search"-attributes
         if (
             $foundEqualSign
             &&
@@ -1023,27 +1024,32 @@ final class AntiXSS
             $matchInner = [];
             $foundSomethingBad = false;
             \preg_match($pattern, $match[1], $matchInner);
-            if (
-                \count($matchInner) > 0
-                &&
-                \preg_match('#(?:\(.*([^)]*?)(?:\)))#s', $matchInner[0])
-            ) {
-                $foundSomethingBad = true;
+            if (\count($matchInner) > 0) {
+                $tmpAntiXss = clone $this;
 
-                $replacer = (string) \preg_replace(
-                    $pattern,
-                    $search . '="' . $this->_replacement . '"',
-                    $replacer
-                );
+                $tmpAntiXss->xss_clean($matchInner[0]);
+
+                if ($tmpAntiXss->isXssFound() === true) {
+                    $foundSomethingBad = true;
+                    $this->_xss_found = true;
+
+                    $replacer = (string) \preg_replace(
+                        $pattern,
+                        $search . '="' . $this->_replacement . '"',
+                        $replacer
+                    );
+                }
             }
 
             if (!$foundSomethingBad) {
                 // filter for javascript
                 $patternTmp = '';
                 foreach (self::$_never_allowed_call as $callTmp) {
-                    $patternTmp .= $callTmp . ':|';
+                    if (\stripos($match[0], $callTmp) !== false) {
+                        $patternTmp .= $callTmp . ':|';
+                    }
                 }
-                $pattern = '#' . $search . '=.*(?:' . $patternTmp . 'charset=|window\.|\(?document\)?\.|\.cookie|<script|d\s*a\s*t\s*a\s*:)#ius';
+                $pattern = '#' . $search . '=.*(?:' . $patternTmp . 'window\.|\(?document\)?\.|\.cookie|(?:%3C|<)\s*s\s*c\s*r\s*i\s*p\s*t\s*|d\s*a\s*t\s*a\s*:)#ius';
                 $matchInner = [];
                 \preg_match($pattern, $match[1], $matchInner);
                 if (\count($matchInner) > 0) {
@@ -1167,18 +1173,19 @@ final class AntiXSS
                 );
             }
 
-            if (\stripos($str, '<script') !== false) {
+            if (\stripos($str, 'script') !== false) {
+                // INFO: US-ASCII: ¼ === <
                 $str = (string) \preg_replace(
-                    '#<script[^\p{L}@]+(?:[^>]*?)(?:\s?/?>|$)#iu',
+                    '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
                     $this->_replacement,
                     $str
                 );
             }
 
             if (\stripos($str, 'script') !== false) {
-                // US-ASCII: ¼ === <
+                // INFO: US-ASCII: ¼ === <
                 $str = (string) \preg_replace(
-                    '#[¼<][^\p{L}@]*?/*?[^\p{L}@]*?(?:script[^\p{L}@]+).*[¾>]#iuU',
+                    '#(?:%3C|¼|<)[^\p{L}@]*?/*?[^\p{L}@]*?(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iuU',
                     $this->_replacement,
                     $str
                 );

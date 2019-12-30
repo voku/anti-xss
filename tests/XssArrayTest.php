@@ -52,7 +52,7 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
             '<td bgcolor="#00ff00" nowrap>Very Long String with a blue background</td>',
             '<a href="proto1://www.foo.com">New protocol test</a>',
             '<img src="proto2://www.foo.com" />',
-            '<a href="">bleep</a>',
+            '<a href="(\'Boo!\');">bleep</a>',
             '<a href="proto4://abc.xyz.foo.com">Another new protocol</a>',
             '<a href="proto9://foo.foo.foo.foo.foo.org/">Test of "proto9"</a>',
             '<td width="75">Bar!</td>',

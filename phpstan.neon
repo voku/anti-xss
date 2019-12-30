@@ -1,7 +1,7 @@
 parameters:
-    excludes_analyse:
-        - %currentWorkingDirectory%/vendor/*
-        - %currentWorkingDirectory%/tests/*
+    level: max
+    paths:
+        - %currentWorkingDirectory%/src/
     autoload_files:
         - %currentWorkingDirectory%/vendor/autoload.php
     ignoreErrors:

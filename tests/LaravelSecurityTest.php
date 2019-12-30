@@ -35,7 +35,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<a href="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere</a>',
-                '<a href="[removed]">Clickhere</a>',
+                '<a href="[removed](1)">Clickhere</a>',
             ],
             [
                 '&foo should not include a semicolon',
@@ -67,7 +67,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<iframe/src="javascript:a=[alert&lpar;1&rpar;,confirm&#40;2&#41;,prompt%283%29];eval(a[0]);">',
-                '&lt;iframe/src="[removed]a=[alert&#40;1&#41;,confirm&#40;2&#41;,prompt&#40;3&#41;];eval&#40;a[0]&#41;;"&gt;',
+                '&lt;iframe/src="[removed](1),confirm&#40;2&#41;,prompt&#40;3&#41;];eval&#40;a[0]&#41;;"&gt;',
             ],
             [
                 '<div/style=content:url(data:image/svg+xml);visibility:visible onmouseover=alert(1)>x</div>',
@@ -103,7 +103,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<form/action=javascript&#x0003A;eval(setTimeout(confirm(1)))><input/type=submit>',
-                '&lt;form/action=[removed]eval&#40;setTimeout(confirm(1&#41;))&gt;&lt;input/type=submit>',
+                '&lt;form/action=[removed](setTimeout(confirm&#40;1&#41;))&gt;&lt;input/type=submit>',
             ],
             [
                 '<body/onload=this.onload=document.body.innerHTML=alert&lpar;1&rpar;>',
@@ -123,7 +123,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 'http://www.<script abc>setTimeout(\'confirm(1)\',1)</script .com>',
-                'http://www.[removed]setTimeout(\'confirm&#40;1&#41;\',1)[removed]',
+                'http://www.[removed]setTimeout(\'confirm&#40;1&#41;\',1)[removed].com>',
             ],
             [
                 '<style/onload    =    !-alert&#x28;1&#x29;>',
@@ -139,7 +139,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<form/action=javascript&#x3A;void(1)&quest;void(1)&colon;alert(1)><input/type=\'submit\'>',
-                '&lt;form/action=[removed]void(1)?void(1):alert&#40;1&#41;&gt;&lt;input/type=\'submit\'>',
+                '&lt;form/action=[removed](1)?void(1):alert&#40;1&#41;&gt;&lt;input/type=\'submit\'>',
             ],
             [
                 '<iframe/srcdoc=\'&lt;iframe&sol;onload&equals;confirm(&sol;&iexcl;&hearts;&xcup;&sol;)&gt;\'>',
@@ -147,7 +147,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<meta/http-equiv="refresh"/content="0;url=javascript&Tab;:&Tab;void(alert(0))?0:0,0,prompt(0)">',
-                '&lt;meta/http-equiv="refresh"/content="0;url=[removed]	void(alert&#40;0&#41;)?0:0,0,prompt&#40;0&#41;"&gt;',
+                '&lt;meta/http-equiv="refresh"/content="0;url=[removed](alert&#40;0&#41;)?0:0,0,prompt&#40;0&#41;"&gt;',
             ],
             [
                 '<script src="h&Tab;t&Tab;t&Tab;p&Tab;s&colon;/&Tab;/&Tab;http://dl.dropbox.com/u/13018058/js.js"></script>',
@@ -167,15 +167,15 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<iframe/src="j&Tab;AVASCRIP&NewLine;t:\u0061ler\u0074&#x28;1&#x29;">',
-                '&lt;iframe/src="[removed]alert&#40;1&#41;"&gt;',
+                '&lt;iframe/src="[removed](1)"&gt;',
             ],
             [
                 '<iframe/src="javascript:void(alert(1))?alert(1):confirm(1),prompt(1)">',
-                '&lt;iframe/src="[removed]void(alert&#40;1&#41;)?alert&#40;1&#41;:confirm&#40;1&#41;,prompt&#40;1&#41;"&gt;',
+                '&lt;iframe/src="[removed](alert&#40;1&#41;)?alert&#40;1&#41;:confirm&#40;1&#41;,prompt&#40;1&#41;"&gt;',
             ],
             [
                 '<embed/src=javascript&colon;\u0061&#x6C;&#101%72t&#x28;1&#x29;>',
-                '&lt;embed/src=[removed]alert&#40;1&#41;&gt;',
+                '&lt;embed/src=[removed](1)&gt;',
             ],
             [
                 '<img/src=\'http://i.imgur.com/P8mL8.jpg \' onmouseover={confirm(1)}f()>',
