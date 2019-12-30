@@ -1,5 +1,12 @@
 # Changelog
 
+### 4.1.21 (2019-12-30)
+
+- fix false-positive (issue #53)
+- fix for "server-sent events"
+- optimize regex for encoded script-tags (%3C && %3E)
+
+
 ### 4.1.20 (2019-12-07)
 
 - fix additional false positives in string (issue #52)
