@@ -120,8 +120,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             'something[onendtest'                                                                                                                                                                                                                     => 'something[onendtest',
             'something$onendtest'                                                                                                                                                                                                                     => 'something$onendtest',
             '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>'                                                                                                                                                    => '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>',
-            '<a href="https://example.com/?onlyEnabled=1">link</a>' => '<a href="https://example.com/?onlyEnabled=1">link</a>',
-            '<a href="https://example.com/?onlyEnabled=123123foo">link</a>' => '<a href="https://example.com/?onlyEnabled=123123foo">link</a>',
+            '<a href="https://example.com/?onlyEnabled=1">link</a>'                                                                                                                                                                                   => '<a href="https://example.com/?onlyEnabled=1">link</a>',
+            '<a href="https://example.com/?onlyEnabled=123123foo">link</a>'                                                                                                                                                                           => '<a href="https://example.com/?onlyEnabled=123123foo">link</a>',
         ];
 
         $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -647,8 +647,8 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
             // Mimetism
             '<x </onxxx=hack (closing tag)' => '&lt;x &lt;/onxxx=hack (closing tag)',
             '<http://onxxx%3Dhack/ (URL)'   => '&lt;http://onxxx=hack/ (URL)',
-            '<x </onxxx=1 (closing tag)' => '&lt;x &lt;/onxxx=1 (closing tag)',
-            '<http://onxxx%3D1/ (URL)'   => '&lt;http://onxxx=1/ (URL)',
+            '<x </onxxx=1 (closing tag)'    => '&lt;x &lt;/onxxx=1 (closing tag)',
+            '<http://onxxx%3D1/ (URL)'      => '&lt;http://onxxx=1/ (URL)',
             // Combo
             '<x%2F1=">%22OnClick%3D1' => '<x/1=">"=1',
             // Location Based Payloads

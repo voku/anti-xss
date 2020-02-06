@@ -396,7 +396,7 @@ final class AntiXSS
      * @var string
      */
     private $_cache_never_allowed_regex_string = '';
-    
+
     /**
      * @var string
      */
@@ -691,7 +691,7 @@ final class AntiXSS
                 $replaceNeverAllowedCall[] = $call;
             }
         }
-        if (count($replaceNeverAllowedCall) > 0) {
+        if (\count($replaceNeverAllowedCall) > 0) {
             $str = (string) \preg_replace(
                 '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
@@ -719,9 +719,9 @@ final class AntiXSS
         if (!$this->_cache_never_allowed_regex_string || $regex_combined !== []) {
             $this->_cache_never_allowed_regex_string = \implode('|', $regex_combined);
         }
-         
+
         if ($this->_cache_never_allowed_regex_string) {
-            $str = (string)\preg_replace(
+            $str = (string) \preg_replace(
                 '#' . $this->_cache_never_allowed_regex_string . '#ius',
                 $this->_replacement,
                 $str
@@ -1260,7 +1260,7 @@ final class AntiXSS
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
             $this->_cache_evil_attributes_regex_string .= '|' . \implode('\w*|', $this->_never_allowed_on_events_afterwards);
         }
-        
+
         do {
             $count = $temp_count = 0;
 
@@ -1383,11 +1383,11 @@ final class AntiXSS
             if (\strpos($str, '<') === false) {
                 return $str;
             }
-            
+
             if (!$this->_cache__evil_html_tags_str) {
                 $this->_cache__evil_html_tags_str = \implode('|', $this->_evil_html_tags);
             }
-            
+
             $str = (string) \preg_replace_callback(
                 '#<(?<start>/*\s*)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
                 function ($matches) {
@@ -1529,7 +1529,7 @@ final class AntiXSS
 
         // reset
         $this->_cache_evil_attributes_regex_string = '';
-        
+
         $this->_evil_attributes_regex = \array_merge(
             $strings,
             $this->_evil_attributes_regex
@@ -1550,7 +1550,7 @@ final class AntiXSS
         if ($strings === []) {
             return $this;
         }
-        
+
         // reset
         $this->_cache__evil_html_tags_str = '';
 
@@ -1577,7 +1577,7 @@ final class AntiXSS
 
         // reset
         $this->_cache_never_allowed_regex_string = '';
-        
+
         $this->_never_allowed_regex = \array_merge(
             $strings,
             $this->_never_allowed_regex
@@ -1604,9 +1604,9 @@ final class AntiXSS
             return $this;
         }
 
-        // reset 
+        // reset
         $this->_cache_never_allowed_regex_string = '';
-        
+
         $this->_never_allowed_regex = \array_diff(
             $this->_never_allowed_regex,
             \array_intersect($strings, $this->_never_allowed_regex)
@@ -1727,7 +1727,7 @@ final class AntiXSS
 
         // reset
         $this->_cache_evil_attributes_regex_string = '';
-        
+
         $this->_never_allowed_on_events_afterwards = \array_diff(
             $this->_never_allowed_on_events_afterwards,
             \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
