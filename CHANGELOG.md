@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.22 (2020-02-06)
+
+- fix false-positive (issue #54)
+- optimize internal caching of strings
+
+
 ### 4.1.21 (2019-12-30)
 
 - fix false-positive (issue #53)
