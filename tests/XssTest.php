@@ -120,6 +120,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             'something[onendtest'                                                                                                                                                                                                                     => 'something[onendtest',
             'something$onendtest'                                                                                                                                                                                                                     => 'something$onendtest',
             '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>'                                                                                                                                                    => '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>',
+            '<a href="https://example.com/?onlyEnabled=1">link</a>' => '<a href="https://example.com/?onlyEnabled=1">link</a>',
+            '<a href="https://example.com/?onlyEnabled=123123foo">link</a>' => '<a href="https://example.com/?onlyEnabled=123123foo">link</a>',
         ];
 
         $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -628,11 +630,11 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
             // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
             //
             // Spacers
-            '<x%09onxxx=1' => '&lt;x	',
-            '<x%0Aonxxx=1' => '&lt;x' . "\n",
-            '<x%0Conxxx=1' => '&lt;x ',
-            '<x%0Donxxx=1' => '&lt;x' . "\r",
-            '<x%2Fonxxx=1' => '&lt;x/',
+            '<x%09onxxx=1' => '&lt;x	onxxx=1',
+            '<x%0Aonxxx=1' => '&lt;x' . "\nonxxx=1",
+            '<x%0Conxxx=1' => '&lt;x onxxx=1',
+            '<x%0Donxxx=1' => '&lt;x' . "\ronxxx=1",
+            '<x%2Fonxxx=1' => '&lt;x/onxxx=1',
 
             '<img alt=\'Right click and share me!\' src=% />' => '<img alt=\'Right click and share me!\' />',
 
@@ -640,11 +642,13 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED>',
             '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG SRC="(\'XSS\');">',
             '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
             // Quotes
-            '<x 1=\'1\'onxxx=1' => '&lt;x 1=\'1\'',
-            '<x 1="1"onxxx=1'   => '&lt;x 1="1"',
+            '<x 1=\'1\'onxxx=1' => '&lt;x 1=\'1\'onxxx=1',
+            '<x 1="1"onxxx=1'   => '&lt;x 1="1"onxxx=1',
             // Mimetism
-            '<x </onxxx=1 (closing tag)' => '&lt;x &lt;/ (closing tag)',
-            '<http://onxxx%3D1/ (URL)'   => '&lt;http:// (URL)',
+            '<x </onxxx=hack (closing tag)' => '&lt;x &lt;/onxxx=hack (closing tag)',
+            '<http://onxxx%3Dhack/ (URL)'   => '&lt;http://onxxx=hack/ (URL)',
+            '<x </onxxx=1 (closing tag)' => '&lt;x &lt;/onxxx=1 (closing tag)',
+            '<http://onxxx%3D1/ (URL)'   => '&lt;http://onxxx=1/ (URL)',
             // Combo
             '<x%2F1=">%22OnClick%3D1' => '<x/1=">"=1',
             // Location Based Payloads
@@ -1312,7 +1316,7 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('&lt;blink&gt;', $this->antiXss->xss_clean('<blink>'));
         static::assertSame('<fubar>', $this->antiXss->xss_clean('<fubar>'));
         static::assertSame('<img &svg="" src="x">', $this->antiXss->xss_clean('<img <svg=""> src="x">'));
-        static::assertSame('<img  >"x ="alert&#40;1&#41;">', $this->antiXss->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+        static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', $this->antiXss->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
 
     public function testXssCleanSanitizeNaughtyHtmlAttributes()
@@ -1326,8 +1330,8 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('onNoTagAtAll = true', $this->antiXss->xss_clean('onNoTagAtAll = true'));
         static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', $this->antiXss->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
         static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', $this->antiXss->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
-        static::assertSame('<img src="x" > on=&lt;svg&gt; =alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
-        static::assertSame('<img >"&>', $this->antiXss->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
+        static::assertSame('<img src="x" on=""> on=&lt;svg&gt; =alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
+        static::assertSame('<img src="on=\'">"&lt;svg&gt; =alert&#40;1&#41; =alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
         static::assertSame('<img src="x"> on=\'x\' =``,alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
         static::assertSame('<img src="x"> on=\'x\' ononerror=error=``,alert&#40;1&#41;>', $this->antiXss->xss_clean('<img src="x"> on=\'x\' ononerror=error=``,alert(1)>'));
         static::assertSame('<img src="0" width="0" alt="src=" />', $this->antiXss->xss_clean('<img src="0" width="0" alt="src=&quot;src=0 width=0 onerror=alert(unescape(/dang%20quotes!/.source))//\" />'));

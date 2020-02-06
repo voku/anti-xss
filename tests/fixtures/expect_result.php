@@ -168,7 +168,7 @@ return [
     122 => '<div id="68"><doc xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:html="http://www.w3.org/1999/xhtml">
     &lt;html:style /&gt;&lt;x  xlink:type="simple">XXX</x>
 </doc>//["\'`-->]]>]</div>',
-    123 => '<div id="69"><card xmlns="http://www.wapforum.org/2001/wml"><onevent type="ontimer"><go href="(69)"/></onevent><timer value="1"/></card>//["\'`-->]]>]</div>',
+    123 => '<div id="69"><card xmlns="http://www.wapforum.org/2001/wml"><onevent type=""><go href="(69)"/></onevent><timer value="1"/></card>//["\'`-->]]>]</div>',
     124 => '<div id="70"><div  >x</div>//["\'`-->]]>]</div>',
     125 => '<div id="71">&lt;//  8alert&#40;71&#41; 9&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     126 => '<div id="72">&lt;form&gt;&lt;button >X&lt;/button&gt;//["\'`-->]]>]</div>',
