@@ -629,7 +629,7 @@ final class AntiXSS
         // backup the string (for later comparision)
         $str_backup = $str;
 
-        // corrects words before the browser will do it
+        // correct words before the browser will do it
         $str = $this->_compact_exploded_javascript($str);
 
         // remove disallowed javascript calls in links, images etc.
@@ -900,9 +900,7 @@ final class AntiXSS
         if (\strpos($str, '=') !== false) {
             $out = '';
             if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#ui', $str, $matches)) {
-                foreach ($matches[0] as $match) {
-                    $out .= $match;
-                }
+                $out = \implode('', $matches[0]);
             }
         } else {
             $out = $str;
@@ -1067,7 +1065,7 @@ final class AntiXSS
                         $patternTmp .= $callTmp . ':|';
                     }
                 }
-                $pattern = '#' . $search . '=.*(?:' . $patternTmp . 'window\.|\(?document\)?\.|\.cookie|(?:%3C|<)\s*s\s*c\s*r\s*i\s*p\s*t\s*|d\s*a\s*t\s*a\s*:)#ius';
+                $pattern = '#' . $search . '=.*(?:' . $patternTmp . '\(?window\)?\.|\(?history\)?\.|\(?location\)?\.|\(?document\)?\.|\(?cookie\)?\.|\(?ScriptElement\)?\.|d\s*a\s*t\s*a\s*:)#ius';
                 $matchInner = [];
                 \preg_match($pattern, $match[1], $matchInner);
                 if (\count($matchInner) > 0) {
@@ -1505,11 +1503,46 @@ final class AntiXSS
      */
     private function _sanitize_naughty_javascript($str)
     {
-        $str = (string) \preg_replace(
-            '#(alert|prompt|confirm|cmd|passthru|eval|exec|expression|system|fopen|fsockopen|file|file_get_contents|readfile|unlink)(\s*)\((.*)\)#uisU',
-            '\\1\\2&#40;\\3&#41;',
-            $str
-        );
+        if (\strpos($str, '(') !== false) {
+            $patterns = [
+                'alert',
+                'prompt',
+                'confirm',
+                'cmd',
+                'passthru',
+                'eval',
+                'exec',
+                'execScript',
+                'setTimeout',
+                'setInterval',
+                'setImmediate',
+                'expression',
+                'system',
+                'fopen',
+                'fsockopen',
+                'file',
+                'file_get_contents',
+                'readfile',
+                'unlink',
+            ];
+
+            $found = false;
+            foreach ($patterns as $pattern) {
+                if (\strpos($str, $pattern) !== false) {
+                    $found = true;
+
+                    break;
+                }
+            }
+
+            if ($found === true) {
+                $str = (string) \preg_replace(
+                    '#(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
+                    '\\1\\2&#40;\\3&#41;',
+                    $str
+                );
+            }
+        }
 
         return (string) $str;
     }
