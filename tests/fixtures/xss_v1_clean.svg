@@ -20,7 +20,7 @@
     </a>
     <animation  />
     <animation 
-        xmlns='http://www.w3.org/2000/svg' >&lt;/svg&gt;" />
+        xmlns='http://www.w3.org/2000/svg' &gt;&lt;/svg>" />
     <set attributeName="" to="alert&#40;89&#41;" />
     <animate attributeName="" to="alert&#40;89&#41;" />
     <handler xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load">alert&#40;94&#41;
@@ -33,11 +33,11 @@
         <set attributeName="xlink:href" to="
 PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4NCg==" />
     </feImage>
-    &lt;x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
-&lt;handler xml:id="bar" type="application/ecmascript"&gt; alert&#40;104&#41; &lt;/handler&gt;
+    <x xmlns="http://www.w3.org/2001/xml-events" event="load" observer="foo" handler="data:image/svg+xml,&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;handler xml:id="bar" type="application/ecmascript"> alert&#40;104&#41; </handler>
 &lt;/svg&gt;
-#bar" /&gt;
-    &lt;path d="M0,0"  /&gt;
+#bar" />
+    <path d="M0,0"  />
     &lt;iframe src="http://example.com/"  /&gt;
     &lt;svg:svg&gt;
         &lt;svg:mask id="maskForClickjacking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox"&gt;
@@ -45,27 +45,27 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
             &lt;svg:circle cx="0.45" cy="0.7" r="0.075" fill="white" /&gt;
         &lt;/svg:mask&gt;
     &lt;/svg:svg&gt;
-    &lt;xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
-        &lt;xsl:template match="/"&gt;
+    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+        <xsl:template match="/">
             &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;
             &lt;/iframe&gt;
-        &lt;/xsl:template&gt;
-    &lt;/xsl:stylesheet&gt;
-    &lt;circle fill="red" r="40"&gt;&lt;/circle&gt;
-    &lt;listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x" /&gt;
-    &lt;handler id="y"&gt;alert&#40;127&#41;&lt;/handler&gt;
-    &lt;image xmlns:xlink="http://www.w3.org/1999/xlink"&gt;
-        &lt;set attributeName="xlink:href" begin="accessKey(a)" to="//example.com/?a" /&gt;
-        &lt;set attributeName="xlink:href" begin="accessKey(b)" to="//example.com/?b" /&gt;
-        &lt;set attributeName="xlink:href" begin="accessKey(c)" to="//example.com/?c" /&gt;
-        &lt;set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" /&gt;
-    &lt;/image&gt;
-    &lt;animate attributeName="xlink:href" begin="0" from="(137)" to="1" /&gt;
-    &lt;a href="(2)"&gt;test 1&lt;/a&gt;
-    &lt;a href="(2)"&gt;test 2&lt;/a&gt;
-    &lt;a href="#test3"&gt;test 3&lt;/a&gt;
-    &lt;a href="#test"&gt;test 4&lt;/a&gt;
+        </xsl:template>
+    </xsl:stylesheet>
+    <circle fill="red" r="40"></circle>
+    <listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x" />
+    <handler id="y">alert&#40;127&#41;</handler>
+    <image xmlns:xlink="http://www.w3.org/1999/xlink">
+        <set attributeName="xlink:href" begin="accessKey(a)" to="//example.com/?a" />
+        <set attributeName="xlink:href" begin="accessKey(b)" to="//example.com/?b" />
+        <set attributeName="xlink:href" begin="accessKey(c)" to="//example.com/?c" />
+        <set attributeName="xlink:href" begin="accessKey(d)" to="//example.com/?d" />
+    </image>
+    <animate attributeName="xlink:href" begin="0" from="(137)" to="1" />
+    <a href="(2)">test 1</a>
+    <a href="(2)">test 2</a>
+    <a href="#test3">test 3</a>
+    <a href="#test">test 4</a>
 
-    &lt;a  xmlns='http://www.w3.org/2000/svg'&gt;&lt;/svg&gt;"&gt;test 5&lt;/a&gt;
-    &lt;a  xmlns='http://www.w3.org/2000/svg'&gt;&lt;/svg&gt;"&gt;test 6&lt;/a&gt;
+    <a  xmlns='http://www.w3.org/2000/svg'>">test 5</a>
+    <a  xmlns='http://www.w3.org/2000/svg'>">test 6</a>
 &lt;/svg&gt;

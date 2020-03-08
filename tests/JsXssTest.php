@@ -66,7 +66,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<a t="">', $this->security->xss_clean('<a t="">'));
 
         // 属性内的特殊字符
-        static::assertSame('<a >>">', $this->security->xss_clean('<a title="\'<<>>">'));
+        static::assertSame('<a title="\'&lt;&lt;&gt;&gt;">', $this->security->xss_clean('<a title="\'<<>>">'));
         static::assertSame('<a title="">', $this->security->xss_clean('<a title=""">'));
         static::assertSame('<a title="oo">', $this->security->xss_clean('<a h=title="oo">'));
         static::assertSame('<a  title="oo">', $this->security->xss_clean('<a h= title="oo">'));

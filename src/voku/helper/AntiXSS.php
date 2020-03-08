@@ -65,7 +65,7 @@ final class AntiXSS
     /**
      * @var string[]
      */
-    private static $_never_allowed_str_afterwards = [
+    private $_never_allowed_str_afterwards = [
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
@@ -535,12 +535,18 @@ final class AntiXSS
                     if ($tmpAntiXss->isXssFound() === true) {
                         $this->_xss_found = true;
 
-                        $str = \str_ireplace($matchInner, UTF8::rawurldecode($urlPartClean), $str);
+                        $urlPartClean = \str_replace(['&lt;', '&gt;'], ['voku::anti-xss::lt', 'voku::anti-xss::gt'], $urlPartClean);
+                        $urlPartClean = UTF8::rawurldecode($urlPartClean);
+                        $urlPartClean = \str_replace(['voku::anti-xss::lt', 'voku::anti-xss::gt'], ['&lt;', '&gt;'], $urlPartClean);
+
+                        $str = \str_ireplace($matchInner, $urlPartClean, $str);
                     }
                 }
             }
         } else {
+            $str = \str_replace(['&lt;', '&gt;'], ['voku::anti-xss::lt', 'voku::anti-xss::gt'], $str);
             $str = $this->_entity_decode(UTF8::rawurldecode($str));
+            $str = \str_replace(['voku::anti-xss::lt', 'voku::anti-xss::gt'], ['&lt;', '&gt;'], $str);
         }
 
         return $str;
@@ -767,7 +773,7 @@ final class AntiXSS
         }
 
         return (string) \str_ireplace(
-            self::$_never_allowed_str_afterwards,
+            $this->_never_allowed_str_afterwards,
             $this->_replacement,
             $str
         );
@@ -1673,6 +1679,27 @@ final class AntiXSS
     }
 
     /**
+     * Add some strings to the "_never_allowed_str_afterwards"-array.
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function addNeverAllowedStrAfterwards(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_never_allowed_str_afterwards = \array_merge(
+            $strings,
+            $this->_never_allowed_str_afterwards
+        );
+
+        return $this;
+    }
+
+    /**
      * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
      *
      * @return bool|null will return null if the "xss_clean()" wan't running at all
@@ -1764,6 +1791,32 @@ final class AntiXSS
         $this->_never_allowed_on_events_afterwards = \array_diff(
             $this->_never_allowed_on_events_afterwards,
             \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
+        );
+
+        return $this;
+    }
+
+    /**
+     * Remove some strings from the "_never_allowed_str_afterwards"-array.
+     *
+     * <p>
+     * <br />
+     * WARNING: Use this method only if you have a really good reason.
+     * </p>
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function removeNeverAllowedStrAfterwards(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_never_allowed_str_afterwards = \array_diff(
+            $this->_never_allowed_str_afterwards,
+            \array_intersect($strings, $this->_never_allowed_str_afterwards)
         );
 
         return $this;
