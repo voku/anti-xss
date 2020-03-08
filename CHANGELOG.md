@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.24 (2020-03-08)
+
+- allow to change the "_never_allowed_str_afterwards" (issue #56)
+- fix false-positive (issue #55)
+
 ### 4.1.23 (2020-03-06)
 
 - use some more bad strings from "https://github.com/s0md3v/AwesomeXSS"
