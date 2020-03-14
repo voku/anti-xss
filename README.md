@@ -26,7 +26,7 @@ accounted for roughly 84% of all security vulnerabilities documented by Symantec
 
 4) DO NOT WRITE YOUR OWN REGEX TO PARSE HTML!
 
-5) READ THIS TEXT -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)
+5) READ THIS TEXT -> [XSS (Cross Site Scripting) Prevention Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md)
 
 6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
