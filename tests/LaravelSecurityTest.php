@@ -115,11 +115,11 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<object/type="text/x-scriptlet"/data="data:X,&#60script&#62setInterval&lpar;\'prompt(1)\',10&rpar;&#60/script&#62"></object>',
-                '&lt;object/type="text/x-scriptlet"/data="data:X,[removed]"&gt;&lt;/object&gt;'
+                '&lt;object/type="text/x-scriptlet"/data="data:X,[removed]"&gt;&lt;/object&gt;',
             ],
             [
                 '<i<f<r<a<m<e><iframe/onload=confirm(1);></i>f>r>a>m>e>',
-                '<i&lt;f&lt;r&lt;a&lt;me>&lt;iframe/[removed]&gt;</i>f>r>a>m>e>'
+                '<i&lt;f&lt;r&lt;a&lt;me>&lt;iframe/[removed]&gt;</i>f>r>a>m>e>',
             ],
             [
                 'http://www.<script abc>setTimeout(\'confirm(1)\',1)</script .com>',

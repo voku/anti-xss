@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return [
     0 => '&lt;svg&gt;<image id="v-146" width="500" height="500" xmlns:xlink="http://www.w3.org/1999/xlink" 0 0 100 100" height="100" width="100" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" id="Layer_1"&gt;
   &lt;title&gt;Compute&lt;/title&gt;
   &lt;g>
@@ -15,14 +15,14 @@ return array (
     <rect fill="#f58536" ry="9.12" rx="9.12" height="53" width="53" y="22.26" x="23.5"></rect>
   </g>
 &lt;/svg&gt;" preserveratio="true" style="border-color: rgb(51, 51, 51); box-sizing: border-box; color: rgb(51, 51, 51); cursor: move; font-family: sans-serif; font-size: 14px; line-height: 20px; outline-color: rgb(51, 51, 51); text-size-adjust: 100%; column-rule-color: rgb(51, 51, 51); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-emphasis-color: rgb(51, 51, 51); -webkit-text-fill-color: rgb(51, 51, 51); -webkit-text-stroke-color: rgb(51, 51, 51); user-select: none; vector-effect: non-scaling-stroke;"></image>&lt;/svg&gt;',
-    2 => '<div aria-labelledby="msg--title" role="dialog" class="msg">&lt;button class="modal-close" aria-label="close" type="button"&gt;<i class="icon-close"></i>some button&lt;/button&gt;</div>',
-    3 => '&lt;input type=checkbox checked&gt;&lt;input type=checkbox onclick&gt;',
-    4 => '&lt;svg&gt;<defs><filter id="f1"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter></defs><rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)" />&lt;/svg&gt;',
-    5 => '<b href="(1)" title="(2)"></b>',
-    6 => '<img src="">&lt;audio src=""&gt;&lt;/audio&gt;&lt;video src=""&gt;&lt;/video&gt;&lt;source src=""&gt;<div src="data:,345">',
-    7 => '<img ><img >',
-    8 => '<img >',
-    9 => '123<a href=\' (1)\'>I am a dolphin!</a>',
+    2  => '<div aria-labelledby="msg--title" role="dialog" class="msg">&lt;button class="modal-close" aria-label="close" type="button"&gt;<i class="icon-close"></i>some button&lt;/button&gt;</div>',
+    3  => '&lt;input type=checkbox checked&gt;&lt;input type=checkbox onclick&gt;',
+    4  => '&lt;svg&gt;<defs><filter id="f1"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter></defs><rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)" />&lt;/svg&gt;',
+    5  => '<b href="(1)" title="(2)"></b>',
+    6  => '<img src="">&lt;audio src=""&gt;&lt;/audio&gt;&lt;video src=""&gt;&lt;/video&gt;&lt;source src=""&gt;<div src="data:,345">',
+    7  => '<img ><img >',
+    8  => '<img >',
+    9  => '123<a href=\' (1)\'>I am a dolphin!</a>',
     10 => '123<a href=\' (1)\'>I am a dolphin too!</a>',
     11 => '123<a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\'᠎(1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a>',
     12 => '<img >',
@@ -399,4 +399,4 @@ XXX
     201 => '<xmp>&lt;svg&gt;<b>&lt;style&gt;<b title=\'&lt;/style&gt;&lt;img>\'>',
     202 => '<noembed>&lt;svg&gt;<b>&lt;style&gt;<b title=\'&lt;/style&gt;&lt;img>\'>',
     203 => ' ',
-);
+];

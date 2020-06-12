@@ -1383,7 +1383,7 @@ final class AntiXSS
     {
         // init
         $strEnd = '';
-        
+
         do {
             $original = $str;
 
@@ -1418,13 +1418,12 @@ final class AntiXSS
                 },
                 $str
             );
-            
+
             if ($str === $strEnd) {
                 return (string) $str;
             }
 
             $strEnd = $str;
-            
         } while ($original !== $str);
 
         return (string) $str;
@@ -1459,7 +1458,7 @@ final class AntiXSS
     private function _sanitize_naughty_html_callback(array $matches)
     {
         $fullMatch = $matches[0];
-        
+
         // skip some edge-cases
         /** @noinspection NotOptimalIfConditionsInspection */
         if (
