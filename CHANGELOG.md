@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.25 (2020-06-12)
+
+- fix false-positive (issue #58)
+
 ### 4.1.24 (2020-03-08)
 
 - allow to change the "_never_allowed_str_afterwards" (issue #56)
