@@ -20,7 +20,7 @@
     </a>
     <animation  />
     <animation 
-        xmlns='http://www.w3.org/2000/svg' &gt;&lt;/svg>" />
+        xmlns='http://www.w3.org/2000/svg' &gt;&lt;/svg&gt;" />
     <set attributeName="" to="alert&#40;89&#41;" />
     <animate attributeName="" to="alert&#40;89&#41;" />
     <handler xmlns:ev="http://www.w3.org/2001/xml-events" ev:event="load">alert&#40;94&#41;
@@ -66,6 +66,6 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
     <a href="#test3">test 3</a>
     <a href="#test">test 4</a>
 
-    <a  xmlns='http://www.w3.org/2000/svg'>">test 5</a>
-    <a  xmlns='http://www.w3.org/2000/svg'>">test 6</a>
+    <a href="">test 5</a>
+    <a href="">test 6</a>
 &lt;/svg&gt;

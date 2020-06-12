@@ -32,7 +32,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
     public function testFromJsXss()
     {
 
-    // 兼容各种奇葩输入
+        // 兼容各种奇葩输入
         static::assertSame('', $this->security->xss_clean(''));
         static::assertNull($this->security->xss_clean(null));
         static::assertSame(123, $this->security->xss_clean(123));
@@ -159,7 +159,9 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('&lt;IMG SRC="(\'XSS\')"', $this->security->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
 
-        static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html &lt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
+        static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html <', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
+
+        static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html &gt;', $this->security->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html >'));
 
         // 过滤 javascript:
         static::assertSame('<a >', $this->security->xss_clean('<a style="url(\'javascript:alert(1)\')">'));
