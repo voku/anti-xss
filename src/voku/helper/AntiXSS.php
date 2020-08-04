@@ -1161,13 +1161,13 @@ final class AntiXSS
                     '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         if (
-                            strpos($matches[1], 'base64') !== false 
+                            \strpos($matches[1], 'base64') !== false
                             &&
                             \preg_match("/(?:[\"'])?data\s*:\s*(?:image\s*\/.*?)[^\1]*?base64[^\1]*?,[^\1]*?\1?/iUu", $matches[1])
                         ) {
                             return $matches[0];
                         }
-                        
+
                         return $this->_js_src_removal_callback($matches);
                     },
                     $str
