@@ -964,7 +964,7 @@ final class AntiXSS
             // default javascript
             '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $this->_replacement,
             // data-attribute + base64
-            "(?:[\"'])?data\s*:[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
+            "(?:[\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
             // old IE, old Netscape
             'expression\s*(?:\(|&\#40;)' => $this->_replacement,
             // src="js"
@@ -1160,6 +1160,14 @@ final class AntiXSS
                 $str = (string) \preg_replace_callback(
                     '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
+                        if (
+                            strpos($matches[1], 'base64') !== false 
+                            &&
+                            \preg_match("/(?:[\"'])?data\s*:\s*(?:image\s*\/.*?)[^\1]*?base64[^\1]*?,[^\1]*?\1?/iUu", $matches[1])
+                        ) {
+                            return $matches[0];
+                        }
+                        
                         return $this->_js_src_removal_callback($matches);
                     },
                     $str
