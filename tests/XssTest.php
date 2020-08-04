@@ -719,6 +719,7 @@ textContent>click me!',
             Sucuri CloudProxy (POST only)<a >
             ModSecurity CRS 3.2.0 PL1<a href="(1)">
             ', // 2019-12 - https://twitter.com/brutelogic/status/1209086328383660033
+            'https://terjanq.me/xss.php?js=onhashchange=setTimeout;Object.prototype.toString=RegExp.prototype.toString;Object.prototype.source=location.hash;location.hash=null;#null' => 'https://terjanq.me/xss.php?js==setTimeout;Object.prototype.toString=RegExp.prototype.toString;Object.prototype.source=location.hash;location.hash=null;#null', // XSS without parenthesses | https://twitter.com/terjanq/status/1286059146509516800 (2020)
         ];
 
         foreach ($testArray as $before => $after) {

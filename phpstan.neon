@@ -2,6 +2,3 @@ parameters:
     level: max
     paths:
         - %currentWorkingDirectory%/src/
-    autoload_files:
-        - %currentWorkingDirectory%/vendor/autoload.php
-    ignoreErrors:

@@ -1049,6 +1049,7 @@ final class AntiXSS
             if (\count($matchInner) > 0) {
                 $tmpAntiXss = clone $this;
 
+                /** @noinspection UnusedFunctionResultInspection */
                 $tmpAntiXss->xss_clean($matchInner[0]);
 
                 if ($tmpAntiXss->isXssFound() === true) {
@@ -1909,7 +1910,7 @@ final class AntiXSS
 
         // check for an array of strings
         if (\is_array($str)) {
-            foreach ($str as $key => &$value) {
+            foreach ($str as $key => $value) {
                 $str[$key] = $this->xss_clean($value);
             }
 
