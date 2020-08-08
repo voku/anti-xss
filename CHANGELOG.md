@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.26 (2020-08-08)
+
+- allow base64 encoded images in <img>-tags (issue #59)
+
 ### 4.1.25 (2020-06-12)
 
 - fix false-positive (issue #58)
