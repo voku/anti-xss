@@ -122,6 +122,15 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>'                                                                                                                                                    => '<a href="https://wiki.product.net/FAQ.Error_during_connect_to_Database_(0)">link</a>',
             '<a href="https://example.com/?onlyEnabled=1">link</a>'                                                                                                                                                                                   => '<a href="https://example.com/?onlyEnabled=1">link</a>',
             '<a href="https://example.com/?onlyEnabled=123123foo">link</a>'                                                                                                                                                                           => '<a href="https://example.com/?onlyEnabled=123123foo">link</a>',
+            '<2€'                                                                                                                                                                                                                                     => '<2€',
+            '<=2€'                                                                                                                                                                                                                                     => '<=2€',
+            '< 2 €'                                                                                                                                                                                                                                   => '< 2 €',
+            '>2€'                                                                                                                                                                                                                                     => '>2€',
+            '< 2€'                                                                                                                                                                                                                                    => '< 2€',
+            '<2 €'                                                                                                                                                                                                                                    => '<2 €',
+            '<2$'                                                                                                                                                                                                                                     => '<2$',
+            '<3'                                                                                                                                                                                                                                      => '<3',
+            '≪2 €'                                                                                                                                                                                                                                    => '≪2 €',
         ];
 
         $this->antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -1505,21 +1514,27 @@ nodeValue+outerHTML>/*click me', $str);
             ],
             [
                 '<<script>alert(0);//<</script>',
-                '<',
+                '',
                 'script',
                 'HTML tag stripping evasion -- double opening brackets.',
             ],
             [
                 '< <script >alert(0);//<</ script >',
-                '&lt; ',
+                '',
                 'script',
                 'HTML tag stripping evasion -- double opening brackets.',
             ],
             [
                 '< <script< >alert(0);//<</ script >',
-                '&lt; ',
+                '',
                 'script',
                 'HTML tag stripping evasion -- double opening brackets.',
+            ],
+            [
+                '< $2.20< <script< >alert(0);//<</ script >',
+                '&lt; $2.20&lt; ',
+                'script',
+                'HTML tag stripping evasion -- double opening brackets + x.',
             ],
             [
                 '<script src=http://www.example.com/a.js?<b>',

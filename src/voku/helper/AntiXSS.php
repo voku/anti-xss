@@ -1420,6 +1420,14 @@ final class AntiXSS
                 return $str;
             }
 
+            if (
+                $this->_xss_found
+                &&
+                trim($str) === '<'
+            ) {
+                return '';
+            }
+
             $str = (string) \preg_replace_callback(
                 '#<((?<start>/*\s*)((?<tagName>[\p{L}]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS',
                 function ($matches) {
@@ -1446,6 +1454,11 @@ final class AntiXSS
     private function _close_html_callback(array $matches)
     {
         if (empty($matches['closeTag'])) {
+            // allow e.g. "< $2.20"
+            if (\preg_match('/^[ .,\d=€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]*$/u', $matches[1])) {
+                return '<' . \str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[1]);
+            }
+
             return '&lt;' . \str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[1]);
         }
 
