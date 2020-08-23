@@ -7,7 +7,7 @@ vendor
 composer.lock
 
 # php (phpunit)
-build/
+build/logs/
 
 # phpcs fixer
 .php_cs.cache
