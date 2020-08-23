@@ -144,20 +144,20 @@ composer install
 
 ## AntiXss methods
 
-<p id="voku-php-readme-class-methods"></p><table><tr><td><a href="#vokuhelperantixss-addevilattributesstring-strings-this">addEvilAttributes</a>
-</td><td><a href="#vokuhelperantixss-addevilhtmltagsstring-strings-this">addEvilHtmlTags</a>
-</td><td><a href="#vokuhelperantixss-addneverallowedoneventsafterwardsstring-strings-this">addNeverAllowedOnEventsAfterwards</a>
-</td><td><a href="#vokuhelperantixss-addneverallowedregexstring-strings-this">addNeverAllowedRegex</a>
-</td></tr><tr><td><a href="#vokuhelperantixss-addneverallowedstrafterwardsstring-strings-this">addNeverAllowedStrAfterwards</a>
-</td><td><a href="#vokuhelperantixss-isxssfound-boolnull">isXssFound</a>
-</td><td><a href="#vokuhelperantixss-removeevilattributesstring-strings-this">removeEvilAttributes</a>
-</td><td><a href="#vokuhelperantixss-removeevilhtmltagsstring-strings-this">removeEvilHtmlTags</a>
-</td></tr><tr><td><a href="#vokuhelperantixss-removeneverallowedoneventsafterwardsstring-strings-this">removeNeverAllowedOnEventsAfterwards</a>
-</td><td><a href="#vokuhelperantixss-removeneverallowedregexstring-strings-this">removeNeverAllowedRegex</a>
-</td><td><a href="#vokuhelperantixss-removeneverallowedstrafterwardsstring-strings-this">removeNeverAllowedStrAfterwards</a>
-</td><td><a href="#vokuhelperantixss-setreplacementstring-string-this">setReplacement</a>
-</td></tr><tr><td><a href="#vokuhelperantixss-setstripe4bytecharsbool-bool-this">setStripe4byteChars</a>
-</td><td><a href="#vokuhelperantixss-xss_cleanarraymixed-str-mixed">xss_clean</a>
+<p id="voku-php-readme-class-methods"></p><table><tr><td><a href="#addevilattributesstring-strings-this">addEvilAttributes</a>
+</td><td><a href="#addevilhtmltagsstring-strings-this">addEvilHtmlTags</a>
+</td><td><a href="#addneverallowedoneventsafterwardsstring-strings-this">addNeverAllowedOnEventsAfterwards</a>
+</td><td><a href="#addneverallowedregexstring-strings-this">addNeverAllowedRegex</a>
+</td></tr><tr><td><a href="#addneverallowedstrafterwardsstring-strings-this">addNeverAllowedStrAfterwards</a>
+</td><td><a href="#isxssfound-boolnull">isXssFound</a>
+</td><td><a href="#removeevilattributesstring-strings-this">removeEvilAttributes</a>
+</td><td><a href="#removeevilhtmltagsstring-strings-this">removeEvilHtmlTags</a>
+</td></tr><tr><td><a href="#removeneverallowedoneventsafterwardsstring-strings-this">removeNeverAllowedOnEventsAfterwards</a>
+</td><td><a href="#removeneverallowedregexstring-strings-this">removeNeverAllowedRegex</a>
+</td><td><a href="#removeneverallowedstrafterwardsstring-strings-this">removeNeverAllowedStrAfterwards</a>
+</td><td><a href="#setreplacementstring-string-this">setReplacement</a>
+</td></tr><tr><td><a href="#setstripe4bytecharsbool-bool-this">setStripe4byteChars</a>
+</td><td><a href="#xss_cleanarraymixed-str-mixed">xss_clean</a>
 </td></tr></table>
 
 ## addEvilAttributes(string[] $strings): $this
