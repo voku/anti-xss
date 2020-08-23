@@ -1423,7 +1423,7 @@ final class AntiXSS
             if (
                 $this->_xss_found
                 &&
-                trim($str) === '<'
+                \trim($str) === '<'
             ) {
                 return '';
             }
