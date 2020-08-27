@@ -25,7 +25,9 @@ use const HTML_ENTITIES;
 final class AntiXSS
 {
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
+
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
+
     const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
 
     /**
@@ -527,16 +529,15 @@ final class AntiXSS
         if (\strpos($str, '=') !== false) {
             $strCopy = $str;
             $matchesTmp = [];
-            while (preg_match("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/u", $strCopy, $matches)) {
-
+            while (\preg_match("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/u", $strCopy, $matches)) {
                 $matchesTmp[] = $matches;
-                $strCopy = str_replace($matches[0], '', $strCopy);
+                $strCopy = \str_replace($matches[0], '', $strCopy);
 
-                if (substr_count($strCopy, '"') <= 1 && substr_count($strCopy, '\'') <= 1) {
+                if (\substr_count($strCopy, '"') <= 1 && \substr_count($strCopy, '\'') <= 1) {
                     break;
                 }
             }
-            
+
             if ($strCopy === $str) {
                 $needProtection = true;
             } else {
@@ -560,7 +561,7 @@ final class AntiXSS
                 }
             }
         }
-        
+
         if ($needProtection) {
             $str = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $str);
             $str = $this->_entity_decode(UTF8::rawurldecode($str));
@@ -923,12 +924,11 @@ final class AntiXSS
 
         if (\strpos($str, '=') !== false) {
             $matchesTmp = [];
-            while (preg_match('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#u', $str, $matches)) {
-
+            while (\preg_match('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#u', $str, $matches)) {
                 $matchesTmp[] = $matches[0];
-                $str = str_replace($matches[0], '', $str);
+                $str = \str_replace($matches[0], '', $str);
 
-                if (substr_count($str, '"') <= 1 && substr_count($str, '\'') <= 1) {
+                if (\substr_count($str, '"') <= 1 && \substr_count($str, '\'') <= 1) {
                     break;
                 }
             }
