@@ -1,8 +1,9 @@
 # Changelog
 
-### 4.1.28 (2020-08-27)
+### 4.1.28 (2020-08-28)
 
 - fix allow base64 encoded images in <img>-tags (issue #61)
+- fix performance issue of regex with "preg_match_all"
 
 ### 4.1.27 (2020-08-23)
 
