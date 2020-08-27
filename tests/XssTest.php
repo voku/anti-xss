@@ -1117,6 +1117,37 @@ nodeValue+outerHTML>/*click me', $str);
         );
     }
 
+    public function testNonXssFile()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image.html');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image.html');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", $this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
+    /**
+     * TODO@me
+     */
+    public function _testPerformanceIssue()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/image.html');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/image_clean.html');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", $this->antiXss->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
     public function testUrls()
     {
         $testArray = [

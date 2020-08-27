@@ -754,7 +754,7 @@ final class AntiXSS
         if (\stripos($str, 'on') !== false) {
             foreach ($this->_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
-                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*\])*?=(?:\s|\[.*\])*?|(?:\s|\[.*\])*?&equals;(?:\s|\[.*\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
+                    $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
 
                     do {
                         $count = $temp_count = 0;
@@ -964,7 +964,7 @@ final class AntiXSS
             // default javascript
             '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $this->_replacement,
             // data-attribute + base64
-            "(?:[\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
+            "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
             // old IE, old Netscape
             'expression\s*(?:\(|&\#40;)' => $this->_replacement,
             // src="js"
@@ -1025,7 +1025,7 @@ final class AntiXSS
             &&
             \stripos($match[0], 'style') !== false
         ) {
-            \preg_match('/style=".*?"/i', $match[0], $match_style);
+            \preg_match('/style=".*?"/ius', $match[0], $match_style);
             $match_style_matched = (\count($match_style) > 0);
             if ($match_style_matched) {
                 $match[0] = \str_ireplace($match_style[0], self::VOKU_ANTI_XSS_STYLE, $match[0]);
@@ -1163,7 +1163,7 @@ final class AntiXSS
                         if (
                             \strpos($matches[1], 'base64') !== false
                             &&
-                            \preg_match("/(?:[\"'])?data\s*:\s*(?:image\s*\/.*?)[^\1]*?base64[^\1]*?,[^\1]*?\1?/iUu", $matches[1])
+                            \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
                         ) {
                             return $matches[0];
                         }
@@ -1216,7 +1216,7 @@ final class AntiXSS
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
                 $str = (string) \preg_replace(
-                    '#(?:%3C|¼|<)[^\p{L}@]*?/*?[^\p{L}@]*?(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iuU',
+                    '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
                     $this->_replacement,
                     $str
                 );
@@ -1288,7 +1288,7 @@ final class AntiXSS
             $count += $temp_count;
 
             $str = (string) \preg_replace(
-                '/(.*)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*)/ius',
+                '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius',
                 '$1$2' . $this->_replacement . '$3',
                 $str,
                 -1,
@@ -1314,7 +1314,7 @@ final class AntiXSS
         }
 
         return (string) \preg_replace_callback(
-            '#\+([\p{L}0-9]+)-#ui',
+            '#\+([\p{L}0-9]+)-#iu',
             function ($matches) {
                 return $this->_repack_utf7_callback($matches);
             },
@@ -1502,7 +1502,7 @@ final class AntiXSS
                 \stripos($fullMatch, '<' . $matches['tagName'] . '<') !== 0
             )
             ||
-            \preg_match('/<[\/]?' . $matches['tagName'] . '\p{L}+>/us', $fullMatch) === 1
+            \preg_match('/<[\/]?' . $matches['tagName'] . '\p{L}+>/ius', $fullMatch) === 1
         ) {
             return $fullMatch;
         }
