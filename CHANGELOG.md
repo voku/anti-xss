@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.28 (2020-08-27)
+
+- fix allow base64 encoded images in <img>-tags (issue #61)
+
 ### 4.1.27 (2020-08-23)
 
 - allow e.g. "< $2.20" (issue #60)
