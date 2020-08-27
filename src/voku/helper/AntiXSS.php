@@ -24,6 +24,8 @@ use const HTML_ENTITIES;
  */
 final class AntiXSS
 {
+    const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
+    const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
     const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
 
     /**
@@ -521,32 +523,48 @@ final class AntiXSS
         $str = $match[0];
 
         // protect GET variables without XSS in URLs
-        if (
-            \strpos($str, '=') !== false
-            &&
-            \preg_match_all("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/ui", $str, $matches)
-        ) {
-            if (isset($matches['attr'])) {
-                foreach ($matches['attr'] as $matchInner) {
-                    $tmpAntiXss = clone $this;
+        $needProtection = true;
+        if (\strpos($str, '=') !== false) {
+            $strCopy = $str;
+            $matchesTmp = [];
+            while (preg_match("/[?|&]?[\p{L}0-9_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/u", $strCopy, $matches)) {
 
-                    $urlPartClean = $tmpAntiXss->xss_clean($matchInner);
+                $matchesTmp[] = $matches;
+                $strCopy = str_replace($matches[0], '', $strCopy);
 
-                    if ($tmpAntiXss->isXssFound() === true) {
-                        $this->_xss_found = true;
+                if (substr_count($strCopy, '"') <= 1 && substr_count($strCopy, '\'') <= 1) {
+                    break;
+                }
+            }
+            
+            if ($strCopy === $str) {
+                $needProtection = true;
+            } else {
+                $needProtection = false;
+                foreach ($matchesTmp as $matches) {
+                    if (isset($matches['attr'])) {
+                        $tmpAntiXss = clone $this;
 
-                        $urlPartClean = \str_replace(['&lt;', '&gt;'], ['voku::anti-xss::lt', 'voku::anti-xss::gt'], $urlPartClean);
-                        $urlPartClean = UTF8::rawurldecode($urlPartClean);
-                        $urlPartClean = \str_replace(['voku::anti-xss::lt', 'voku::anti-xss::gt'], ['&lt;', '&gt;'], $urlPartClean);
+                        $urlPartClean = $tmpAntiXss->xss_clean($matches['attr']);
 
-                        $str = \str_ireplace($matchInner, $urlPartClean, $str);
+                        if ($tmpAntiXss->isXssFound() === true) {
+                            $this->_xss_found = true;
+
+                            $urlPartClean = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $urlPartClean);
+                            $urlPartClean = UTF8::rawurldecode($urlPartClean);
+                            $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $urlPartClean);
+
+                            $str = \str_ireplace($matches['attr'], $urlPartClean, $str);
+                        }
                     }
                 }
             }
-        } else {
-            $str = \str_replace(['&lt;', '&gt;'], ['voku::anti-xss::lt', 'voku::anti-xss::gt'], $str);
+        }
+        
+        if ($needProtection) {
+            $str = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $str);
             $str = $this->_entity_decode(UTF8::rawurldecode($str));
-            $str = \str_replace(['voku::anti-xss::lt', 'voku::anti-xss::gt'], ['&lt;', '&gt;'], $str);
+            $str = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $str);
         }
 
         return $str;
@@ -904,10 +922,17 @@ final class AntiXSS
         }
 
         if (\strpos($str, '=') !== false) {
-            $out = '';
-            if (\preg_match_all('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#ui', $str, $matches)) {
-                $out = \implode('', $matches[0]);
+            $matchesTmp = [];
+            while (preg_match('#\s*[\p{L}0-9_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#u', $str, $matches)) {
+
+                $matchesTmp[] = $matches[0];
+                $str = str_replace($matches[0], '', $str);
+
+                if (substr_count($str, '"') <= 1 && substr_count($str, '\'') <= 1) {
+                    break;
+                }
             }
+            $out = \implode('', $matchesTmp);
         } else {
             $out = $str;
         }
