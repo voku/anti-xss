@@ -15,16 +15,6 @@ final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
     // https://github.com/cure53/DOMPurify/blob/master/test/fixtures/expect.js
     //
 
-    /**
-     * @var AntiXSS
-     */
-    public $security;
-
-    protected function setUp()
-    {
-        $this->security = new AntiXSS();
-    }
-
     public function testFromDOMPurify()
     {
         // init
@@ -32,7 +22,7 @@ final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
         $result = [];
 
         foreach ($this->xssProvider() as $test) {
-            $result[] = $this->security->xss_clean($test['payload']);
+            $result[] = (new AntiXSS())->xss_clean($test['payload']);
         }
 
         // DEBUG

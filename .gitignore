@@ -8,6 +8,7 @@ composer.lock
 
 # php (phpunit)
 build/logs/
+.phpunit.result.cache
 
 # phpcs fixer
 .php_cs.cache

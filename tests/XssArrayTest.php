@@ -14,11 +14,6 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
      */
     public $security;
 
-    protected function setUp()
-    {
-        $this->security = new AntiXSS();
-    }
-
     public function testArray()
     {
         $testArray = [
@@ -61,6 +56,6 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
             'http://localhost/text.php/">&lt;/form&gt;&lt;form action="/...',
         ];
 
-        static::assertSame($resultArray, $this->security->xss_clean($testArray));
+        static::assertSame($resultArray, (new AntiXSS())->xss_clean($testArray));
     }
 }
