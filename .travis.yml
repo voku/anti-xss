@@ -60,6 +60,13 @@ matrix:
         - PHP_COMPOSER_SETUP=lowest
         - PHP_EXTENSION=false
     - php: 7.4
+    - php: 7.4
+      env:
+        - PHP_EXTENSION=false
+    - php: 7.4
+      env:
+        - PHP_COMPOSER_SETUP=lowest
+        - PHP_EXTENSION=false
 
 before_script:
   - stty cols 120
