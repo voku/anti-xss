@@ -1,8 +1,9 @@
 # Changelog
 
-### 4.1.29 (2020-11-08)
+### 4.1.29 (2020-11-09)
 
 - allow e.g. "<35%" (issue #62)
+- allow to skip some html tags from auto closing (issue #63)
 - run tests with PHP 8.0 rc3
 
 ### 4.1.28 (2020-08-28)
