@@ -350,10 +350,10 @@ Same effect with
     181 => '<div id="133">&lt;!-- `<img/>//["\'`--&gt;]]>]</div>',
     182 => '<div id="134"><xmp>
 &lt;%
-</xmp>
-<img ></xmp>&lt;img \'>
+&lt;/xmp&gt;
+&lt;img &gt;&lt;/xmp&gt;&lt;img \'&gt;
 
- %>/
+ %&gt;/
 alert&#40;2&#41;
 
 
@@ -362,7 +362,7 @@ XXX
 *[\'&lt;!--\']{}
 &lt;/style&gt;
 --&gt;{}
-*{color:red}&lt;/style&gt;//["\'`-->]]>]</div>',
+*{color:red}&lt;/style&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     183 => '<div id="135">&lt;?xml-stylesheet type="text/xsl" href="#" ?&gt;
 &lt;stylesheet xmlns="http://www.w3.org/TR/WD-xsl"&gt;
 <template match="/">
