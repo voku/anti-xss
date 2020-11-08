@@ -116,7 +116,7 @@ return [
     89 => '<div id="36"><a  folder="(36)">XXX</a>//["\'`-->]]>]</div>',
     90 => '<div id="37">&lt;!--<img >&lt;img ">//["\'`--&gt;]]>]</div>',
     91 => '<div id="38"><comment><img >&lt;img ">//["\'`-->]]>]</div><div id="39">&lt;!-- up to Opera 11.52, FF 3.6.28 --&gt;',
-    92 => '&lt;![&gt;&lt;img &gt;&lt;img "&gt;',
+    92 => '<![><img >&lt;img ">',
     93 => '&lt;!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  --&gt;
 &lt;svg&gt;&lt;![CDATA[><image >&lt;/svg&gt;//["\'`-->]]>]</div>',
     94 => '<div id="40">&lt;style&gt;<img src="">//["\'`-->]]>]</div>',

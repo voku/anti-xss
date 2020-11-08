@@ -191,8 +191,8 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         // 这个暂时不知道怎么处理
         //self::assertSame((new AntiXSS())->xss_clean('¼script¾alert(¢XSS¢)¼/script¾'), '');
 
-        static::assertSame('&lt;!--[if gte IE 4]>&lt;![endif]--&gt; END', (new AntiXSS())->xss_clean('<!--[if gte IE 4]><SCRIPT>alert(\'XSS\');</SCRIPT><![endif]--> END'));
-        static::assertSame('&lt;!--[if gte IE 4]>&lt;![endif]--&gt; END', (new AntiXSS())->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
+        static::assertSame('&lt;!--[if gte IE 4]><![endif]--&gt; END', (new AntiXSS())->xss_clean('<!--[if gte IE 4]><SCRIPT>alert(\'XSS\');</SCRIPT><![endif]--> END'));
+        static::assertSame('&lt;!--[if gte IE 4]><![endif]--&gt; END', (new AntiXSS())->xss_clean('<!--[if gte IE 4]><SCRIPT >alert(\'XSS\');</SCRIPT><![endif]--> END'));
 
         // HTML5新增实体编码 冒号&colon; 换行&NewLine;
         static::assertSame('<a href="(/xss/)">', (new AntiXSS())->xss_clean('<a href="javascript&colon;alert(/xss/)">'));

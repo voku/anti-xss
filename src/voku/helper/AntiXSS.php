@@ -38,6 +38,13 @@ final class AntiXSS
     private $_never_allowed_regex = [];
 
     /**
+     * List of html tags that will not closed automatically.
+     *
+     * @var string[]
+     */
+    private $_do_not_close_html_tags = [];
+
+    /**
      * List of never allowed call statements.
      *
      * @var string[]
@@ -1454,8 +1461,18 @@ final class AntiXSS
             }
 
             $str = (string) \preg_replace_callback(
-                '#<((?<start>/*\s*)((?<tagName>[\p{L}]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS',
+                '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS', // tags without comments
                 function ($matches) {
+                    if (
+                        $this->_do_not_close_html_tags !== []
+                        &&
+                        isset($matches['tagName'])
+                        &&
+                        \in_array($matches['tagName'], $this->_do_not_close_html_tags, true)
+                    ) {
+                        return $matches[0];
+                    }
+
                     return $this->_close_html_callback($matches);
                 },
                 $str
@@ -1755,6 +1772,53 @@ final class AntiXSS
         $this->_never_allowed_str_afterwards = \array_merge(
             $strings,
             $this->_never_allowed_str_afterwards
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add some strings to the "_do_not_close_html_tags"-array.
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function addDoNotCloseHtmlTags(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_do_not_close_html_tags = \array_merge(
+            $strings,
+            $this->_do_not_close_html_tags
+        );
+
+        return $this;
+    }
+
+    /**
+     * Remove some strings from the "_do_not_close_html_tags"-array.
+     *
+     * <p>
+     * <br />
+     * WARNING: Use this method only if you have a really good reason.
+     * </p>
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function removeDoNotCloseHtmlTags(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_do_not_close_html_tags = \array_diff(
+            $this->_do_not_close_html_tags,
+            \array_intersect($strings, $this->_do_not_close_html_tags)
         );
 
         return $this;
