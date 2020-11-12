@@ -15,15 +15,17 @@ return [
     <rect fill="#f58536" ry="9.12" rx="9.12" height="53" width="53" y="22.26" x="23.5"></rect>
   </g>
 &lt;/svg&gt;" preserveratio="true" style="border-color: rgb(51, 51, 51); box-sizing: border-box; color: rgb(51, 51, 51); cursor: move; font-family: sans-serif; font-size: 14px; line-height: 20px; outline-color: rgb(51, 51, 51); text-size-adjust: 100%; column-rule-color: rgb(51, 51, 51); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-emphasis-color: rgb(51, 51, 51); -webkit-text-fill-color: rgb(51, 51, 51); -webkit-text-stroke-color: rgb(51, 51, 51); user-select: none; vector-effect: non-scaling-stroke;"></image>&lt;/svg&gt;',
-    2  => '<div aria-labelledby="msg--title" role="dialog" class="msg">&lt;button class="modal-close" aria-label="close" type="button"&gt;<i class="icon-close"></i>some button&lt;/button&gt;</div>',
-    3  => '&lt;input type=checkbox checked&gt;&lt;input type=checkbox onclick&gt;',
-    4  => '&lt;svg&gt;<defs><filter id="f1"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter></defs><rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)" />&lt;/svg&gt;',
-    5  => '<b href="(1)" title="(2)"></b>',
-    6  => '<img src="">&lt;audio src=""&gt;&lt;/audio&gt;&lt;video src=""&gt;&lt;/video&gt;&lt;source src=""&gt;<div src="data:,345">',
-    7  => '<img ><img >',
-    8  => '<img >',
-    9  => '123<a href=\' (1)\'>I am a dolphin!</a>',
-    10 => '123<a href=\' (1)\'>I am a dolphin too!</a>',
+    2 => '<div aria-labelledby="msg--title" role="dialog" class="msg">&lt;button class="modal-close" aria-label="close" type="button"&gt;<i class="icon-close"></i>some button&lt;/button&gt;</div>',
+    3 => '&lt;input type=checkbox checked&gt;&lt;input type=checkbox onclick&gt;',
+    4 => '&lt;svg&gt;<defs><filter id="f1"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter></defs><rect width="90" height="90" stroke="green" stroke-width="3" fill="yellow" filter="url(#f1)" />&lt;/svg&gt;',
+    5 => '<b href="(1)" title="(2)"></b>',
+    6 => '<img src="">&lt;audio src=""&gt;&lt;/audio&gt;&lt;video src=""&gt;&lt;/video&gt;&lt;source src=""&gt;<div src="data:,345">',
+    7 => '<img ><img >',
+    8 => '<img >',
+    9 => '123<a href=\'
+(1)\'>I am a dolphin!</a>',
+    10 => '123<a href=\'
+(1)\'>I am a dolphin too!</a>',
     11 => '123<a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\'᠎(1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a><a href=\' (1)\'>CLICK</a>',
     12 => '<img >',
     13 => '<img src="">',
@@ -49,8 +51,8 @@ return [
     33 => '<b>&lt;noscript&gt;&lt;!-- &lt;/noscript&gt;<img >&lt;/noscript&gt;',
     34 => '<b>&lt;noscript&gt;<a >">&lt;/noscript&gt;',
     35 => '&lt;body&gt;<template><s><template><s><img >@shafigullin/s></template></s></template>',
-    36 => '<a href=" (1)">@shafigullin<a>',
-    37 => ' <option>&lt;style&gt;</option>&lt;/select&gt;<b><img >&lt;/style&gt;/option>',
+    36 => '<a href="(1)">@shafigullin<a>',
+    37 => '<option>&lt;style&gt;</option>&lt;/select&gt;<b><img >&lt;/style&gt;/option>',
     38 => '<option>&lt;iframe&gt;&lt;/select&gt;<b>',
     39 => '&lt;/iframe&gt;</option>',
     40 => '<b>&lt;style&gt;&lt;style/&gt;<img >',
@@ -66,7 +68,7 @@ return [
   </mrow>
 &lt;/math&gt;',
     43 => '<image name=body><image name=adoptNode>@mmrupp<image name=firstElementChild>&lt;svg &gt;',
-    44 => '<a href=" (1)">@shafigullin<a>',
+    44 => '<a href="(1)">@shafigullin<a>',
     45 => '<image name=activeElement>&lt;svg &gt;',
     46 => '<image name=body><img >&lt;&gt;, &lt;&gt;',
     47 => '<div  x=yscript: n>@superevr</div>',
@@ -172,7 +174,7 @@ return [
 </doc>//["\'`-->]]>]</div>',
     123 => '<div id="69"><card xmlns="http://www.wapforum.org/2001/wml"><onevent type=""><go href="(69)"/></onevent><timer value="1"/></card>//["\'`-->]]>]</div>',
     124 => '<div id="70"><div  >x</div>//["\'`-->]]>]</div>',
-    125 => '<div id="71">&lt;//  8alert&#40;71&#41; 9&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
+    125 => '<div id="71">&lt;// &gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
     126 => '<div id="72">&lt;form&gt;&lt;button &gt;X&lt;/button&gt;//["\'`-->]]>]</div>',
     127 => '<div id="73">&lt;event-source src="event.php" &gt;//["\'`-->]]>]</div>',
     128 => '<div id="74"><a href="(74)">&lt;event-source src="data:application/x-dom-event-stream,Event:click%0Adata:XXX%0A%0A" /&gt;</a>//["\'`-->]]>]</div>',
@@ -238,7 +240,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
 &lt;!--
 --&gt;&lt;!--*{color:red}   /* all UA */
 
-*{background:url(xx //**/' . "\r" . 'ed/*)} /* IE 6-7 Standards mode */
+*{background:url(xx //**/' . "\n" . 'ed/*)} /* IE 6-7 Standards mode */
 
 &lt;/style&gt;//["\'`--&gt;]]>]</div>',
     151 => '<div id="100"><img[>//["\'`-->]]>]</div>',
@@ -250,7 +252,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
 &lt;/svg&gt;
 #bar"/>
 &lt;/svg&gt;//["\'`-->]]>]</div>',
-    155 => '<div id="105">&lt;iframe src="data:image/svg-xml, %8B        %B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2 "&gt;&lt;/iframe&gt;//["\'`-->]]>]</div>',
+    155 => '<div id="105">&lt;iframe src="data:image/svg-xml,%8B%B3)N.%CA%2C(Q%A8%C8%CD%C9%2B%B6U%CA())%B0%D2%D7%2F%2F%2F%D7%2B7%D6%CB%2FJ%D77%B4%B4%B4%D4%AF%C8(%C9%CDQ%B2K%CCI-*%D10%D4%B4%D1%87%E8%B2"&gt;&lt;/iframe&gt;//["\'`-->]]>]</div>',
     156 => '<div id="106"><img >//["\'`-->]]>]</div>',
     157 => '<div id="107">&lt;title &gt;&lt;/title&gt;&lt;title title=&gt;&lt;/title&gt;//["\'`-->]]>]</div>',
     158 => '<div id="108">&lt;!-- IE 5-8 standards mode --&gt;
@@ -279,7 +281,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
     164 => '<div id="116"><div id="x">x</div>
 &lt;xml:namespace prefix="t"&gt;
 <import namespace="t" implementation="#default#time2">
-<t:set attributeName="innerHTML" targetElement="x" to="&lt;img >">//["\'`-->]]>]</div>',
+<t:set attributeName="innerHTML" targetElement="x" to="&lt;img	>">//["\'`-->]]>]</div>',
     165 => '<div id="117"><a href="http://attacker.org">
     &lt;iframe src="http://example.org/"&gt;&lt;/iframe&gt;
 </a>//["\'`-->]]>]</div>',

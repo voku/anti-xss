@@ -23,7 +23,7 @@
   ],
   "require": {
     "php": ">=7.0.0",
-    "voku/portable-utf8": "~5.4.48"
+    "voku/portable-utf8": "~5.4.50"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0 || ~7.0 || ~9.0"

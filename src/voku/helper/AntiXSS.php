@@ -642,10 +642,7 @@ final class AntiXSS
         $str = UTF8::replace_diamond_question_mark($str, '');
 
         // replace invisible characters with one single space
-        $str = UTF8::remove_invisible_characters($str, true, ' ');
-
-        // normalize the whitespace
-        $str = UTF8::normalize_whitespace($str);
+        $str = UTF8::remove_invisible_characters($str, true, '', false);
 
         // decode UTF-7 characters
         $str = $this->_repack_utf7($str);
