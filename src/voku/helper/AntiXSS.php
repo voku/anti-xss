@@ -775,6 +775,19 @@ final class AntiXSS
     private function _do_never_allowed_afterwards(string $str)
     {
         if (\stripos($str, 'on') !== false) {
+            $never_allowed_and_likely_contained = [];
+            $thirdChar = '';
+            foreach ($this->_never_allowed_on_events_afterwards as $event) {
+                if ($event[2] === $thirdChar) {
+                    continue;
+                }
+
+                $thirdChar = $event[2];
+                if (\stripos($str, 'on'. $thirdChar) !== false) {
+                    $never_allowed_and_likely_contained[] = $event;
+                }
+            }
+            
             foreach ($this->_never_allowed_on_events_afterwards as $event) {
                 if (\stripos($str, $event) !== false) {
                     $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
