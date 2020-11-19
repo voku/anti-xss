@@ -788,7 +788,7 @@ final class AntiXSS
                 }
             }
             
-            foreach ($this->_never_allowed_on_events_afterwards as $event) {
+            foreach ($never_allowed_and_likely_contained as $event) {
                 if (\stripos($str, $event) !== false) {
                     $regex = '(?<before>[^\p{L}]|^)(?:' . $event . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
 
