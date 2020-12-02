@@ -119,7 +119,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<i<f<r<a<m<e><iframe/onload=confirm(1);></i>f>r>a>m>e>',
-                '<i&lt;f&lt;r&lt;a&lt;me>&lt;iframe/[removed]&gt;</i>f>r>a>m>e>',
+                '<i&lt;f&lt;r&lt;a&lt;m&lt;e>&lt;iframe/[removed]&gt;</i>f>r>a>m>e>',
             ],
             [
                 'http://www.<script abc>setTimeout(\'confirm(1)\',1)</script .com>',

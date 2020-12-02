@@ -50,9 +50,9 @@ return [
     32 => '&lt;textarea&gt;@shafigullin&lt;/textarea&gt;&lt;!--&lt;/textarea&gt;<img >--&gt;',
     33 => '<b>&lt;noscript&gt;&lt;!-- &lt;/noscript&gt;<img >&lt;/noscript&gt;',
     34 => '<b>&lt;noscript&gt;<a >">&lt;/noscript&gt;',
-    35 => '&lt;body&gt;<template><s><template><s><img >@shafigullin/s></template></s></template>',
+    35 => '&lt;body&gt;<template><s><template><s><img >@shafigullin</s></template></s></template>',
     36 => '<a href="(1)">@shafigullin<a>',
-    37 => '<option>&lt;style&gt;</option>&lt;/select&gt;<b><img >&lt;/style&gt;/option>',
+    37 => '<option>&lt;style&gt;</option>&lt;/select&gt;<b><img >&lt;/style&gt;</option>',
     38 => '<option>&lt;iframe&gt;&lt;/select&gt;<b>',
     39 => '&lt;/iframe&gt;</option>',
     40 => '<b>&lt;style&gt;&lt;style/&gt;<img >',
@@ -121,10 +121,10 @@ return [
     92 => '<![><img >&lt;img ">',
     93 => '&lt;!-- IE9+, FF4+, Opera 11.60+, Safari 4.0.4+, GC7+  --&gt;
 &lt;svg&gt;&lt;![CDATA[><image >&lt;/svg&gt;//["\'`-->]]>]</div>',
-    94 => '<div id="40">&lt;style&gt;<img src="">//["\'`-->]]>]</div>',
+    94 => '<div id="40">&lt;style&gt;<img src="&lt;/style&gt;&lt;img ">//["\'`-->]]>]</div>',
     95 => '<div id="41"><li  ></li>',
     96 => '<div >);visibility:hidden =alert&#40;41&#41;></div>//["\'`-->]]>]</div>',
-    97 => '<div id="42">&lt;head&gt;&lt;base href="//"/&gt;&lt;/head&gt;&lt;body&gt;<a href="">XXX</a>&lt;/body&gt;//["\'`-->]]>]</div>',
+    97 => '<div id="42">&lt;head&gt;&lt;base href="//"/&gt;&lt;/head&gt;&lt;body&gt;<a href="/. /,alert&#40;42&#41;//#">XXX</a>&lt;/body&gt;//["\'`-->]]>]</div>',
     98 => '<div id="43">&lt;?xml version="1.0" standalone="no"?&gt;',
     99 => '&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
 &lt;head&gt;
