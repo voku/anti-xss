@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.31 (2020-12-02)
+
+- optimize performance (thx @staabm)
+- update vendor lib (Portable UTF-8)
+
+
 ### 4.1.30 (2020-11-12)
 
 - update vendor lib (Portable UTF-8)
