@@ -2014,9 +2014,13 @@ final class AntiXSS
      *    vulnerabilities along with a few other hacks I've
      *    harvested from examining vulnerabilities in other programs.
      *
-     * @param array|mixed $str <p>input data e.g. string or array of strings</p>
+     * @param string[]|string $str <p>input data e.g. string or array of strings</p>
      *
-     * @return mixed
+     * @return string
+     *
+     * @psalm-template T of string[]|string
+     * @psalm-param T $str
+     * @psalm-return (T is string ? string : string[])
      */
     public function xss_clean($str)
     {
