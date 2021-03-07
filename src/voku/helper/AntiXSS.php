@@ -2016,7 +2016,7 @@ final class AntiXSS
      *
      * @param string[]|string $str <p>input data e.g. string or array of strings</p>
      *
-     * @return string
+     * @return string[]|string
      *
      * @psalm-template T of string[]|string
      * @psalm-param T $str
