@@ -2020,7 +2020,7 @@ final class AntiXSS
      *
      * @psalm-template T of string[]|string
      * @psalm-param T $str
-     * @psalm-return (T is string ? string : string[])
+     * @psalm-return T
      */
     public function xss_clean($str)
     {
