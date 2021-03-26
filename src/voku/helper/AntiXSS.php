@@ -436,7 +436,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _compact_exploded_javascript(string $str)
+    private function _compact_exploded_javascript($str)
     {
         static $WORDS_CACHE;
         $WORDS_CACHE['chunk'] = [];
@@ -466,7 +466,7 @@ final class AntiXSS
                     -\strlen($this->_spacing_regex)
                 );
 
-                $WORDS_CACHE['split'][$word] = \str_split($word, 1);
+                $WORDS_CACHE['split'][$word] = \str_split($word);
             }
 
             if ($useStrPos) {
@@ -526,7 +526,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _decode_entity(array $match)
+    private function _decode_entity($match)
     {
         // init
         $str = $match[0];
@@ -553,7 +553,7 @@ final class AntiXSS
                     if (isset($matches['attr'])) {
                         $tmpAntiXss = clone $this;
 
-                        $urlPartClean = $tmpAntiXss->xss_clean($matches['attr']);
+                        $urlPartClean = $tmpAntiXss->xss_clean((string)$matches['attr']);
 
                         if ($tmpAntiXss->isXssFound() === true) {
                             $this->_xss_found = true;
@@ -585,7 +585,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _decode_string(string $str)
+    private function _decode_string($str)
     {
         // init
         $regExForHtmlTags = '/<\p{L}+.*+/us';
@@ -612,7 +612,7 @@ final class AntiXSS
     /**
      * @param string $str
      *
-     * @return mixed
+     * @return string
      */
     private function _do($str)
     {
@@ -696,7 +696,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _do_never_allowed(string $str)
+    private function _do_never_allowed($str)
     {
         static $NEVER_ALLOWED_CACHE = [];
 
@@ -789,7 +789,7 @@ final class AntiXSS
      *
      * @return  string
      */
-    private function _do_never_allowed_afterwards(string $str)
+    private function _do_never_allowed_afterwards($str)
     {
         if (\stripos($str, 'on') !== false) {
             foreach ($this->_get_never_allowed_on_events_afterwards_chunks() as $eventNameBeginning => $events) {
@@ -836,7 +836,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _entity_decode(string $str)
+    private function _entity_decode($str)
     {
         static $HTML_ENTITIES_CACHE;
 
@@ -944,7 +944,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _filter_attributes(string $str)
+    private function _filter_attributes($str)
     {
         if ($str === '') {
             return '';
@@ -973,9 +973,11 @@ final class AntiXSS
      *
      * @param string $file
      *
-     * @return mixed
+     * @return string[]
+     *                 
+     * @phpstan-return array<string, string>
      */
-    private static function _get_data(string $file)
+    private static function _get_data($file)
     {
         /** @noinspection PhpIncludeInspection */
         return include __DIR__ . '/data/' . $file . '.php';
@@ -1042,7 +1044,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _js_link_removal_callback(array $match)
+    private function _js_link_removal_callback($match)
     {
         return $this->_js_removal_callback($match, 'href');
     }
@@ -1062,7 +1064,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _js_removal_callback(array $match, string $search)
+    private function _js_removal_callback($match, $search)
     {
         if (!$match[0]) {
             return '';
@@ -1098,7 +1100,7 @@ final class AntiXSS
                     $tmpAntiXss = clone $this;
 
                     /** @noinspection UnusedFunctionResultInspection */
-                    $tmpAntiXss->xss_clean($matchInner[0]);
+                    $tmpAntiXss->xss_clean((string)$matchInner[0]);
 
                     if ($tmpAntiXss->isXssFound() === true) {
                         $foundSomethingBad = true;
@@ -1282,7 +1284,8 @@ final class AntiXSS
      *
      * @param string $str <p>The string to check.</p>
      *
-     * @return string the string with the evil attributes removed
+     * @return string
+     *                <p>The string with the evil attributes removed.</p>
      */
     private function _remove_evil_attributes($str)
     {
@@ -1344,7 +1347,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _repack_utf7(string $str)
+    private function _repack_utf7($str)
     {
         if (\strpos($str, '-') === false) {
             return $str;
@@ -1366,7 +1369,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _repack_utf7_callback(array $strings)
+    private function _repack_utf7_callback($strings)
     {
         $strTmp = \base64_decode($strings[1], true);
 
@@ -1496,9 +1499,9 @@ final class AntiXSS
     /**
      * @param string[] $matches
      *
-     * @return mixed|string
+     * @return string
      */
-    private function _close_html_callback(array $matches)
+    private function _close_html_callback($matches)
     {
         if (empty($matches['closeTag'])) {
             // allow e.g. "< $2.20"
@@ -1524,7 +1527,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _sanitize_naughty_html_callback(array $matches)
+    private function _sanitize_naughty_html_callback($matches)
     {
         $fullMatch = $matches[0];
 
@@ -1832,7 +1835,8 @@ final class AntiXSS
     /**
      * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
      *
-     * @return bool|null will return null if the "xss_clean()" wan't running at all
+     * @return bool|null
+     *                   <p>Will return null if the "xss_clean()" wasn't running at all.</p>
      */
     public function isXssFound()
     {
@@ -2014,13 +2018,14 @@ final class AntiXSS
      *    vulnerabilities along with a few other hacks I've
      *    harvested from examining vulnerabilities in other programs.
      *
-     * @param string[]|string $str <p>input data e.g. string or array of strings</p>
+     * @param string[]|string $str
+     *                             <p>input data e.g. string or array of strings</p>
      *
      * @return string[]|string
      *
-     * @psalm-template T of string[]|string
-     * @psalm-param T $str
-     * @psalm-return T
+     * @template TXssCleanInput
+     * @phpstan-param TXssCleanInput $str
+     * @phpstan-return TXssCleanInput
      */
     public function xss_clean($str)
     {
@@ -2029,10 +2034,11 @@ final class AntiXSS
 
         // check for an array of strings
         if (\is_array($str)) {
-            foreach ($str as $key => $value) {
-                $str[$key] = $this->xss_clean($value);
+            foreach ($str as &$value) {
+                $value = $this->xss_clean($value);
             }
 
+            /** @var TXssCleanInput $str - hack for phpstan */
             return $str;
         }
 
