@@ -89,11 +89,12 @@ jobs:
           php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
           bash <(curl -s https://codecov.io/bash)
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            path-to-lcov: build/logs/clover.xml
+      - name: Upload coverage results to Coveralls
+        env:
+            COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            composer global require php-coveralls/php-coveralls
+            php-coveralls --coverage_clover=build/logs/clover.xml -v
       
       - name: Archive logs artifacts
         if: ${{ failure() }}
