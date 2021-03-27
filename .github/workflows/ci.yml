@@ -87,7 +87,6 @@ jobs:
 
           wget -q https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
-          bash <(curl -s https://codecov.io/bash)
 
       - name: Upload coverage results to Coveralls
         env:
