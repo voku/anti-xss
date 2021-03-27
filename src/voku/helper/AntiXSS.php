@@ -974,7 +974,7 @@ final class AntiXSS
      * @param string $file
      *
      * @return string[]
-     *                 
+     *
      * @phpstan-return array<string, string>
      */
     private static function _get_data($file)
