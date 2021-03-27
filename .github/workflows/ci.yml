@@ -54,8 +54,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require php-coveralls/php-coveralls --no-update
-
           if [[ "${{ matrix.php }}" == "7.4" ]]; then
             composer require phpstan/phpstan --no-update
           fi;
@@ -83,17 +81,20 @@ jobs:
 
       - name: scrutinizer-ci
         continue-on-error: true
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           export TRAVIS=$CI
           export TRAVIS_JOB_ID=$GITHUB_RUN_ID
 
           wget -q https://scrutinizer-ci.com/ocular.phar
-          php vendor/bin/php-coveralls -v
           php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
           bash <(curl -s https://codecov.io/bash)
 
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            path-to-lcov: build/logs/clover.xml
+      
       - name: Archive logs artifacts
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
