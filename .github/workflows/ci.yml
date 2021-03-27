@@ -73,7 +73,7 @@ jobs:
       - name: Run tests
         run: |
           mkdir -p build/logs
-          php vendor/bin/phpunit -c phpunit.xml.dist --coverage-clover=build/logs/clover.xml
+          php vendor/bin/phpunit -c phpunit.xml --coverage-clover=build/logs/clover.xml
 
       - name: Run phpstan
         continue-on-error: true
