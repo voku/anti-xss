@@ -79,21 +79,22 @@ jobs:
         run: |
           php vendor/bin/phpstan analyse
 
-      - name: scrutinizer-ci
-        continue-on-error: true
-        run: |
-          export TRAVIS=$CI
-          export TRAVIS_JOB_ID=$GITHUB_RUN_ID
-
-          wget -q https://scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
-
       - name: Upload coverage results to Coveralls
         env:
             COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
             composer global require php-coveralls/php-coveralls
             php-coveralls --coverage_clover=build/logs/clover.xml -v
+
+      - name: Upload coverage results to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          files: build/logs/clover.xml
+          
+      - name: Upload coverage results to Scrutinizer
+        uses: sudo-bot/action-scrutinizer@latest
+        with:
+          cli-args: "--format=php-clover build/logs/clover.xml"
       
       - name: Archive logs artifacts
         if: ${{ failure() }}
