@@ -553,7 +553,7 @@ final class AntiXSS
                     if (isset($matches['attr'])) {
                         $tmpAntiXss = clone $this;
 
-                        $urlPartClean = $tmpAntiXss->xss_clean((string)$matches['attr']);
+                        $urlPartClean = $tmpAntiXss->xss_clean((string) $matches['attr']);
 
                         if ($tmpAntiXss->isXssFound() === true) {
                             $this->_xss_found = true;
@@ -1100,7 +1100,7 @@ final class AntiXSS
                     $tmpAntiXss = clone $this;
 
                     /** @noinspection UnusedFunctionResultInspection */
-                    $tmpAntiXss->xss_clean((string)$matchInner[0]);
+                    $tmpAntiXss->xss_clean((string) $matchInner[0]);
 
                     if ($tmpAntiXss->isXssFound() === true) {
                         $foundSomethingBad = true;
@@ -2018,10 +2018,10 @@ final class AntiXSS
      *    vulnerabilities along with a few other hacks I've
      *    harvested from examining vulnerabilities in other programs.
      *
-     * @param string[]|string $str
+     * @param string|string[] $str
      *                             <p>input data e.g. string or array of strings</p>
      *
-     * @return string[]|string
+     * @return string|string[]
      *
      * @template TXssCleanInput
      * @phpstan-param TXssCleanInput $str
