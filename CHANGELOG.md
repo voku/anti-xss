@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.32 (2021-03-29)
+
+- micro-optimize performance
+- optimize phpdocs + use phpstan-syntax
+
+
 ### 4.1.31 (2020-12-02)
 
 - optimize performance (thx @staabm)
