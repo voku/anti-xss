@@ -144,21 +144,35 @@ composer install
 
 ## AntiXss methods
 
-<p id="voku-php-readme-class-methods"></p><table><tr><td><a href="#addevilattributesstring-strings-this">addEvilAttributes</a>
+<p id="voku-php-readme-class-methods"></p><table><tr><td><a href="#adddonotclosehtmltagsstring-strings-this">addDoNotCloseHtmlTags</a>
+</td><td><a href="#addevilattributesstring-strings-this">addEvilAttributes</a>
 </td><td><a href="#addevilhtmltagsstring-strings-this">addEvilHtmlTags</a>
 </td><td><a href="#addneverallowedoneventsafterwardsstring-strings-this">addNeverAllowedOnEventsAfterwards</a>
-</td><td><a href="#addneverallowedregexstring-strings-this">addNeverAllowedRegex</a>
-</td></tr><tr><td><a href="#addneverallowedstrafterwardsstring-strings-this">addNeverAllowedStrAfterwards</a>
+</td></tr><tr><td><a href="#addneverallowedregexstring-strings-this">addNeverAllowedRegex</a>
+</td><td><a href="#addneverallowedstrafterwardsstring-strings-this">addNeverAllowedStrAfterwards</a>
 </td><td><a href="#isxssfound-boolnull">isXssFound</a>
-</td><td><a href="#removeevilattributesstring-strings-this">removeEvilAttributes</a>
+</td><td><a href="#removedonotclosehtmltagsstring-strings-this">removeDoNotCloseHtmlTags</a>
+</td></tr><tr><td><a href="#removeevilattributesstring-strings-this">removeEvilAttributes</a>
 </td><td><a href="#removeevilhtmltagsstring-strings-this">removeEvilHtmlTags</a>
-</td></tr><tr><td><a href="#removeneverallowedoneventsafterwardsstring-strings-this">removeNeverAllowedOnEventsAfterwards</a>
+</td><td><a href="#removeneverallowedoneventsafterwardsstring-strings-this">removeNeverAllowedOnEventsAfterwards</a>
 </td><td><a href="#removeneverallowedregexstring-strings-this">removeNeverAllowedRegex</a>
-</td><td><a href="#removeneverallowedstrafterwardsstring-strings-this">removeNeverAllowedStrAfterwards</a>
+</td></tr><tr><td><a href="#removeneverallowedstrafterwardsstring-strings-this">removeNeverAllowedStrAfterwards</a>
 </td><td><a href="#setreplacementstring-string-this">setReplacement</a>
-</td></tr><tr><td><a href="#setstripe4bytecharsbool-bool-this">setStripe4byteChars</a>
-</td><td><a href="#xss_cleanarraymixed-str-mixed">xss_clean</a>
+</td><td><a href="#setstripe4bytecharsbool-bool-this">setStripe4byteChars</a>
+</td><td><a href="#xss_cleanstringstring-str-stringstring">xss_clean</a>
 </td></tr></table>
+
+## addDoNotCloseHtmlTags(string[] $strings): $this
+<a href="#voku-php-readme-class-methods">↑</a>
+Add some strings to the "_do_not_close_html_tags"-array.
+
+**Parameters:**
+- `string[] $strings`
+
+**Return:**
+- `$this`
+
+--------
 
 ## addEvilAttributes(string[] $strings): $this
 <a href="#voku-php-readme-class-methods">↑</a>
@@ -228,7 +242,24 @@ Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
 __nothing__
 
 **Return:**
-- `bool|null will return null if the "xss_clean()" wan't running at all`
+- `bool|null <p>Will return null if the "xss_clean()" wasn't running at all.</p>`
+
+--------
+
+## removeDoNotCloseHtmlTags(string[] $strings): $this
+<a href="#voku-php-readme-class-methods">↑</a>
+Remove some strings from the "_do_not_close_html_tags"-array.
+
+<p>
+<br />
+WARNING: Use this method only if you have a really good reason.
+</p>
+
+**Parameters:**
+- `string[] $strings`
+
+**Return:**
+- `$this`
 
 --------
 
@@ -346,7 +377,7 @@ INFO: use it if your DB (MySQL) can't use "utf8mb4" -> preventing stored XSS-att
 
 --------
 
-## xss_clean(array|mixed $str): mixed
+## xss_clean(string|string[] $str): string|string[]
 <a href="#voku-php-readme-class-methods">↑</a>
 XSS Clean
 
@@ -367,10 +398,10 @@ is ever 100% foolproof...
 </p>
 
 **Parameters:**
-- `array|mixed $str <p>input data e.g. string or array of strings</p>`
+- `TXssCleanInput $str <p>input data e.g. string or array of strings</p>`
 
 **Return:**
-- `mixed`
+- `string|string[]`
 
 --------
 
