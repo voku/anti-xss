@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.33 (2021-10-04)
+
+- fix errors in large strings
+- fix "_xss_found" if xss string was found in array value
+
 ### 4.1.32 (2021-03-29)
 
 - micro-optimize performance
