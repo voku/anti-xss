@@ -149,7 +149,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertSame($html, $antiXssHtml->xss_clean($html));
     }
     
-    public function testArray() 
+    public function testArray()
     {
         $antiXss = new AntiXSS();
         $test = ['key1'=>"<script>alert('hax');</script>"];
@@ -157,12 +157,12 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertSame(true, $antiXss->isXssFound());
         
         $antiXss = new AntiXSS();
-        $test = ['key1'=>"<script>alert('hax');</script>", 'key2'=>"test"];
+        $test = ['key1'=>"<script>alert('hax');</script>", 'key2'=>'test'];
         $antiXss->xss_clean($test);
         static::assertSame(true, $antiXss->isXssFound());
         
         $antiXss = new AntiXSS();
-        $test = ["key1"=>"test", 'key2'=>"<script>alert('hax');</script>"];
+        $test = ['key1'=>'test', 'key2'=>"<script>alert('hax');</script>"];
         $antiXss->xss_clean($test);
         static::assertSame(true, $antiXss->isXssFound());
     }
