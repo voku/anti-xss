@@ -2107,7 +2107,17 @@ final class AntiXSS
         // check for an array of strings
         if (\is_array($str)) {
             foreach ($str as &$value) {
+                if ($this->_xss_found === true) {
+                    $alreadyFoundXss = true;
+                } else {
+                    $alreadyFoundXss = false;
+                }
+                
                 $value = $this->xss_clean($value);
+                
+                if ($alreadyFoundXss === true) {
+                    $this->_xss_found = true;
+                }
             }
 
             /** @var TXssCleanInput $str - hack for phpstan */

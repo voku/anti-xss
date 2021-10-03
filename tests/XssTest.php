@@ -148,6 +148,24 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         <!-- [if gte mso 9]><xml><o:OfficeDocumentSettings>96</xml><![endif]--> <!-- [if !mso]><!--> <!--<![endif]--> <!-- [if !mso]><!--> <!--<![endif]--><!-- [if IE]><div class="ie-browser"><![endif]-->';
         static::assertSame($html, $antiXssHtml->xss_clean($html));
     }
+    
+    public function testArray() 
+    {
+        $antiXss = new AntiXSS();
+        $test = ['key1'=>"<script>alert('hax');</script>"];
+        $antiXss->xss_clean($test);
+        static::assertSame(true, $antiXss->isXssFound());
+        
+        $antiXss = new AntiXSS();
+        $test = ['key1'=>"<script>alert('hax');</script>", 'key2'=>"test"];
+        $antiXss->xss_clean($test);
+        static::assertSame(true, $antiXss->isXssFound());
+        
+        $antiXss = new AntiXSS();
+        $test = ["key1"=>"test", 'key2'=>"<script>alert('hax');</script>"];
+        $antiXss->xss_clean($test);
+        static::assertSame(true, $antiXss->isXssFound());
+    }
 
     public function testRemoveAddStr()
     {
