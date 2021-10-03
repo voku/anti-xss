@@ -125,6 +125,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<3'                                                                                                                                                                                                                                      => '<3',
             '≪2 €'                                                                                                                                                                                                                                    => '≪2 €',
             '<35%'                                                                                                                                                                                                                                    => '<35%',
+            '< 35%' => '< 35%',
         ];
 
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
