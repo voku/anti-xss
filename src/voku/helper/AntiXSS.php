@@ -1256,7 +1256,7 @@ final class AntiXSS
                             return $this->_js_src_removal_callback($matches);
                         },
                         $str
-                    );  
+                    );
                 }
                 $str = (string)$strTmp;
             }
