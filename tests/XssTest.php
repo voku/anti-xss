@@ -1060,7 +1060,7 @@ nodeValue+outerHTML>/*click me', $str);
     ';
 
         $resultStringOrig = '
-    &lt;video autoplay="autoplay" controls="controls" width="640" height="360"&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /&gt; <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> &lt;/video&gt;
+    &lt;video autoplay="autoplay" controls="controls" width="640" height="360"&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4"&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm"&gt; &lt;source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg"&gt; <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> &lt;/video&gt;
 <p><strong>Download Video:</strong> Closed Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">"MP4"</a> Open Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">"OGG"</a> / <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">"WebM"</a></p>
 
 &lt;iframe width="560" height="315" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
@@ -1075,7 +1075,7 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss->removeEvilHtmlTags(['video', 'source', 'iframe']);
 
         $resultString = '
-    <video autoplay="autoplay" controls="controls" width="640" height="360"> <source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm" /> <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg" /> <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> </video>
+    <video autoplay="autoplay" controls="controls" width="640" height="360"> <source src="http://clips.vorwaerts-gmbh.de/VfE_html5.mp4" type="video/mp4"> <source src="http://clips.vorwaerts-gmbh.de/VfE.webm" type="video/webm"> <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv" type="video/ogg"> <img title="No video playback capabilities, please download the video below" src="/poster.jpg" alt="Big Buck Bunny" width="640" height="360"> </video>
 <p><strong>Download Video:</strong> Closed Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4">"MP4"</a> Open Format: <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv">"OGG"</a> / <a href="http://clips.vorwaerts-gmbh.de/big_buck_bunny.webm">"WebM"</a></p>
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YE7VzlLtp-4?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
@@ -1169,6 +1169,20 @@ nodeValue+outerHTML>/*click me', $str);
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image.html');
         $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
         $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image.html');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", (new AntiXSS())->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
+    public function testNonXssBigFile()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image_big.html');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/base64_image_big.html');
         $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
 
         static::assertSame(

@@ -1186,17 +1186,27 @@ final class AntiXSS
             $original = $str;
 
             if (\stripos($str, '<a') !== false) {
-                $str = (string) \preg_replace_callback(
+                $strTmp = \preg_replace_callback(
                     '#<a[^\p{L}@>]+([^>]*?)(?:>|$)#iu',
                     function ($matches) {
                         return $this->_js_link_removal_callback($matches);
                     },
                     $str
                 );
+                if ($strTmp === null) {
+                    $strTmp = \preg_replace_callback(
+                        '#<a[^\p{L}@>]+([^>]*)(?:>|$)#iu',
+                        function ($matches) {
+                            return $this->_js_link_removal_callback($matches);
+                        },
+                        $str
+                    );
+                }
+                $str = (string)$strTmp;
             }
 
             if (\stripos($str, '<img') !== false) {
-                $str = (string) \preg_replace_callback(
+                $strTmp = \preg_replace_callback(
                     '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         if (
@@ -1211,31 +1221,69 @@ final class AntiXSS
                     },
                     $str
                 );
+                if ($strTmp === null) {
+                    $strTmp = (string) \preg_replace_callback(
+                        '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        function ($matches) {
+                            if (
+                                \strpos($matches[1], 'base64') !== false
+                                &&
+                                \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
+                            ) {
+                                return $matches[0];
+                            }
+
+                            return $this->_js_src_removal_callback($matches);
+                        },
+                        $str
+                    );
+                }
+                $str = (string)$strTmp;
             }
 
             if (\stripos($str, '<audio') !== false) {
-                $str = (string) \preg_replace_callback(
+                $strTmp = \preg_replace_callback(
                     '#<audio[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
                     $str
                 );
+                if ($strTmp === null) {
+                    $strTmp = (string) \preg_replace_callback(
+                        '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        function ($matches) {
+                            return $this->_js_src_removal_callback($matches);
+                        },
+                        $str
+                    );  
+                }
+                $str = (string)$strTmp;
             }
 
             if (\stripos($str, '<video') !== false) {
-                $str = (string) \preg_replace_callback(
+                $strTmp = \preg_replace_callback(
                     '#<video[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
                     $str
                 );
+                if ($strTmp === null) {
+                    $strTmp = \preg_replace_callback(
+                        '#<video[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        function ($matches) {
+                            return $this->_js_src_removal_callback($matches);
+                        },
+                        $str
+                    );
+                }
+                $str = (string)$strTmp;
             }
 
             if (\stripos($str, '<source') !== false) {
                 $str = (string) \preg_replace_callback(
-                    '#<source[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                    '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
@@ -1318,22 +1366,46 @@ final class AntiXSS
             $count = $temp_count = 0;
 
             // find occurrences of illegal attribute strings with and without quotes (" and ' are octal quotes)
-            $str = (string) \preg_replace(
-                '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")(.*)/ius',
+            $regex = '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")(.*)/ius';
+            $strTmp = \preg_replace(
+                $regex,
                 '$1$2' . $this->_replacement . '$3$4',
                 $str,
                 -1,
                 $temp_count
             );
+            if ($strTmp === null) {
+                $regex = '/(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")/ius';
+                $strTmp = \preg_replace(
+                    $regex,
+                    $this->_replacement,
+                    $str,
+                    -1,
+                    $temp_count
+                );
+            }
+            $str = (string)$strTmp;
             $count += $temp_count;
 
-            $str = (string) \preg_replace(
-                '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius',
+            $regex =  '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
+            $strTmp = \preg_replace(
+                $regex,
                 '$1$2' . $this->_replacement . '$3',
                 $str,
                 -1,
                 $temp_count
             );
+            if ($strTmp === null) {
+                $regex =  '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius';
+                $strTmp = \preg_replace(
+                    $regex,
+                    '$1$2' . $this->_replacement . '$3',
+                    $str,
+                    -1,
+                    $temp_count
+                );
+            }
+            $str = (string)$strTmp;
             $count += $temp_count;
         } while ($count);
 
