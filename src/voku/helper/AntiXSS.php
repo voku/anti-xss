@@ -1541,7 +1541,7 @@ final class AntiXSS
             }
 
             $str = (string) \preg_replace_callback(
-                '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS', // tags without comments
+                '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)#iusS', // tags without comments
                 function ($matches) {
                     if (
                         $this->_do_not_close_html_tags !== []
