@@ -152,7 +152,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('', (new AntiXSS())->xss_clean('<SCRIPT SRC=//ha.ckers.org/.j'));
 
-        static::assertSame('&lt;IMG SRC="(\'XSS\')"', (new AntiXSS())->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
+        static::assertSame('&lt;IMG src=""', (new AntiXSS())->xss_clean('<IMG SRC="javascript:alert(\'XSS\')"'));
 
         static::assertSame('&lt;iframe src=http://ha.ckers.org/scriptlet.html <', (new AntiXSS())->xss_clean('<iframe src=http://ha.ckers.org/scriptlet.html <'));
 

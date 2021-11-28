@@ -242,7 +242,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
 
         $return = $security->xss_clean($input);
 
-        static::assertSame($output, $return);
+        static::assertSame($output, $return, 'tested: ' . $input);
     }
 
     /**

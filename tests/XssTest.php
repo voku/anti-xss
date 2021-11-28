@@ -147,6 +147,16 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         <html>
         <!-- [if gte mso 9]><xml><o:OfficeDocumentSettings>96</xml><![endif]--> <!-- [if !mso]><!--> <!--<![endif]--> <!-- [if !mso]><!--> <!--<![endif]--><!-- [if IE]><div class="ie-browser"><![endif]-->';
         static::assertSame($html, $antiXssHtml->xss_clean($html));
+        
+        // ---
+
+        $antiXssHtml = new AntiXSS();
+        $html = '
+        <span>
+         foo="<span class="bar">baz</span>"
+        </span>
+        ';
+        static::assertSame($html, $antiXssHtml->xss_clean($html));
     }
     
     public function testArray()
@@ -512,7 +522,7 @@ xmlns:x="http://www.w3.org/1999/xhtml ">alert(1&#00000041;', // IE11
             '<SCR%00IPT>alert(\"XSS\")</SCR%00IPT>'                                                                                                                                                                                     => '',
             '<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>'                                                                                                                                                                    => '',
             '<SCRIPT SRC=http://ha.ckers.org/xss.js?<B>'                                                                                                                                                                                => '',
-            '<IMG SRC="javascript:alert(\'XSS\')"'                                                                                                                                                                                      => '&lt;IMG SRC="(\'XSS\')"',
+            '<IMG SRC="javascript:alert(\'XSS\')"'                                                                                                                                                                                      => '&lt;IMG src=""',
             '<SCRIPT>a=/XSS/'                                                                                                                                                                                                           => '',
             '\";alert(\'XSS\');//'                                                                                                                                                                                                      => '\";alert&#40;\'XSS\'&#41;;//',
             '<INPUT TYPE="IMAGE" SRC="javascript:alert(\'XSS\');">'                                                                                                                                                                     => '&lt;INPUT TYPE="IMAGE" SRC="(\'XSS\');"&gt;',
@@ -693,7 +703,7 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED&gt;',
             '<div data-role=popup id=\'--><script>alert(1)</script>\'></div>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              => '<div data-role=popup id=\'-->\'></div>', // Bypassing sanitizers via jQuery Mobile
             '<div data-bind="html:\'<script src=&quot;//evil.com&quot;></script>\'"></div>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                => '<div data-bind="html:\'\'"></div>', // Bypassing sanitizers via Knockout
             "\n><!-\n<b\n<c d=\"'e><iframe onload=alert(1) src=x>\n<a HREF=\"\">\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        => "\n>&lt;!-\n&lt;b\n&lt;c d=\"'e&gt;&lt;iframe  src=x&gt;\n&lt;a \"\"&gt;\n", // CodeIgniter 2017-01 - https://github.com/bcit-ci/CodeIgniter/commit/2ab1c1902711c8b0caf5c3e8f2fa825d72f6755d
-            '<x/><title>&amp;lt;/title&amp;gt;&amp;lt;img src=1 onerror=alert(1)&amp;gt;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  => '<x/>&lt;title&gt;&lt;/title&gt;<img >', // "Bypassing DOMPurify with mXSS" - http://www.thespanner.co.uk/2018/07/29/bypassing-dompurify-with-mxss/
+            '<x/><title>&amp;lt;/title&amp;gt;&amp;lt;img src=1 onerror=alert(1)&amp;gt;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  => '<x/>&lt;title&gt;&amp;lt;/title&amp;gt;&amp;lt;img src=1 =alert&#40;1&#41;&amp;gt;', // "Bypassing DOMPurify with mXSS" - http://www.thespanner.co.uk/2018/07/29/bypassing-dompurify-with-mxss/
             // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
             //
             // Spacers
@@ -738,13 +748,13 @@ nodeValue+outerHTML>/*click me',
 alert(1)' => '<javas >cript:"-\'click me!</javas>#\'-
 alert&#40;1&#41;',
             // Location Self
-            'p=<j onclick=location=textContent>?p=%26lt;svg/onload=alert(1)>' => 'p=<j >?p=&lt;svg/&gt;',
+            'p=<j onclick=location=textContent>?p=%26lt;svg/onload=alert(1)>' => 'p=<j >?p=%26lt;svg/=alert&#40;1&#41;>',
             'p=<svg id=?p=<svg/onload=alert(1)%2B onload=location=id>'        => 'p=&lt;svg id=?p=&lt;svg/ &gt;',
             // Location Self Plus
             'p=%26p=%26lt;svg/onload=alert(1)><j onclick=location%2B=document.body.
 textContent>click me!' => 'p=%26p=%26lt;svg/=alert&#40;1&#41;><j 
 textContent>click me!',
-            'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>'                                                             => 'p=<j >&p=&lt;svg/&gt;',
+            'p=<j onclick=location%2B=textContent>%26p=%26lt;svg/onload=alert(1)>'                                                             => 'p=<j >%26p=%26lt;svg/=alert&#40;1&#41;>',
             '<object data=javascript:confirm()><a href=javascript:confirm()>click here<script src=//14.rs></script><script>confirm()</script>' => '&lt;object data=()&gt;<a >click here', // Without event handlers
             '<svg/onload=confirm()><iframe/src=javascript:alert(1)>'                                                                           => '&lt;svg/&gt;&lt;iframe/src=(1)&gt;', // Without space (https://github.com/s0md3v/AwesomeXSS)
             '<svg onload=confirm()><img src=x onerror=confirm()>'                                                                              => '&lt;svg &gt;<img >', // Without slash (/)
@@ -1174,6 +1184,20 @@ nodeValue+outerHTML>/*click me', $str);
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v4.html');
         $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
         $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v4_clean.html');
+        $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
+
+        static::assertSame(
+            $resultString,
+            \str_replace(["\n\r", "\r\n", "\n"], "\n", (new AntiXSS())->xss_clean($testString)),
+            'testing: ' . $testString
+        );
+    }
+
+    public function testXssFileV5()
+    {
+        $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v5.html');
+        $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
+        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v5_clean.html');
         $resultString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString);
 
         static::assertSame(

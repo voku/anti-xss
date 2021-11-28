@@ -237,6 +237,7 @@ final class AntiXSS
         'onPointerMove',
         'onPointerOut',
         'onPointerOver',
+        'onPointerRawUpdate',
         'onPointerUp',
         'onPopState',
         'onProgress',
@@ -588,7 +589,7 @@ final class AntiXSS
     private function _decode_string($str)
     {
         // init
-        $regExForHtmlTags = '/<\p{L}+.*+/us';
+        $regExForHtmlTags = '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU';
 
         if (
             \strpos($str, '<') !== false
