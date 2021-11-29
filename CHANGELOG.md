@@ -1,5 +1,10 @@
 # Changelog
 
+### 4.1.34 (2021-11-29)
+
+- allow e.g. "< 1 year" (issue 83)
+- fix false-positive issue (issue 85 | thx @gharlan)
+
 ### 4.1.33 (2021-10-04)
 
 - fix errors in large strings
