@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.35 (2021-12-08)
+
+- update "portable-utf8"
+
 ### 4.1.34 (2021-11-29)
 
 - allow e.g. "< 1 year" (issue 83)
