@@ -986,7 +986,11 @@ textContent>click me!',
     public function testSvgXssFileV1()
     {
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
-        $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
+        if (\PHP_VERSION_ID < 80100) {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
+        } else {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php81.svg');
+        }
 
         static::assertSame(
             \str_replace(["\n\r", "\r\n", "\n"], "\n", $resultString),
