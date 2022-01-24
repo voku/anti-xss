@@ -1,5 +1,5 @@
 {
     "require-dev": {
-        "voku/php-readme-helper": "~0.6"
+        "voku/php-readme-helper": "0.6.3"
     }
 }
