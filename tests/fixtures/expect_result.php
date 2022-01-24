@@ -238,7 +238,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
 &lt;!--
 --&gt;&lt;!--*{color:red}   /* all UA */
 
-*{background:url(xx //**/' . "\n" . 'ed/*)} /* IE 6-7 Standards mode */
+*{background:url(xx //**/' . "\r" . 'ed/*)} /* IE 6-7 Standards mode */
 
 &lt;/style&gt;//["\'`--&gt;]]>]</div>',
   151 => '<div id="100"><img[>//["\'`-->]]>]</div>',
