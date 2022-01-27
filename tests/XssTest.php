@@ -150,6 +150,11 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         <html>
         <!-- [if gte mso 9]><xml><o:OfficeDocumentSettings>96</xml><![endif]--> <!-- [if !mso]><!--> <!--<![endif]--> <!-- [if !mso]><!--> <!--<![endif]--><!-- [if IE]><div class="ie-browser"><![endif]-->';
         static::assertSame($html, $antiXssHtml->xss_clean($html));
+        $antiXssHtml->removeDoNotCloseHtmlTags(['xml', 'html', 'o:OfficeDocumentSettings']);
+        $html = '
+        <html>
+        <!-- [if gte mso 9]><xml><o:OfficeDocumentSettings>96</xml><![endif]--> <!-- [if !mso]><!--> <!--<![endif]--> <!-- [if !mso]><!--> <!--<![endif]--><!-- [if IE]><div class="ie-browser"><![endif]-->';
+        static::assertSame($html, $antiXssHtml->xss_clean($html));
         
         // ---
 
