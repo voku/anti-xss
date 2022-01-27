@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.36 (2022-01-27)
+
+- update "portable-utf8"
+
 ### 4.1.35 (2021-12-08)
 
 - update "portable-utf8"
