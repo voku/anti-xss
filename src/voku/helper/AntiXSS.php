@@ -38,7 +38,7 @@ final class AntiXSS
     private $_never_allowed_regex = [];
 
     /**
-     * List of html tags that will not closed automatically.
+     * List of html tags that will not close automatically.
      *
      * @var string[]
      */
@@ -546,9 +546,7 @@ final class AntiXSS
                 }
             }
 
-            if ($strCopy === $str) {
-                $needProtection = true;
-            } else {
+            if ($strCopy !== $str) {
                 $needProtection = false;
                 foreach ($matchesTmp as $matches) {
                     if (isset($matches['attr'])) {
@@ -1082,7 +1080,6 @@ final class AntiXSS
                 $needProtection = true;
                 $matchInner['link'] = \str_replace(' ', '%20', $matchInner['link']);
 
-                /** @noinspection BypassedUrlValidationInspection */
                 if (
                     \strpos($matchInner[0], 'script') === false
                     &&
@@ -1100,7 +1097,6 @@ final class AntiXSS
                 if ($needProtection) {
                     $tmpAntiXss = clone $this;
 
-                    /** @noinspection UnusedFunctionResultInspection */
                     $tmpAntiXss->xss_clean((string) $matchInner[0]);
 
                     if ($tmpAntiXss->isXssFound() === true) {
@@ -2096,7 +2092,7 @@ final class AntiXSS
      *
      * @return string|string[]
      *
-     * @template TXssCleanInput
+     * @template TXssCleanInput as string|string[]
      * @phpstan-param TXssCleanInput $str
      * @phpstan-return TXssCleanInput
      */
@@ -2108,6 +2104,7 @@ final class AntiXSS
         // check for an array of strings
         if (\is_array($str)) {
             foreach ($str as &$value) {
+                /* @phpstan-ignore-next-line | _xss_found is maybe changed via "xss_clean" */
                 if ($this->_xss_found === true) {
                     $alreadyFoundXss = true;
                 } else {
@@ -2115,7 +2112,8 @@ final class AntiXSS
                 }
                 
                 $value = $this->xss_clean($value);
-                
+
+                /* @phpstan-ignore-next-line | _xss_found is maybe changed via "xss_clean" */
                 if ($alreadyFoundXss === true) {
                     $this->_xss_found = true;
                 }
