@@ -1498,6 +1498,23 @@ nodeValue+outerHTML>/*click me', $str);
         $testString = '<img/src/onerror=alert(1)>';
         static::assertSame('<img/>', (new AntiXSS())->xss_clean($testString));
     }
+    
+    public function testAddRemoveRegex() {
+        $antiXss = new AntiXSS();
+
+        $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
+        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+        
+        $antiXss->removeNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
+        $antiXss->removeNeverAllowedCallStrings(['javascript']);
+        $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
+        static::assertSame('<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">', $antiXss->xss_clean($testString));
+
+        $antiXss->addNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
+        $antiXss->addNeverAllowedCallStrings(['javascript']);
+        $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
+        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+    }
 
     public function testXssUrlDecode()
     {
