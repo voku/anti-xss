@@ -1,5 +1,11 @@
 # Changelog
 
+### 4.1.37 (2022-02-15)
+
+- move more static data into the object
+  - allow to modify the "_never_allowed_call_strings"-data"
+  - allow to modify the "_never_allowed_js_callback_regex"-data"
+
 ### 4.1.36 (2022-01-27)
 
 - update "portable-utf8"
