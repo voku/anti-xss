@@ -46,8 +46,8 @@ final class AntiXSS
 
     /**
      * List of never allowed call statements.
-     * 
-     * @var string[] 
+     *
+     * @var string[]
      */
     private $_never_allowed_js_callback_regex = [
         '\(?window\)?\.',
