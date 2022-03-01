@@ -1499,7 +1499,8 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img/>', (new AntiXSS())->xss_clean($testString));
     }
     
-    public function testAddRemoveRegex() {
+    public function testAddRemoveRegex()
+    {
         $antiXss = new AntiXSS();
 
         $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
