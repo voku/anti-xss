@@ -99,7 +99,7 @@ jobs:
       
       - name: Archive logs artifacts
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: logs_composer-${{ matrix.composer }}_php-${{ matrix.php }}
           path: |
