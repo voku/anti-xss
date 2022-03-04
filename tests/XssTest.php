@@ -1612,23 +1612,24 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssCleanSanitizeNaughtyJavascript(): iterable
+    public function _dataForXssCleanSanitizeNaughtyJavascript(): array
     {
-        // no XSS
-        yield 'valid string without JS XSS #1' => ['schonende', false];
-        yield 'valid string without JS XSS #2' => ['<p>Montagehilfe - Montageprofile(n) - <strong>Dachankern</strong> - Bedienungsanleitung</p>', false];
-        yield 'valid string without JS XSS #3' => ['<p>Montagehilfe - Montagepronend - Dachankern - Bedienungsanleitung</p>', false];
-        yield 'valid string without JS XSS #4' => ['"Soddisfal\'EnEV al 100%"', false];
-
-        // find XSS
-        yield 'valid string with JS XSS #1' => ['<p>Montagehilfe - Montagepro file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #2' => ['<p>Montagehilfe - Montagepro;file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #3' => ['<p>Montagehilfe - Montagepro]file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #4' => ['<p>Montagehilfe - Montagepro.file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #5' => ['<p>Montagehilfe - Montagepro#file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #6' => ['<p>Montagehilfe - Montagepro>file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #7' => ['<p>Montagehilfe - Montagepro"file(n) - Dachankern - Bedienungsanleitung</p>', true];
-        yield 'valid string with JS XSS #8' => ['Hello, i try to <script>alert(\'Hack\');</script> your site', true];
+        return [
+            // no XSS
+            'valid string without JS XSS #1' => ['schonende', false],
+            'valid string without JS XSS #2' => ['<p>Montagehilfe - Montageprofile(n) - <strong>Dachankern</strong> - Bedienungsanleitung</p>', false],
+            'valid string without JS XSS #3' => ['<p>Montagehilfe - Montagepronend - Dachankern - Bedienungsanleitung</p>', false],
+            'valid string without JS XSS #4' => ['"Soddisfal\'EnEV al 100%"', false],
+            // find XSS
+            'valid string with JS XSS #1' => ['<p>Montagehilfe - Montagepro file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #2' => ['<p>Montagehilfe - Montagepro;file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #3' => ['<p>Montagehilfe - Montagepro]file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #4' => ['<p>Montagehilfe - Montagepro.file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #5' => ['<p>Montagehilfe - Montagepro#file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #6' => ['<p>Montagehilfe - Montagepro>file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #7' => ['<p>Montagehilfe - Montagepro"file(n) - Dachankern - Bedienungsanleitung</p>', true],
+            'valid string with JS XSS #8' => ['Hello, i try to <script>alert(\'Hack\');</script> your site', true],
+        ];
     }
 
     /**
@@ -1652,11 +1653,13 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssXssCleanNeverAllowedAfterwards(): iterable
+    public function _dataForXssXssCleanNeverAllowedAfterwards(): array
     {
-        yield 'todo: valid string without attribute XSS #5' => ['<p>onend</p>', true]; // todo: fix more false positives
-        yield 'todo: valid string without attribute XSS #6' => ['onend', true]; // todo: fix more false positives
-        yield 'todo: valid string without attribute XSS #7' => [' onend ', true]; // todo: fix more false positives
+        return [
+            'todo: valid string without attribute XSS #5' => ['<p>onend</p>', true], // todo: fix more false positives
+            'todo: valid string without attribute XSS #6' => ['onend', true], // todo: fix more false positives
+            'todo: valid string without attribute XSS #7' => [' onend ', true], // todo: fix more false positives
+        ];
     }
     
     public function testXssCleanSanitizeNaughtyHtmlAttributes()
