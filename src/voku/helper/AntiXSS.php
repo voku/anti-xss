@@ -1713,7 +1713,7 @@ final class AntiXSS
 
             if ($found === true) {
                 $str = (string) \preg_replace(
-                    '#(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
+                    '#(?<!\p{L})(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
                 );

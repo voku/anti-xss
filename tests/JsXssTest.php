@@ -196,7 +196,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         // HTML5新增实体编码 冒号&colon; 换行&NewLine;
         static::assertSame('<a href="(/xss/)">', (new AntiXSS())->xss_clean('<a href="javascript&colon;alert(/xss/)">'));
-        static::assertSame('<a href="">', (new AntiXSS())->xss_clean('<a href="javascript&colonalert(/xss/)">'));
+        static::assertSame('<a href="javascript&colonalert(/xss/)">', (new AntiXSS())->xss_clean('<a href="javascript&colonalert(/xss/)">'));
         static::assertSame('<a href="a&NewLine;b">', (new AntiXSS())->xss_clean('<a href="a&NewLine;b">'));
         static::assertSame('<a href="a&NewLineb">', (new AntiXSS())->xss_clean('<a href="a&NewLineb">'));
         static::assertSame('<a href="(1)">', (new AntiXSS())->xss_clean('<a href="javasc&NewLine;ript&colon;alert(1)">'));

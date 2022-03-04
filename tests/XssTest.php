@@ -424,7 +424,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<div id="b" style="font-family:a/**/ression(alert(1))(\'\\\')exp\\\')">aa</div>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           => '<div id="b" >aa</div>', // IE | 2014: http://wooyun.org/bugs/wooyun-2014-068564
             '<a href="jar:http://SEVER/flash3.bin!/flash3.swf">xss</a>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 => '<a href="//SEVER/flash3.bin!/flash3.swf">xss</a>', // Firefox | 2007: https://bugzilla.mozilla.org/show_bug.cgi?id=369814
             '<li><a href="?bypass=%3Clink%20rel=%22import%22%20href=%22?bypass=%3Cscript%3Ealert(document.domain)%3C/script%3E%22%3E">Now click to execute arbitrary JS</a></li>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       => '<li><a href="?bypass=&lt;link rel=" href="?bypass=">Now click to execute arbitrary JS</a></li>', // Chrome 33 | 2015: view-source:https://html5sec.org/test/bypass
-            '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         => '<scralert&#40;1&#41;&lt;/scpt>', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17
+            '<scr<script>ipt>alert(1)</sc<script>ri<script>pt>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         => '<scralert(1)&lt;/scpt>', // 2015: https://frederic-hemberger.de/talks/froscon-xss/#/17 
             '<svg </onload ="1> (_=alert,_(1337)) "">'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  => '&lt;svg &lt;/"&gt;',
             '<svg><script>/<@/>alert(1)</script>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       => '&lt;svg&gt;alert&#40;1&#41;',
             '<svg/onload=alert`xss`>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   => '&lt;svg/&gt;', // FF34+, Edge | 2015 | https://www.davidsopas.com/win-50-amazon-gift-card-with-a-xss-challenge/
@@ -1589,6 +1589,46 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<fubar>', (new AntiXSS())->xss_clean('<fubar>'));
         static::assertSame('<img &svg="" src="x">', (new AntiXSS())->xss_clean('<img <svg=""> src="x">'));
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+    }
+    
+    /**
+     * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
+     */
+    public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
+    {
+        // Arrange
+        $antiXSS = new \voku\helper\AntiXSS();
+
+        // Act
+        $antiXSS->xss_clean($contentToFilter);
+
+        $result = $antiXSS->isXssFound();
+
+        // Assert
+        if ($expectedFindXss) {
+            self::assertTrue($result, 'testing: ' . $contentToFilter);
+        } else {
+            self::assertFalse($result, 'testing: ' . $contentToFilter);
+        }
+    }
+
+    public function _dataForXssCleanSanitizeNaughtyJavascript(): iterable
+    {
+       // no XSS
+       yield 'valid string without JS XSS #1' => ['schonende', false];
+       yield 'valid string without JS XSS #2' => ['<p>Montagehilfe - Montageprofile(n) - <strong>Dachankern</strong> - Bedienungsanleitung</p>', false];
+       yield 'valid string without JS XSS #3' => ['<p>Montagehilfe - Montagepronend - Dachankern - Bedienungsanleitung</p>', false];
+       yield 'valid string without JS XSS #4' => ['"Soddisfal\'EnEV al 100%"', false];
+       // yield 'valid string without JS XSS #5' => ['<p>Montagehilfe - Montagepr onend - Dachankern - Bedienungsanleitung</p>', false];
+       // find XSS
+       yield 'valid string with JS XSS #1' => ['<p>Montagehilfe - Montagepro file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #2' => ['<p>Montagehilfe - Montagepro;file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #3' => ['<p>Montagehilfe - Montagepro]file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #4' => ['<p>Montagehilfe - Montagepro.file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #5' => ['<p>Montagehilfe - Montagepro#file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #6' => ['<p>Montagehilfe - Montagepro>file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #7' => ['<p>Montagehilfe - Montagepro"file(n) - Dachankern - Bedienungsanleitung</p>', true];
+       yield 'valid string with JS XSS #8' => ['Hello, i try to <script>alert(\'Hack\');</script> your site', true];
     }
 
     public function testXssCleanSanitizeNaughtyHtmlAttributes()
