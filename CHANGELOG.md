@@ -1,5 +1,10 @@
 # Changelog
 
+### unreleased (2022-??-??)
+
+- optimize "_sanitize_naughty_javascript" (issue 99 | thx @Fahl-Design)
+- optimize "_do_never_allowed_afterwards", at least for strings in tags
+
 ### 4.1.37 (2022-02-15)
 
 - move more static data into the object
