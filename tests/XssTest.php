@@ -128,7 +128,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '< 35%' => '< 35%',
             '< 1 year' => '< 1 year',
             ' < 1 year' => ' < 1 year',
-            '> 1 year' => '> 1 year'
+            '> 1 year' => '> 1 year',
+            '<p>onend</p>' => '<p>onend</p>',
         ];
 
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -1597,7 +1598,7 @@ nodeValue+outerHTML>/*click me', $str);
     public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange
-        $antiXSS = new \voku\helper\AntiXSS();
+        $antiXSS = new AntiXSS();
 
         // Act
         $antiXSS->xss_clean($contentToFilter);
@@ -1638,7 +1639,7 @@ nodeValue+outerHTML>/*click me', $str);
     public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange
-        $antiXSS = new \voku\helper\AntiXSS();
+        $antiXSS = new AntiXSS();
 
         // Act
         $antiXSS->xss_clean($contentToFilter);
@@ -1656,9 +1657,9 @@ nodeValue+outerHTML>/*click me', $str);
     public function _dataForXssXssCleanNeverAllowedAfterwards(): array
     {
         return [
-            'todo: valid string without attribute XSS #5' => ['<p>onend</p>', true], // todo: fix more false positives
-            'todo: valid string without attribute XSS #6' => ['onend', true], // todo: fix more false positives
-            'todo: valid string without attribute XSS #7' => [' onend ', true], // todo: fix more false positives
+            'valid string without attribute XSS #5' => ['<p>onend</p>', false],
+            'todo?: valid string without attribute XSS #6' => ['onend', true],
+            'todo?: valid string without attribute XSS #7' => [' onend ', true],
         ];
     }
     
