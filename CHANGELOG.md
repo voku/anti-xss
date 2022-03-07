@@ -1,6 +1,6 @@
 # Changelog
 
-### unreleased (2022-??-??)
+### 4.1.38 (2022-03-07)
 
 - optimize "_sanitize_naughty_javascript" (issue 99 | thx @Fahl-Design)
 - optimize "_do_never_allowed_afterwards", at least for strings in tags
