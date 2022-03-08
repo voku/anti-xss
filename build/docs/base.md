@@ -1,3 +1,5 @@
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
 [![Build Status](https://github.com/voku/anti-xss/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/voku/anti-xss/actions)
 [![codecov.io](http://codecov.io/github/voku/anti-xss/coverage.svg?branch=master)](http://codecov.io/github/voku/anti-xss?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8e3c9da417124971b8d8e0c1046c24c7)](https://www.codacy.com/app/voku/anti-xss)
