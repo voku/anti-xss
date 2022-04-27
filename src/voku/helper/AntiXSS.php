@@ -313,6 +313,7 @@ final class AntiXSS
         'onTimer',
         'onTrackChange',
         'onTransitionEnd',
+        'onTransitionRun',
         'onToggle',
         'onTouchCancel',
         'onTouchEnd',
