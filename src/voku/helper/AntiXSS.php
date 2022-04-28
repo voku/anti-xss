@@ -201,7 +201,7 @@ final class AntiXSS
         'onLanguageChange',
         'onLayoutComplete',
         'onLoad',
-        'onloadEnd'
+        'onLoadEnd',
         'onLoadedData',
         'onLoadedMetaData',
         'onLoadStart',
@@ -315,7 +315,7 @@ final class AntiXSS
         'onTrackChange',
         'onTransitionEnd',
         'onTransitionRun',
-        'onTransitionStart'
+        'onTransitionStart',
         'onToggle',
         'onTouchCancel',
         'onTouchEnd',
@@ -325,7 +325,7 @@ final class AntiXSS
         'onTransitionCancel',
         'onTransitionEnd',
         'onUnload',
-        'onUnhandledRejection'
+        'onUnhandledRejection',
         'onURLFlip',
         'onUserProximity',
         'onVolumeChange',
