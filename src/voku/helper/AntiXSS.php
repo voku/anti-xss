@@ -169,6 +169,7 @@ final class AntiXSS
         'onDrag',
         'onDragDrop',
         'onDragEnd',
+        'onDragExit',
         'onDragEnter',
         'onDragLeave',
         'onDragOver',
