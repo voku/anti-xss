@@ -954,6 +954,21 @@ textContent>click me!',
         static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean("/*alert(*/alert(1/*)*/)"));
     }
     
+    public function testIssue114()
+    {
+        $antiXss = new AntiXSS();
+        // TODO@me -> check if we can whitelist URLs?
+        static::assertSame("<a href=\"\">...</a>", $antiXss->xss_clean("<a href='https://www.history.com'>...</a>"));
+    }
+    
+    public function testIssue113()
+    {
+        $antiXss = new AntiXSS();
+        $value = "Eva L'Host";
+        $cleaned = $antiXss->xss_clean($value);
+        static::assertSame($value, $cleaned);
+    }
+    
     public function testIssue58()
     {
         $testString = '<AWACS>

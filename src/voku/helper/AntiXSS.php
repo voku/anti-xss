@@ -522,7 +522,7 @@ final class AntiXSS
                     ['#', '.'],
                     ['\#', '\.'],
                     $WORDS_CACHE['chunk'][$word]
-                ) . ')(?<after>[^\p{L}@.!? ]|$)#ius',
+                ) . ')(?<after>[^\p{L}@.!?\' ]|$)#ius',
                 function ($matches) {
                     return $this->_compact_exploded_words_callback($matches);
                 },
