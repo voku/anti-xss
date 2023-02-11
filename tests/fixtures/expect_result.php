@@ -90,7 +90,7 @@ return [
   63 => '<div id="8">&lt;input  autofocus&gt;&lt;input autofocus&gt;//["\'`-->]]>]</div>',
   64 => '<div id="9"><a >X</a>//["\'`-->]]>]</div>
 
-<div id="10">&lt;video /&gt;&lt;/video&gt;//["\'`-->]]>]</div>',
+<div id="10">&lt;video //&gt;&lt;/video&gt;//["\'`-->]]>]</div>',
   65 => '<div id="11">&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;<g ></g>&lt;/svg&gt;//["\'`-->]]>]</div>',
   66 => '<div id="12">&lt;body &gt;<br><br><br><br><br><br>...<br><br><br><br>&lt;input autofocus&gt;//["\'`-->]]>]</div>',
   67 => '<div id="13"><x repeat="template" repeat-start="999999">0<y repeat="template" repeat-start="999999">1</y></x>//["\'`-->]]>]</div>',

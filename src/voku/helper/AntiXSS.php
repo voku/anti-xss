@@ -1173,6 +1173,27 @@ final class AntiXSS
             }
         }
 
+        var_dump($match[0], $match[1], $replacer, "\n");
+        
+        if (
+            \substr($match[0], -3) === ' />'
+            &&
+            \substr($match[1], -2) === ' /'
+            &&
+            \substr($replacer, -2) !== ' /'
+        ) {
+            $replacer .= ' /';
+        } elseif (
+            \substr($match[0], -2) === '/>'
+            &&
+            \substr($match[1], -1) === '/'
+            &&
+            \substr($replacer, -1) !== '/'
+        ) {
+            $replacer .= '/';
+        }
+        
+        
         return \str_ireplace($match[1], $replacer, (string) $match[0]);
     }
 

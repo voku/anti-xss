@@ -4,6 +4,7 @@
 
 - fix xss bypass (issue 115 | thx @thanosgn [Thanos Giannopoulos])
 - add more blacklisted js calls (thx @peter-mw [Peter Ivanov])
+- fix false positive on self-close tags (issue 111 | thx @genetus [Maxim Antonov])
 
 ### 4.1.39 (2022-03-08)
 
