@@ -103,7 +103,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<form/action=javascript&#x0003A;eval(setTimeout(confirm(1)))><input/type=submit>',
-                '&lt;form/action=[removed](setTimeout&#40;confirm(1&#41;))&gt;&lt;input/type=submit&gt;',
+                '&lt;form/action=[removed](setTimeout&#40;confirm&#40;1&#41;&#41;)&gt;&lt;input/type=submit&gt;',
             ],
             [
                 '<body/onload=this.onload=document.body.innerHTML=alert&lpar;1&rpar;>',
@@ -123,7 +123,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 'http://www.<script abc>setTimeout(\'confirm(1)\',1)</script .com>',
-                'http://www.[removed]setTimeout&#40;\'confirm(1&#41;\',1)[removed].com>',
+                'http://www.[removed]setTimeout&#40;\'confirm&#40;1&#41;\',1&#41;[removed].com>',
             ],
             [
                 '<style/onload    =    !-alert&#x28;1&#x29;>',

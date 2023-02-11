@@ -948,6 +948,12 @@ textContent>click me!',
         );
     }
 
+    public function testIssue115()
+    {
+        $antiXss = new AntiXSS();
+        static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean("/*alert(*/alert(1/*)*/)"));
+    }
+    
     public function testIssue58()
     {
         $testString = '<AWACS>
