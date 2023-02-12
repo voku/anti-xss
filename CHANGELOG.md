@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.41 (2023-02-12)
+
+- remove debug call (thx @gharlan [Gregor Harlan]
+
 ### 4.1.40 (2023-02-11)
 
 - fix xss bypass (issue 115 | thx @thanosgn [Thanos Giannopoulos])
