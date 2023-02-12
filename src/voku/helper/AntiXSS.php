@@ -1172,8 +1172,6 @@ final class AntiXSS
                 }
             }
         }
-
-        var_dump($match[0], $match[1], $replacer, "\n");
         
         if (
             \substr($match[0], -3) === ' />'
