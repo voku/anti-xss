@@ -718,7 +718,6 @@ final class AntiXSS
             //
             // -> This adds a bit of extra precaution in case something got through the above filters.
             $str = $this->_do_never_allowed_afterwards($str);
-            
         } while ($str_backup_loop !== $str);
 
         // check for xss
