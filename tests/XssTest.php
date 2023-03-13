@@ -12,8 +12,7 @@ use voku\helper\UTF8;
  */
 final class XssTest extends \PHPUnit\Framework\TestCase
 {
-
-  // INFO: here you can find some more tests
+    // INFO: here you can find some more tests
     //
     // - https://www.xssposed.org/incidents/
     // - http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt

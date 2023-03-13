@@ -18,7 +18,6 @@ use voku\helper\AntiXSS;
  */
 final class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
 {
-
     //
     // https://github.com/iamcal/lib_filter/blob/master/t/01_basics.t
     //

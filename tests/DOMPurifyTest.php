@@ -10,7 +10,6 @@ use voku\helper\UTF8;
  */
 final class DOMPurifyTest extends \PHPUnit\Framework\TestCase
 {
-
     //
     // https://github.com/cure53/DOMPurify/blob/master/test/fixtures/expect.js
     //
