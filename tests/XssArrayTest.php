@@ -35,6 +35,7 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
             'search.php?q=%22%3Balert(%22XSS%22)%3B&n=1093&i=410',
             'http://localhost/text.php/"><script>alert(“Gehackt!”);</script></form><form action="/...',
             '<p>Montageprofile(n)</p>',
+            '<button popovertarget=x>Click me</button><input type="hidden" value="y" popover id=x onbeforetoggle=alert(1)>'
         ];
 
         $resultArray = [
@@ -56,6 +57,7 @@ final class XssTestArray extends \PHPUnit\Framework\TestCase
             'search.php?q=";alert&#40;"XSS"&#41;;&n=1093&i=410',
             'http://localhost/text.php/">&lt;/form&gt;&lt;form action="/...',
             '<p>Montageprofile(n)</p>',
+            '&lt;button popovertarget=x&gt;Click me&lt;/button&gt;&lt;input type="hidden" value="y" popover id=x &gt;'
         ];
 
         static::assertSame($resultArray, (new AntiXSS())->xss_clean($testArray));
