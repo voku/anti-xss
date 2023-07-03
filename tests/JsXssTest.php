@@ -9,7 +9,6 @@ use voku\helper\AntiXSS;
  */
 final class JsXssTest extends \PHPUnit\Framework\TestCase
 {
-
   //
     // https://github.com/leizongmin/js-xss/blob/master/test/test_xss.js
     //
@@ -26,7 +25,6 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
     public function testFromJsXss()
     {
-
         // 兼容各种奇葩输入
         static::assertSame('', (new AntiXSS())->xss_clean(''));
         static::assertNull((new AntiXSS())->xss_clean(null));

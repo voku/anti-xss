@@ -12,8 +12,7 @@ use voku\helper\UTF8;
  */
 final class XssTest extends \PHPUnit\Framework\TestCase
 {
-
-  // INFO: here you can find some more tests
+    // INFO: here you can find some more tests
     //
     // - https://www.xssposed.org/incidents/
     // - http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_TESTCASE.txt
@@ -951,14 +950,14 @@ textContent>click me!',
     public function testIssue115()
     {
         $antiXss = new AntiXSS();
-        static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean("/*alert(*/alert(1/*)*/)"));
+        static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean('/*alert(*/alert(1/*)*/)'));
     }
     
     public function testIssue114()
     {
         $antiXss = new AntiXSS();
         // TODO@me -> check if we can whitelist URLs?
-        static::assertSame("<a href=\"\">...</a>", $antiXss->xss_clean("<a href='https://www.history.com'>...</a>"));
+        static::assertSame('<a href="">...</a>', $antiXss->xss_clean("<a href='https://www.history.com'>...</a>"));
     }
     
     public function testIssue113()
@@ -969,7 +968,7 @@ textContent>click me!',
         static::assertSame($value, $cleaned);
     }
     
-    public function testIssue111() 
+    public function testIssue111()
     {
         $html = <<<HTML
 <video controls="controls" width="300" height="150">
