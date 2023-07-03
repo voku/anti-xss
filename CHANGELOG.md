@@ -1,5 +1,9 @@
 # Changelog
 
+### 4.1.42 (2023-07-03)
+
+- add more js events e.g. "onbeforetoggle"
+
 ### 4.1.41 (2023-02-12)
 
 - remove debug call (thx @gharlan [Gregor Harlan]
