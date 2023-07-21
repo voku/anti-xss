@@ -811,6 +811,17 @@ textContent>click me!',
     }
 
     /**
+     * https://hadess.io/xss-and-cors-bypass-in-youtube/
+     */
+    public function testXssAndCorsBypassYoutube()
+    {
+        $testString = '{"answers":{"check-your-knowledge-1":0,"check-your-knowledge-2":0,"check-your-knowledge-3":2,"check-your-knowledge-4":2,"check-your-knowledge-5":2},"entityId":"ypp_are-you-ready-to-apply-to-y<h1 onload=alert(1)>pp_quiz","localeCode":"en","submitRequired":true}';
+        $expected = '{"answers":{"check-your-knowledge-1":0,"check-your-knowledge-2":0,"check-your-knowledge-3":2,"check-your-knowledge-4":2,"check-your-knowledge-5":2},"entityId":"ypp_are-you-ready-to-apply-to-y<h1 >pp_quiz","localeCode":"en","submitRequired":true}';
+        
+        static::assertSame($expected, (new AntiXSS())->xss_clean($testString));
+    }
+    
+    /**
      * https://github.com/s0md3v/AwesomeXSS
      */
     public function testAwesomePayload()

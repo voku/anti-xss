@@ -7,7 +7,7 @@ use voku\helper\AntiXSS;
  *
  * @internal
  */
-final class XssTestArray extends \PHPUnit\Framework\TestCase
+final class XssArrayTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var AntiXSS
