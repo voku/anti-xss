@@ -1,5 +1,5 @@
 {
-  "name": "voku/anti-xss",
+  "name": "armo-team/anti-xss",
   "description": "anti xss-library",
   "type": "library",
   "keywords": [
@@ -23,7 +23,7 @@
   ],
   "require": {
     "php": ">=7.0.0",
-    "voku/portable-utf8": "~6.0.2"
+    "voku/portable-utf8": "~6.0.13"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0 || ~7.0 || ~9.0"
