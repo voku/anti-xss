@@ -42,6 +42,9 @@ final class AntiXSS
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
 
+    /**
+     * @deprecated will be removed in future versions
+     */
     const VOKU_ANTI_XSS_STYLE = 'voku::anti-xss::STYLE';
 
     /**
@@ -450,10 +453,7 @@ final class AntiXSS
      * @var string
      */
     private $_cache__evil_html_tags_str = '';
-
-    /**
-     * __construct()
-     */
+    
     public function __construct()
     {
         $this->_initNeverAllowedStr();
@@ -629,7 +629,7 @@ final class AntiXSS
         if (
             \strpos($str, '<') !== false
             &&
-            \preg_match($regExForHtmlTags, $str, $matches)
+            \preg_match($regExForHtmlTags, $str)
         ) {
             $str = (string) \preg_replace_callback(
                 $regExForHtmlTags,
@@ -1019,7 +1019,6 @@ final class AntiXSS
      */
     private static function _get_data($file)
     {
-        /** @noinspection PhpIncludeInspection */
         return include __DIR__ . '/data/' . $file . '.php';
     }
 
