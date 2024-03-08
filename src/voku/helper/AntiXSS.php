@@ -1527,7 +1527,7 @@ final class AntiXSS
     /**
      * Additional UTF-7 encoding function.
      *
-     * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
+     * @param array<int|string, string> $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
      *
      * @return string
      */
