@@ -408,6 +408,31 @@ final class AntiXSS
     ];
 
     /**
+     * @var string[]
+     */
+    private $_naughty_javascript_patterns = [
+        'alert',
+        'prompt',
+        'confirm',
+        'cmd',
+        'passthru',
+        'eval',
+        'exec',
+        'execScript',
+        'setTimeout',
+        'setInterval',
+        'setImmediate',
+        'expression',
+        'system',
+        'fopen',
+        'fsockopen',
+        'file',
+        'file_get_contents',
+        'readfile',
+        'unlink',
+    ];
+
+    /**
      * @var string
      */
     private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*?';
@@ -1724,30 +1749,8 @@ final class AntiXSS
     private function _sanitize_naughty_javascript($str)
     {
         if (\strpos($str, '(') !== false) {
-            $patterns = [
-                'alert',
-                'prompt',
-                'confirm',
-                'cmd',
-                'passthru',
-                'eval',
-                'exec',
-                'execScript',
-                'setTimeout',
-                'setInterval',
-                'setImmediate',
-                'expression',
-                'system',
-                'fopen',
-                'fsockopen',
-                'file',
-                'file_get_contents',
-                'readfile',
-                'unlink',
-            ];
-
             $found = false;
-            foreach ($patterns as $pattern) {
+            foreach ($this->_naughty_javascript_patterns as $pattern) {
                 if (\strpos($str, $pattern) !== false) {
                     $found = true;
 
@@ -1757,7 +1760,7 @@ final class AntiXSS
 
             if ($found === true) {
                 $str = (string) \preg_replace(
-                    '#(?<!\p{L})(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
+                    '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
                 );
@@ -1997,6 +2000,27 @@ final class AntiXSS
         $this->_do_not_close_html_tags = \array_diff(
             $this->_do_not_close_html_tags,
             \array_intersect($strings, $this->_do_not_close_html_tags)
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add some strings to the "_naughty_javascript_patterns"-array.
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function addNaughtyJavascriptPatterns(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_naughty_javascript_patterns = \array_merge(
+            $strings,
+            $this->_naughty_javascript_patterns
         );
 
         return $this;
