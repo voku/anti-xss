@@ -1,5 +1,5 @@
 {
-  "name": "ihasco/anti-xss",
+  "name": "voku/anti-xss",
   "description": "anti xss-library",
   "type": "library",
   "keywords": [
