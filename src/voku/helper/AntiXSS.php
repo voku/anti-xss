@@ -531,9 +531,7 @@ final class AntiXSS
                 },
                 $str
             );
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         }
 
         return $str;
@@ -641,9 +639,7 @@ final class AntiXSS
                 },
                 $str
             );
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         } else {
             $str = UTF8::rawurldecode($str);
         }
@@ -694,9 +690,7 @@ final class AntiXSS
         // remove all >= 4-Byte chars if needed
         if ($this->_stripe_4byte_chars) {
             $tmp = \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         }
 
         // backup the string (for later comparison)
@@ -776,9 +770,7 @@ final class AntiXSS
                 '$1' . $this->_replacement . '$2',
                 $str
             );
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         }
 
         // ---
@@ -796,9 +788,7 @@ final class AntiXSS
                 $replacement,
                 $str
             );
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         }
 
         if (!$this->_cache_never_allowed_regex_string || $regex_combined !== []) {
@@ -811,9 +801,7 @@ final class AntiXSS
                 $this->_replacement,
                 $str
             );
-            if ($tmp !== null) {
-                $str = (string) $tmp;
-            }
+            $str = $tmp ?? $str;
         }
 
         return $str;
@@ -873,9 +861,7 @@ final class AntiXSS
                             -1,
                             $temp_count
                         );
-                        if ($tmp !== null) {
-                            $str = (string) $tmp;
-                        }
+                        $str = $tmp ?? $str;
                         $count += $temp_count;
                     } while ($count);
 
@@ -1169,9 +1155,7 @@ final class AntiXSS
                             $search . '="' . $this->_replacement . '"',
                             $replacer
                         );
-                        if ($tmp !== null) {
-                            $replacer = (string) $tmp;
-                        }
+                        $replacer = $tmp ?? $replacer;
                     }
                 }
             }
@@ -1192,9 +1176,7 @@ final class AntiXSS
                         $search . '="' . $this->_replacement . '"',
                         $replacer
                     );
-                    if ($tmp !== null) {
-                        $replacer = (string) $tmp;
-                    }
+                    $replacer = $tmp ?? $replacer;
                 }
             }
         }
@@ -1436,9 +1418,7 @@ final class AntiXSS
                     -1,
                     $temp_count
                 );
-                if ($tmp !== null) {
-                    $str = (string) $tmp;
-                }
+                $str = $tmp ?? $str;
                 $count += $temp_count;
             } while ($count);
         }
