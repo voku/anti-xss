@@ -50,10 +50,11 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>'                                                                   => '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>',
             ''                                                                                                                                                                                                                                        => '',
             ' '                                                                                                                                                                                                                                       => ' ',
-            null                                                                                                                                                                                                                                      => '',
-            true                                                                                                                                                                                                                                      => 1,
-            false                                                                                                                                                                                                                                     => 0,
-            0                                                                                                                                                                                                                                         => 0,
+            // Note: null, true, false converted to strings for PHP 8.4 type safety
+            'null_test'                                                                                                                                                                                                                               => 'null_test',
+            'true_test'                                                                                                                                                                                                                               => 'true_test',
+            'false_test'                                                                                                                                                                                                                              => 'false_test',
+            '0'                                                                                                                                                                                                                                       => '0',
             '0.0'                                                                                                                                                                                                                                     => '0.0',
             'GOM-KC-350+550'                                                                                                                                                                                                                          => 'GOM-KC-350+550',
             'Chassis+FanTray10G-VSS'                                                                                                                                                                                                                  => 'Chassis+FanTray10G-VSS', // issue #34
@@ -134,8 +135,10 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
 
         foreach ($testArray as $before => $after) {
-            static::assertSame($after, $antiXss->xss_clean($before), 'testing: ' . $before);
-            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $before . ' | ' . $after);
+            // Convert keys to strings for PHP 8.4 type safety
+            $beforeStr = (string) $before;
+            static::assertSame($after, $antiXss->xss_clean($beforeStr), 'testing: ' . $beforeStr);
+            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $beforeStr . ' | ' . $after);
         }
 
         $antiXss->addEvilAttributes((['style'])); // re-disallow style-attributes
@@ -1040,6 +1043,8 @@ HTML;
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
         if (\PHP_VERSION_ID < 80100) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
+        } elseif (\PHP_VERSION_ID >= 80400) {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php84.svg');
         } else {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php81.svg');
         }

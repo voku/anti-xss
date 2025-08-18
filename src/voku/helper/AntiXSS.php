@@ -396,7 +396,7 @@ final class AntiXSS
     /**
      * @var bool|null
      */
-    private ?bool $_xss_found;
+    private ?bool $_xss_found = null;
 
     /**
      * @var string
@@ -1417,14 +1417,30 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
-                $regex =  '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius';
+                $regex =  '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
                 $strTmp = \preg_replace(
                     $regex,
-                    '$1$2' . $this->_replacement . '$3',
+                    $this->_replacement,
                     $str,
                     -1,
                     $temp_count
                 );
+            }
+            
+            // Additional cleanup for PHP 8.4 compatibility - handle UTF-8 remnants in quoted attributes
+            if (\PHP_VERSION_ID >= 80400) {
+                $regex = '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*"[^"]*"\s*([^>\s]*")/ius';
+                $strTmp = \preg_replace(
+                    $regex,
+                    $this->_replacement,
+                    $str,
+                    -1,
+                    $temp_count_extra
+                );
+                if ($strTmp !== null) {
+                    $str = $strTmp;
+                    $count += $temp_count_extra;
+                }
             }
             $str = (string)$strTmp;
             $count += $temp_count;
