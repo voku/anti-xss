@@ -1643,9 +1643,7 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
     
-    /**
-     * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
     public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange
@@ -1664,7 +1662,7 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssCleanSanitizeNaughtyJavascript(): array
+    public static function _dataForXssCleanSanitizeNaughtyJavascript(): array
     {
         return [
             // no XSS
@@ -1684,9 +1682,7 @@ nodeValue+outerHTML>/*click me', $str);
         ];
     }
 
-    /**
-     * @dataProvider _dataForXssXssCleanNeverAllowedAfterwards
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
     public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange
@@ -1705,7 +1701,7 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssXssCleanNeverAllowedAfterwards(): array
+    public static function _dataForXssXssCleanNeverAllowedAfterwards(): array
     {
         return [
             'valid string without attribute XSS #5' => ['<p>onend</p>', false],

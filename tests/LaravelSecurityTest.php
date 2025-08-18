@@ -25,7 +25,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function snippetProvider()
+    public static function snippetProvider()
     {
         return [
             [
@@ -229,11 +229,10 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @dataProvider snippetProvider
-     *
      * @param $input
      * @param $output
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('snippetProvider')]
     public function testCleanString($input, $output)
     {
         $security = $this->getSecurity();
