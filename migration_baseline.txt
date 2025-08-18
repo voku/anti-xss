@@ -1,0 +1,45 @@
+PHP 8.4 Migration Baseline - Anti-XSS Library
+==============================================
+
+PHPStan Analysis Results (Level: max)
+Total Errors Found: 24
+
+ERROR CATEGORIZATION:
+====================
+
+HIGH PRIORITY (Runtime Failures - Critical for PHP 8.4):
+- Line 480: Cannot access offset 'chunk' on mixed
+- Line 481: Cannot access offset 'split' on mixed  
+- Line 500: Cannot access offset '</script>'|'<script'|'base64'|'document'|'eval'|'javascript' on mixed
+- Line 500: Cannot access offset 'chunk' on mixed
+- Line 501: Cannot access offset '</script>'|'<script'|'base64'|'document'|'eval'|'javascript' on mixed
+- Line 501: Cannot access offset 'chunk' on mixed
+- Line 507: Cannot access offset '</script>'|'<script'|'base64'|'document'|'eval'|'javascript' on mixed
+- Line 507: Cannot access offset 'split' on mixed
+- Line 511: Argument of an invalid type mixed supplied for foreach, only iterables are supported
+- Line 511: Cannot access offset '</script>'|'<script'|'base64'|'document'|'eval'|'javascript' on mixed
+- Line 511: Cannot access offset 'split' on mixed
+- Line 512: Parameter #2 $needle of function stripos expects string, mixed given
+- Line 527: Cannot access offset '</script>'|'<script'|'base64'|'document'|'eval'|'javascript' on mixed
+- Line 527: Cannot access offset 'chunk' on mixed
+- Line 527: Parameter #3 $subject of function str_replace expects array<string>|string, mixed given
+- Line 966: Cannot access offset non-falsy-string on mixed
+- Line 973: Parameter #2 $replace of function str_ireplace expects array<string>|string, array<string, mixed> given
+- Line 1515: Parameter #1 $str of method expects string, array<int, string> given
+
+MEDIUM PRIORITY (Type Safety Issues):
+- Line 1022: Method _get_data() should return array<string, string> but returns mixed
+- Line 2276: PHPDoc tag @var with type TXssCleanInput of array<string>|string is not subtype of native type array<mixed>
+
+LOW PRIORITY (Code Quality/Always-True Conditions):
+- Line 589: Offset 'attr' on array in isset() always exists and is not nullable
+- Line 746: Strict comparison using === between null and null will always evaluate to true
+- Line 2288: Strict comparison using !== between null and true will always evaluate to true
+
+UNKNOWN PRIORITY (Needs Investigation):
+- Line 744: Cannot access offset 'keys' on mixed
+
+Total High Priority: 18 errors
+Total Medium Priority: 2 errors  
+Total Low Priority: 3 errors
+Total Unknown: 1 error
