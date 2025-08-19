@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection ReturnTypeCanBeDeclaredInspection */
-
 declare(strict_types=1);
 
 namespace voku\helper;
@@ -39,7 +37,7 @@ final class AntiXSS
         '\(?ScriptElement\)?\.',
         'd\s*a\s*t\s*a\s*:',
     ];
-    
+
     private array $_never_allowed_call_strings = [
         // default javascript
         'javascript',
@@ -412,7 +410,7 @@ final class AntiXSS
      * @var string
      */
     private string $_cache__evil_html_tags_str = '';
-    
+
     public function __construct()
     {
         $this->_initNeverAllowedStr();
@@ -437,11 +435,11 @@ final class AntiXSS
     {
         /** @var array{chunk: array<string, string>, split: array<string, array<int, string>>}|null $WORDS_CACHE */
         static $WORDS_CACHE = null;
-        
+
         if ($WORDS_CACHE === null) {
             $WORDS_CACHE = [
                 'chunk' => [],
-                'split' => []
+                'split' => [],
             ];
         }
 
@@ -485,7 +483,7 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
-            $str = (string) \preg_replace_callback(
+            $str = (string)\preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
                     ['\#', '\.'],
@@ -516,10 +514,10 @@ final class AntiXSS
     private function _compact_exploded_words_callback($matches): string
     {
         return $matches['before'] . \preg_replace(
-            '/' . $this->_spacing_regex . '/ius',
-            '',
-            $matches['word']
-        ) . $matches['after'];
+                '/' . $this->_spacing_regex . '/ius',
+                '',
+                $matches['word']
+            ) . $matches['after'];
     }
 
     /**
@@ -537,11 +535,11 @@ final class AntiXSS
         // protect GET variables without XSS in URLs
         $needProtection = true;
         if (strpos($str, '=') !== false) {
-            $strCopy = $str;
+            $strCopy    = $str;
             $matchesTmp = [];
             while (\preg_match("/[?|&]?[\p{L}\d_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/u", $strCopy, $matches)) {
                 $matchesTmp[] = $matches;
-                $strCopy = \str_replace($matches[0], '', $strCopy);
+                $strCopy      = \str_replace($matches[0], '', $strCopy);
 
                 if (\substr_count($strCopy, '"') <= 1 && \substr_count($strCopy, '\'') <= 1) {
                     break;
@@ -554,14 +552,17 @@ final class AntiXSS
                     if (isset($matches['attr'])) {
                         $tmpAntiXss = clone $this;
 
-                        $urlPartClean = $tmpAntiXss->xss_clean((string) $matches['attr']);
+                        $urlPartClean = $tmpAntiXss->xss_clean((string)$matches['attr']);
 
                         if ($tmpAntiXss->isXssFound() === true) {
                             $this->_xss_found = true;
 
-                            $urlPartClean = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $urlPartClean);
+                            $urlPartClean = \str_replace(['&lt;', '&gt;'],
+                                                         [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT],
+                                                         $urlPartClean);
                             $urlPartClean = UTF8::rawurldecode($urlPartClean);
-                            $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $urlPartClean);
+                            $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT],
+                                                         ['&lt;', '&gt;'], $urlPartClean);
 
                             $str = \str_ireplace($matches['attr'], $urlPartClean, $str);
                         }
@@ -596,7 +597,7 @@ final class AntiXSS
             &&
             \preg_match($regExForHtmlTags, $str)
         ) {
-            $str = (string) \preg_replace_callback(
+            $str = (string)\preg_replace_callback(
                 $regExForHtmlTags,
                 function ($matches) {
                     return $this->_decode_entity($matches);
@@ -617,15 +618,15 @@ final class AntiXSS
      */
     private function _do($str)
     {
-        $str = (string) $str;
-        $strInt = (int) $str;
-        $strFloat = (float) $str;
+        $str      = (string)$str;
+        $strInt   = (int)$str;
+        $strFloat = (float)$str;
         if (
             !$str
             ||
-            (string) $strInt === $str
+            (string)$strInt === $str
             ||
-            (string) $strFloat === $str
+            (string)$strFloat === $str
         ) {
             // no xss found
             if ($this->_xss_found !== true) {
@@ -652,46 +653,51 @@ final class AntiXSS
 
         // remove all >= 4-Byte chars if needed
         if ($this->_stripe_4byte_chars) {
-            $str = (string) \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
+            $str = (string)\preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
         }
 
         // backup the string (for later comparison)
         $str_backup = $str;
-        
+
         // process
+        $loop_count = 0;
+        $max_loops  = 500; // Prevent infinite loops while allowing thorough sanitization
+
         do {
             // backup the string (for the loop)
             $str_backup_loop = $str;
 
             // correct words before the browser will do it
             $str = $this->_compact_exploded_javascript($str);
-    
+
             // remove disallowed javascript calls in links, images etc.
             $str = $this->_remove_disallowed_javascript($str);
-    
+
             // remove strings that are never allowed
             $str = $this->_do_never_allowed($str);
-    
+
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
-    
+
             // sanitize naughty JavaScript elements
             $str = $this->_sanitize_naughty_javascript($str);
-    
+
             // sanitize naughty HTML elements
             $str = $this->_sanitize_naughty_html($str);
-    
+
             // final clean up
             //
             // -> This adds a bit of extra precaution in case something got through the above filters.
             $str = $this->_do_never_allowed_afterwards($str);
-        } while ($str_backup_loop !== $str);
+
+            $loop_count++;
+        } while ($str_backup_loop !== $str && $loop_count < $max_loops);
 
         // check for xss
         if ($this->_xss_found !== true) {
             $this->_xss_found = !($str_backup === $str);
         }
-        
+
         return $str;
     }
 
@@ -727,7 +733,7 @@ final class AntiXSS
             }
         }
         if (\count($replaceNeverAllowedCall) > 0) {
-            $str = (string) \preg_replace(
+            $str = (string)\preg_replace(
                 '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
                 $str
@@ -744,7 +750,7 @@ final class AntiXSS
                 continue;
             }
 
-            $str = (string) \preg_replace(
+            $str = (string)\preg_replace(
                 '#' . $regex . '#iUus',
                 $replacement,
                 $str
@@ -756,7 +762,7 @@ final class AntiXSS
         }
 
         if ($this->_cache_never_allowed_regex_string) {
-            $str = (string) \preg_replace(
+            $str = (string)\preg_replace(
                 '#' . $this->_cache_never_allowed_regex_string . '#ius',
                 $this->_replacement,
                 $str
@@ -808,12 +814,16 @@ final class AntiXSS
                         continue;
                     }
 
-                    $regex = '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
+                    $regex = '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|',
+                                                                        $events) . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
+
+                    $inner_loop_count = 0;
+                    $max_inner_loops  = 10;
 
                     do {
                         $count = $temp_count = 0;
 
-                        $str = (string) \preg_replace(
+                        $str   = (string)\preg_replace(
                             '#' . $regex . '#ius',
                             '$1' . $this->_replacement . '$2',
                             $str,
@@ -821,14 +831,15 @@ final class AntiXSS
                             $temp_count
                         );
                         $count += $temp_count;
-                    } while ($count);
+                        $inner_loop_count++;
+                    } while ($count && $inner_loop_count < $max_inner_loops);
 
                     break;
                 }
             }
         }
 
-        return (string) \str_ireplace(
+        return (string)\str_ireplace(
             $this->_never_allowed_str_afterwards,
             $this->_replacement,
             $str
@@ -842,7 +853,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _entity_decode($str): string
+    private function _entity_decode(string $str): string
     {
         static $HTML_ENTITIES_CACHE;
 
@@ -924,12 +935,12 @@ final class AntiXSS
                 );
             }
 
-            $search = [];
+            $search  = [];
             $replace = [];
             foreach ($matches['html_entity'] as $match) {
                 $match .= ';';
                 if (isset($HTML_ENTITIES_CACHE[$match])) {
-                    $search[$match] = $match;
+                    $search[$match]  = $match;
                     $replace[$match] = $HTML_ENTITIES_CACHE[$match];
                 }
             }
@@ -949,17 +960,17 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _filter_attributes($str): string
+    private function _filter_attributes(string $str): string
     {
         if ($str === '') {
             return '';
         }
 
-        if (strpos($str, '=') !== false) {
+        if (str_contains($str, '=')) {
             $matchesTmp = [];
             while (\preg_match('#\s*[\p{L}\d_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#u', $str, $matches)) {
                 $matchesTmp[] = $matches[0];
-                $str = \str_replace($matches[0], '', $str);
+                $str          = \str_replace($matches[0], '', $str);
 
                 if (\substr_count($str, '"') <= 1 && \substr_count($str, '\'') <= 1) {
                     break;
@@ -982,7 +993,7 @@ final class AntiXSS
      *
      * @phpstan-return array<string, string>
      */
-    private static function _get_data($file): array
+    private static function _get_data(string $file): array
     {
         return include __DIR__ . '/data/' . $file . '.php';
     }
@@ -1021,16 +1032,16 @@ final class AntiXSS
     {
         $this->_never_allowed_regex = [
             // default javascript
-            '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $this->_replacement,
+            '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)'          => $this->_replacement,
             // data-attribute + base64
             "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
             // old IE, old Netscape
-            'expression\s*(?:\(|&\#40;)' => $this->_replacement,
+            'expression\s*(?:\(|&\#40;)'                                                    => $this->_replacement,
             // src="js"
-            'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $this->_replacement,
+            'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})'                                  => $this->_replacement,
             // comments
-            '<!--(.*)-->' => '&lt;!--$1--&gt;',
-            '<!--'        => '&lt;!--',
+            '<!--(.*)-->'                                                                   => '&lt;!--$1--&gt;',
+            '<!--'                                                                          => '&lt;!--',
         ];
     }
 
@@ -1078,11 +1089,11 @@ final class AntiXSS
 
         // filter for "$search"-attributes
         if (\stripos($match[1], $search . '=') !== false) {
-            $pattern = '#' . $search . '=(?<wrapper>[\'|"])(?<link>.*)(?:\g{wrapper})#isU';
-            $matchInner = [];
+            $pattern           = '#' . $search . '=(?<wrapper>[\'|"])(?<link>.*)(?:\g{wrapper})#isU';
+            $matchInner        = [];
             $foundSomethingBad = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
-                $needProtection = true;
+                $needProtection     = true;
                 $matchInner['link'] = \str_replace(' ', '%20', $matchInner['link']);
 
                 if (
@@ -1093,7 +1104,8 @@ final class AntiXSS
                     (
                         \filter_var($matchInner['link'], \FILTER_VALIDATE_URL) !== false
                         ||
-                        \filter_var('https://localhost.localdomain/' . $matchInner['link'], \FILTER_VALIDATE_URL) !== false
+                        \filter_var('https://localhost.localdomain/' . $matchInner['link'],
+                                    \FILTER_VALIDATE_URL) !== false
                     )
                 ) {
                     $needProtection = false;
@@ -1102,13 +1114,13 @@ final class AntiXSS
                 if ($needProtection) {
                     $tmpAntiXss = clone $this;
 
-                    $tmpAntiXss->xss_clean((string) $matchInner[0]);
+                    $tmpAntiXss->xss_clean((string)$matchInner[0]);
 
                     if ($tmpAntiXss->isXssFound() === true) {
                         $foundSomethingBad = true;
-                        $this->_xss_found = true;
+                        $this->_xss_found  = true;
 
-                        $replacer = (string) \preg_replace(
+                        $replacer = (string)\preg_replace(
                             $pattern,
                             $search . '="' . $this->_replacement . '"',
                             $replacer
@@ -1125,10 +1137,11 @@ final class AntiXSS
                         $patternTmp .= $callTmp . ':|';
                     }
                 }
-                $pattern = '#' . $search . '=.*(?:' . $patternTmp . \implode('|', $this->_never_allowed_js_callback_regex) . ')#ius';
+                $pattern    = '#' . $search . '=.*(?:' . $patternTmp . \implode('|',
+                                                                                $this->_never_allowed_js_callback_regex) . ')#ius';
                 $matchInner = [];
                 if (\preg_match($pattern, $match[1], $matchInner)) {
-                    $replacer = (string) \preg_replace(
+                    $replacer = (string)\preg_replace(
                         $pattern,
                         $search . '="' . $this->_replacement . '"',
                         $replacer
@@ -1136,7 +1149,7 @@ final class AntiXSS
                 }
             }
         }
-        
+
         if (
             str_ends_with($match[0], ' />')
             &&
@@ -1154,9 +1167,9 @@ final class AntiXSS
         ) {
             $replacer .= '/';
         }
-        
-        
-        return \str_ireplace($match[1], $replacer, (string) $match[0]);
+
+
+        return \str_ireplace($match[1], $replacer, (string)$match[0]);
     }
 
     /**
@@ -1203,6 +1216,9 @@ final class AntiXSS
      */
     private function _remove_disallowed_javascript(string $str): string
     {
+        $loop_count = 0;
+        $max_loops  = 50;
+
         do {
             $original = $str;
 
@@ -1233,7 +1249,8 @@ final class AntiXSS
                         if (
                             str_contains($matches[1], 'base64')
                             &&
-                            \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
+                            \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus",
+                                        $matches[1])
                         ) {
                             return $matches[0];
                         }
@@ -1243,13 +1260,14 @@ final class AntiXSS
                     $str
                 );
                 if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
+                    $strTmp = (string)\preg_replace_callback(
                         '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                         function ($matches) {
                             if (
                                 str_contains($matches[1], 'base64')
                                 &&
-                                \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
+                                \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus",
+                                            $matches[1])
                             ) {
                                 return $matches[0];
                             }
@@ -1271,7 +1289,7 @@ final class AntiXSS
                     $str
                 );
                 if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
+                    $strTmp = (string)\preg_replace_callback(
                         '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                         function ($matches) {
                             return $this->_js_src_removal_callback($matches);
@@ -1303,7 +1321,7 @@ final class AntiXSS
             }
 
             if (\stripos($str, '<source') !== false) {
-                $str = (string) \preg_replace_callback(
+                $str = (string)\preg_replace_callback(
                     '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
@@ -1314,7 +1332,7 @@ final class AntiXSS
 
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
+                $str = (string)\preg_replace(
                     '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
                     $this->_replacement,
                     $str
@@ -1323,15 +1341,16 @@ final class AntiXSS
 
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
+                $str = (string)\preg_replace(
                     '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
                     $this->_replacement,
                     $str
                 );
             }
-        } while ($original !== $str);
+            $loop_count++;
+        } while ($original !== $str && $loop_count < $max_loops);
 
-        return (string) $str;
+        return (string)$str;
     }
 
     /**
@@ -1364,10 +1383,13 @@ final class AntiXSS
             &&
             \in_array('style', $this->_evil_attributes_regex, true)
         ) {
+            $style_loop_count = 0;
+            $max_style_loops  = 50;
+
             do {
                 $count = $temp_count = 0;
 
-                $str = (string) \preg_replace(
+                $str   = (string)\preg_replace(
                     '/(<[^>]+)(?<!\p{L})(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/iu',
                     '$1' . $this->_replacement,
                     $str,
@@ -1375,19 +1397,24 @@ final class AntiXSS
                     $temp_count
                 );
                 $count += $temp_count;
-            } while ($count);
+                $style_loop_count++;
+            } while ($count && $style_loop_count < $max_style_loops);
         }
 
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
-            $this->_cache_evil_attributes_regex_string .= '|' . \implode('\w*|', $this->_never_allowed_on_events_afterwards);
+            $this->_cache_evil_attributes_regex_string .= '|' . \implode('\w*|',
+                                                                         $this->_never_allowed_on_events_afterwards);
         }
+
+        $inner_loop_count = 0;
+        $max_inner_loops  = 50;
 
         do {
             $count = $temp_count = 0;
 
             // find occurrences of illegal attribute strings with and without quotes (" and ' are octal quotes)
-            $regex = '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")(.*)/ius';
+            $regex  = '/(.*)((?:<[^>]+)(?<!\p{L}))(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")(.*)/ius';
             $strTmp = \preg_replace(
                 $regex,
                 '$1$2' . $this->_replacement . '$3$4',
@@ -1396,7 +1423,7 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
-                $regex = '/(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")/ius';
+                $regex  = '/(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")/ius';
                 $strTmp = \preg_replace(
                     $regex,
                     $this->_replacement,
@@ -1405,10 +1432,10 @@ final class AntiXSS
                     $temp_count
                 );
             }
-            $str = (string)$strTmp;
+            $str   = (string)$strTmp;
             $count += $temp_count;
 
-            $regex =  '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
+            $regex  = '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
             $strTmp = \preg_replace(
                 $regex,
                 '$1$2' . $this->_replacement . '$3',
@@ -1417,7 +1444,7 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
-                $regex =  '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
+                $regex  = '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius';
                 $strTmp = \preg_replace(
                     $regex,
                     $this->_replacement,
@@ -1426,10 +1453,10 @@ final class AntiXSS
                     $temp_count
                 );
             }
-            
+
             // Additional cleanup for PHP 8.4 compatibility - handle UTF-8 remnants in quoted attributes
             if (\PHP_VERSION_ID >= 80400) {
-                $regex = '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*"[^"]*"\s*([^>\s]*")/ius';
+                $regex  = '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*"[^"]*"\s*([^>\s]*")/ius';
                 $strTmp = \preg_replace(
                     $regex,
                     $this->_replacement,
@@ -1438,15 +1465,16 @@ final class AntiXSS
                     $temp_count_extra
                 );
                 if ($strTmp !== null) {
-                    $str = $strTmp;
+                    $str   = $strTmp;
                     $count += $temp_count_extra;
                 }
             }
-            $str = (string)$strTmp;
+            $str   = (string)$strTmp;
             $count += $temp_count;
-        } while ($count);
+            $inner_loop_count++;
+        } while ($count && $inner_loop_count < $max_inner_loops);
 
-        return (string) $str;
+        return (string)$str;
     }
 
     /**
@@ -1462,7 +1490,7 @@ final class AntiXSS
             return $str;
         }
 
-        return (string) \preg_replace_callback(
+        return (string)\preg_replace_callback(
             '#\+([\p{L}\d]+)-#iu',
             function ($matches) {
                 return $this->_repack_utf7_callback($matches);
@@ -1490,7 +1518,7 @@ final class AntiXSS
             return $strings[0];
         }
 
-        $string = (string) \preg_replace_callback(
+        $string = (string)\preg_replace_callback(
             '/^((?:\x00.)*?)((?:[^\x00].)+)/us',
             function ($matches) {
                 return $this->_repack_utf7_callback_back($matches);
@@ -1498,7 +1526,7 @@ final class AntiXSS
             $strTmp
         );
 
-        return (string) \preg_replace(
+        return (string)\preg_replace(
             '/\x00(.)/us',
             '$1',
             $string
@@ -1540,7 +1568,9 @@ final class AntiXSS
     private function _sanitize_naughty_html(string $str): string
     {
         // init
-        $strEnd = '';
+        $strEnd     = '';
+        $loop_count = 0;
+        $max_loops  = 50; // Prevent infinite loops while allowing thorough sanitization
 
         do {
             $original = $str;
@@ -1557,7 +1587,7 @@ final class AntiXSS
                 $this->_cache__evil_html_tags_str = \implode('|', $this->_evil_html_tags);
             }
 
-            $str = (string) \preg_replace_callback(
+            $str = (string)\preg_replace_callback(
                 '#<(?<start>/*\s*)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
                 function ($matches) {
                     return $this->_sanitize_naughty_html_callback($matches);
@@ -1577,8 +1607,9 @@ final class AntiXSS
                 return '';
             }
 
-            $str = (string) \preg_replace_callback(
-                '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS', // tags without comments
+            $str = (string)\preg_replace_callback(
+                '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS',
+                // tags without comments
                 function ($matches) {
                     if (
                         $this->_do_not_close_html_tags !== []
@@ -1596,13 +1627,14 @@ final class AntiXSS
             );
 
             if ($str === $strEnd) {
-                return (string) $str;
+                return (string)$str;
             }
 
             $strEnd = $str;
-        } while ($original !== $str);
+            $loop_count++;
+        } while ($original !== $str && $loop_count < $max_loops);
 
-        return (string) $str;
+        return (string)$str;
     }
 
     /**
@@ -1614,7 +1646,8 @@ final class AntiXSS
     {
         if (empty($matches['closeTag'])) {
             // allow e.g. "< $2.20" and e.g. "< 1 year"
-            if (\preg_match('/^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]*$|^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]+\p{L}*\s*$/u', $matches[1])) {
+            if (\preg_match('/^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]*$|^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]+\p{L}*\s*$/u',
+                            $matches[1])) {
                 return '<' . \str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[1]);
             }
 
@@ -1737,7 +1770,7 @@ final class AntiXSS
             }
 
             if ($found === true) {
-                $str = (string) \preg_replace(
+                $str = (string)\preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
@@ -1745,7 +1778,7 @@ final class AntiXSS
             }
         }
 
-        return (string) $str;
+        return (string)$str;
     }
 
     /**
@@ -1935,7 +1968,7 @@ final class AntiXSS
 
         return $this;
     }
-    
+
     /**
      * Add some strings to the "_never_allowed_call_strings"-array.
      *
@@ -1987,7 +2020,7 @@ final class AntiXSS
      * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
      *
      * @return bool|null
-     *                   <p>Will return null if the "xss_clean()" wasn't running at all.</p>
+     * <p>Will return null if the "xss_clean()" wasn't running at all.</p>
      */
     public function isXssFound(): ?bool
     {
@@ -2166,9 +2199,9 @@ final class AntiXSS
      *
      * @return $this
      */
-    public function setReplacement($string): self
+    public function setReplacement(string $string): self
     {
-        $this->_replacement = (string) $string;
+        $this->_replacement = $string;
 
         $this->_initNeverAllowedStr();
         $this->_initNeverAllowedRegex();
@@ -2190,7 +2223,7 @@ final class AntiXSS
      */
     public function setStripe4byteChars(bool $bool): self
     {
-        $this->_stripe_4byte_chars = (bool) $bool;
+        $this->_stripe_4byte_chars = $bool;
 
         return $this;
     }
@@ -2213,13 +2246,6 @@ final class AntiXSS
      *   It's not something that should be used for general
      *   runtime processing.
      * </p>
-     *
-     * @see http://channel.bitflux.ch/wiki/XSS_Prevention
-     *    Based in part on some code and ideas from Bitflux.
-     * @see http://ha.ckers.org/xss.html
-     *    To help develop this script I used this great list of
-     *    vulnerabilities along with a few other hacks I've
-     *    harvested from examining vulnerabilities in other programs.
      *
      * @param string|string[]        $str
      *                             <p>input data e.g. string or array of strings</p>
@@ -2244,7 +2270,7 @@ final class AntiXSS
                 } else {
                     $alreadyFoundXss = false;
                 }
-                
+
                 $value = $this->xss_clean($value);
 
                 /* @phpstan-ignore-next-line | _xss_found is maybe changed via "xss_clean" */
@@ -2260,10 +2286,14 @@ final class AntiXSS
         $old_str_backup = $str;
 
         // process
+        $xss_loop_count = 0;
+        $max_xss_loops  = 500;
+
         do {
             $old_str = $str;
-            $str = $this->_do($str);
-        } while ($old_str !== $str);
+            $str     = $this->_do($str);
+            $xss_loop_count++;
+        } while ($old_str !== $str && $xss_loop_count < $max_xss_loops);
 
         // keep the old value, if there wasn't any XSS attack
         if ($this->_xss_found !== true) {
