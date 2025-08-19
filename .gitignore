@@ -12,3 +12,4 @@ build/logs/
 
 # phpcs fixer
 .php_cs.cache
+.github
