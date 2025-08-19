@@ -1255,7 +1255,6 @@ nodeValue+outerHTML>/*click me', $str);
 
     public function testXssFileV5(): void
     {
-        $this->markTestIncomplete('Fix me');
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v5.html');
         $testString = \str_replace(["\n\r", "\r\n", "\n"], "\n", $testString);
         $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v5_clean.html');
