@@ -235,13 +235,6 @@ final class UTF8
     private static $CHR;
 
     /**
-     * __construct()
-     */
-    public function __construct()
-    {
-    }
-
-    /**
      * Return the character at the specified position: $str[1] like functionality.
      *
      * EXAMPLE: <code>UTF8::access('fòô', 1); // 'ò'</code>
@@ -1234,7 +1227,7 @@ final class UTF8
      *                      <p>A decoded MIME field on success,
      *                      or false if an error occurs during the decoding.</p>
      */
-    public static function decode_mimeheader(string $str, string $encoding = 'UTF-8')
+    public static function decode_mimeheader(string $str, string $encoding = 'UTF-8'): false|string
     {
         if ($encoding !== 'UTF-8' && $encoding !== 'CP850') {
             $encoding = self::normalize_encoding($encoding, 'UTF-8');
@@ -1924,7 +1917,7 @@ final class UTF8
      *
      * @psalm-pure
      *
-     * @return mixed
+     * @return string|array|object
      *
      * @template TFilter
      * @phpstan-param TFilter     $var
@@ -1934,7 +1927,7 @@ final class UTF8
         object|array|string $var,
         int                 $normalization_form = \Normalizer::NFC,
         string              $leading_combining = '◌'
-    ): mixed {
+    ): string|array|object {
         switch (\gettype($var)) {
             case 'object':
             case 'array':
@@ -2175,10 +2168,10 @@ final class UTF8
      *               <p>The filtered data, or <b>FALSE</b> if the filter fails.</p>
      */
     public static function filter_var(
-        $variable,
-        int $filter = \FILTER_DEFAULT,
-        $options = 0
-    ) {
+        float|int|string|null $variable,
+        int                   $filter = \FILTER_DEFAULT,
+        array|int             $options = 0
+    ): mixed {
         /**
          * @psalm-suppress ImpureFunctionCall - we use func_num_args only for args count matching here
          */
@@ -2217,7 +2210,7 @@ final class UTF8
      * @param array<string, mixed>     $data            <p>
      *                                                  An array with string keys containing the data to filter.
      *                                                  </p>
-     * @param array<string, mixed>|int $definition      [optional] <p>
+     * @param int|array<string, mixed> $definition      [optional] <p>
      *                                                  An array defining the arguments. A valid key is a string
      *                                                  containing a variable name and a valid value is either a
      *                                                  filter type, or an
@@ -2246,10 +2239,10 @@ final class UTF8
      *                                         </p>
      */
     public static function filter_var_array(
-        array $data,
-              $definition = 0,
-        bool  $add_empty = true
-    ) {
+        array     $data,
+        array|int $definition = 0,
+        bool      $add_empty = true
+    ): array|false|null {
         /**
          * @psalm-suppress ImpureFunctionCall - we use func_num_args only for args count matching here
          */
@@ -2400,7 +2393,7 @@ final class UTF8
      * @phpstan-param TFixUtf8 $str
      * @phpstan-return TFixUtf8
      */
-    public static function fix_utf8($str)
+    public static function fix_utf8(array|string $str): array|string
     {
         if (\is_array($str)) {
             foreach ($str as &$v) {
@@ -2726,13 +2719,9 @@ final class UTF8
      *
      * @return non-empty-string
      */
-    public static function get_unique_string($extra_entropy = '', bool $use_md5 = true): string
+    public static function get_unique_string(int|string $extra_entropy = '', bool $use_md5 = true): string
     {
-        try {
-            $rand_int = \random_int(0, \mt_getrandmax());
-        } catch (\Exception $e) {
-            $rand_int = \mt_rand(0, \mt_getrandmax());
-        }
+        $rand_int = \random_int(0, \mt_getrandmax());
 
         $unique_helper = $rand_int .
                          \session_id() .
@@ -2820,7 +2809,7 @@ final class UTF8
      * @return string
      *                      <p>One single UTF-8 character.</p>
      */
-    public static function hex_to_chr(string $hexdec)
+    public static function hex_to_chr(string $hexdec): string
     {
         /** @noinspection PhpUsageOfSilenceOperatorInspection - Invalid characters passed for attempted conversion, these have been ignored */
         return self::decimal_to_chr((int)@\hexdec($hexdec));
@@ -2918,10 +2907,6 @@ final class UTF8
                 return $return;
             }
         }
-
-        //
-        // fallback via vanilla php
-        //
 
         return \implode(
             '',
@@ -3557,7 +3542,7 @@ final class UTF8
      * @return bool
      *              <p>Whether or not $str is base64 encoded.</p>
      */
-    public static function is_base64($str, bool $empty_string_is_valid = false): bool
+    public static function is_base64(?string $str, bool $empty_string_is_valid = false): bool
     {
         if (
             !$empty_string_is_valid
@@ -3588,7 +3573,7 @@ final class UTF8
      *
      * @return bool
      */
-    public static function is_binary($input, bool $strict = false): bool
+    public static function is_binary(int|string $input, bool $strict = false): bool
     {
         $input = (string)$input;
         if ($input === '') {
@@ -3638,7 +3623,7 @@ final class UTF8
      *
      * @return bool
      */
-    public static function is_binary_file($file): bool
+    public static function is_binary_file(string $file): bool
     {
         // init
         $block = '';
@@ -3689,7 +3674,7 @@ final class UTF8
      * @return bool
      *              <p><strong>true</strong> if the $utf8_chr is Byte Order Mark, <strong>false</strong> otherwise.</p>
      */
-    public static function is_bom($str): bool
+    public static function is_bom(string $str): bool
     {
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach (self::$BOM as $bom_string => &$bom_byte_length) {
@@ -3707,14 +3692,14 @@ final class UTF8
      * A variable is considered empty if it does not exist or if its value equals FALSE.
      * empty() does not generate a warning if the variable does not exist.
      *
-     * @param array<array-key, mixed>|float|int|string $str
+     * @param float|int|string|array<array-key, mixed> $str
      *
      * @psalm-pure
      *
      * @return bool
      *              <p>Whether or not $str is empty().</p>
      */
-    public static function is_empty($str): bool
+    public static function is_empty(array|float|int|string $str): bool
     {
         return empty($str);
     }
@@ -3940,7 +3925,7 @@ final class UTF8
      *                   <strong>1</strong> for UTF-16LE,<br>
      *                   <strong>2</strong> for UTF-16BE
      */
-    public static function is_utf16($str, bool $check_if_string_is_binary = true)
+    public static function is_utf16(string $str, bool $check_if_string_is_binary = true): false|int
     {
         // init
         $str       = (string)$str;
@@ -4034,7 +4019,7 @@ final class UTF8
      *                   <strong>1</strong> for UTF-32LE,<br>
      *                   <strong>2</strong> for UTF-32BE
      */
-    public static function is_utf32($str, bool $check_if_string_is_binary = true)
+    public static function is_utf32(string $str, bool $check_if_string_is_binary = true): false|int
     {
         // init
         $str       = (string)$str;
@@ -4123,7 +4108,7 @@ final class UTF8
      *
      * @return bool
      */
-    public static function is_utf8($str, bool $strict = false): bool
+    public static function is_utf8(array|int|string|null $str, bool $strict = false): bool
     {
         if (\is_array($str)) {
             foreach ($str as &$v) {
@@ -4182,7 +4167,7 @@ final class UTF8
         bool   $assoc = false,
         int    $depth = 512,
         int    $options = 0
-    ) {
+    ): mixed {
         $json = self::filter($json);
 
         if (self::$SUPPORT['json'] === false) {
@@ -4238,7 +4223,7 @@ final class UTF8
      *                      <p>A JSON encoded <strong>string</strong> on success or<br>
      *                      <strong>FALSE</strong> on failure.</p>
      */
-    public static function json_encode($value, int $options = 0, int $depth = 512)
+    public static function json_encode(mixed $value, int $options = 0, int $depth = 512): false|string
     {
         $value = self::filter($value);
 
@@ -4468,7 +4453,7 @@ final class UTF8
      *
      * @return string|null the character with the highest code point than others, returns null on failure or empty input
      */
-    public static function max($arg)
+    public static function max(array|string $arg): ?string
     {
         if (\is_array($arg)) {
             $arg = \implode('', $arg);
@@ -4536,7 +4521,7 @@ final class UTF8
      * @return string|null
      *                     <p>The character with the lowest code point than others, returns null on failure or empty input.</p>
      */
-    public static function min($arg)
+    public static function min(array|string $arg): ?string
     {
         if (\is_array($arg)) {
             $arg = \implode('', $arg);
@@ -4558,7 +4543,7 @@ final class UTF8
      * EXAMPLE: <code>UTF8::normalize_encoding('UTF8'); // 'UTF-8'</code>
      *
      * @param mixed                                     $encoding <p>e.g.: ISO, UTF8, WINDOWS-1251 etc.</p>
-     * @param mixed                                     $fallback <p>e.g.: UTF-8</p>
+     * @param mixed|string                              $fallback <p>e.g.: UTF-8</p>
      *
      * @psalm-pure
      *
@@ -4569,7 +4554,7 @@ final class UTF8
      * @phpstan-param string|TNormalizeEncodingFallback $fallback
      * @phpstan-return string|TNormalizeEncodingFallback
      */
-    public static function normalize_encoding($encoding, $fallback = '')
+    public static function normalize_encoding(mixed $encoding, mixed $fallback = ''): mixed
     {
         /**
          * @psalm-suppress ImpureStaticVariable
@@ -4727,7 +4712,7 @@ final class UTF8
      * @return string
      *                <p>A string with normalized line ending.</p>
      */
-    public static function normalize_line_ending(string $str, $replacer = "\n"): string
+    public static function normalize_line_ending(string $str, array|string $replacer = "\n"): string
     {
         return \str_replace(["\r\n", "\r", "\n"], $replacer, $str);
     }
@@ -4795,7 +4780,7 @@ final class UTF8
      *             <p>Unicode code point of the given character,<br>
      *             0 on invalid UTF-8 byte sequence</p>
      */
-    public static function ord($chr, string $encoding = 'UTF-8'): int
+    public static function ord(string $chr, string $encoding = 'UTF-8'): int
     {
         /**
          * @psalm-suppress ImpureStaticVariable
@@ -4887,7 +4872,7 @@ final class UTF8
      * @return bool
      *              <p>Will return <strong>false</strong> if php can't parse the string and we haven't any $result.</p>
      */
-    public static function parse_str(string $str, &$result, bool $clean_utf8 = false): bool
+    public static function parse_str(string $str, array &$result, bool $clean_utf8 = false): bool
     {
         if ($clean_utf8) {
             $str = self::clean($str);
@@ -4946,11 +4931,11 @@ final class UTF8
      * @return list<string>
      */
     public static function range(
-        $var1,
-        $var2,
-        bool $use_ctype = true,
-        string $encoding = 'UTF-8',
-        $step = 1
+        int|string $var1,
+        int|string $var2,
+        bool       $use_ctype = true,
+        string     $encoding = 'UTF-8',
+        float|int  $step = 1
     ): array {
         if (!$var1 || !$var2) {
             return [];
@@ -5028,7 +5013,7 @@ final class UTF8
      *
      * @return mixed
      */
-    public static function getUrlParamFromArray(string $param, array $data)
+    public static function getUrlParamFromArray(string $param, array $data): mixed
     {
         /**
          * @param array<array-key, mixed> $searchArray
@@ -5233,7 +5218,7 @@ final class UTF8
      * @return string
      *                <p>A string with removed duplicates.</p>
      */
-    public static function remove_duplicates(string $str, $what = ' '): string
+    public static function remove_duplicates(string $str, array|string $what = ' '): string
     {
         if (\is_string($what)) {
             $what = [$what];
@@ -5527,10 +5512,10 @@ final class UTF8
      *                <p>A string with replaced parts.</p>
      */
     public static function replace_all(
-        string $str,
-        array  $search,
-               $replacement,
-        bool   $case_sensitive = true
+        string       $str,
+        array        $search,
+        array|string $replacement,
+        bool         $case_sensitive = true
     ): string {
         if ($case_sensitive) {
             return \str_replace($search, $replacement, $str);
@@ -5638,35 +5623,6 @@ final class UTF8
         }
 
         return self::regex_replace($str, $pattern, '');
-    }
-
-    /**
-     * WARNING: Print native UTF-8 support (libs) by default, e.g. for debugging.
-     *
-     * @param bool $useEcho
-     *
-     * @psalm-pure
-     *
-     * @return string|void
-     *
-     * @phpstan-return ($useEcho is true ? void : string)
-     */
-    public static function showSupport(bool $useEcho = true)
-    {
-        // init
-        $html = '';
-
-        $html .= '<pre>';
-        foreach (self::$SUPPORT as $key => &$value) {
-            $html .= $key . ' - ' . \print_r($value, true) . "\n<br>";
-        }
-        $html .= '</pre>';
-
-        if ($useEcho) {
-            echo $html;
-        }
-
-        return $html;
     }
 
     /**
@@ -6071,7 +6027,7 @@ final class UTF8
      *                      otherwise it will return false e.g. for BINARY or not detected encoding.
      *                      </p>
      */
-    public static function str_detect_encoding($str)
+    public static function str_detect_encoding(string $str): false|string
     {
         // init
         $str = (string)$str;
@@ -6314,7 +6270,7 @@ final class UTF8
      *
      * @return string
      */
-    public static function str_humanize($str): string
+    public static function str_humanize(string $str): string
     {
         $str = \str_replace(
             [
@@ -9061,7 +9017,7 @@ final class UTF8
      * @return false|string
      *                      <p>false on error</p>
      */
-    public static function str_to_binary(string $str)
+    public static function str_to_binary(string $str): false|string
     {
         $value = \unpack('H*', $str);
         if ($value === false) {
@@ -10954,11 +10910,11 @@ final class UTF8
      *                   string.<br>If needle is not found, it returns false.</p>
      */
     public static function strrpos(
-        string $haystack,
-               $needle,
-        int    $offset = 0,
-        string $encoding = 'UTF-8',
-        bool   $clean_utf8 = false
+        string     $haystack,
+        int|string $needle,
+        int        $offset = 0,
+        string     $encoding = 'UTF-8',
+        bool       $clean_utf8 = false
     ): false|int {
         if ($haystack === '') {
             if (\PHP_VERSION_ID >= 80000) {
@@ -12900,14 +12856,14 @@ final class UTF8
      * Returns the given input as string, or null if the input isn't int|float|string
      * and do not implement the "__toString()" method.
      *
-     * @param float|int|object|string|null $input
+     * @param float|object|int|string|null $input
      *
      * @psalm-pure
      *
      * @return string|null
      *                     <p>null if the input isn't int|float|string and has no "__toString()" method</p>
      */
-    public static function to_string($input): ?string
+    public static function to_string(float|object|int|string|null $input): ?string
     {
         if ($input === null) {
             return null;
