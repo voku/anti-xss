@@ -2725,9 +2725,9 @@ final class UTF8
 
         $unique_helper = (string)$rand_int .
                          (string)\session_id() .
-                         ($_SERVER['REMOTE_ADDR'] ?? '') .
-                         ($_SERVER['SERVER_ADDR'] ?? '') .
-                         $extra_entropy;
+                         (string)($_SERVER['REMOTE_ADDR'] ?? '') .
+                         (string)($_SERVER['SERVER_ADDR'] ?? '') .
+                         (string)$extra_entropy;
 
         $unique_string = \uniqid($unique_helper, true);
 
@@ -13988,8 +13988,8 @@ final class UTF8
         if (isset(self::$WIN1252_TO_UTF8[$ordC1])) { // found in Windows-1252 special cases
             $buf .= (string)self::$WIN1252_TO_UTF8[$ordC1];
         } else {
-            $cc1 = (string)self::$CHR[(int)($ordC1 / 64)] | "\xC0";
-            $cc2 = (\chr((int)$input) & "\x3F") | "\x80";
+            $cc1 = (string)self::$CHR[(int)((int)$ordC1 / 64)] | "\xC0";
+            $cc2 = ((string)\chr((int)$input) & "\x3F") | "\x80";
             $buf .= (string)$cc1 . (string)$cc2;
         }
 
