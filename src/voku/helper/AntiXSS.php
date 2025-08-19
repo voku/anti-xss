@@ -34,21 +34,21 @@ final class AntiXSS
      *
      * @var string[]
      */
-    private $_never_allowed_regex = [];
+    private array $_never_allowed_regex = [];
 
     /**
      * List of html tags that will not close automatically.
      *
      * @var string[]
      */
-    private $_do_not_close_html_tags = [];
+    private array $_do_not_close_html_tags = [];
 
     /**
      * List of never allowed call statements.
      *
      * @var string[]
      */
-    private $_never_allowed_js_callback_regex = [
+    private array $_never_allowed_js_callback_regex = [
         '\(?window\)?\.',
         '\(?history\)?\.',
         '\(?location\)?\.',
@@ -63,7 +63,7 @@ final class AntiXSS
      *
      * @var string[]
      */
-    private $_never_allowed_call_strings = [
+    private array $_never_allowed_call_strings = [
         // default javascript
         'javascript',
         // Java: jar-protocol is an XSS hazard
@@ -90,7 +90,7 @@ final class AntiXSS
     /**
      * @var string[]
      */
-    private $_never_allowed_str_afterwards = [
+    private array $_never_allowed_str_afterwards = [
         '&lt;script&gt;',
         '&lt;/script&gt;',
     ];
@@ -100,7 +100,7 @@ final class AntiXSS
      *
      * @var string[]
      */
-    private $_never_allowed_on_events_afterwards = [
+    private array $_never_allowed_on_events_afterwards = [
         'onAbort',
         'onActivate',
         'onAttribute',
@@ -333,7 +333,7 @@ final class AntiXSS
      *
      * @var string[]
      */
-    private $_evil_attributes_regex = [
+    private array $_evil_attributes_regex = [
         'style',
         'xmlns:xdp',
         'formaction',
@@ -346,7 +346,7 @@ final class AntiXSS
     /**
      * @var string[]
      */
-    private $_evil_html_tags = [
+    private array $_evil_html_tags = [
         'applet',
         'audio',
         'basefont',
@@ -392,21 +392,21 @@ final class AntiXSS
     /**
      * @var string
      */
-    private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*?';
+    private string $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*?';
 
     /**
      * The replacement-string for not allowed strings.
      *
      * @var string
      */
-    private $_replacement = '';
+    private string $_replacement = '';
 
     /**
      * List of never allowed strings.
      *
      * @var string[]
      */
-    private $_never_allowed_str = [];
+    private array $_never_allowed_str = [];
 
     /**
      * If your DB (MySQL) encoding is "utf8" and not "utf8mb4", then
@@ -414,27 +414,27 @@ final class AntiXSS
      *
      * @var bool
      */
-    private $_stripe_4byte_chars = false;
+    private bool $_stripe_4byte_chars = false;
 
     /**
      * @var bool|null
      */
-    private $_xss_found;
+    private ?bool $_xss_found = null;
 
     /**
      * @var string
      */
-    private $_cache_evil_attributes_regex_string = '';
+    private string $_cache_evil_attributes_regex_string = '';
 
     /**
      * @var string
      */
-    private $_cache_never_allowed_regex_string = '';
+    private string $_cache_never_allowed_regex_string = '';
 
     /**
      * @var string
      */
-    private $_cache__evil_html_tags_str = '';
+    private string $_cache__evil_html_tags_str = '';
 
     public function __construct()
     {
