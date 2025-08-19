@@ -785,7 +785,9 @@ final class ASCII
         }
 
         $charDone = [];
-        if (\preg_match_all('/' . self::$REGEX_ASCII . ($replace_extra_symbols ? '|[' . $EXTRA_SYMBOLS_CACHE . ']' : '') . '/u',
+        $extraSymbolsRegex = ($replace_extra_symbols && \is_string($EXTRA_SYMBOLS_CACHE)) ? '|[' . $EXTRA_SYMBOLS_CACHE . ']' : '';
+
+        if (\preg_match_all('/' . self::$REGEX_ASCII . $extraSymbolsRegex . '/u',
                             $str, $matches)) {
             if (!$replace_single_chars_only) {
                 if (self::$LANGUAGE_MAX_KEY === null) {
@@ -810,15 +812,9 @@ final class ASCII
                             &&
                             \strpos($str, $fiveChars) !== false
                         ) {
-                            // DEBUG
-                            //\var_dump($str, $fiveChars, $REPLACE_HELPER_CACHE[$cacheKey][$fiveChars]);
-
                             $charDone[$fiveChars] = true;
                             $str                  = \str_replace($fiveChars,
                                                                  $REPLACE_HELPER_CACHE[$cacheKey][$fiveChars], $str);
-
-                            // DEBUG
-                            //\var_dump($str, "\n");
                         }
                     }
                 }
@@ -1157,7 +1153,7 @@ final class ASCII
         $ord     = null;
         $str_tmp = '';
         foreach ($chars as &$c) {
-            $ordC0 = self::$ORD[$c[0]];
+            $ordC0 = (int)self::$ORD[$c[0]];
 
             if ($ordC0 >= 0 && $ordC0 <= 127) {
                 $str_tmp .= $c;
@@ -1165,7 +1161,7 @@ final class ASCII
                 continue;
             }
 
-            $ordC1 = self::$ORD[$c[1]];
+            $ordC1 = (int)self::$ORD[$c[1]];
 
             // ASCII - next please
             if ($ordC0 >= 192 && $ordC0 <= 223) {
@@ -1173,14 +1169,14 @@ final class ASCII
             }
 
             if ($ordC0 >= 224) {
-                $ordC2 = self::$ORD[$c[2]];
+                $ordC2 = (int)self::$ORD[$c[2]];
 
                 if ($ordC0 <= 239) {
                     $ord = ($ordC0 - 224) * 4096 + ($ordC1 - 128) * 64 + ($ordC2 - 128);
                 }
 
                 if ($ordC0 >= 240) {
-                    $ordC3 = self::$ORD[$c[3]];
+                    $ordC3 = (int)self::$ORD[$c[3]];
 
                     if ($ordC0 <= 247) {
                         $ord = ($ordC0 - 240) * 262144 + ($ordC1 - 128) * 4096 + ($ordC2 - 128) * 64 + ($ordC3 - 128);
