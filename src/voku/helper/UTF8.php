@@ -6132,7 +6132,7 @@ final class UTF8
         foreach (self::$ENCODINGS as $encoding_tmp) {
             // INFO: //IGNORE but still throw notice
             /** @noinspection PhpUsageOfSilenceOperatorInspection */
-            if ((string)@\iconv($encoding_tmp, $encoding_tmp . '//IGNORE', $str) === $str) {
+            if ((string)@\iconv($encoding_tmp, (string)$encoding_tmp . '//IGNORE', $str) === $str) {
                 return $encoding_tmp;
             }
         }
@@ -13183,7 +13183,7 @@ final class UTF8
             switch ($str[$i] & "\xF0") {
                 case "\xC0":
                 case "\xD0":
-                    $c       = (self::$ORD[$str[$i] & "\x1F"] << 6) | self::$ORD[$str[++$i] & "\x3F"];
+                    $c       = ((int)self::$ORD[$str[$i] & "\x1F"] << 6) | (int)self::$ORD[$str[++$i] & "\x3F"];
                     $str[$j] = $c < 256 ? self::$CHR[$c] : $no_char_found;
 
                     break;
@@ -13525,25 +13525,25 @@ final class UTF8
             if ($mState === 0) {
                 // When mState is zero we expect either a US-ASCII character or a
                 // multi-octet sequence.
-                if ((0x80 & $in) === 0) {
+                if ((0x80 & (int)$in) === 0) {
                     // US-ASCII, pass straight through.
                     $mBytes = 1;
-                } elseif ((0xE0 & $in) === 0xC0) {
+                } elseif ((0xE0 & (int)$in) === 0xC0) {
                     // First octet of 2 octet sequence.
                     $mUcs4  = $in;
-                    $mUcs4  = ($mUcs4 & 0x1F) << 6;
+                    $mUcs4  = ((int)$mUcs4 & 0x1F) << 6;
                     $mState = 1;
                     $mBytes = 2;
-                } elseif ((0xF0 & $in) === 0xE0) {
+                } elseif ((0xF0 & (int)$in) === 0xE0) {
                     // First octet of 3 octet sequence.
                     $mUcs4  = $in;
-                    $mUcs4  = ($mUcs4 & 0x0F) << 12;
+                    $mUcs4  = ((int)$mUcs4 & 0x0F) << 12;
                     $mState = 2;
                     $mBytes = 3;
-                } elseif ((0xF8 & $in) === 0xF0) {
+                } elseif ((0xF8 & (int)$in) === 0xF0) {
                     // First octet of 4 octet sequence.
                     $mUcs4  = $in;
-                    $mUcs4  = ($mUcs4 & 0x07) << 18;
+                    $mUcs4  = ((int)$mUcs4 & 0x07) << 18;
                     $mState = 3;
                     $mBytes = 4;
                 } elseif ((0xFC & $in) === 0xF8) {
