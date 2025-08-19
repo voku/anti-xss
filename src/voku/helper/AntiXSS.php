@@ -453,7 +453,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _compact_exploded_javascript($str)
+    private function _compact_exploded_javascript(string $str): string
     {
         static $WORDS_CACHE;
         $WORDS_CACHE['chunk'] = [];
@@ -523,7 +523,7 @@ final class AntiXSS
      * @param string[] $matches
      * @return string
      */
-    private function _compact_exploded_words_callback($matches)
+    private function _compact_exploded_words_callback(array $matches): string
     {
         return $matches['before'] . \preg_replace(
                 '/' . $this->_spacing_regex . '/ius',
@@ -538,7 +538,7 @@ final class AntiXSS
      * @param string[] $match
      * @return string
      */
-    private function _decode_entity($match)
+    private function _decode_entity(array $match): string
     {
         $str = $match[0];
 
@@ -593,7 +593,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _decode_string($str)
+    private function _decode_string(string $str): string
     {
         $regExForHtmlTags = '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU';
 
@@ -620,7 +620,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _do($str)
+    private function _do(string $str): string
     {
         $str = (string) $str;
         $strInt = (int) $str;
@@ -706,7 +706,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _do_never_allowed($str)
+    private function _do_never_allowed(string $str): string
     {
         static $NEVER_ALLOWED_CACHE = [];
 
@@ -774,7 +774,7 @@ final class AntiXSS
      * @return array
      * @phpstan-return array<string, list<string>>
      */
-    private function _get_never_allowed_on_events_afterwards_chunks()
+    private function _get_never_allowed_on_events_afterwards_chunks(): array
     {
         $array = [];
 
@@ -793,7 +793,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _do_never_allowed_afterwards($str)
+    private function _do_never_allowed_afterwards(string $str): string
     {
         if (\stripos($str, 'on') !== false) {
             foreach ($this->_get_never_allowed_on_events_afterwards_chunks() as $eventNameBeginning => $events) {
@@ -840,7 +840,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _entity_decode($str)
+    private function _entity_decode(string $str): string
     {
         static $HTML_ENTITIES_CACHE;
 
@@ -946,7 +946,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _filter_attributes($str)
+    private function _filter_attributes(string $str): string
     {
         if ($str === '') {
             return '';
@@ -979,7 +979,7 @@ final class AntiXSS
      *
      * @phpstan-return array<string, string>
      */
-    private static function _get_data($file)
+    private static function _get_data(string $file): array
     {
         return include __DIR__ . '/data/' . $file . '.php';
     }
@@ -989,7 +989,7 @@ final class AntiXSS
      *
      * @return void
      */
-    private function _initNeverAllowedStr()
+    private function _initNeverAllowedStr(): void
     {
         $this->_never_allowed_str = [
             'document.cookie'   => $this->_replacement,
@@ -1014,7 +1014,7 @@ final class AntiXSS
      *
      * @return void
      */
-    private function _initNeverAllowedRegex()
+    private function _initNeverAllowedRegex(): void
     {
         $this->_never_allowed_regex = [
             // default javascript
@@ -1041,7 +1041,7 @@ final class AntiXSS
      * @param string[] $match
      * @return string
      */
-    private function _js_link_removal_callback($match)
+    private function _js_link_removal_callback(array $match): string
     {
         return $this->_js_removal_callback($match, 'href');
     }
@@ -1057,7 +1057,7 @@ final class AntiXSS
      * @param string $search
      * @return string
      */
-    private function _js_removal_callback($match, $search)
+    private function _js_removal_callback(array $match, string $search): string
     {
         if (!$match[0]) {
             return '';
@@ -1169,7 +1169,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _remove_disallowed_javascript($str)
+    private function _remove_disallowed_javascript(string $str): string
     {
         do {
             $original = $str;
@@ -1320,7 +1320,7 @@ final class AntiXSS
      * @param string $str The string to check
      * @return string The string with the evil attributes removed
      */
-    private function _remove_evil_attributes($str)
+    private function _remove_evil_attributes(string $str): string
     {
         // replace style-attribute, first (if needed)
         if (
@@ -1403,7 +1403,7 @@ final class AntiXSS
      * @param string $str HTML document for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
-    private function _repack_utf7($str)
+    private function _repack_utf7(string $str): string
     {
         if (\strpos($str, '-') === false) {
             return $str;
@@ -1424,7 +1424,7 @@ final class AntiXSS
      * @param string[] $strings Array of strings for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
-    private function _repack_utf7_callback($strings)
+    private function _repack_utf7_callback(array $strings): string
     {
         $strTmp = \base64_decode($strings[1], true);
 
@@ -1457,7 +1457,7 @@ final class AntiXSS
      * @param string $str String for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
-    private function _repack_utf7_callback_back($str)
+    private function _repack_utf7_callback_back(array $str): string
     {
         return $str[1] . '+' . \rtrim(\base64_encode($str[2]), '=') . '-';
     }
@@ -1473,7 +1473,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _sanitize_naughty_html($str)
+    private function _sanitize_naughty_html(string $str): string
     {
         $strEnd = '';
 
@@ -1545,7 +1545,7 @@ final class AntiXSS
      *
      * @return string
      */
-    private function _close_html_callback($matches)
+    private function _close_html_callback(array $matches): string
     {
         if (empty($matches['closeTag'])) {
             // allow e.g. "< $2.20" and e.g. "< 1 year"
@@ -1567,7 +1567,7 @@ final class AntiXSS
      * @param string[] $matches
      * @return string
      */
-    private function _sanitize_naughty_html_callback($matches)
+    private function _sanitize_naughty_html_callback(array $matches): string
     {
         $fullMatch = $matches[0];
 
@@ -1624,7 +1624,7 @@ final class AntiXSS
      * @param string $str
      * @return string
      */
-    private function _sanitize_naughty_javascript($str)
+    private function _sanitize_naughty_javascript(string $str): string
     {
         if (\strpos($str, '(') !== false) {
             $patterns = [
@@ -1902,7 +1902,7 @@ final class AntiXSS
      *
      * @return bool|null Will return null if the "xss_clean()" wasn't running at all
      */
-    public function isXssFound()
+    public function isXssFound(): ?bool
     {
         return $this->_xss_found;
     }
