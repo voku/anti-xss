@@ -1375,7 +1375,7 @@ final class ASCII
     /**
      * @return void
      */
-    private static function prepareAsciiAndExtrasMaps()
+    private static function prepareAsciiAndExtrasMaps(): void
     {
         if (self::$ASCII_MAPS_AND_EXTRAS === null) {
             self::prepareAsciiMaps();
@@ -1391,7 +1391,7 @@ final class ASCII
     /**
      * @return void
      */
-    private static function prepareAsciiMaps()
+    private static function prepareAsciiMaps(): void
     {
         if (self::$ASCII_MAPS === null) {
             self::$ASCII_MAPS = self::getData('ascii_by_languages');
@@ -1401,7 +1401,7 @@ final class ASCII
     /**
      * @return void
      */
-    private static function prepareAsciiExtras()
+    private static function prepareAsciiExtras(): void
     {
         if (self::$ASCII_EXTRAS === null) {
             self::$ASCII_EXTRAS = self::getData('ascii_extras_by_languages');

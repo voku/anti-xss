@@ -19,10 +19,10 @@ class Bootup
      * @return mixed
      */
     public static function filterString(
-        $input,
-        int $normalization_form = \Normalizer::NFC,
+        mixed  $input,
+        int    $normalization_form = \Normalizer::NFC,
         string $leading_combining = '◌'
-    ) {
+    ): mixed {
         return UTF8::filter(
             $input,
             $normalization_form,
@@ -35,12 +35,12 @@ class Bootup
      *
      * @param int $length <p>output length</p>
      *
-     * @throws \Exception if it was not possible to gather sufficient entropy
-     *
      * @return false|string
      *                      <strong>false</strong> on error
+     *@throws \Exception if it was not possible to gather sufficient entropy
+     *
      */
-    public static function get_random_bytes($length)
+    public static function get_random_bytes(int $length): false|string
     {
         if (!$length) {
             return false;
@@ -64,7 +64,7 @@ class Bootup
      *
      * @return false|string
      */
-    public static function filter_sanitize_string_polyfill(string $str)
+    public static function filter_sanitize_string_polyfill(string $str): false|string
     {
         $str = \preg_replace('/\x00|<[^>]*>?/', '', $str);
         if ($str === null) {
@@ -96,13 +96,8 @@ class Bootup
      *
      * @psalm-pure
      */
-    public static function is_php($version): bool
+    public static function is_php(string $version): bool
     {
-        /**
-         * @psalm-suppress ImpureStaticVariable
-         *
-         * @var bool[]
-         */
         static $_IS_PHP;
 
         $version = (string) $version;
