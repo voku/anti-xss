@@ -1086,9 +1086,9 @@ final class ASCII
      *                <p>A String that contains only ASCII characters.</p>
      */
     public static function to_transliterate(
-        string $str,
-               $unknown = '?',
-        bool   $strict = false
+        string  $str,
+        ?string $unknown = '?',
+        bool    $strict = false
     ): string {
         static $UTF8_TO_TRANSLIT = null;
 
@@ -1326,7 +1326,7 @@ final class ASCII
      *
      * @return string
      */
-    private static function get_language(string $language)
+    private static function get_language(string $language): string
     {
         if ($language === '') {
             return '';
@@ -1352,7 +1352,7 @@ final class ASCII
      *
      * @return array<array-key,mixed>
      */
-    private static function getData(string $file)
+    private static function getData(string $file): array
     {
         return include __DIR__ . '/data/' . $file . '.php';
     }
