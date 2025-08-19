@@ -8,7 +8,19 @@
     "security",
     "xss"
   ],
-  "homepage": "https://github.com/trustcharge/anti-xss.git",
+  "homepage": "https://github.com/voku/anti-xss",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "EllisLab Dev Team",
+      "homepage": "http://ellislab.com/"
+    },
+    {
+      "name": "Lars Moelleken",
+      "email": "lars@moelleken.org",
+      "homepage": "https://www.moelleken.org/"
+    }
+  ],
   "require": {
     "php": ">=8.2.0",
     "ext-intl": "*",
