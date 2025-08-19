@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection ReturnTypeCanBeDeclaredInspection */
-
 declare(strict_types=1);
 
 namespace voku\helper;
@@ -2054,9 +2052,9 @@ final class AntiXSS
      * @param string $string
      * @return $this
      */
-    public function setReplacement($string): self
+    public function setReplacement(string $string): self
     {
-        $this->_replacement = (string) $string;
+        $this->_replacement = $string;
 
         $this->_initNeverAllowedStr();
         $this->_initNeverAllowedRegex();
@@ -2072,9 +2070,9 @@ final class AntiXSS
      * @param bool $bool
      * @return $this
      */
-    public function setStripe4byteChars($bool): self
+    public function setStripe4byteChars(bool $bool): self
     {
-        $this->_stripe_4byte_chars = (bool) $bool;
+        $this->_stripe_4byte_chars = $bool;
 
         return $this;
     }
@@ -2095,14 +2093,14 @@ final class AntiXSS
      * @see http://channel.bitflux.ch/wiki/XSS_Prevention
      * @see http://ha.ckers.org/xss.html
      *
-     * @param string|string[] $str
+     * @param string|string[]        $str
      * @return string|string[]
      *
      * @template TXssCleanInput as string|string[]
      * @phpstan-param TXssCleanInput $str
      * @phpstan-return TXssCleanInput
      */
-    public function xss_clean($str)
+    public function xss_clean(array|string $str): array|string
     {
         // reset
         $this->_xss_found = null;
