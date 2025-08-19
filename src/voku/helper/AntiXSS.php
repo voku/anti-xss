@@ -1458,7 +1458,7 @@ final class AntiXSS
      */
     private function _repack_utf7_callback_back(array $str): string
     {
-        return $str[1] . '+' . \rtrim(\base64_encode((string) $str[2]), '=') . '-';
+        return (string)$str[1] . '+' . \rtrim(\base64_encode((string) $str[2]), '=') . '-';
     }
 
     /**
