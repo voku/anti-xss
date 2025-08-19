@@ -484,6 +484,7 @@ final class AntiXSS
 
             if ($useStrPos) {
                 $splitArray = $WORDS_CACHE['split'][$word] ?? [];
+
                 foreach ($splitArray as $charTmp) {
                     if (\stripos($str, (string) $charTmp) === false) {
                         continue 2;
@@ -497,6 +498,7 @@ final class AntiXSS
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
             $chunkValue = $WORDS_CACHE['chunk'][$word] ?? '';
+
             $str = (string) \preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
@@ -980,6 +982,7 @@ final class AntiXSS
     private static function _get_data(string $file): array
     {
         $data = include __DIR__ . '/data/' . $file . '.php';
+
         return \is_array($data) ? $data : [];
     }
 

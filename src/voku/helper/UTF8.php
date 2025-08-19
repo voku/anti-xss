@@ -169,70 +169,70 @@ final class UTF8
      *
      * @phpstan-var array<string, string>|null
      */
-    private static $BROKEN_UTF8_FIX;
+    private static ?array $BROKEN_UTF8_FIX = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<int, string>|null
      */
-    private static $WIN1252_TO_UTF8;
+    private static ?array $WIN1252_TO_UTF8 = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<int ,string>|null
      */
-    private static ?array $INTL_TRANSLITERATOR_LIST;
+    private static ?array $INTL_TRANSLITERATOR_LIST = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<string>|null
      */
-    private static ?array $ENCODINGS;
+    private static ?array $ENCODINGS = null;
 
     /**
      * @var int[]|null
      *
      * @phpstan-var array<string ,int>|null
      */
-    private static $ORD;
+    private static ?array $ORD = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<string, string>|null
      */
-    private static ?array $EMOJI;
+    private static ?array $EMOJI = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<string>|null
      */
-    private static ?array $EMOJI_VALUES_CACHE;
+    private static ?array $EMOJI_VALUES_CACHE = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<string>|null
      */
-    private static ?array $EMOJI_KEYS_CACHE;
+    private static ?array $EMOJI_KEYS_CACHE = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<string>|null
      */
-    private static ?array $EMOJI_KEYS_REVERSIBLE_CACHE;
+    private static ?array $EMOJI_KEYS_REVERSIBLE_CACHE = null;
 
     /**
      * @var string[]|null
      *
      * @phpstan-var array<int, string>|null
      */
-    private static $CHR;
+    private static ?array $CHR = null;
 
     /**
      * Return the character at the specified position: $str[1] like functionality.

@@ -11,9 +11,6 @@ class UTF8Initializer {
         // Call a method that will initialize the support arrays
         // This will trigger the static initialization in the UTF8 class
         \voku\helper\UTF8::checkForSupport();
-        
-        // Suppress warnings for the test run
-        \error_reporting(\E_ALL & ~\E_WARNING & ~\E_DEPRECATED & ~\E_USER_DEPRECATED);
     }
 }
 
