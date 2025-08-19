@@ -15,22 +15,6 @@ use const HTML_ENTITIES;
 /**
  * AntiXSS - ported from "CodeIgniter"
  *
- * ## 🇷🇺 Русским гражданам
- * В Украине сейчас идет война. Силами РФ наносятся удары по гражданской инфраструктуре в [Харькове][1], [Киеве][2], [Чернигове][3], [Сумах][4], [Ирпене][5] и десятках других городов. Гибнут люди - и гражданское население, и военные, в том числе российские призывники, которых бросили воевать. Чтобы лишить собственный народ доступа к информации, правительство РФ запретило называть войну войной, закрыло независимые СМИ и принимает сейчас ряд диктаторских законов. Эти законы призваны заткнуть рот всем, кто против войны. За обычный призыв к миру сейчас можно получить несколько лет тюрьмы.
- * Не молчите! Молчание - знак вашего согласия с политикой российского правительства.
- *  **Вы можете сделать выбор НЕ МОЛЧАТЬ.**
- * ---
- * ## 🇺🇸 To people of Russia
- * There is a war in Ukraine right now. The forces of the Russian Federation are attacking civilian infrastructure in [Kharkiv][1], [Kyiv][2], [Chernihiv][3], [Sumy][4], [Irpin][5] and dozens of other cities. People are dying – both civilians and military servicemen, including Russian conscripts who were thrown into the fighting. In order to deprive its own people of access to information, the government of the Russian Federation has forbidden calling a war a war, shut down independent media and is passing a number of dictatorial laws. These laws are meant to silence all those who are against war. You can be jailed for multiple years for simply calling for peace.
- * Do not be silent! Silence is a sign that you accept the Russian government's policy.
- * **You can choose NOT TO BE SILENT.**
- * ---
- * - [1] https://cloudfront-us-east-2.images.arcpublishing.com/reuters/P7K2MSZDGFMIJPDD7CI2GIROJI.jpg "Kharkiv under attack"
- * - [2] https://gdb.voanews.com/01bd0000-0aff-0242-fad0-08d9fc92c5b3_cx0_cy5_cw0_w1023_r1_s.jpg "Kyiv under attack"
- * - [3] https://ichef.bbci.co.uk/news/976/cpsprodpb/163DD/production/_123510119_hi074310744.jpg "Chernihiv under attack"
- * - [4] https://www.youtube.com/watch?v=8K-bkqKKf2A "Sumy under attack"
- * - [5] https://cloudfront-us-east-2.images.arcpublishing.com/reuters/K4MTMLEHTRKGFK3GSKAT4GR3NE.jpg "Irpin under attack"
- *
  * @copyright   Copyright (c) 2008 - 2014, EllisLab, Inc. (http://ellislab.com/)
  * @copyright   Copyright (c) 2014 - 2015, British Columbia Institute of Technology (http://bcit.ca/)
  * @copyright   Copyright (c) 2015 - 2020, Lars Moelleken (https://moelleken.org/)
@@ -462,16 +446,11 @@ final class AntiXSS
 
     /**
      * Compact any exploded words.
-     *
-     * <p>
-     * <br />
-     * INFO: This corrects words like:  j a v a s c r i p t
-     * <br />
+     * 
+     * This corrects words like: j a v a s c r i p t
      * These words are compacted back to their correct state.
-     * </p>
      *
      * @param string $str
-     *
      * @return string
      */
     private function _compact_exploded_javascript($str)
@@ -538,15 +517,11 @@ final class AntiXSS
 
     /**
      * Compact exploded words.
-     *
-     * <p>
-     * <br />
-     * INFO: Callback method for xss_clean() to remove whitespace from things like 'j a v a s c r i p t'.
-     * </p>
+     * 
+     * Callback method for xss_clean() to remove whitespace from things like 'j a v a s c r i p t'.
      *
      * @param string[] $matches
-     *
-     * @return  string
+     * @return string
      */
     private function _compact_exploded_words_callback($matches)
     {
@@ -561,7 +536,6 @@ final class AntiXSS
      * HTML-Entity decode callback.
      *
      * @param string[] $match
-     *
      * @return string
      */
     private function _decode_entity($match)
@@ -618,7 +592,6 @@ final class AntiXSS
      * Decode the html-tags but keep links without XSS.
      *
      * @param string $str
-     *
      * @return string
      */
     private function _decode_string($str)
@@ -647,7 +620,6 @@ final class AntiXSS
 
     /**
      * @param string $str
-     *
      * @return string
      */
     private function _do($str)
@@ -734,7 +706,6 @@ final class AntiXSS
      * Remove never allowed strings.
      *
      * @param string $str
-     *
      * @return string
      */
     private function _do_never_allowed($str)
@@ -803,7 +774,6 @@ final class AntiXSS
 
     /**
      * @return array
-     *
      * @phpstan-return array<string, list<string>>
      */
     private function _get_never_allowed_on_events_afterwards_chunks()
@@ -820,15 +790,11 @@ final class AntiXSS
 
     /**
      * Remove never allowed string, afterwards.
-     *
-     * <p>
-     * <br />
-     * INFO: clean-up also some string, if there is no html-tag
-     * </p>
+     * 
+     * Clean-up also some string, if there is no html-tag.
      *
      * @param string $str
-     *
-     * @return  string
+     * @return string
      */
     private function _do_never_allowed_afterwards($str)
     {
@@ -981,7 +947,6 @@ final class AntiXSS
      * Filters tag attributes for consistency and safety.
      *
      * @param string $str
-     *
      * @return string
      */
     private function _filter_attributes($str)
@@ -1196,16 +1161,12 @@ final class AntiXSS
 
     /**
      * Callback method for xss_clean() to sanitize image tags.
-     *
-     * <p>
-     * <br />
-     * INFO: This limits the PCRE backtracks, making it more performance friendly
+     * 
+     * This limits the PCRE backtracks, making it more performance friendly
      * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
      * PHP 5.2+ on image tag heavy strings.
-     * </p>
      *
      * @param string[] $match
-     *
      * @return string
      */
     private function _js_src_removal_callback(array $match)
@@ -1215,23 +1176,6 @@ final class AntiXSS
 
     /**
      * Remove disallowed Javascript in links or img tags
-     *
-     * <p>
-     * <br />
-     * We used to do some version comparisons and use of stripos(),
-     * but it is dog slow compared to these simplified non-capturing
-     * preg_match(), especially if the pattern exists in the string
-     * </p>
-     *
-     * <p>
-     * <br />
-     * Note: It was reported that not only space characters, but all in
-     * the following pattern can be parsed as separators between a tag name
-     * and its attributes: [\d\s"\'`;,\/\=\(\x00\x0B\x09\x0C]
-     * ... however, UTF8::clean() above already strips the
-     * hex-encoded ones, so we'll skip them below.
-     * </p>
-     *
      * @param string $str
      *
      * @return string
@@ -1261,9 +1205,25 @@ final class AntiXSS
                 $str = (string)$strTmp;
             }
 
-            if (\stripos($str, '<img') !== false) {
-                $strTmp = \preg_replace_callback(
-                    '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+        if (\stripos($str, '<img') !== false) {
+            $strTmp = \preg_replace_callback(
+                '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                function ($matches) {
+                    if (
+                        \strpos($matches[1], 'base64') !== false
+                        &&
+                        \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
+                    ) {
+                        return $matches[0];
+                    }
+
+                    return $this->_js_src_removal_callback($matches);
+                },
+                $str
+            );
+            if ($strTmp === null) {
+                $strTmp = (string) \preg_replace_callback(
+                    '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         if (
                             \strpos($matches[1], 'base64') !== false
@@ -1277,86 +1237,70 @@ final class AntiXSS
                     },
                     $str
                 );
-                if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
-                        '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
-                        function ($matches) {
-                            if (
-                                \strpos($matches[1], 'base64') !== false
-                                &&
-                                \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
-                            ) {
-                                return $matches[0];
-                            }
-
-                            return $this->_js_src_removal_callback($matches);
-                        },
-                        $str
-                    );
-                }
-                $str = (string)$strTmp;
             }
+            $str = (string)$strTmp;
+        }
 
-            if (\stripos($str, '<audio') !== false) {
+        if (\stripos($str, '<audio') !== false) {
+            $strTmp = \preg_replace_callback(
+                '#<audio[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                function ($matches) {
+                    return $this->_js_src_removal_callback($matches);
+                },
+                $str
+            );
+            if ($strTmp === null) {
+                $strTmp = (string) \preg_replace_callback(
+                    '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                    function ($matches) {
+                        return $this->_js_src_removal_callback($matches);
+                    },
+                    $str
+                );
+            }
+            $str = (string)$strTmp;
+        }
+
+        if (\stripos($str, '<video') !== false) {
+            $strTmp = \preg_replace_callback(
+                '#<video[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                function ($matches) {
+                    return $this->_js_src_removal_callback($matches);
+                },
+                $str
+            );
+            if ($strTmp === null) {
                 $strTmp = \preg_replace_callback(
-                    '#<audio[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
-                    function ($matches) {
-                        return $this->_js_src_removal_callback($matches);
-                    },
-                    $str
-                );
-                if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
-                        '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
-                        function ($matches) {
-                            return $this->_js_src_removal_callback($matches);
-                        },
-                        $str
-                    );
-                }
-                $str = (string)$strTmp;
-            }
-
-            if (\stripos($str, '<video') !== false) {
-                $strTmp = \preg_replace_callback(
-                    '#<video[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
-                    function ($matches) {
-                        return $this->_js_src_removal_callback($matches);
-                    },
-                    $str
-                );
-                if ($strTmp === null) {
-                    $strTmp = \preg_replace_callback(
-                        '#<video[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
-                        function ($matches) {
-                            return $this->_js_src_removal_callback($matches);
-                        },
-                        $str
-                    );
-                }
-                $str = (string)$strTmp;
-            }
-
-            if (\stripos($str, '<source') !== false) {
-                $str = (string) \preg_replace_callback(
-                    '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                    '#<video[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                     function ($matches) {
                         return $this->_js_src_removal_callback($matches);
                     },
                     $str
                 );
             }
+            $str = (string)$strTmp;
+        }
 
-            if (\stripos($str, 'script') !== false) {
+        if (\stripos($str, '<source') !== false) {
+            $str = (string) \preg_replace_callback(
+                '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                function ($matches) {
+                    return $this->_js_src_removal_callback($matches);
+                },
+                $str
+            );
+        }
+
+        if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
+            $str = (string) \preg_replace(
                     '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
-                    $this->_replacement,
-                    $str
-                );
-            }
+                $this->_replacement,
+                $str
+            );
+        }
 
-            if (\stripos($str, 'script') !== false) {
+        if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
                 $str = (string) \preg_replace(
                     '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
@@ -1402,7 +1346,7 @@ final class AntiXSS
             do {
                 $count = $temp_count = 0;
 
-                $str = (string) \preg_replace(
+            $str = (string) \preg_replace(
                     '/(<[^>]+)(?<!\p{L})(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/iu',
                     '$1' . $this->_replacement,
                     $str,
@@ -1434,7 +1378,7 @@ final class AntiXSS
                 $regex = '/(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")/ius';
                 $strTmp = \preg_replace(
                     $regex,
-                    $this->_replacement,
+                $this->_replacement,
                     $str,
                     -1,
                     $temp_count
@@ -2044,14 +1988,10 @@ final class AntiXSS
 
     /**
      * Remove some strings from the "_evil_html_tags"-array.
-     *
-     * <p>
-     * <br />
+     * 
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeEvilHtmlTags(array $strings): self
@@ -2073,14 +2013,10 @@ final class AntiXSS
 
     /**
      * Remove some strings from the "_never_allowed_on_events_afterwards"-array.
-     *
-     * <p>
-     * <br />
+     * 
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeNeverAllowedOnEventsAfterwards(array $strings): self
@@ -2102,14 +2038,10 @@ final class AntiXSS
 
     /**
      * Remove some strings from the "_never_allowed_str_afterwards"-array.
-     *
-     * <p>
-     * <br />
+     * 
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeNeverAllowedStrAfterwards(array $strings): self
@@ -2128,14 +2060,10 @@ final class AntiXSS
 
     /**
      * Remove some strings from the "_never_allowed_call_strings"-array.
-     *
-     * <p>
-     * <br />
+     * 
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeNeverAllowedCallStrings(array $strings): self
@@ -2154,14 +2082,10 @@ final class AntiXSS
 
     /**
      * Remove some strings from the "_never_allowed_js_callback_regex"-array.
-     *
-     * <p>
-     * <br />
+     * 
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeNeverAllowedJsCallbackRegex(array $strings): self
@@ -2182,7 +2106,6 @@ final class AntiXSS
      * Set the replacement-string for not allowed strings.
      *
      * @param string $string
-     *
      * @return $this
      */
     public function setReplacement($string): self
@@ -2197,14 +2120,10 @@ final class AntiXSS
 
     /**
      * Set the option to stripe 4-Byte chars.
-     *
-     * <p>
-     * <br />
+     * 
      * INFO: use it if your DB (MySQL) can't use "utf8mb4" -> preventing stored XSS-attacks
-     * </p>
      *
      * @param bool $bool
-     *
      * @return $this
      */
     public function setStripe4byteChars($bool): self
@@ -2216,33 +2135,21 @@ final class AntiXSS
 
     /**
      * XSS Clean
-     *
-     * <p>
-     * <br />
+     * 
      * Sanitizes data so that "Cross Site Scripting" hacks can be
      * prevented. This method does a fair amount of work but
      * it is extremely thorough, designed to prevent even the
      * most obscure XSS attempts. But keep in mind that nothing
-     * is ever 100% foolproof...
-     * </p>
-     *
-     * <p>
-     * <br />
-     * <strong>Note:</strong> Should only be used to deal with data upon submission.
-     *   It's not something that should be used for general
-     *   runtime processing.
-     * </p>
+     * is ever 100% foolproof.
+     * 
+     * Note: Should only be used to deal with data upon submission.
+     * It's not something that should be used for general
+     * runtime processing.
      *
      * @see http://channel.bitflux.ch/wiki/XSS_Prevention
-     *    Based in part on some code and ideas from Bitflux.
      * @see http://ha.ckers.org/xss.html
-     *    To help develop this script I used this great list of
-     *    vulnerabilities along with a few other hacks I've
-     *    harvested from examining vulnerabilities in other programs.
      *
-     * @param string|string[] $str
-     *                             <p>input data e.g. string or array of strings</p>
-     *
+     * @param string|string[] $str input data e.g. string or array of strings
      * @return string|string[]
      *
      * @template TXssCleanInput as string|string[]
