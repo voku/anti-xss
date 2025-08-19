@@ -453,9 +453,7 @@ final class AntiXSS
      */
     private function _compact_exploded_javascript(string $str): string
     {
-        static $WORDS_CACHE;
-        $WORDS_CACHE['chunk'] = [];
-        $WORDS_CACHE['split'] = [];
+        static $WORDS_CACHE = ['chunk' => [], 'split' => []];
 
         $words = [
             'javascript',
@@ -485,8 +483,9 @@ final class AntiXSS
             }
 
             if ($useStrPos) {
-                foreach ($WORDS_CACHE['split'][$word] as $charTmp) {
-                    if (\stripos($str, $charTmp) === false) {
+                $splitArray = $WORDS_CACHE['split'][$word] ?? [];
+                foreach ($splitArray as $charTmp) {
+                    if (\stripos($str, (string) $charTmp) === false) {
                         continue 2;
                     }
                 }
@@ -497,11 +496,12 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
+            $chunkValue = $WORDS_CACHE['chunk'][$word] ?? '';
             $str = (string) \preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
                     ['\#', '\.'],
-                    $WORDS_CACHE['chunk'][$word]
+                    $chunkValue
                 ) . ')(?<after>[^\p{L}@.!?\' ]|$)#ius',
                 function ($matches) {
                     return $this->_compact_exploded_words_callback($matches);
@@ -979,7 +979,8 @@ final class AntiXSS
      */
     private static function _get_data(string $file): array
     {
-        return include __DIR__ . '/data/' . $file . '.php';
+        $data = include __DIR__ . '/data/' . $file . '.php';
+        return \is_array($data) ? $data : [];
     }
 
     /**
@@ -1156,7 +1157,7 @@ final class AntiXSS
      * @param string[] $match
      * @return string
      */
-    private function _js_src_removal_callback(array $match)
+    private function _js_src_removal_callback(array $match): string
     {
         return $this->_js_removal_callback($match, 'src');
     }
@@ -1452,12 +1453,12 @@ final class AntiXSS
     /**
      * Additional UTF-7 encoding function.
      *
-     * @param string $str String for recode ASCII part of UTF-7 back to ASCII
+     * @param array $str Array for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
     private function _repack_utf7_callback_back(array $str): string
     {
-        return $str[1] . '+' . \rtrim(\base64_encode($str[2]), '=') . '-';
+        return $str[1] . '+' . \rtrim(\base64_encode((string) $str[2]), '=') . '-';
     }
 
     /**
@@ -2123,7 +2124,6 @@ final class AntiXSS
                 }
             }
 
-            /** @var TXssCleanInput $str - hack for phpstan */
             return $str;
         }
 
