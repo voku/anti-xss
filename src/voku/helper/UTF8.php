@@ -648,23 +648,23 @@ final class UTF8
             /**
              * @psalm-suppress PossiblyNullArrayAccess
              */
-            $chr = self::$CHR[($code_point >> 6) + 0xC0] .
-                   self::$CHR[($code_point & 0x3F) + 0x80];
+            $chr = (string)self::$CHR[($code_point >> 6) + 0xC0] .
+                   (string)self::$CHR[($code_point & 0x3F) + 0x80];
         } elseif ($code_point <= 0xFFFF) {
             /**
              * @psalm-suppress PossiblyNullArrayAccess
              */
-            $chr = self::$CHR[($code_point >> 12) + 0xE0] .
-                   self::$CHR[(($code_point >> 6) & 0x3F) + 0x80] .
-                   self::$CHR[($code_point & 0x3F) + 0x80];
+            $chr = (string)self::$CHR[($code_point >> 12) + 0xE0] .
+                   (string)self::$CHR[(($code_point >> 6) & 0x3F) + 0x80] .
+                   (string)self::$CHR[($code_point & 0x3F) + 0x80];
         } else {
             /**
              * @psalm-suppress PossiblyNullArrayAccess
              */
-            $chr = self::$CHR[($code_point >> 18) + 0xF0] .
-                   self::$CHR[(($code_point >> 12) & 0x3F) + 0x80] .
-                   self::$CHR[(($code_point >> 6) & 0x3F) + 0x80] .
-                   self::$CHR[($code_point & 0x3F) + 0x80];
+            $chr = (string)self::$CHR[($code_point >> 18) + 0xF0] .
+                   (string)self::$CHR[(($code_point >> 12) & 0x3F) + 0x80] .
+                   (string)self::$CHR[(($code_point >> 6) & 0x3F) + 0x80] .
+                   (string)self::$CHR[($code_point & 0x3F) + 0x80];
         }
 
         if ($encoding !== 'UTF-8') {
@@ -1431,7 +1431,7 @@ final class UTF8
         if ($to_encoding === 'JSON') {
             $return = self::json_encode($str);
             if ($return === false) {
-                throw new \InvalidArgumentException('The input string [' . $str . '] can not be used for json_encode().');
+                throw new \InvalidArgumentException('The input string [' . (string)$str . '] can not be used for json_encode().');
             }
 
             return $return;
@@ -2608,7 +2608,7 @@ final class UTF8
         if ($str_info === false) {
             return $fallback;
         }
-        $type_code = (int)($str_info['chars1'] . $str_info['chars2']);
+        $type_code = (int)((string)$str_info['chars1'] . (string)$str_info['chars2']);
 
         // DEBUG
         //var_dump($type_code);
@@ -2723,8 +2723,8 @@ final class UTF8
     {
         $rand_int = \random_int(0, \mt_getrandmax());
 
-        $unique_helper = $rand_int .
-                         \session_id() .
+        $unique_helper = (string)$rand_int .
+                         (string)\session_id() .
                          ($_SERVER['REMOTE_ADDR'] ?? '') .
                          ($_SERVER['SERVER_ADDR'] ?? '') .
                          $extra_entropy;
