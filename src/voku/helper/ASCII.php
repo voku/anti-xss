@@ -135,34 +135,34 @@ final class ASCII
     /**
      * @var array<string, array<string, string>>|null
      */
-    private static $ASCII_MAPS;
+    private static ?array $ASCII_MAPS = null;
 
     /**
      * @var array<string, array<string, string>>|null
      */
-    private static $ASCII_MAPS_AND_EXTRAS;
+    private static ?array $ASCII_MAPS_AND_EXTRAS = null;
 
     /**
      * @var array<string, array<string, string>>|null
      */
-    private static $ASCII_EXTRAS;
+    private static ?array $ASCII_EXTRAS = null;
 
     /**
      * @var array<string, int>|null
      */
-    private static $ORD;
+    private static ?array $ORD = null;
 
     /**
      * @var array<string, int>|null
      */
-    private static $LANGUAGE_MAX_KEY;
+    private static ?array $LANGUAGE_MAX_KEY = null;
 
     /**
      * url: https://en.wikipedia.org/wiki/Wikipedia:ASCII#ASCII_printable_characters
      *
      * @var string
      */
-    private static $REGEX_ASCII = "[^\x09\x10\x13\x0A\x0D\x20-\x7E]";
+    private static string $REGEX_ASCII = "[^\x09\x10\x13\x0A\x0D\x20-\x7E]";
 
     /**
      * bidirectional text chars
@@ -171,7 +171,7 @@ final class ASCII
      *
      * @var array<int, string>
      */
-    private static $BIDI_UNI_CODE_CONTROLS_TABLE = [
+    private static array $BIDI_UNI_CODE_CONTROLS_TABLE = [
         // LEFT-TO-RIGHT EMBEDDING (use -> dir = "ltr")
         8234 => "\xE2\x80\xAA",
         // RIGHT-TO-LEFT EMBEDDING (use -> dir = "rtl")
