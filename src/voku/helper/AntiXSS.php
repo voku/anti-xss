@@ -511,7 +511,7 @@ final class AntiXSS
      *
      * @return  string
      */
-    private function _compact_exploded_words_callback($matches): string
+    private function _compact_exploded_words_callback(array $matches): string
     {
         return $matches['before'] . \preg_replace(
                 '/' . $this->_spacing_regex . '/ius',
