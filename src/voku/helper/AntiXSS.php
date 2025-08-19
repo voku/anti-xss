@@ -540,7 +540,6 @@ final class AntiXSS
      */
     private function _decode_entity($match)
     {
-        // init
         $str = $match[0];
 
         // protect GET variables without XSS in URLs
@@ -596,7 +595,6 @@ final class AntiXSS
      */
     private function _decode_string($str)
     {
-        // init
         $regExForHtmlTags = '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU';
 
         if (
@@ -778,7 +776,6 @@ final class AntiXSS
      */
     private function _get_never_allowed_on_events_afterwards_chunks()
     {
-        // init
         $array = [];
 
         foreach ($this->_never_allowed_on_events_afterwards as $event) {
@@ -1037,15 +1034,11 @@ final class AntiXSS
     /**
      * Callback method for xss_clean() to sanitize links.
      *
-     * <p>
-     * <br />
-     * INFO: This limits the PCRE backtracks, making it more performance friendly
+     * This limits the PCRE backtracks, making it more performance friendly
      * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
      * PHP 5.2+ on link-heavy strings.
-     * </p>
      *
      * @param string[] $match
-     *
      * @return string
      */
     private function _js_link_removal_callback($match)
@@ -1056,16 +1049,12 @@ final class AntiXSS
     /**
      * Callback method for xss_clean() to sanitize tags.
      *
-     * <p>
-     * <br />
-     * INFO: This limits the PCRE backtracks, making it more performance friendly
+     * This limits the PCRE backtracks, making it more performance friendly
      * and prevents PREG_BACKTRACK_LIMIT_ERROR from being triggered in
      * PHP 5.2+ on image tag heavy strings.
-     * </p>
      *
-     * @param string[]  $match
+     * @param string[] $match
      * @param string $search
-     *
      * @return string
      */
     private function _js_removal_callback($match, $search)
@@ -1292,18 +1281,16 @@ final class AntiXSS
         }
 
         if (\stripos($str, 'script') !== false) {
-                // INFO: US-ASCII: ¼ === <
             $str = (string) \preg_replace(
-                    '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
+                '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
                 $this->_replacement,
                 $str
             );
         }
 
         if (\stripos($str, 'script') !== false) {
-                // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
-                    '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
+            $str = (string) \preg_replace(
+                '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
                     $this->_replacement,
                     $str
                 );
@@ -1330,10 +1317,8 @@ final class AntiXSS
      *   <a |style="document.write('hello'); alert('world');"| class="link">
      * </code>
      *
-     * @param string $str <p>The string to check.</p>
-     *
-     * @return string
-     *                <p>The string with the evil attributes removed.</p>
+     * @param string $str The string to check
+     * @return string The string with the evil attributes removed
      */
     private function _remove_evil_attributes($str)
     {
@@ -1415,8 +1400,7 @@ final class AntiXSS
     /**
      * UTF-7 decoding function.
      *
-     * @param string $str <p>HTML document for recode ASCII part of UTF-7 back to ASCII.</p>
-     *
+     * @param string $str HTML document for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
     private function _repack_utf7($str)
@@ -1437,8 +1421,7 @@ final class AntiXSS
     /**
      * Additional UTF-7 decoding function.
      *
-     * @param string[] $strings <p>Array of strings for recode ASCII part of UTF-7 back to ASCII.</p>
-     *
+     * @param string[] $strings Array of strings for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
     private function _repack_utf7_callback($strings)
@@ -1471,8 +1454,7 @@ final class AntiXSS
     /**
      * Additional UTF-7 encoding function.
      *
-     * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
-     *
+     * @param string $str String for recode ASCII part of UTF-7 back to ASCII
      * @return string
      */
     private function _repack_utf7_callback_back($str)
@@ -1483,26 +1465,16 @@ final class AntiXSS
     /**
      * Sanitize naughty HTML elements.
      *
-     * <p>
-     * <br />
-     *
      * If a tag containing any of the words in the list
      * below is found, the tag gets converted to entities.
      *
-     * <br /><br />
-     *
-     * So this: <blink>
-     * <br />
-     * Becomes: &lt;blink&gt;
-     * </p>
+     * Example: <blink> becomes &lt;blink&gt;
      *
      * @param string $str
-     *
      * @return string
      */
     private function _sanitize_naughty_html($str)
     {
-        // init
         $strEnd = '';
 
         do {
@@ -1590,13 +1562,9 @@ final class AntiXSS
     /**
      * Sanitize naughty HTML.
      *
-     * <p>
-     * <br />
      * Callback method for AntiXSS->sanitize_naughty_html() to remove naughty HTML elements.
-     * </p>
      *
      * @param string[] $matches
-     *
      * @return string
      */
     private function _sanitize_naughty_html_callback($matches)
@@ -1645,24 +1613,15 @@ final class AntiXSS
     /**
      * Sanitize naughty scripting elements
      *
-     * <p>
-     * <br />
-     *
      * Similar to above, only instead of looking for
      * tags it looks for PHP and JavaScript commands
      * that are disallowed. Rather than removing the
      * code, it simply converts the parenthesis to entities
      * rendering the code un-executable.
      *
-     * <br /><br />
-     *
-     * For example:  <pre>eval('some code')</pre>
-     * <br />
-     * Becomes:      <pre>eval&#40;'some code'&#41;</pre>
-     * </p>
+     * Example: eval('some code') becomes eval&#40;'some code'&#41;
      *
      * @param string $str
-     *
      * @return string
      */
     private function _sanitize_naughty_javascript($str)
@@ -1786,13 +1745,9 @@ final class AntiXSS
     /**
      * Remove some strings from the "_never_allowed_regex"-array.
      *
-     * <p>
-     * <br />
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeNeverAllowedRegex(array $strings): self
@@ -1923,13 +1878,9 @@ final class AntiXSS
     /**
      * Remove some strings from the "_do_not_close_html_tags"-array.
      *
-     * <p>
-     * <br />
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeDoNotCloseHtmlTags(array $strings): self
@@ -1949,8 +1900,7 @@ final class AntiXSS
     /**
      * Check if the "AntiXSS->xss_clean()"-method found an XSS attack in the last run.
      *
-     * @return bool|null
-     *                   <p>Will return null if the "xss_clean()" wasn't running at all.</p>
+     * @return bool|null Will return null if the "xss_clean()" wasn't running at all
      */
     public function isXssFound()
     {
@@ -1960,13 +1910,9 @@ final class AntiXSS
     /**
      * Remove some strings from the "_evil_attributes"-array.
      *
-     * <p>
-     * <br />
      * WARNING: Use this method only if you have a really good reason.
-     * </p>
      *
      * @param string[] $strings
-     *
      * @return $this
      */
     public function removeEvilAttributes(array $strings): self
@@ -2149,7 +2095,7 @@ final class AntiXSS
      * @see http://channel.bitflux.ch/wiki/XSS_Prevention
      * @see http://ha.ckers.org/xss.html
      *
-     * @param string|string[] $str input data e.g. string or array of strings
+     * @param string|string[] $str
      * @return string|string[]
      *
      * @template TXssCleanInput as string|string[]
