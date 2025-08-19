@@ -13,7 +13,7 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public static function snippetProvider()
+    public static function snippetProvider(): array
     {
         return [
             [
@@ -217,11 +217,11 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $input
-     * @param $output
+     * @param string $input
+     * @param string $output
      */
     #[\PHPUnit\Framework\Attributes\DataProvider('snippetProvider')]
-    public function testCleanString($input, $output)
+    public function testCleanString(string $input, string $output): void
     {
         $security = $this->getSecurity();
         $security->setReplacement('[removed]');
@@ -239,7 +239,7 @@ class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         return new AntiXSS();
     }
 
-    public function testCleanArray()
+    public function testCleanArray(): void
     {
         $security = $this->getSecurity();
 

@@ -2115,7 +2115,7 @@ nodeValue+outerHTML>/*click me', $str);
      *
      * @return mixed method return
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = [])
+    public function invokeMethod(object &$object, string $methodName, array $parameters = []): mixed
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
@@ -2132,7 +2132,7 @@ nodeValue+outerHTML>/*click me', $str);
      *
      * @return mixed method return
      */
-    public function invokeProperty(&$object, $propertyName)
+    public function invokeProperty(object &$object, string $propertyName): mixed
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);

@@ -10,9 +10,9 @@ class XssArrayTest extends TestCase
     /**
      * @var AntiXSS
      */
-    public $security;
+    public AntiXSS $security;
 
-    public function testArray()
+    public function testArray(): void
     {
         $testArray = [
             '<a href="http://www.chaos.org/">www.chaos.org</a>',

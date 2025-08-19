@@ -11,7 +11,7 @@ class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
     // https://github.com/iamcal/lib_filter/blob/master/t/01_basics.t
     //
 
-    private $testArray = [];
+    private array $testArray = [];
 
     /**
      * @return AntiXSS
@@ -22,15 +22,15 @@ class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param $test
-     * @param $result
+     * @param string $test
+     * @param string $result
      */
-    public function addToTestArray($test, $result)
+    public function addToTestArray(string $test, string $result): void
     {
         $this->testArray[$test] = $result;
     }
 
-    public function testClean()
+    public function testClean(): void
     {
         $this->addToTestArray('<script', '');
         $this->addToTestArray('<script woo="yay<b>', '');
