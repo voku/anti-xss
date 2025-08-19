@@ -1262,7 +1262,7 @@ final class ASCII
                 $c = $unknown ?? $c;
             }
 
-            $str_tmp .= $c;
+            $str_tmp .= (string)$c;
         }
 
         return $str_tmp;

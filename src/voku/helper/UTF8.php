@@ -12740,7 +12740,7 @@ final class UTF8
                     $c2 = $i + 1 >= $max ? "\x00" : $str[$i + 1];
 
                     if ($c2 >= "\x80" && $c2 <= "\xBF") { // yeah, almost sure it's UTF8 already
-                        $buf .= $c1 . $c2;
+                        $buf .= (string)$c1 . (string)$c2;
                         ++$i;
                     } else { // not valid UTF8 - convert it
                         $buf .= self::to_utf8_convert_helper($c1);
@@ -13546,7 +13546,7 @@ final class UTF8
                     $mUcs4  = ((int)$mUcs4 & 0x07) << 18;
                     $mState = 3;
                     $mBytes = 4;
-                } elseif ((0xFC & $in) === 0xF8) {
+                } elseif ((0xFC & (int)$in) === 0xF8) {
                     /* First octet of 5 octet sequence.
                      *
                      * This is illegal because the encoded codepoint must be either
@@ -13556,13 +13556,13 @@ final class UTF8
                      * of the sequence and let the later error handling code catch it.
                      */
                     $mUcs4  = $in;
-                    $mUcs4  = ($mUcs4 & 0x03) << 24;
+                    $mUcs4  = ((int)$mUcs4 & 0x03) << 24;
                     $mState = 4;
                     $mBytes = 5;
-                } elseif ((0xFE & $in) === 0xFC) {
+                } elseif ((0xFE & (int)$in) === 0xFC) {
                     // First octet of 6 octet sequence, see comments for 5 octet sequence.
                     $mUcs4  = $in;
-                    $mUcs4  = ($mUcs4 & 1) << 30;
+                    $mUcs4  = ((int)$mUcs4 & 1) << 30;
                     $mState = 5;
                     $mBytes = 6;
                 } else {
@@ -13570,14 +13570,14 @@ final class UTF8
                     // octet of a multi-octet sequence.
                     return false;
                 }
-            } elseif ((0xC0 & $in) === 0x80) {
+            } elseif ((0xC0 & (int)$in) === 0x80) {
                 // When mState is non-zero, we expect a continuation of the multi-octet
                 // sequence
 
                 // Legal continuation.
                 $shift = ($mState - 1) * 6;
                 $tmp   = $in;
-                $tmp   = ($tmp & 0x0000003F) << $shift;
+                $tmp   = ((int)$tmp & 0x0000003F) << $shift;
                 $mUcs4 |= $tmp;
                 // Prefix: End of the multi-octet sequence. mUcs4 now contains the final
                 // Unicode code point to be output.
@@ -13738,7 +13738,7 @@ final class UTF8
         /** @noinspection DeprecatedIniOptionsInspection */
         return \defined('MB_OVERLOAD_STRING')
                &&
-               ((int)@\ini_get('mbstring.func_overload') & \MB_OVERLOAD_STRING);
+               ((int)@\ini_get('mbstring.func_overload') & (int)\MB_OVERLOAD_STRING);
     }
 
     /**
@@ -13986,11 +13986,11 @@ final class UTF8
 
         $ordC1 = self::$ORD[$input];
         if (isset(self::$WIN1252_TO_UTF8[$ordC1])) { // found in Windows-1252 special cases
-            $buf .= self::$WIN1252_TO_UTF8[$ordC1];
+            $buf .= (string)self::$WIN1252_TO_UTF8[$ordC1];
         } else {
-            $cc1 = self::$CHR[(int)($ordC1 / 64)] | "\xC0";
+            $cc1 = (string)self::$CHR[(int)($ordC1 / 64)] | "\xC0";
             $cc2 = (\chr((int)$input) & "\x3F") | "\x80";
-            $buf .= $cc1 . $cc2;
+            $buf .= (string)$cc1 . (string)$cc2;
         }
 
         return $buf;
