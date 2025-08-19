@@ -1,6 +1,6 @@
 {
   "name": "voku/anti-xss",
-  "description": "anti xss-library",
+  "description": "Trustcharge adaptation of anti xss-library",
   "type": "library",
   "keywords": [
     "anti-xss",
@@ -8,21 +8,9 @@
     "security",
     "xss"
   ],
-  "homepage": "https://github.com/voku/anti-xss",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "EllisLab Dev Team",
-      "homepage": "http://ellislab.com/"
-    },
-    {
-      "name": "Lars Moelleken",
-      "email": "lars@moelleken.org",
-      "homepage": "https://www.moelleken.org/"
-    }
-  ],
+  "homepage": "https://github.com/trustcharge/anti-xss.git",
   "require": {
-    "php": ">=8.4.0",
+    "php": ">=8.2.0",
     "ext-intl": "*",
     "ext-mbstring": "*",
     "ext-iconv": "*"
