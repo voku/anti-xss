@@ -818,7 +818,7 @@ final class AntiXSS
                                                                         $events) . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
 
                     $inner_loop_count = 0;
-                    $max_inner_loops  = 10;
+                    $max_inner_loops  = 100;
 
                     do {
                         $count = $temp_count = 0;
@@ -1217,7 +1217,7 @@ final class AntiXSS
     private function _remove_disallowed_javascript(string $str): string
     {
         $loop_count = 0;
-        $max_loops  = 50;
+        $max_loops  = 500;
 
         do {
             $original = $str;
@@ -1384,7 +1384,7 @@ final class AntiXSS
             \in_array('style', $this->_evil_attributes_regex, true)
         ) {
             $style_loop_count = 0;
-            $max_style_loops  = 50;
+            $max_style_loops  = 500;
 
             do {
                 $count = $temp_count = 0;
@@ -1408,7 +1408,7 @@ final class AntiXSS
         }
 
         $inner_loop_count = 0;
-        $max_inner_loops  = 50;
+        $max_inner_loops  = 500;
 
         do {
             $count = $temp_count = 0;
@@ -1570,7 +1570,7 @@ final class AntiXSS
         // init
         $strEnd     = '';
         $loop_count = 0;
-        $max_loops  = 50; // Prevent infinite loops while allowing thorough sanitization
+        $max_loops  = 500; // Prevent infinite loops while allowing thorough sanitization
 
         do {
             $original = $str;

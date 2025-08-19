@@ -6,12 +6,7 @@ use PHPUnit\Framework\TestCase;
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
-/**
- * Class DOMPurifyTest
- *
- * @internal
- */
-final class DOMPurifyTest extends TestCase
+class DOMPurifyTest extends TestCase
 {
     //
     // https://github.com/cure53/DOMPurify/blob/master/test/fixtures/expect.js
@@ -25,13 +20,13 @@ final class DOMPurifyTest extends TestCase
         $testData = $this->xssProvider();
 
         foreach ($testData as $index => $test) {
-            echo "Processing test case #$index: " . substr($test['payload'], 0, 100) . "...\n";
-            flush();
+            //echo "Processing test case #$index: " . substr($test['payload'], 0, 100) . "...\n";
+            //flush();
 
             $result[] = (new AntiXSS())->xss_clean($test['payload']);
 
-            echo "Completed test case #$index\n";
-            flush();
+            //echo "Completed test case #$index\n";
+            //flush();
         }
 
         // DEBUG

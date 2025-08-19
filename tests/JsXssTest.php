@@ -5,7 +5,7 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use voku\helper\AntiXSS;
 
-final class JsXssTest extends TestCase
+class JsXssTest extends TestCase
 {
     public AntiXSS $security;
 

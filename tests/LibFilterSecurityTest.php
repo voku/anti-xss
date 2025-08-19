@@ -1,22 +1,11 @@
 <?php
 
-/*
- * This file is part of Laravel Security.
- *
- * (c) Graham Campbell <graham@alt-three.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 use voku\helper\AntiXSS;
 
-/**
- * Class LibFilterSecurityTest
- *
- * @internal
- */
-final class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
+
+class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
 {
     //
     // https://github.com/iamcal/lib_filter/blob/master/t/01_basics.t
@@ -79,14 +68,20 @@ final class LibFilterSecurityTest extends \PHPUnit\Framework\TestCase
         $this->addToTestArray('<a href="jAvAsCrIpT:foo">bar</a>', '<a href="">bar</a>');
 
         // bad protocols with entities (semicolons)
-        $this->addToTestArray('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;foo">bar</a>', '<a href="">bar</a>');
-        $this->addToTestArray('<a href="&#0000106;&#0000097;&#0000118;&#0000097;&#0000115;&#0000099;&#0000114;&#0000105;&#0000112;&#0000116;&#0000058;foo">bar</a>', '<a href="">bar</a>');
-        $this->addToTestArray('<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3A;foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;foo">bar</a>',
+                              '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#0000106;&#0000097;&#0000118;&#0000097;&#0000115;&#0000099;&#0000114;&#0000105;&#0000112;&#0000116;&#0000058;foo">bar</a>',
+                              '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#x6A;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3A;foo">bar</a>',
+                              '<a href="">bar</a>');
 
         // bad protocols with entities (no semicolons)
-        $this->addToTestArray('<a href="&#106&#97&#118&#97&#115&#99&#114&#105&#112&#116&#58;foo">bar</a>', '<a href="">bar</a>');
-        $this->addToTestArray('<a href="&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058foo">bar</a>', '<a href="">bar</a>');
-        $this->addToTestArray('<a href="&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A;foo">bar</a>', '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#106&#97&#118&#97&#115&#99&#114&#105&#112&#116&#58;foo">bar</a>',
+                              '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058foo">bar</a>',
+                              '<a href="">bar</a>');
+        $this->addToTestArray('<a href="&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A;foo">bar</a>',
+                              '<a href="">bar</a>');
 
         $security = $this->getSecurity();
 

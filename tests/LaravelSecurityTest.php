@@ -1,22 +1,10 @@
 <?php
 
-/*
- * This file is part of Laravel Security.
- *
- * (c) Graham Campbell <graham@alt-three.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+declare(strict_types=1);
 
 use voku\helper\AntiXSS;
 
-/**
- * This is the security test class.
- *
- * @internal
- */
-final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
+class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
 {
     //
     // https://github.com/GrahamCampbell/Laravel-Security/blob/master/tests/SecurityTest.php
