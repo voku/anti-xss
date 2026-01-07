@@ -656,7 +656,7 @@ final class AntiXSS
         if (
             !$str
             ||
-            (\is_numeric($str) && ((string) (int) $str === $str || (string) (float) $str === $str))
+            \is_numeric($str) && ((string) (int) $str === $str || (string) (float) $str === $str)
         ) {
             // no xss found
             if ($this->_xss_found !== true) {

@@ -2122,6 +2122,11 @@ nodeValue+outerHTML>/*click me', $str);
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
 
+        // setAccessible() is required for PHP < 8.1, deprecated in 8.1+
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
+
         return $method->invokeArgs($object, $parameters);
     }
 
@@ -2137,6 +2142,11 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
+
+        // setAccessible() is required for PHP < 8.1, deprecated in 8.1+
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }
