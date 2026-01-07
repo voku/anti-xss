@@ -17,11 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         php: [
-            7.0,
-            7.1,
-            7.2,
-            7.3,
-            7.4,
             8.0,
             8.1,
             8.2,
@@ -31,7 +26,7 @@ jobs:
         ]
         composer: [basic]
         include:
-          - php: 7.3
+          - php: 8.0
             composer: lowest
     timeout-minutes: 10
     steps:
@@ -59,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [[ "${{ matrix.php }}" == "7.4" ]]; then
+          if [[ "${{ matrix.php }}" == "8.2" ]]; then
             composer require phpstan/phpstan --no-update
           fi;
 
@@ -80,7 +75,7 @@ jobs:
 
       - name: Run phpstan
         continue-on-error: true
-        if: ${{ matrix.php == '7.4' }}
+        if: ${{ matrix.php == '8.2' }}
         run: |
           php vendor/bin/phpstan analyse
 
