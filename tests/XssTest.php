@@ -50,7 +50,6 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>'                                                                   => '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>',
             ''                                                                                                                                                                                                                                        => '',
             ' '                                                                                                                                                                                                                                       => ' ',
-            null                                                                                                                                                                                                                                      => '',
             true                                                                                                                                                                                                                                      => 1,
             false                                                                                                                                                                                                                                     => 0,
             0                                                                                                                                                                                                                                         => 0,
@@ -2122,7 +2121,11 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
+
+        // setAccessible() is required for PHP < 8.1, deprecated in 8.1+
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invokeArgs($object, $parameters);
     }
@@ -2139,7 +2142,11 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+
+        // setAccessible() is required for PHP < 8.1, deprecated in 8.1+
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }
