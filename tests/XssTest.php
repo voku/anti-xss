@@ -1040,8 +1040,10 @@ HTML;
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
         if (\PHP_VERSION_ID < 80100) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
-        } else {
+        } elseif (\PHP_VERSION_ID < 80300) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php81.svg');
+        } else {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php83.svg');
         }
 
         static::assertSame(
@@ -1659,7 +1661,7 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssCleanSanitizeNaughtyJavascript(): array
+    public static function _dataForXssCleanSanitizeNaughtyJavascript(): array
     {
         return [
             // no XSS
@@ -1700,7 +1702,7 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
-    public function _dataForXssXssCleanNeverAllowedAfterwards(): array
+    public static function _dataForXssXssCleanNeverAllowedAfterwards(): array
     {
         return [
             'valid string without attribute XSS #5' => ['<p>onend</p>', false],
