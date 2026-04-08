@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         php: [
-            7.2,
             7.3,
             7.4,
             8.0,
@@ -75,7 +74,7 @@ jobs:
           XDEBUG_MODE: coverage
         run: |
           mkdir -p build/logs
-          if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge 80000 ]; then
+          if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge 80100 ]; then
             php vendor/bin/phpunit -c phpunit.xml --coverage-clover=build/logs/clover.xml
           else
             php vendor/bin/phpunit -c phpunit9.xml --coverage-clover=build/logs/clover.xml
