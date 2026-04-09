@@ -81,7 +81,6 @@ jobs:
           fi
 
       - name: Run phpstan
-        continue-on-error: true
         if: ${{ matrix.php == '8.3' }}
         run: |
           php vendor/bin/phpstan analyse
