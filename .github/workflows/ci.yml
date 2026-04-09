@@ -100,6 +100,12 @@ jobs:
         with:
           files: build/logs/clover.xml
       
+      - name: Upload coverage results to Scrutinizer
+        if: ${{ matrix.php == '8.3' && matrix.composer == 'basic' }}
+        run: |
+          composer global require scrutinizer/ocular
+          ocular code-coverage:upload --format=php-clover build/logs/clover.xml
+
       - name: Archive logs artifacts
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
