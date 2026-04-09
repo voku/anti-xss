@@ -739,12 +739,8 @@ final class AntiXSS
      */
     private function _do_never_allowed($str)
     {
-        $NEVER_ALLOWED_CACHE = [];
-
-        $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
-
         $str = \str_ireplace(
-            $NEVER_ALLOWED_CACHE['keys'],
+            \array_keys($this->_never_allowed_str),
             $this->_never_allowed_str,
             $str
         );
