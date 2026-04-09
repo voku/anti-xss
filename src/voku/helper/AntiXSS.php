@@ -587,7 +587,7 @@ final class AntiXSS
             if ($strCopy !== $str) {
                 $needProtection = false;
                 foreach ($matchesTmp as $matches) {
-                    if (isset($matches['attr'])) {
+                    if ($matches['attr'] !== '') {
                         $tmpAntiXss = clone $this;
 
                         $urlPartClean = $tmpAntiXss->xss_clean((string) $matches['attr']);
@@ -744,9 +744,7 @@ final class AntiXSS
     {
         static $NEVER_ALLOWED_CACHE = [];
 
-        $NEVER_ALLOWED_CACHE['keys'] = null;
-
-        if ($NEVER_ALLOWED_CACHE['keys'] === null) {
+        if (!isset($NEVER_ALLOWED_CACHE['keys'])) {
             $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
         }
 
@@ -1537,13 +1535,13 @@ final class AntiXSS
     /**
      * Additional UTF-7 encoding function.
      *
-     * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
+     * @param string[] $matches <p>Matches for recode ASCII part of UTF-7 back to ASCII.</p>
      *
      * @return string
      */
-    private function _repack_utf7_callback_back($str)
+    private function _repack_utf7_callback_back($matches)
     {
-        return $str[1] . '+' . \rtrim(\base64_encode($str[2]), '=') . '-';
+        return $matches[1] . '+' . \rtrim(\base64_encode($matches[2]), '=') . '-';
     }
 
     /**
@@ -2255,9 +2253,8 @@ final class AntiXSS
      *
      * @return string|string[]
      *
-     * @template TXssCleanInput as string|string[]
-     * @phpstan-param TXssCleanInput $str
-     * @phpstan-return TXssCleanInput
+     * @phpstan-param string|string[] $str
+     * @phpstan-return ($str is string ? string : string[])
      */
     public function xss_clean($str)
     {
@@ -2282,7 +2279,6 @@ final class AntiXSS
                 }
             }
 
-            /** @var TXssCleanInput $str - hack for phpstan */
             return $str;
         }
 
@@ -2295,7 +2291,7 @@ final class AntiXSS
         } while ($old_str !== $str);
 
         // keep the old value, if there wasn't any XSS attack
-        if ($this->_xss_found !== true) {
+        if ($this->isXssFound() !== true) {
             $str = $old_str_backup;
         }
 
