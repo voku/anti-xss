@@ -520,7 +520,7 @@ final class AntiXSS
             //
             // That way valid stuff like "dealer to!" does not become "dealerto".
 
-            $str = (string) \preg_replace_callback(
+            $tmp = \preg_replace_callback(
                 '#(?<before>[^\p{L}]|^)(?<word>' . \str_replace(
                     ['#', '.'],
                     ['\#', '\.'],
@@ -531,6 +531,7 @@ final class AntiXSS
                 },
                 $str
             );
+            $str = $tmp ?? $str;
         }
 
         return $str;
@@ -586,7 +587,7 @@ final class AntiXSS
             if ($strCopy !== $str) {
                 $needProtection = false;
                 foreach ($matchesTmp as $matches) {
-                    if (isset($matches['attr'])) {
+                    if ($matches['attr'] !== '') {
                         $tmpAntiXss = clone $this;
 
                         $urlPartClean = $tmpAntiXss->xss_clean((string) $matches['attr']);
@@ -631,13 +632,14 @@ final class AntiXSS
             &&
             \preg_match($regExForHtmlTags, $str)
         ) {
-            $str = (string) \preg_replace_callback(
+            $tmp = \preg_replace_callback(
                 $regExForHtmlTags,
                 function ($matches) {
                     return $this->_decode_entity($matches);
                 },
                 $str
             );
+            $str = $tmp ?? $str;
         } else {
             $str = UTF8::rawurldecode($str);
         }
@@ -687,7 +689,8 @@ final class AntiXSS
 
         // remove all >= 4-Byte chars if needed
         if ($this->_stripe_4byte_chars) {
-            $str = (string) \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
+            $tmp = \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
+            $str = $tmp ?? $str;
         }
 
         // backup the string (for later comparison)
@@ -741,9 +744,7 @@ final class AntiXSS
     {
         static $NEVER_ALLOWED_CACHE = [];
 
-        $NEVER_ALLOWED_CACHE['keys'] = null;
-
-        if ($NEVER_ALLOWED_CACHE['keys'] === null) {
+        if (!isset($NEVER_ALLOWED_CACHE['keys'])) {
             $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
         }
 
@@ -762,11 +763,12 @@ final class AntiXSS
             }
         }
         if (\count($replaceNeverAllowedCall) > 0) {
-            $str = (string) \preg_replace(
+            $tmp = \preg_replace(
                 '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
                 $str
             );
+            $str = $tmp ?? $str;
         }
 
         // ---
@@ -779,11 +781,12 @@ final class AntiXSS
                 continue;
             }
 
-            $str = (string) \preg_replace(
+            $tmp = \preg_replace(
                 '#' . $regex . '#iUus',
                 $replacement,
                 $str
             );
+            $str = $tmp ?? $str;
         }
 
         if (!$this->_cache_never_allowed_regex_string || $regex_combined !== []) {
@@ -791,11 +794,12 @@ final class AntiXSS
         }
 
         if ($this->_cache_never_allowed_regex_string) {
-            $str = (string) \preg_replace(
+            $tmp = \preg_replace(
                 '#' . $this->_cache_never_allowed_regex_string . '#ius',
                 $this->_replacement,
                 $str
             );
+            $str = $tmp ?? $str;
         }
 
         return $str;
@@ -848,13 +852,14 @@ final class AntiXSS
                     do {
                         $count = $temp_count = 0;
 
-                        $str = (string) \preg_replace(
+                        $tmp = \preg_replace(
                             '#' . $regex . '#ius',
                             '$1' . $this->_replacement . '$2',
                             $str,
                             -1,
                             $temp_count
                         );
+                        $str = $tmp ?? $str;
                         $count += $temp_count;
                     } while ($count);
 
@@ -1143,11 +1148,12 @@ final class AntiXSS
                         $foundSomethingBad = true;
                         $this->_xss_found = true;
 
-                        $replacer = (string) \preg_replace(
+                        $tmp = \preg_replace(
                             $pattern,
                             $search . '="' . $this->_replacement . '"',
                             $replacer
                         );
+                        $replacer = $tmp ?? $replacer;
                     }
                 }
             }
@@ -1163,11 +1169,12 @@ final class AntiXSS
                 $pattern = '#' . $search . '=.*(?:' . $patternTmp . \implode('|', $this->_never_allowed_js_callback_regex) . ')#ius';
                 $matchInner = [];
                 if (\preg_match($pattern, $match[1], $matchInner)) {
-                    $replacer = (string) \preg_replace(
+                    $tmp = \preg_replace(
                         $pattern,
                         $search . '="' . $this->_replacement . '"',
                         $replacer
                     );
+                    $replacer = $tmp ?? $replacer;
                 }
             }
         }
@@ -1402,13 +1409,14 @@ final class AntiXSS
             do {
                 $count = $temp_count = 0;
 
-                $str = (string) \preg_replace(
+                $tmp = \preg_replace(
                     '/(<[^>]+)(?<!\p{L})(style\s*=\s*"(?:[^"]*?)"|style\s*=\s*\'(?:[^\']*?)\')/iu',
                     '$1' . $this->_replacement,
                     $str,
                     -1,
                     $temp_count
                 );
+                $str = $tmp ?? $str;
                 $count += $temp_count;
             } while ($count);
         }
@@ -1527,13 +1535,13 @@ final class AntiXSS
     /**
      * Additional UTF-7 encoding function.
      *
-     * @param string $str <p>String for recode ASCII part of UTF-7 back to ASCII.</p>
+     * @param string[] $matches <p>Matches for recode ASCII part of UTF-7 back to ASCII.</p>
      *
      * @return string
      */
-    private function _repack_utf7_callback_back($str)
+    private function _repack_utf7_callback_back($matches)
     {
-        return $str[1] . '+' . \rtrim(\base64_encode($str[2]), '=') . '-';
+        return $matches[1] . '+' . \rtrim(\base64_encode($matches[2]), '=') . '-';
     }
 
     /**
@@ -2245,9 +2253,8 @@ final class AntiXSS
      *
      * @return string|string[]
      *
-     * @template TXssCleanInput as string|string[]
-     * @phpstan-param TXssCleanInput $str
-     * @phpstan-return TXssCleanInput
+     * @phpstan-param string|string[] $str
+     * @phpstan-return ($str is string ? string : string[])
      */
     public function xss_clean($str)
     {
@@ -2272,7 +2279,6 @@ final class AntiXSS
                 }
             }
 
-            /** @var TXssCleanInput $str - hack for phpstan */
             return $str;
         }
 
@@ -2285,7 +2291,7 @@ final class AntiXSS
         } while ($old_str !== $str);
 
         // keep the old value, if there wasn't any XSS attack
-        if ($this->_xss_found !== true) {
+        if ($this->isXssFound() !== true) {
             $str = $old_str_backup;
         }
 

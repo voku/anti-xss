@@ -25,7 +25,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
     /**
      * @return array
      */
-    public function snippetProvider()
+    public static function snippetProvider()
     {
         return [
             [
