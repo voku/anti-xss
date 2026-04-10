@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload coverage results to Codecov
         if: ${{ matrix.php == '8.3' && matrix.composer == 'basic' }}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           files: build/logs/clover.xml
       
