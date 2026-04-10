@@ -1041,8 +1041,10 @@ HTML;
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
         if (\PHP_VERSION_ID < 80100) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
-        } else {
+        } elseif (\PHP_VERSION_ID < 80300) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php81.svg');
+        } else {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php83.svg');
         }
 
         static::assertSame(
