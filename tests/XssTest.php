@@ -129,6 +129,17 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ' < 1 year' => ' < 1 year',
             '> 1 year' => '> 1 year',
             '<p>onend</p>' => '<p>onend</p>',
+            'test1 &lt; test2' => 'test1 &lt; test2',
+            'test1 &gt; test2' => 'test1 &gt; test2',
+            'test1 < test2' => 'test1 < test2',
+            'test1 > test2' => 'test1 > test2',
+            'abcd &lt; 35kg abc' => 'abcd &lt; 35kg abc',
+            'abcd &amp;lt;35kg abc' => 'abcd &amp;lt;35kg abc',
+            'abcd &gt; 35kg abc' => 'abcd &gt; 35kg abc',
+            'abcd &gt;35kg abc' => 'abcd &gt;35kg abc',
+            'abcd < 35kg abc' => 'abcd < 35kg abc',
+            'abcd > 35kg abc' => 'abcd > 35kg abc',
+            'abcd >35kg abc' => 'abcd >35kg abc',
         ];
 
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
