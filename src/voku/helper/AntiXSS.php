@@ -665,6 +665,8 @@ final class AntiXSS
         }
 
         if (\is_numeric($str)) {
+            // Keep the fast-path only for canonical numeric strings so inputs such as
+            // scientific notation continue through the sanitizer as before.
             $strInt = (string) (int) $str;
             $strFloat = (string) (float) $str;
 
