@@ -2139,7 +2139,7 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        // Reflection methods are invokable without setAccessible() on PHP 8.1+.
+        // setAccessible() is a no-op and deprecated on PHP 8.1+.
         if (\PHP_VERSION_ID < 80100) {
             $method->setAccessible(true);
         }
@@ -2159,7 +2159,7 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        // Reflection properties are readable without setAccessible() on PHP 8.1+.
+        // setAccessible() is a no-op and deprecated on PHP 8.1+.
         if (\PHP_VERSION_ID < 80100) {
             $property->setAccessible(true);
         }

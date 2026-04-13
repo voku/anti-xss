@@ -664,7 +664,7 @@ final class AntiXSS
             return $str;
         }
 
-        if (\preg_match('/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?$/', $str) === 1) {
+        if (\preg_match('/^[+-]?(?:(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)$/', $str) === 1) {
             $strInt = (string) (int) $str;
             $strFloat = (string) (float) $str;
 
