@@ -655,25 +655,27 @@ final class AntiXSS
     private function _do($str)
     {
         $str = (string) $str;
-        if (
-            !$str
-            ||
-            (
-                \is_numeric($str)
-                &&
-                (
-                    (string) (int) $str === $str
-                    ||
-                    (string) (float) $str === $str
-                )
-            )
-        ) {
+        if (!$str) {
             // no xss found
             if ($this->_xss_found !== true) {
                 $this->_xss_found = false;
             }
 
             return $str;
+        }
+
+        if (\is_numeric($str)) {
+            $strInt = (string) (int) $str;
+            $strFloat = (string) (float) $str;
+
+            if ($strInt === $str || $strFloat === $str) {
+                // no xss found
+                if ($this->_xss_found !== true) {
+                    $this->_xss_found = false;
+                }
+
+                return $str;
+            }
         }
 
         // remove the BOM from UTF-8 / UTF-16 / UTF-32 strings
