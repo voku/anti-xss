@@ -42,6 +42,8 @@ final class AntiXSS
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
 
+    private const NUMERIC_STRING_REGEX = '/^[+-]?(?:(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)$/';
+
     /**
      * @deprecated will be removed in future versions
      */
@@ -664,7 +666,7 @@ final class AntiXSS
             return $str;
         }
 
-        if (\preg_match('/^[+-]?(?:(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)$/', $str) === 1) {
+        if (\preg_match(self::NUMERIC_STRING_REGEX, $str) === 1) {
             $strInt = (string) (int) $str;
             $strFloat = (string) (float) $str;
 
