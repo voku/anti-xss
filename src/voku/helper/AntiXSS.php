@@ -664,9 +664,7 @@ final class AntiXSS
             return $str;
         }
 
-        if (\is_numeric($str)) {
-            // Keep the fast-path only for canonical numeric strings so inputs such as
-            // scientific notation continue through the sanitizer as before.
+        if (\preg_match('/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?$/', $str) === 1) {
             $strInt = (string) (int) $str;
             $strFloat = (string) (float) $str;
 
