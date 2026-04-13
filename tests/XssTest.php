@@ -48,6 +48,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<p>&lt;h1&gt;<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&amp;n_type=0&amp;p_from=1" target="_blank">Special url</a>&lt;/h1&gt; User content %7B%7B Test 123</p>' => '<p>&lt;h1&gt;<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&amp;n_type=0&amp;p_from=1" target="_blank">Special url</a>&lt;/h1&gt; User content %7B%7B Test 123</p>',
             '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&amp;n_type=0&amp;p_from=1" target="_blank">Valid Link</a>'                                                           => '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&amp;n_type=0&amp;p_from=1" target="_blank">Valid Link</a>',
             '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>'                                                                   => '<a href="https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_15446515888862039806%22%7D&n_type=0&p_from=1" target="_blank">Valid Link</a>',
+            '8e90674d-132b-4c5c-88d2-a2bbe13b93fd'                                                                                                                                                                                                     => '8e90674d-132b-4c5c-88d2-a2bbe13b93fd',
+            '49e298g50njhf3'                                                                                                                                                                                                                           => '49e298g50njhf3',
             ''                                                                                                                                                                                                                                        => '',
             ' '                                                                                                                                                                                                                                       => ' ',
             null                                                                                                                                                                                                                                      => '',
@@ -2135,7 +2137,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invokeArgs($object, $parameters);
     }
@@ -2152,7 +2156,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }
