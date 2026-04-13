@@ -42,6 +42,9 @@ final class AntiXSS
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
 
+    /**
+     * Matches numeric strings that are safe to probe with int/float casts, including exponent notation.
+     */
     private const NUMERIC_STRING_REGEX = '/^[+-]?(?:(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)$/';
 
     /**
