@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
@@ -1654,6 +1655,7 @@ nodeValue+outerHTML>/*click me', $str);
     /**
      * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
      */
+    #[DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
     public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange
@@ -1695,6 +1697,7 @@ nodeValue+outerHTML>/*click me', $str);
     /**
      * @dataProvider _dataForXssXssCleanNeverAllowedAfterwards
      */
+    #[DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
     public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
         // Arrange

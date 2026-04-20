@@ -10,6 +10,7 @@
  */
 
 use voku\helper\AntiXSS;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * This is the security test class.
@@ -234,6 +235,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
      * @param $input
      * @param $output
      */
+    #[DataProvider('snippetProvider')]
     public function testCleanString($input, $output)
     {
         $security = $this->getSecurity();
