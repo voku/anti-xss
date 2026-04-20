@@ -778,33 +778,30 @@ final class AntiXSS
 
         $result = '';
         $offset = 0;
+        $regex = '/<(pre|code)\b(?:[^>"\']+|"[^"]*"|\'[^\']*\')*>.*?<\/\1>/is';
 
         while (
-            \preg_match('/<(pre|code)\b[^>]*>/i', $str, $matches, PREG_OFFSET_CAPTURE, $offset) === 1
+            \preg_match($regex, $str, $matches, PREG_OFFSET_CAPTURE, $offset) === 1
         ) {
             $match = $matches[0][0];
-            $tagName = $matches[1][0];
             $start = $matches[0][1];
-            $afterMatch = $start + \strlen($match);
-            $end = \stripos($str, '</' . $tagName . '>', $afterMatch);
-
-            if ($end === false) {
-                break;
-            }
 
             $result .= $callback((string) \substr($str, $offset, $start - $offset));
-
-            $closingTagLength = \strlen('</' . $tagName . '>');
-            $result .= (string) \substr($str, $start, ($end + $closingTagLength) - $start);
-
-            $offset = $end + $closingTagLength;
+            $result .= $match;
+            $offset = $start + \strlen($match);
         }
 
         if ($offset === 0) {
             return $callback($str);
         }
 
-        return $result . $callback((string) \substr($str, $offset));
+        $remaining = (string) \substr($str, $offset);
+
+        if ($remaining === '') {
+            return $result;
+        }
+
+        return $result . $callback($remaining);
     }
 
     /**
