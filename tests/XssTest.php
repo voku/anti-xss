@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
@@ -1652,25 +1651,25 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
     
-    /**
-     * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
-     */
-    #[DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
-    public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
+    public function testXssCleanSanitizeNaughtyJavascript()
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssCleanSanitizeNaughtyJavascript() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
@@ -1694,25 +1693,25 @@ nodeValue+outerHTML>/*click me', $str);
         ];
     }
 
-    /**
-     * @dataProvider _dataForXssXssCleanNeverAllowedAfterwards
-     */
-    #[DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
-    public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
+    public function testXssCleanNeverAllowedAfterwards()
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssXssCleanNeverAllowedAfterwards() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
