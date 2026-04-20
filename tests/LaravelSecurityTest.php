@@ -9,8 +9,8 @@
  * file that was distributed with this source code.
  */
 
-use voku\helper\AntiXSS;
 use PHPUnit\Framework\Attributes\DataProvider;
+use voku\helper\AntiXSS;
 
 /**
  * This is the security test class.
