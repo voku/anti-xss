@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
@@ -1651,7 +1652,11 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
     
-    public function testXssCleanSanitizeNaughtyJavascript()
+    /**
+     * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
+     */
+    #[DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
+    public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
         foreach (self::_dataForXssCleanSanitizeNaughtyJavascript() as $name => $case) {
             [$contentToFilter, $expectedFindXss] = $case;
@@ -1693,7 +1698,11 @@ nodeValue+outerHTML>/*click me', $str);
         ];
     }
 
-    public function testXssCleanNeverAllowedAfterwards()
+    /**
+     * @dataProvider _dataForXssXssCleanNeverAllowedAfterwards
+     */
+    #[DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
+    public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
         foreach (self::_dataForXssXssCleanNeverAllowedAfterwards() as $name => $case) {
             [$contentToFilter, $expectedFindXss] = $case;

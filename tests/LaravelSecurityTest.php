@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
  */
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 
 /**
@@ -228,7 +229,14 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    public function testCleanString()
+    /**
+     * @dataProvider snippetProvider
+     *
+     * @param $input
+     * @param $output
+     */
+    #[DataProvider('snippetProvider')]
+    public function testCleanString($input, $output)
     {
         $security = $this->getSecurity();
         $security->setReplacement('[removed]');
