@@ -2122,15 +2122,14 @@ nodeValue+outerHTML>/*click me', $str);
             </code></pre>
         ';
 
-        $expected = '
-            <pre><code>
-                
-                    foo();
-                
-            </code></pre>
-        ';
+        static::assertSame($content, (new AntiXSS())->xss_clean($content));
+    }
 
-        static::assertSame($expected, (new AntiXSS())->xss_clean($content));
+    public function testJavascriptLikeTextInsidePreAndCodeTagsIsPreserved()
+    {
+        $content = "<pre>\n.innerHTML\n.appendChild\neval(1)\n.onclick\n</pre>";
+
+        static::assertSame($content, (new AntiXSS())->xss_clean($content));
     }
 
     /**

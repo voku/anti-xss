@@ -729,13 +729,17 @@ final class AntiXSS
             $str = $this->_remove_disallowed_javascript($str);
     
             // remove strings that are never allowed
-            $str = $this->_do_never_allowed($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_do_never_allowed($string);
+            });
     
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
     
             // sanitize naughty JavaScript elements
-            $str = $this->_sanitize_naughty_javascript($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_sanitize_naughty_javascript($string);
+            });
     
             // sanitize naughty HTML elements
             $str = $this->_sanitize_naughty_html($str);
@@ -743,7 +747,9 @@ final class AntiXSS
             // final clean up
             //
             // -> This adds a bit of extra precaution in case something got through the above filters.
-            $str = $this->_do_never_allowed_afterwards($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_do_never_allowed_afterwards($string);
+            });
         } while ($str_backup_loop !== $str);
 
         // check for xss
@@ -752,6 +758,53 @@ final class AntiXSS
         }
         
         return $str;
+    }
+
+    /**
+     * @param string   $str
+     * @param callable $callback
+     *
+     * @return string
+     */
+    private function _do_callback_outside_of_pre_and_code_tags($str, callable $callback)
+    {
+        if (
+            \stripos($str, '<pre') === false
+            &&
+            \stripos($str, '<code') === false
+        ) {
+            return $callback($str);
+        }
+
+        $result = '';
+        $offset = 0;
+
+        while (
+            \preg_match('/<(pre|code)\b[^>]*>/i', $str, $matches, PREG_OFFSET_CAPTURE, $offset) === 1
+        ) {
+            $match = $matches[0][0];
+            $tagName = $matches[1][0];
+            $start = $matches[0][1];
+            $afterMatch = $start + \strlen($match);
+            $end = \stripos($str, '</' . $tagName . '>', $afterMatch);
+
+            if ($end === false) {
+                break;
+            }
+
+            $result .= $callback((string) \substr($str, $offset, $start - $offset));
+
+            $closingTagLength = \strlen('</' . $tagName . '>');
+            $result .= (string) \substr($str, $start, ($end + $closingTagLength) - $start);
+
+            $offset = $end + $closingTagLength;
+        }
+
+        if ($offset === 0) {
+            return $callback($str);
+        }
+
+        return $result . $callback((string) \substr($str, $offset));
     }
 
     /**
