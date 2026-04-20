@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 use voku\helper\UTF8;
 
@@ -129,12 +130,17 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ' < 1 year' => ' < 1 year',
             '> 1 year' => '> 1 year',
             '<p>onend</p>' => '<p>onend</p>',
+            'test1 &lt; test2' => 'test1 &lt; test2',
+            'test1 &gt; test2' => 'test1 &gt; test2',
             'test1 < test2' => 'test1 < test2',
             'test1 > test2' => 'test1 > test2',
+            'abcd &lt; 35kg abc' => 'abcd &lt; 35kg abc',
+            'abcd &amp;lt;35kg abc' => 'abcd &amp;lt;35kg abc',
+            'abcd &gt; 35kg abc' => 'abcd &gt; 35kg abc',
+            'abcd &gt;35kg abc' => 'abcd &gt;35kg abc',
             'abcd < 35kg abc' => 'abcd < 35kg abc',
-            'abcd <35kg abc' => 'abcd <35kg abc',
             'abcd > 35kg abc' => 'abcd > 35kg abc',
-            'abcd >35kg abc' => 'abcd >35kg abc'
+            'abcd >35kg abc' => 'abcd >35kg abc',
         ];
 
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -1046,8 +1052,10 @@ HTML;
         $testString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1.svg');
         if (\PHP_VERSION_ID < 80100) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean.svg');
-        } else {
+        } elseif (\PHP_VERSION_ID < 80300) {
             $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php81.svg');
+        } else {
+            $resultString = UTF8::file_get_contents(__DIR__ . '/fixtures/xss_v1_clean_php83.svg');
         }
 
         static::assertSame(
@@ -1647,25 +1655,30 @@ nodeValue+outerHTML>/*click me', $str);
     /**
      * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
      */
+    #[DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
     public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssCleanSanitizeNaughtyJavascript() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
-    public function _dataForXssCleanSanitizeNaughtyJavascript(): array
+    public static function _dataForXssCleanSanitizeNaughtyJavascript(): array
     {
         return [
             // no XSS
@@ -1688,25 +1701,30 @@ nodeValue+outerHTML>/*click me', $str);
     /**
      * @dataProvider _dataForXssXssCleanNeverAllowedAfterwards
      */
+    #[DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
     public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssXssCleanNeverAllowedAfterwards() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
-    public function _dataForXssXssCleanNeverAllowedAfterwards(): array
+    public static function _dataForXssXssCleanNeverAllowedAfterwards(): array
     {
         return [
             'valid string without attribute XSS #5' => ['<p>onend</p>', false],
@@ -2128,7 +2146,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invokeArgs($object, $parameters);
     }
@@ -2145,7 +2165,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }
