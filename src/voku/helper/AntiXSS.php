@@ -655,14 +655,10 @@ final class AntiXSS
     private function _do($str)
     {
         $str = (string) $str;
-        $strInt = (int) $str;
-        $strFloat = (float) $str;
         if (
             !$str
             ||
-            (string) $strInt === $str
-            ||
-            (string) $strFloat === $str
+            (\is_numeric($str) && ((string) (int) $str === $str || (string) (float) $str === $str))
         ) {
             // no xss found
             if ($this->_xss_found !== true) {
