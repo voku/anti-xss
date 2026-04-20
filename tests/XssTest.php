@@ -2137,7 +2137,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invokeArgs($object, $parameters);
     }
@@ -2154,7 +2156,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }
