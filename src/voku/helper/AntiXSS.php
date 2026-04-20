@@ -408,6 +408,31 @@ final class AntiXSS
     ];
 
     /**
+     * @var string[]
+     */
+    private $_naughty_javascript_patterns = [
+        'alert',
+        'prompt',
+        'confirm',
+        'cmd',
+        'passthru',
+        'eval',
+        'exec',
+        'execScript',
+        'setTimeout',
+        'setInterval',
+        'setImmediate',
+        'expression',
+        'system',
+        'fopen',
+        'fsockopen',
+        'file',
+        'file_get_contents',
+        'readfile',
+        'unlink',
+    ];
+
+    /**
      * @var string
      */
     private $_spacing_regex = '(?:\s|"|\'|\+|&#x0[9A-F];|%0[9a-f])*?';
@@ -655,14 +680,10 @@ final class AntiXSS
     private function _do($str)
     {
         $str = (string) $str;
-        $strInt = (int) $str;
-        $strFloat = (float) $str;
         if (
             !$str
             ||
-            (string) $strInt === $str
-            ||
-            (string) $strFloat === $str
+            (\is_numeric($str) && ((string) (int) $str === $str || (string) (float) $str === $str))
         ) {
             // no xss found
             if ($this->_xss_found !== true) {
@@ -1640,8 +1661,8 @@ final class AntiXSS
     private function _close_html_callback($matches)
     {
         if (empty($matches['closeTag'])) {
-            // allow e.g. "< $2.20" and e.g. "< 1 year"
-            if (\preg_match('/^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]*$|^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]+\p{L}*\s*$/u', $matches[1])) {
+            // allow e.g. "< $2.20" and e.g. "< 1 year" and e.g. "< 35kg Gross" and e.g. "< subject1"
+            if (\preg_match('/^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]*$|^[ .,\d=%€$₢₣£₤₶ℳ₥₦₧₨රුரூ௹रू₹૱₩₪₸₫֏₭₺₼₮₯₰₷₱﷼₲₾₳₴₽₵₡¢¥円৳元៛₠¤฿؋]+[\p{L}\d\s]*$/u', $matches[1])) {
                 return '<' . \str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[1]);
             }
 
@@ -1732,30 +1753,8 @@ final class AntiXSS
     private function _sanitize_naughty_javascript($str)
     {
         if (\strpos($str, '(') !== false) {
-            $patterns = [
-                'alert',
-                'prompt',
-                'confirm',
-                'cmd',
-                'passthru',
-                'eval',
-                'exec',
-                'execScript',
-                'setTimeout',
-                'setInterval',
-                'setImmediate',
-                'expression',
-                'system',
-                'fopen',
-                'fsockopen',
-                'file',
-                'file_get_contents',
-                'readfile',
-                'unlink',
-            ];
-
             $found = false;
-            foreach ($patterns as $pattern) {
+            foreach ($this->_naughty_javascript_patterns as $pattern) {
                 if (\strpos($str, $pattern) !== false) {
                     $found = true;
 
@@ -1765,7 +1764,7 @@ final class AntiXSS
 
             if ($found === true) {
                 $str = (string) \preg_replace(
-                    '#(?<!\p{L})(' . \implode('|', $patterns) . ')(\s*)\((.*)\)#uisU',
+                    '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
                 );
@@ -2005,6 +2004,27 @@ final class AntiXSS
         $this->_do_not_close_html_tags = \array_diff(
             $this->_do_not_close_html_tags,
             \array_intersect($strings, $this->_do_not_close_html_tags)
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add some strings to the "_naughty_javascript_patterns"-array.
+     *
+     * @param string[] $strings
+     *
+     * @return $this
+     */
+    public function addNaughtyJavascriptPatterns(array $strings): self
+    {
+        if ($strings === []) {
+            return $this;
+        }
+
+        $this->_naughty_javascript_patterns = \array_merge(
+            $strings,
+            $this->_naughty_javascript_patterns
         );
 
         return $this;

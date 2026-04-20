@@ -130,6 +130,17 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ' < 1 year' => ' < 1 year',
             '> 1 year' => '> 1 year',
             '<p>onend</p>' => '<p>onend</p>',
+            'test1 &lt; test2' => 'test1 &lt; test2',
+            'test1 &gt; test2' => 'test1 &gt; test2',
+            'test1 < test2' => 'test1 < test2',
+            'test1 > test2' => 'test1 > test2',
+            'abcd &lt; 35kg abc' => 'abcd &lt; 35kg abc',
+            'abcd &amp;lt;35kg abc' => 'abcd &amp;lt;35kg abc',
+            'abcd &gt; 35kg abc' => 'abcd &gt; 35kg abc',
+            'abcd &gt;35kg abc' => 'abcd &gt;35kg abc',
+            'abcd < 35kg abc' => 'abcd < 35kg abc',
+            'abcd > 35kg abc' => 'abcd > 35kg abc',
+            'abcd >35kg abc' => 'abcd >35kg abc',
         ];
 
         $antiXss->removeEvilAttributes(['style']); // allow style-attributes
@@ -1647,19 +1658,23 @@ nodeValue+outerHTML>/*click me', $str);
     #[DataProvider('_dataForXssCleanSanitizeNaughtyJavascript')]
     public function testXssCleanSanitizeNaughtyJavascript(string $contentToFilter, bool $expectedFindXss)
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssCleanSanitizeNaughtyJavascript() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
@@ -1689,19 +1704,23 @@ nodeValue+outerHTML>/*click me', $str);
     #[DataProvider('_dataForXssXssCleanNeverAllowedAfterwards')]
     public function testXssCleanNeverAllowedAfterwards(string $contentToFilter, bool $expectedFindXss)
     {
-        // Arrange
-        $antiXSS = new AntiXSS();
+        foreach (self::_dataForXssXssCleanNeverAllowedAfterwards() as $name => $case) {
+            [$contentToFilter, $expectedFindXss] = $case;
 
-        // Act
-        $antiXSS->xss_clean($contentToFilter);
+            // Arrange
+            $antiXSS = new AntiXSS();
 
-        $result = $antiXSS->isXssFound();
+            // Act
+            $antiXSS->xss_clean($contentToFilter);
 
-        // Assert
-        if ($expectedFindXss) {
-            self::assertTrue($result, 'testing: ' . $contentToFilter);
-        } else {
-            self::assertFalse($result, 'testing: ' . $contentToFilter);
+            $result = $antiXSS->isXssFound();
+
+            // Assert
+            if ($expectedFindXss) {
+                self::assertTrue($result, 'testing (' . $name . '): ' . $contentToFilter);
+            } else {
+                self::assertFalse($result, 'testing (' . $name . '): ' . $contentToFilter);
+            }
         }
     }
 
@@ -2127,7 +2146,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
 
         return $method->invokeArgs($object, $parameters);
     }
@@ -2144,7 +2165,9 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+        if (\PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($object);
     }

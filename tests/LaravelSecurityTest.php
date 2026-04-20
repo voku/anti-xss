@@ -241,9 +241,11 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
         $security = $this->getSecurity();
         $security->setReplacement('[removed]');
 
-        $return = $security->xss_clean($input);
-
-        static::assertSame($output, $return, 'tested: ' . $input);
+        foreach (self::snippetProvider() as $case) {
+            [$input, $output] = $case;
+            $return = $security->xss_clean($input);
+            static::assertSame($output, $return, 'tested: ' . $input);
+        }
     }
 
     /**
