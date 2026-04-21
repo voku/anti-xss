@@ -1188,16 +1188,8 @@ final class AntiXSS
             return true;
         }
 
-        if (\strpos($value, '//') === 0 && \filter_var('https:' . $value, \FILTER_VALIDATE_URL) !== false) {
-            return true;
-        }
-
         if (\stripos($value, 'script') !== false || \strpos($value, ':') !== false) {
             return false;
-        }
-
-        if (\preg_match('#^(?:/|\./|\.\./)#', $value) === 1) {
-            return true;
         }
 
         return \strpbrk($value, '/?#') !== false;
