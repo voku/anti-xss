@@ -979,9 +979,9 @@ textContent>click me!',
     public function testIssue103()
     {
         $antiXss = new AntiXSS();
-        $value = '<a href="https://example.com?34167-%C3%9Cbersicht">text</a>';
+        $htmlWithPercentEncodedUrl = '<a href="https://example.com?34167-%C3%9Cbersicht">text</a>';
 
-        static::assertSame($value, $antiXss->xss_clean($value));
+        static::assertSame($htmlWithPercentEncodedUrl, $antiXss->xss_clean($htmlWithPercentEncodedUrl));
         static::assertFalse($antiXss->isXssFound());
     }
 
