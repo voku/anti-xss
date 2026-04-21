@@ -219,4 +219,11 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('&lt;!--sa       --&gt;ss', (new AntiXSS())->xss_clean('<!--sa       -->ss'));
         static::assertSame('&lt;!--                               ', (new AntiXSS())->xss_clean('<!--                               '));
     }
+
+    public function testJsonEscapedHtmlAttributesArePreserved()
+    {
+        $input = '{"text": "<a href=\\"https://google.com\\">Google</a>"}';
+
+        static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
+    }
 }

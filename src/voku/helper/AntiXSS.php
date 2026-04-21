@@ -1077,7 +1077,7 @@ final class AntiXSS
 
         if (\strpos($str, '=') !== false) {
             $matchesTmp = [];
-            while (\preg_match('#\s*[\p{L}\d_\-\[\]]+\s*=\s*(["\'])(?:[^\1]*?)\\1#u', $str, $matches)) {
+            while (\preg_match('#\s*[\p{L}\d_\-\[\]]+\s*=\s*(?:(["\'])(?:[^\1]*?)\\1|\\\"(?:[^"]*?)\\\")#u', $str, $matches)) {
                 $matchesTmp[] = $matches[0];
                 $str = \str_replace($matches[0], '', $str);
 
