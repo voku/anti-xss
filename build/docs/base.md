@@ -32,11 +32,6 @@ accounted for roughly 84% of all security vulnerabilities documented by Symantec
 
 6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
-### ⚠️ WARNING
-This package depends on `voku/portable-utf8`, which can set `mb_internal_encoding()` to `UTF-8` during autoloading.
-
-Do **not** include this package in any non-UTF-8 application and do **not** add it as a dependency of packages that must support non-UTF-8 applications, as this can cause data corruption.
-
 ### Install via "composer require"
 ```shell
 composer require voku/anti-xss
