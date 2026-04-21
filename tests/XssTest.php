@@ -1722,6 +1722,18 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img &svg="" src="x">', (new AntiXSS())->xss_clean('<img <svg=""> src="x">'));
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
+
+    public function testXssCleanRegressionForIssueExamples()
+    {
+        $antiXss = new AntiXSS();
+
+        // Preserve original spacing for plain text input.
+        static::assertSame('Hello, i try to  your site', $antiXss->xss_clean('Hello, i try to  your site'));
+        static::assertSame('<img>', $antiXss->xss_clean('<img>'));
+        static::assertSame('<a>CLICK</a>', $antiXss->xss_clean('<a>CLICK</a>'));
+        // Regression: keep unclosed anchor input stable (avoid rewriting into balanced tags).
+        static::assertSame('<a>CLICK   ', $antiXss->xss_clean('<a>CLICK   '));
+    }
     
     /**
      * @dataProvider _dataForXssCleanSanitizeNaughtyJavascript
