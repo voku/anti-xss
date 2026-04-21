@@ -1016,6 +1016,38 @@ textContent>click me!',
             static::assertTrue($antiXss->isXssFound(), 'testing: ' . $blockedUrl);
         }
     }
+
+    public function testIssue114SafeSrcUrls()
+    {
+        $safeUrls = [
+            '<img src="https://example.com/history.back.png" />',
+            '<img src="https://example.com/path/location.map" />',
+            '<img src = "https://example.com/history.back.png" />',
+            '<source src="https://example.com/path/history.back.mp4" />',
+            '<video src="https://example.com/path/location.map"></video>',
+        ];
+
+        foreach ($safeUrls as $safeUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($safeUrl, $antiXss->xss_clean($safeUrl), 'testing: ' . $safeUrl);
+            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $safeUrl);
+        }
+    }
+
+    public function testIssue114WhitespaceAroundEqualsDoesNotBypassBlocking()
+    {
+        $blockedUrls = [
+            '<a href = "javascript:alert(1)">...</a>' => '<a href = "(1)">...</a>',
+            '<img src = "javascript:alert(1)" />'     => '<img src = "(1)" />',
+            '<img src = "document.cookie" />'         => '<img src = "" />',
+        ];
+
+        foreach ($blockedUrls as $blockedUrl => $expectedUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expectedUrl, $antiXss->xss_clean($blockedUrl), 'testing: ' . $blockedUrl);
+            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $blockedUrl);
+        }
+    }
     
     public function testIssue113()
     {
