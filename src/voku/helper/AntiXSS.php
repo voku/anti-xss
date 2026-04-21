@@ -38,8 +38,6 @@ use const HTML_ENTITIES;
  */
 final class AntiXSS
 {
-    const RELATIVE_URL_VALIDATION_HOST = 'https://localhost.localdomain/';
-
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
@@ -1176,6 +1174,35 @@ final class AntiXSS
     }
 
     /**
+     * @param string $search
+     * @param string $value
+     *
+     * @return bool
+     */
+    private function _isValidUrlForCallbackBypass($search, $value)
+    {
+        $value = \str_replace(' ', '%20', $value);
+
+        if (\filter_var($value, \FILTER_VALIDATE_URL) !== false) {
+            return true;
+        }
+
+        if (\strpos($value, '//') === 0 && \filter_var('https:' . $value, \FILTER_VALIDATE_URL) !== false) {
+            return true;
+        }
+
+        if (\stripos($value, 'script') !== false || \strpos($value, ':') !== false) {
+            return false;
+        }
+
+        if (\preg_match('#^(?:/|\./|\.\./)#', $value) === 1) {
+            return true;
+        }
+
+        return \strpbrk($value, '/?#') !== false || ($search === 'href' && \strpos($value, '.') !== false);
+    }
+
+    /**
      * Callback method for xss_clean() to sanitize tags.
      *
      * <p>
@@ -1203,28 +1230,10 @@ final class AntiXSS
             $pattern = '#' . $search . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
-            $isValidHrefUrl = false;
-            $isValidSrcUrl = false;
+            $isValidAttributeUrl = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
-                $needProtection = true;
-                $matchInner[4] = \str_replace(' ', '%20', $matchInner[4]);
-                $isValidAbsoluteUrl = \filter_var($matchInner[4], \FILTER_VALIDATE_URL) !== false;
-                $isValidRelativeUrl = \filter_var(self::RELATIVE_URL_VALIDATION_HOST . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
-                $isValidProtocolRelativeUrl = \strpos($matchInner[4], '//') === 0
-                    && \filter_var('https:' . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
-
-                if (
-                    \strpos($matchInner[0], 'script') === false
-                    &&
-                    \strpos(\str_replace(['http://', 'https://'], '', $matchInner[0]), ':') === false
-                ) {
-                    $isValidHrefUrl = $isValidAbsoluteUrl || $isValidRelativeUrl;
-                    $isValidSrcUrl = $isValidAbsoluteUrl || $isValidProtocolRelativeUrl || (
-                        \preg_match('#^(?:/|\./|\.\./)#', $matchInner[4]) === 1
-                        && $isValidRelativeUrl
-                    );
-                    $needProtection = !($isValidHrefUrl || $isValidSrcUrl);
-                }
+                $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($search, $matchInner[4]);
+                $needProtection = !$isValidAttributeUrl;
 
                 if ($needProtection) {
                     $tmpAntiXss = clone $this;
@@ -1245,7 +1254,6 @@ final class AntiXSS
                 }
             }
 
-            $isValidAttributeUrl = ($search === 'href' && $isValidHrefUrl) || ($search === 'src' && $isValidSrcUrl);
             $shouldFilterJsCallbacks = !$foundSomethingBad && !$isValidAttributeUrl;
 
             if ($shouldFilterJsCallbacks) {
