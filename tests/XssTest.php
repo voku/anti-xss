@@ -1723,7 +1723,7 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
     }
 
-    public function testIssueWhyOutputDiffersFromExample()
+    public function testXssCleanRegressionForIssueExamples()
     {
         $antiXss = new AntiXSS();
 
