@@ -1240,11 +1240,10 @@ final class AntiXSS
                 }
             }
 
-            if (
-                !$foundSomethingBad
-                &&
-                ($search !== 'href' || !$isValidUrl)
-            ) {
+            $isValidHref = $search === 'href' && $isValidUrl;
+            $shouldFilterJsCallbacks = !$foundSomethingBad && !$isValidHref;
+
+            if ($shouldFilterJsCallbacks) {
                 // filter for javascript
                 $patternTmp = '';
                 foreach ($this->_never_allowed_call_strings as $callTmp) {

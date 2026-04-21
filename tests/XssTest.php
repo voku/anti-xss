@@ -990,10 +990,15 @@ textContent>click me!',
         $antiXss = new AntiXSS();
         $historyUrl = "<a href='https://www.history.com'>...</a>";
         $geolocationUrl = "<a href='https://www.geolocation.com'>...</a>";
+        $javascriptUrl = "<a href='javascript:alert(1)'>...</a>";
 
         static::assertSame($historyUrl, $antiXss->xss_clean($historyUrl));
         static::assertSame($geolocationUrl, $antiXss->xss_clean($geolocationUrl));
         static::assertFalse($antiXss->isXssFound());
+
+        $antiXss = new AntiXSS();
+        static::assertSame("<a href='(1)'>...</a>", $antiXss->xss_clean($javascriptUrl));
+        static::assertTrue($antiXss->isXssFound());
     }
     
     public function testIssue113()
