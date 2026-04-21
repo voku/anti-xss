@@ -32,6 +32,17 @@ accounted for roughly 84% of all security vulnerabilities documented by Symantec
 
 6) TEST THIS TOOL -> [Zed Attack Proxy (ZAP)](https://github.com/zaproxy/zaproxy)
 
+### Disable automatic encoding changes
+
+This package depends on `voku/portable-utf8`, which sets `default_charset` to `UTF-8` via `ini_set()` during autoloading.
+
+If you need to prevent this behavior, define the following constant **before** loading the Composer autoloader:
+
+```php
+define('PORTABLE_UTF8__DISABLE_AUTO_ENCODING', true);
+require_once __DIR__ . '/vendor/autoload.php';
+```
+
 ### Install via "composer require"
 ```shell
 composer require voku/anti-xss
