@@ -1176,12 +1176,11 @@ final class AntiXSS
     /**
      * Check whether an href/src value is URL-like enough to skip JS callback stripping.
      *
-     * @param string $search The attribute name being sanitized (e.g. "href" or "src")
      * @param string $value  The extracted attribute value
      *
      * @return bool True for URL-like values that should bypass callback filtering, false otherwise
      */
-    private function _isValidUrlForCallbackBypass($search, $value)
+    private function _isValidUrlForCallbackBypass($value)
     {
         $value = \str_replace(' ', '%20', $value);
 
@@ -1228,14 +1227,14 @@ final class AntiXSS
         $replacer = $this->_filter_attributes($match[1]);
 
         // filter for "$search"-attributes
-        if (\preg_match('#(?:^|[ \t])' . $search . '[ \t]*=#iu', $match[1]) === 1) {
+        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) === 1) {
             // 1: whitespace before "=", 2: whitespace after "=", 3: quote wrapper, 4: attribute value
-            $pattern = '#' . $search . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
+            $pattern = '#' . \preg_quote($search, '#') . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
             $isValidAttributeUrl = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
-                $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($search, $matchInner[4]);
+                $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($matchInner[4]);
                 $needProtection = !$isValidAttributeUrl;
 
                 if ($needProtection) {
