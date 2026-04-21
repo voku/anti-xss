@@ -1243,7 +1243,7 @@ final class AntiXSS
             if (
                 !$foundSomethingBad
                 &&
-                !($search === 'href' && $isValidUrl)
+                ($search !== 'href' || !$isValidUrl)
             ) {
                 // filter for javascript
                 $patternTmp = '';
