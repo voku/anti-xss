@@ -163,6 +163,10 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         // 过滤 style
         static::assertSame('<DIV >', (new AntiXSS())->xss_clean('<DIV STYLE="width: \nexpression(alert(1));">'));
         static::assertSame('<DIV >', (new AntiXSS())->xss_clean('<DIV STYLE="width: \n expressionexpression((alert(1));">'));
+        $antiXss = new AntiXSS();
+        $antiXss->removeEvilAttributes(['style']);
+        static::assertSame('<div style=foo:1058+{valueOf:alert})}>x</div>', $antiXss->xss_clean('<div style=foo:expres\sion(1058+{valueOf:alert})}>x</div>'));
+        static::assertSame('<div style=color:1834+{toString:alert})>x</div>', $antiXss->xss_clean('<div style=color:expres\sion(1834+{toString:alert})>x</div>'));
         // 不正常的url
         static::assertSame('<DIV >', (new AntiXSS())->xss_clean('<DIV STYLE="background:\n url (javascript:ooxx);">'));
         static::assertSame('<DIV >', (new AntiXSS())->xss_clean('<DIV STYLE="background:url (javascript:ooxx);">'));
