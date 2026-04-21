@@ -979,7 +979,7 @@ textContent>click me!',
     public function testIssue103()
     {
         $antiXss = new AntiXSS();
-        $value = '<a href="https://example.com?34167-%DCbersicht">text</a>';
+        $value = '<a href="https://example.com?34167-%C3%9Cbersicht">text</a>';
 
         static::assertSame($value, $antiXss->xss_clean($value));
         static::assertFalse($antiXss->isXssFound());
