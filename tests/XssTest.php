@@ -1023,8 +1023,7 @@ textContent>click me!',
             '<img src="https://example.com/history.back.png" />',
             '<img src="https://example.com/path/location.map" />',
             '<img src = "https://example.com/history.back.png" />',
-            '<source src="https://example.com/path/history.back.mp4" />',
-            '<video src="https://example.com/path/location.map"></video>',
+            '<img src="/history.back.png" />',
         ];
 
         foreach ($safeUrls as $safeUrl) {

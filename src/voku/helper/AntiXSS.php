@@ -1197,28 +1197,31 @@ final class AntiXSS
         $replacer = $this->_filter_attributes($match[1]);
 
         // filter for "$search"-attributes
-        if (\stripos($match[1], $search . '=') !== false) {
-            $pattern = '#' . $search . '=(?<wrapper>[\'|"])(?<link>.*)(?:\g{wrapper})#isU';
+        if (\preg_match('#(?:^|[ \t])' . $search . '[ \t]*=#iu', $match[1]) === 1) {
+            $pattern = '#' . $search . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
-            $isValidUrl = false;
+            $isValidHrefUrl = false;
+            $isValidSrcUrl = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
                 $needProtection = true;
-                $matchInner['link'] = \str_replace(' ', '%20', $matchInner['link']);
+                $matchInner[4] = \str_replace(' ', '%20', $matchInner[4]);
+                $isValidAbsoluteUrl = \filter_var($matchInner[4], \FILTER_VALIDATE_URL) !== false;
+                $isValidRelativeUrl = \filter_var('https://localhost.localdomain/' . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
+                $isValidProtocolRelativeUrl = \strpos($matchInner[4], '//') === 0
+                    && \filter_var('https:' . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
 
                 if (
                     \strpos($matchInner[0], 'script') === false
                     &&
                     \strpos(\str_replace(['http://', 'https://'], '', $matchInner[0]), ':') === false
-                    &&
-                    (
-                        \filter_var($matchInner['link'], \FILTER_VALIDATE_URL) !== false
-                        ||
-                        \filter_var('https://localhost.localdomain/' . $matchInner['link'], \FILTER_VALIDATE_URL) !== false
-                    )
                 ) {
-                    $isValidUrl = true;
-                    $needProtection = false;
+                    $isValidHrefUrl = $isValidAbsoluteUrl || $isValidRelativeUrl;
+                    $isValidSrcUrl = $isValidAbsoluteUrl || $isValidProtocolRelativeUrl || (
+                        \preg_match('#^(?:/|\./|\.\./)#', $matchInner[4]) === 1
+                        && $isValidRelativeUrl
+                    );
+                    $needProtection = !($isValidHrefUrl || $isValidSrcUrl);
                 }
 
                 if ($needProtection) {
@@ -1232,7 +1235,7 @@ final class AntiXSS
 
                         $tmp = \preg_replace(
                             $pattern,
-                            $search . '="' . $this->_replacement . '"',
+                            $search . '${1}=${2}"' . $this->_replacement . '"',
                             $replacer
                         );
                         $replacer = $tmp ?? $replacer;
@@ -1240,8 +1243,8 @@ final class AntiXSS
                 }
             }
 
-            $isValidHref = $search === 'href' && $isValidUrl;
-            $shouldFilterJsCallbacks = !$foundSomethingBad && !$isValidHref;
+            $isValidAttributeUrl = ($search === 'href' && $isValidHrefUrl) || ($search === 'src' && $isValidSrcUrl);
+            $shouldFilterJsCallbacks = !$foundSomethingBad && !$isValidAttributeUrl;
 
             if ($shouldFilterJsCallbacks) {
                 // filter for javascript
