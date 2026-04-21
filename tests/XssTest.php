@@ -1727,9 +1727,11 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $antiXss = new AntiXSS();
 
+        // Preserve original spacing for plain text input.
         static::assertSame('Hello, i try to  your site', $antiXss->xss_clean('Hello, i try to  your site'));
         static::assertSame('<img>', $antiXss->xss_clean('<img>'));
         static::assertSame('<a>CLICK</a>', $antiXss->xss_clean('<a>CLICK</a>'));
+        // Regression: keep unclosed anchor input stable (avoid rewriting into balanced tags).
         static::assertSame('<a>CLICK   ', $antiXss->xss_clean('<a>CLICK   '));
     }
     
