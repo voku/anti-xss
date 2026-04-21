@@ -995,7 +995,7 @@ textContent>click me!',
             "<a href='http://google.com/Document.aspx?go=history.back'>document path</a>",
             "<a href='//history.com/path'>protocol relative</a>",
             "<a href='/history.back'>relative path</a>",
-            "<a href='location.href#top'>non-url but safe relative link</a>",
+            "<a href='location.href#top'>href with dot notation and fragment</a>",
         ];
 
         foreach ($safeUrls as $safeUrl) {

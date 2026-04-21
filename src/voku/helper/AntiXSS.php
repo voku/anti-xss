@@ -1174,10 +1174,12 @@ final class AntiXSS
     }
 
     /**
-     * @param string $search
-     * @param string $value
+     * Check whether an href/src value is URL-like enough to skip JS callback stripping.
      *
-     * @return bool
+     * @param string $search The attribute name being sanitized (e.g. "href" or "src")
+     * @param string $value  The extracted attribute value
+     *
+     * @return bool True for URL-like values that should bypass callback filtering, false otherwise
      */
     private function _isValidUrlForCallbackBypass($search, $value)
     {
@@ -1199,7 +1201,9 @@ final class AntiXSS
             return true;
         }
 
-        return \strpbrk($value, '/?#') !== false || ($search === 'href' && \strpos($value, '.') !== false);
+        return \strpbrk($value, '/?#') !== false
+            // Keep href values such as "location.href#top" from being treated like JS callbacks.
+            || ($search === 'href' && \strpos($value, '.') !== false);
     }
 
     /**
