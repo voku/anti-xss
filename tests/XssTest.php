@@ -1757,6 +1757,8 @@ nodeValue+outerHTML>/*click me', $str);
             'valid string without JS XSS #2' => ['<p>Montagehilfe - Montageprofile(n) - <strong>Dachankern</strong> - Bedienungsanleitung</p>', false],
             'valid string without JS XSS #3' => ['<p>Montagehilfe - Montagepronend - Dachankern - Bedienungsanleitung</p>', false],
             'valid string without JS XSS #4' => ['"Soddisfal\'EnEV al 100%"', false],
+            'valid string without JS XSS #5' => ['data:', false],
+            'valid string without JS XSS #6' => ['some plain text with data: token', false],
             // find XSS
             'valid string with JS XSS #1' => ['<p>Montagehilfe - Montagepro file(n) - Dachankern - Bedienungsanleitung</p>', true],
             'valid string with JS XSS #2' => ['<p>Montagehilfe - Montagepro;file(n) - Dachankern - Bedienungsanleitung</p>', true],
