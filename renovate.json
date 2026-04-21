@@ -1,11 +1,11 @@
 {
     "extends": [
-        "config:base",
+        "config:recommended",
         ":preserveSemverRanges"
     ],
     "packageRules": [{
-        "excludePackageNames": [
-            "phpunit/phpunit"
-        ]
+            "matchPackageNames": [
+                "!phpunit/phpunit"
+            ]
     }]
 }
