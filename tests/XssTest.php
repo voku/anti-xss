@@ -2241,6 +2241,36 @@ nodeValue+outerHTML>/*click me', $str);
     }
 
     /**
+     * @see https://github.com/voku/anti-xss/issues/XXX - "system (" false positive
+     */
+    public function testNaughtyJavascriptKeywordWithSpaceIsNotFalsePositive()
+    {
+        // Natural-language parentheticals (space between keyword and "(") must NOT trigger XSS detection.
+        $antiXss = new AntiXSS();
+        foreach ([
+            'move test to productive system (November)',
+            'system (',
+            'file (attachment)',
+            'eval (the results)',
+            'alert (the user)',
+            'confirm (the action)',
+        ] as $safe) {
+            static::assertSame($safe, $antiXss->xss_clean($safe), 'false positive for: ' . $safe);
+            static::assertFalse($antiXss->isXssFound(), 'false positive for: ' . $safe);
+        }
+
+        // Actual function-call syntax (no space before "(") must still be detected.
+        foreach ([
+            'system("ls")' => 'system&#40;"ls"&#41;',
+            'eval(1)'      => 'eval&#40;1&#41;',
+            'file("/etc/passwd")' => 'file&#40;"/etc/passwd"&#41;',
+        ] as $xss => $expected) {
+            static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS for: ' . $xss);
+            static::assertTrue($antiXss->isXssFound(), 'missed XSS for: ' . $xss);
+        }
+    }
+
+    /**
      * Call protected/private method of a class.
      *
      * @param object &$object    Instantiated object that we will run method on

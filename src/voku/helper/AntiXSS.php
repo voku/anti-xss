@@ -423,6 +423,7 @@ final class AntiXSS
         'setInterval',
         'setImmediate',
         'expression',
+        'system',
         'fopen',
         'fsockopen',
         'file',
@@ -1834,8 +1835,8 @@ final class AntiXSS
 
             if ($found === true) {
                 $str = (string) \preg_replace(
-                    '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
-                    '\\1\\2&#40;\\3&#41;',
+                    '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')\((.*)\)#uisU',
+                    '\\1&#40;\\2&#41;',
                     $str
                 );
             }
