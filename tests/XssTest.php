@@ -44,6 +44,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>'                                                                                    => '<a href="https://plus.google.com/u/0/115714615799970937533/about" rel="me" title="Add Me To Your Circle"><i class="fa fa-google-plus fa-3x"></i></a>',
             'eval is evil and xss is bad, but this is only a string : ...'                                                                                                                                                                            => 'eval is evil and xss is bad, but this is only a string : ...',
             'a research paper Behavior: subtitle'                                                                                                                                                                                                       => 'a research paper Behavior: subtitle',
+            'move test to productive system (November)'                                                                                                                                                                                                => 'move test to productive system (November)',
+            'system ('                                                                                                                                                                                                                                  => 'system (',
             '<a href="https://test.com?lall=123&lall=312">test&amp;</a>'                                                                                                                                                                              => '<a href="https://test.com?lall=123&lall=312">test&amp;</a>',
             '&lt;a href="https://test.com?lall=123&lall=312">test&amp;&lt;/a&gt;'                                                                                                                                                                     => '&lt;a href="https://test.com?lall=123&lall=312">test&amp;&lt;/a&gt;',
             '<a href="https://test.com?lall=123&lall=312&lall=999">test&amp;</a>'                                                                                                                                                                     => '<a href="https://test.com?lall=123&lall=312&lall=999">test&amp;</a>',
@@ -1437,6 +1439,15 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
+    public function testScriptEncodingSetsXssFlagForHexEscapedScriptTag()
+    {
+        $antiXss = new AntiXSS();
+        $harmfulString = "\x3cscript src=http://www.example.com/malicious-code.js\x3e\x3c/script\x3e";
+
+        static::assertSame('', $antiXss->xss_clean($harmfulString));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testOnError()
     {
         $testArray = [
@@ -1722,6 +1733,18 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<fubar>', (new AntiXSS())->xss_clean('<fubar>'));
         static::assertSame('<img &svg="" src="x">', (new AntiXSS())->xss_clean('<img <svg=""> src="x">'));
         static::assertSame('<img src="b on=">on=">"x ="alert&#40;1&#41;">', (new AntiXSS())->xss_clean('<img src="b on="<x">on=">"x onerror="alert(1)">'));
+    }
+
+    public function testXssCleanRegressionForIssueExamples()
+    {
+        $antiXss = new AntiXSS();
+
+        // Preserve original spacing for plain text input.
+        static::assertSame('Hello, i try to  your site', $antiXss->xss_clean('Hello, i try to  your site'));
+        static::assertSame('<img>', $antiXss->xss_clean('<img>'));
+        static::assertSame('<a>CLICK</a>', $antiXss->xss_clean('<a>CLICK</a>'));
+        // Regression: keep unclosed anchor input stable (avoid rewriting into balanced tags).
+        static::assertSame('<a>CLICK   ', $antiXss->xss_clean('<a>CLICK   '));
     }
     
     /**
@@ -2237,6 +2260,47 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss->setKeepPreAndCodeTagContent(true);
 
         static::assertSame($content, $antiXss->xss_clean($content));
+    }
+
+    /**
+     * Keywords followed by a space and opening parenthesis must not be treated as function calls
+     * for common English words, but JS-specific keywords should be caught even with a space.
+     * Keywords directly followed by '(' (no whitespace) must always be detected as dangerous.
+     */
+    public function testNaughtyJavascriptKeywordWithSpaceIsNotFalsePositive()
+    {
+        // Common English words followed by a parenthetical (space before "(") must NOT trigger XSS detection.
+        $antiXss = new AntiXSS();
+        foreach ([
+            'move test to productive system (November)',
+            'system (',
+            'file (attachment)',
+            'alert (the user)',
+            'confirm (the action)',
+        ] as $safe) {
+            static::assertSame($safe, $antiXss->xss_clean($safe), 'false positive for: ' . $safe);
+            static::assertFalse($antiXss->isXssFound(), 'false positive for: ' . $safe);
+        }
+
+        // JS-specific keywords with a space before "(" must still be detected (valid JavaScript).
+        foreach ([
+            'eval (variable)'   => 'eval &#40;variable&#41;',
+            'eval (1+1)'        => 'eval &#40;1+1&#41;',
+            'setTimeout (fn,0)' => 'setTimeout &#40;fn,0&#41;',
+        ] as $xss => $expected) {
+            static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS (with space) for: ' . $xss);
+            static::assertTrue($antiXss->isXssFound(), 'missed XSS (with space) for: ' . $xss);
+        }
+
+        // Actual function-call syntax (no space before "(") must always be detected.
+        foreach ([
+            'system("ls")'        => 'system&#40;"ls"&#41;',
+            'eval(1)'             => 'eval&#40;1&#41;',
+            'file("/etc/passwd")' => 'file&#40;"/etc/passwd"&#41;',
+        ] as $xss => $expected) {
+            static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS for: ' . $xss);
+            static::assertTrue($antiXss->isXssFound(), 'missed XSS for: ' . $xss);
+        }
     }
 
     /**
