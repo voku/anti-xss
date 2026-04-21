@@ -2274,6 +2274,9 @@ nodeValue+outerHTML>/*click me', $str);
         foreach ([
             'move test to productive system (November)',
             'system (',
+            'the operating system (e.g. Windows 10, Mac OS X etc.) you are using',
+            'recommended system (i.e. desktop) only',
+            'supported system (Windows 10, macOS 13, Ubuntu 24.04)',
             'file (attachment)',
             'alert (the user)',
             'confirm (the action)',
