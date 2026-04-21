@@ -1436,6 +1436,15 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
+    public function testScriptEncodingSetsXssFlagForHexEscapedScriptTag()
+    {
+        $antiXss = new AntiXSS();
+        $harmfulString = "\x3cscript src=http://www.example.com/malicious-code.js\x3e\x3c/script\x3e";
+
+        static::assertSame('', $antiXss->xss_clean($harmfulString));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testOnError()
     {
         $testArray = [
