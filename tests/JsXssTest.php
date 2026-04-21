@@ -222,7 +222,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
     public function testJsonEscapedHtmlAttributesArePreserved()
     {
-        $input = "{\"text\": \"<a href=\\\"https://google.com\\\">Google</a>\"}";
+        $input = '{"text": "<a href=\\"https://google.com\\">Google</a>"}';
 
         static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
     }
