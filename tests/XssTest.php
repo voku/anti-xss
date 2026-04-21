@@ -987,18 +987,34 @@ textContent>click me!',
 
     public function testIssue114()
     {
-        $antiXss = new AntiXSS();
-        $historyUrl = "<a href='https://www.history.com'>...</a>";
-        $geolocationUrl = "<a href='https://www.geolocation.com'>...</a>";
-        $javascriptUrl = "<a href='javascript:alert(1)'>...</a>";
+        $safeUrls = [
+            "<a href='https://www.history.com'>...</a>",
+            "<a href='https://www.geolocation.com'>...</a>",
+            "<a href='https://example.com/history.back'>history path</a>",
+            "<a href='https://example.com/path/location.map'>location path</a>",
+            "<a href='http://google.com/Document.aspx?go=history.back'>document path</a>",
+            "<a href='//history.com/path'>protocol relative</a>",
+            "<a href='/history.back'>relative path</a>",
+            "<a href='location.href#top'>non-url but safe relative link</a>",
+        ];
 
-        static::assertSame($historyUrl, $antiXss->xss_clean($historyUrl));
-        static::assertSame($geolocationUrl, $antiXss->xss_clean($geolocationUrl));
-        static::assertFalse($antiXss->isXssFound());
+        foreach ($safeUrls as $safeUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($safeUrl, $antiXss->xss_clean($safeUrl), 'testing: ' . $safeUrl);
+            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $safeUrl);
+        }
 
-        $antiXss = new AntiXSS();
-        static::assertSame("<a href='(1)'>...</a>", $antiXss->xss_clean($javascriptUrl));
-        static::assertTrue($antiXss->isXssFound());
+        $blockedUrls = [
+            "<a href='javascript:alert(1)'>...</a>"      => "<a href='(1)'>...</a>",
+            "<a href='document.cookie'>cookie</a>"       => "<a href=''>cookie</a>",
+            "<a href='https://history.com:alert(1)'>x</a>" => '<a href="">x</a>',
+        ];
+
+        foreach ($blockedUrls as $blockedUrl => $expectedUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expectedUrl, $antiXss->xss_clean($blockedUrl), 'testing: ' . $blockedUrl);
+            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $blockedUrl);
+        }
     }
     
     public function testIssue113()
