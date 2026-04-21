@@ -975,7 +975,16 @@ textContent>click me!',
         $antiXss = new AntiXSS();
         static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean('/*alert(*/alert(1/*)*/)'));
     }
-    
+
+    public function testIssue103()
+    {
+        $antiXss = new AntiXSS();
+        $htmlWithPercentEncodedUrl = '<a href="https://example.com?34167-%C3%9Cbersicht">text</a>';
+
+        static::assertSame($htmlWithPercentEncodedUrl, $antiXss->xss_clean($htmlWithPercentEncodedUrl));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
     public function testIssue114()
     {
         $antiXss = new AntiXSS();
