@@ -908,6 +908,11 @@ textContent>click me!',
 
         // ---
 
+        $base64EncodedPostInput = 'DataSet1~PC9TY3JlZW5pbmdQYXRoPg0KPC9TY3JlZW5pbmc+~1~1|DataSet2~GhItU2NyZWVuaW5nUGF0aD4KPC9TY3JlZW5pbmc+~1~1|DataSet3~wvU2NyZWVuaW5nUGF0aD4NCjwvUyZWVuaW5nPg==~1~1|DataSet4~N5c3RWVuaW5nUGF0aD4NCjwvU2NyZWVuaW5nPg==~1~1';
+        static::assertSame($base64EncodedPostInput, $this->invokeMethod($antiXss, '_remove_evil_attributes', [$base64EncodedPostInput]));
+
+        // ---
+
         $testString = '<li FSCommand="bar" style="list-style-image: url(javascript:alert(0))">';
 
         static::assertSame('<li  >', $antiXss->xss_clean($testString));

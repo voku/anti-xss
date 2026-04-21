@@ -1552,7 +1552,7 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
-                $regex =  '/(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius';
+                $regex =  '/(?<![\p{L}=])(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)(.*?)/ius';
                 $strTmp = \preg_replace(
                     $regex,
                     '$1$2' . $this->_replacement . '$3',
