@@ -164,6 +164,7 @@ composer install
 </td><td><a href="#removeneverallowedoneventsafterwardsstring-strings-this">removeNeverAllowedOnEventsAfterwards</a>
 </td></tr><tr><td><a href="#removeneverallowedregexstring-strings-this">removeNeverAllowedRegex</a>
 </td><td><a href="#removeneverallowedstrafterwardsstring-strings-this">removeNeverAllowedStrAfterwards</a>
+</td><td><a href="#setkeeppreandcodetagcontentbool-bool-this">setKeepPreAndCodeTagContent</a>
 </td><td><a href="#setreplacementstring-string-this">setReplacement</a>
 </td><td><a href="#setstripe4bytecharsbool-bool-this">setStripe4byteChars</a>
 </td></tr><tr><td><a href="#xss_cleanstringstring-str-stringstring">xss_clean</a>
@@ -435,6 +436,23 @@ Set the replacement-string for not allowed strings.
 
 **Parameters:**
 - `string $string`
+
+**Return:**
+- `$this`
+
+--------
+
+## setKeepPreAndCodeTagContent(bool $bool): $this
+<a href="#voku-php-readme-class-methods">↑</a>
+Set the option to preserve content inside "pre" and "code" tags.
+
+<p>
+<br />
+WARNING: Enable this only if you explicitly want literal code-like text in "pre" / "code" blocks to remain untouched.
+</p>
+
+**Parameters:**
+- `bool $bool`
 
 **Return:**
 - `$this`

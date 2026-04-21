@@ -465,6 +465,11 @@ final class AntiXSS
     private $_xss_found;
 
     /**
+     * @var bool
+     */
+    private $_keep_pre_and_code_tag_content = false;
+
+    /**
      * @var string
      */
     private $_cache_evil_attributes_regex_string = '';
@@ -729,13 +734,17 @@ final class AntiXSS
             $str = $this->_remove_disallowed_javascript($str);
     
             // remove strings that are never allowed
-            $str = $this->_do_never_allowed($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_do_never_allowed($string);
+            });
     
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
     
             // sanitize naughty JavaScript elements
-            $str = $this->_sanitize_naughty_javascript($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_sanitize_naughty_javascript($string);
+            });
     
             // sanitize naughty HTML elements
             $str = $this->_sanitize_naughty_html($str);
@@ -743,7 +752,9 @@ final class AntiXSS
             // final clean up
             //
             // -> This adds a bit of extra precaution in case something got through the above filters.
-            $str = $this->_do_never_allowed_afterwards($str);
+            $str = $this->_do_callback_outside_of_pre_and_code_tags($str, function ($string) {
+                return $this->_do_never_allowed_afterwards($string);
+            });
         } while ($str_backup_loop !== $str);
 
         // check for xss
@@ -752,6 +763,54 @@ final class AntiXSS
         }
         
         return $str;
+    }
+
+    /**
+     * @param string   $str
+     * @param callable $callback
+     *
+     * @return string
+     */
+    private function _do_callback_outside_of_pre_and_code_tags($str, callable $callback)
+    {
+        if ($this->_keep_pre_and_code_tag_content !== true) {
+            return $callback($str);
+        }
+
+        if (
+            \stripos($str, '<pre') === false
+            &&
+            \stripos($str, '<code') === false
+        ) {
+            return $callback($str);
+        }
+
+        $result = '';
+        $offset = 0;
+        $regex = '/<(pre|code)\b(?:[^>"\']+|"[^"]*"|\'[^\']*\')*>.*?<\/\1>/is';
+
+        while (
+            \preg_match($regex, $str, $matches, PREG_OFFSET_CAPTURE, $offset) === 1
+        ) {
+            $match = $matches[0][0];
+            $start = $matches[0][1];
+
+            $result .= $callback((string) \substr($str, $offset, $start - $offset));
+            $result .= $match;
+            $offset = $start + \strlen($match);
+        }
+
+        if ($offset === 0) {
+            return $callback($str);
+        }
+
+        $remaining = (string) \substr($str, $offset);
+
+        if ($remaining === '') {
+            return $result;
+        }
+
+        return $result . $callback($remaining);
     }
 
     /**
@@ -2219,6 +2278,25 @@ final class AntiXSS
 
         $this->_initNeverAllowedStr();
         $this->_initNeverAllowedRegex();
+
+        return $this;
+    }
+
+    /**
+     * Set the option to preserve content inside "pre" and "code" tags.
+     *
+     * <p>
+     * <br />
+     * WARNING: Enable this only if you explicitly want literal code-like text in "pre" / "code" blocks to remain untouched.
+     * </p>
+     *
+     * @param bool $bool
+     *
+     * @return $this
+     */
+    public function setKeepPreAndCodeTagContent($bool): self
+    {
+        $this->_keep_pre_and_code_tag_content = (bool) $bool;
 
         return $this;
     }
