@@ -1201,9 +1201,7 @@ final class AntiXSS
             return true;
         }
 
-        return \strpbrk($value, '/?#') !== false
-            // Keep href values such as "location.href#top" from being treated like JS callbacks.
-            || ($search === 'href' && \strpos($value, '.') !== false);
+        return \strpbrk($value, '/?#') !== false;
     }
 
     /**
@@ -1231,6 +1229,7 @@ final class AntiXSS
 
         // filter for "$search"-attributes
         if (\preg_match('#(?:^|[ \t])' . $search . '[ \t]*=#iu', $match[1]) === 1) {
+            // 1: whitespace before "=", 2: whitespace after "=", 3: quote wrapper, 4: attribute value
             $pattern = '#' . $search . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
