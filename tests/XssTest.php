@@ -975,6 +975,15 @@ textContent>click me!',
         $antiXss = new AntiXSS();
         static::assertSame('/*alert&#40;*/alert&#40;1/*&#41;*/&#41;', $antiXss->xss_clean('/*alert(*/alert(1/*)*/)'));
     }
+
+    public function testIssue103()
+    {
+        $antiXss = new AntiXSS();
+        $value = '<a href="https://example.com?34167-%DCbersicht">text</a>';
+
+        static::assertSame($value, $antiXss->xss_clean($value));
+        static::assertFalse($antiXss->isXssFound());
+    }
     
     public function testIssue114()
     {
