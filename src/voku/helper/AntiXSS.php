@@ -1201,6 +1201,7 @@ final class AntiXSS
             $pattern = '#' . $search . '=(?<wrapper>[\'|"])(?<link>.*)(?:\g{wrapper})#isU';
             $matchInner = [];
             $foundSomethingBad = false;
+            $isValidUrl = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
                 $needProtection = true;
                 $matchInner['link'] = \str_replace(' ', '%20', $matchInner['link']);
@@ -1216,6 +1217,7 @@ final class AntiXSS
                         \filter_var('https://localhost.localdomain/' . $matchInner['link'], \FILTER_VALIDATE_URL) !== false
                     )
                 ) {
+                    $isValidUrl = true;
                     $needProtection = false;
                 }
 
@@ -1238,7 +1240,11 @@ final class AntiXSS
                 }
             }
 
-            if (!$foundSomethingBad) {
+            if (
+                !$foundSomethingBad
+                &&
+                !($search === 'href' && $isValidUrl)
+            ) {
                 // filter for javascript
                 $patternTmp = '';
                 foreach ($this->_never_allowed_call_strings as $callTmp) {

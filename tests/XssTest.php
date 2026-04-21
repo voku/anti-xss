@@ -988,8 +988,12 @@ textContent>click me!',
     public function testIssue114()
     {
         $antiXss = new AntiXSS();
-        // TODO@me -> check if we can whitelist URLs?
-        static::assertSame('<a href="">...</a>', $antiXss->xss_clean("<a href='https://www.history.com'>...</a>"));
+        $historyUrl = "<a href='https://www.history.com'>...</a>";
+        $geolocationUrl = "<a href='https://www.geolocation.com'>...</a>";
+
+        static::assertSame($historyUrl, $antiXss->xss_clean($historyUrl));
+        static::assertSame($geolocationUrl, $antiXss->xss_clean($geolocationUrl));
+        static::assertFalse($antiXss->isXssFound());
     }
     
     public function testIssue113()
@@ -1574,7 +1578,7 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss = new AntiXSS();
 
         $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
-        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+        static::assertSame('<a href="http://google.com/Document.aspx" title="(\'XSS\');">', $antiXss->xss_clean($testString));
         
         $antiXss->removeNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
         $antiXss->removeNeverAllowedCallStrings(['javascript']);
@@ -1584,7 +1588,7 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss->addNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
         $antiXss->addNeverAllowedCallStrings(['javascript']);
         $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
-        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+        static::assertSame('<a href="http://google.com/Document.aspx" title="(\'XSS\');">', $antiXss->xss_clean($testString));
     }
 
     public function testXssUrlDecode()
