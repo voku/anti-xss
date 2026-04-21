@@ -408,9 +408,6 @@ final class AntiXSS
     ];
 
     /**
-     * @var string[]
-     */
-    /**
      * JavaScript-specific keywords that are essentially never used in natural-language prose before a
      * parenthesis. These are matched even when whitespace appears between the keyword and "(" so that
      * patterns like "eval (variable)" are still caught.
