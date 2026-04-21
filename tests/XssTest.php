@@ -984,7 +984,7 @@ textContent>click me!',
         static::assertSame($value, $antiXss->xss_clean($value));
         static::assertFalse($antiXss->isXssFound());
     }
-    
+
     public function testIssue114()
     {
         $antiXss = new AntiXSS();
