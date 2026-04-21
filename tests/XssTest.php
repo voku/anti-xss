@@ -1005,8 +1005,9 @@ textContent>click me!',
         }
 
         $blockedUrls = [
-            "<a href='javascript:alert(1)'>...</a>"      => "<a href='(1)'>...</a>",
-            "<a href='document.cookie'>cookie</a>"       => "<a href=''>cookie</a>",
+            "<a href='javascript:alert(1)'>...</a>"        => "<a href='(1)'>...</a>",
+            '<a href="javascript:history.back()">x</a>'    => '<a href="()">x</a>',
+            "<a href='document.cookie'>cookie</a>"         => "<a href=''>cookie</a>",
             "<a href='https://history.com:alert(1)'>x</a>" => '<a href="">x</a>',
         ];
 

@@ -38,6 +38,8 @@ use const HTML_ENTITIES;
  */
 final class AntiXSS
 {
+    const RELATIVE_URL_VALIDATION_HOST = 'https://localhost.localdomain/';
+
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
@@ -1207,7 +1209,7 @@ final class AntiXSS
                 $needProtection = true;
                 $matchInner[4] = \str_replace(' ', '%20', $matchInner[4]);
                 $isValidAbsoluteUrl = \filter_var($matchInner[4], \FILTER_VALIDATE_URL) !== false;
-                $isValidRelativeUrl = \filter_var('https://localhost.localdomain/' . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
+                $isValidRelativeUrl = \filter_var(self::RELATIVE_URL_VALIDATION_HOST . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
                 $isValidProtocolRelativeUrl = \strpos($matchInner[4], '//') === 0
                     && \filter_var('https:' . $matchInner[4], \FILTER_VALIDATE_URL) !== false;
 
