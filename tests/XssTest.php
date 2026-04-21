@@ -987,9 +987,66 @@ textContent>click me!',
 
     public function testIssue114()
     {
-        $antiXss = new AntiXSS();
-        // TODO@me -> check if we can whitelist URLs?
-        static::assertSame('<a href="">...</a>', $antiXss->xss_clean("<a href='https://www.history.com'>...</a>"));
+        $safeUrls = [
+            "<a href='https://www.history.com'>...</a>",
+            "<a href='https://www.geolocation.com'>...</a>",
+            "<a href='https://example.com/history.back'>history path</a>",
+            "<a href='https://example.com/path/location.map'>location path</a>",
+            "<a href='http://google.com/Document.aspx?go=history.back'>query parameter with history.back</a>",
+            "<a href='//history.com/path'>protocol relative</a>",
+            "<a href='/history.back'>relative path</a>",
+            "<a href='location.href#top'>href with dot notation and fragment</a>",
+        ];
+
+        foreach ($safeUrls as $safeUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($safeUrl, $antiXss->xss_clean($safeUrl), 'testing: ' . $safeUrl);
+            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $safeUrl);
+        }
+
+        $blockedUrls = [
+            "<a href='javascript:alert(1)'>...</a>"        => "<a href='(1)'>...</a>",
+            '<a href="javascript:history.back()">x</a>'    => '<a href="()">x</a>',
+            "<a href='document.cookie'>cookie</a>"         => "<a href=''>cookie</a>",
+            "<a href='https://history.com:alert(1)'>x</a>" => '<a href="">x</a>',
+        ];
+
+        foreach ($blockedUrls as $blockedUrl => $expectedUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expectedUrl, $antiXss->xss_clean($blockedUrl), 'testing: ' . $blockedUrl);
+            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $blockedUrl);
+        }
+    }
+
+    public function testIssue114SafeSrcUrls()
+    {
+        $safeUrls = [
+            '<img src="https://example.com/history.back.png" />',
+            '<img src="https://example.com/path/location.map" />',
+            '<img src = "https://example.com/history.back.png" />',
+            '<img src="/history.back.png" />',
+        ];
+
+        foreach ($safeUrls as $safeUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($safeUrl, $antiXss->xss_clean($safeUrl), 'testing: ' . $safeUrl);
+            static::assertFalse($antiXss->isXssFound(), 'testing: ' . $safeUrl);
+        }
+    }
+
+    public function testIssue114WhitespaceAroundEqualsDoesNotBypassBlocking()
+    {
+        $blockedUrls = [
+            '<a href = "javascript:alert(1)">...</a>' => '<a href = "(1)">...</a>',
+            '<img src = "javascript:alert(1)" />'     => '<img src = "(1)" />',
+            '<img src = "document.cookie" />'         => '<img src = "" />',
+        ];
+
+        foreach ($blockedUrls as $blockedUrl => $expectedUrl) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expectedUrl, $antiXss->xss_clean($blockedUrl), 'testing: ' . $blockedUrl);
+            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $blockedUrl);
+        }
     }
     
     public function testIssue113()
@@ -1574,7 +1631,7 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss = new AntiXSS();
 
         $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
-        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+        static::assertSame('<a href="http://google.com/Document.aspx" title="(\'XSS\');">', $antiXss->xss_clean($testString));
         
         $antiXss->removeNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
         $antiXss->removeNeverAllowedCallStrings(['javascript']);
@@ -1584,7 +1641,7 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss->addNeverAllowedJsCallbackRegex(['\(?document\)?\.']);
         $antiXss->addNeverAllowedCallStrings(['javascript']);
         $testString = '<a href="http://google.com/Document.aspx" title="javascript:alert&#40;\'XSS\'&#41;;">';
-        static::assertSame('<a href="" title="(\'XSS\');">', $antiXss->xss_clean($testString));
+        static::assertSame('<a href="http://google.com/Document.aspx" title="(\'XSS\');">', $antiXss->xss_clean($testString));
     }
 
     public function testXssUrlDecode()

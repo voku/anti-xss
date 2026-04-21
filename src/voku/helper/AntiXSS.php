@@ -1174,6 +1174,28 @@ final class AntiXSS
     }
 
     /**
+     * Check whether an href/src value is URL-like enough to skip JS callback stripping.
+     *
+     * @param string $value  The extracted attribute value
+     *
+     * @return bool True for URL-like values that should bypass callback filtering, false otherwise
+     */
+    private function _isValidUrlForCallbackBypass($value)
+    {
+        $value = \str_replace(' ', '%20', $value);
+
+        if (\filter_var($value, \FILTER_VALIDATE_URL) !== false) {
+            return true;
+        }
+
+        if (\stripos($value, 'script') !== false || \strpos($value, ':') !== false) {
+            return false;
+        }
+
+        return \strpbrk($value, '/?#') !== false;
+    }
+
+    /**
      * Callback method for xss_clean() to sanitize tags.
      *
      * <p>
@@ -1197,27 +1219,15 @@ final class AntiXSS
         $replacer = $this->_filter_attributes($match[1]);
 
         // filter for "$search"-attributes
-        if (\stripos($match[1], $search . '=') !== false) {
-            $pattern = '#' . $search . '=(?<wrapper>[\'|"])(?<link>.*)(?:\g{wrapper})#isU';
+        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) === 1) {
+            // 1: whitespace before "=", 2: whitespace after "=", 3: quote wrapper, 4: attribute value
+            $pattern = '#' . \preg_quote($search, '#') . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
+            $isValidAttributeUrl = false;
             if (\preg_match($pattern, $match[1], $matchInner)) {
-                $needProtection = true;
-                $matchInner['link'] = \str_replace(' ', '%20', $matchInner['link']);
-
-                if (
-                    \strpos($matchInner[0], 'script') === false
-                    &&
-                    \strpos(\str_replace(['http://', 'https://'], '', $matchInner[0]), ':') === false
-                    &&
-                    (
-                        \filter_var($matchInner['link'], \FILTER_VALIDATE_URL) !== false
-                        ||
-                        \filter_var('https://localhost.localdomain/' . $matchInner['link'], \FILTER_VALIDATE_URL) !== false
-                    )
-                ) {
-                    $needProtection = false;
-                }
+                $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($matchInner[4]);
+                $needProtection = !$isValidAttributeUrl;
 
                 if ($needProtection) {
                     $tmpAntiXss = clone $this;
@@ -1230,7 +1240,7 @@ final class AntiXSS
 
                         $tmp = \preg_replace(
                             $pattern,
-                            $search . '="' . $this->_replacement . '"',
+                            $search . '${1}=${2}"' . $this->_replacement . '"',
                             $replacer
                         );
                         $replacer = $tmp ?? $replacer;
@@ -1238,7 +1248,9 @@ final class AntiXSS
                 }
             }
 
-            if (!$foundSomethingBad) {
+            $shouldFilterJsCallbacks = !$foundSomethingBad && !$isValidAttributeUrl;
+
+            if ($shouldFilterJsCallbacks) {
                 // filter for javascript
                 $patternTmp = '';
                 foreach ($this->_never_allowed_call_strings as $callTmp) {
