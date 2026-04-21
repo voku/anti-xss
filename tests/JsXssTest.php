@@ -166,7 +166,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         $antiXss = new AntiXSS();
         $antiXss->removeEvilAttributes(['style']);
         $cleaned = $antiXss->xss_clean('<div style=foo:expres\sion(1058+{valueOf:alert})}>x</div>');
-        static::assertMatchesRegularExpression('#^<div style=foo:.*>x</div>$#', $cleaned);
+        static::assertTrue((bool) \preg_match('#^<div style=foo:.*>x</div>$#', $cleaned));
         static::assertStringNotContainsString('expression(', $cleaned);
         static::assertStringNotContainsString('expres\sion(', $cleaned);
         static::assertTrue($antiXss->isXssFound());
@@ -174,7 +174,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         $antiXss = new AntiXSS();
         $antiXss->removeEvilAttributes(['style']);
         $cleaned = $antiXss->xss_clean('<div style=color:expres\sion(1834+{toString:alert})>x</div>');
-        static::assertMatchesRegularExpression('#^<div style=color:.*>x</div>$#', $cleaned);
+        static::assertTrue((bool) \preg_match('#^<div style=color:.*>x</div>$#', $cleaned));
         static::assertStringNotContainsString('expression(', $cleaned);
         static::assertStringNotContainsString('expres\sion(', $cleaned);
         static::assertTrue($antiXss->isXssFound());
