@@ -2241,18 +2241,18 @@ nodeValue+outerHTML>/*click me', $str);
     }
 
     /**
-     * Keywords followed by a space and opening parenthesis must not be treated as function calls.
-     * Keywords directly followed by '(' (no whitespace) must still be detected as dangerous.
+     * Keywords followed by a space and opening parenthesis must not be treated as function calls
+     * for common English words, but JS-specific keywords should be caught even with a space.
+     * Keywords directly followed by '(' (no whitespace) must always be detected as dangerous.
      */
     public function testNaughtyJavascriptKeywordWithSpaceIsNotFalsePositive()
     {
-        // Natural-language parentheticals (space between keyword and "(") must NOT trigger XSS detection.
+        // Common English words followed by a parenthetical (space before "(") must NOT trigger XSS detection.
         $antiXss = new AntiXSS();
         foreach ([
             'move test to productive system (November)',
             'system (',
             'file (attachment)',
-            'eval (the results)',
             'alert (the user)',
             'confirm (the action)',
         ] as $safe) {
@@ -2260,10 +2260,20 @@ nodeValue+outerHTML>/*click me', $str);
             static::assertFalse($antiXss->isXssFound(), 'false positive for: ' . $safe);
         }
 
-        // Actual function-call syntax (no space before "(") must still be detected.
+        // JS-specific keywords with a space before "(" must still be detected (valid JavaScript).
         foreach ([
-            'system("ls")' => 'system&#40;"ls"&#41;',
-            'eval(1)'      => 'eval&#40;1&#41;',
+            'eval (variable)'   => 'eval &#40;variable&#41;',
+            'eval (1+1)'        => 'eval &#40;1+1&#41;',
+            'setTimeout (fn,0)' => 'setTimeout &#40;fn,0&#41;',
+        ] as $xss => $expected) {
+            static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS (with space) for: ' . $xss);
+            static::assertTrue($antiXss->isXssFound(), 'missed XSS (with space) for: ' . $xss);
+        }
+
+        // Actual function-call syntax (no space before "(") must always be detected.
+        foreach ([
+            'system("ls")'        => 'system&#40;"ls"&#41;',
+            'eval(1)'             => 'eval&#40;1&#41;',
             'file("/etc/passwd")' => 'file&#40;"/etc/passwd"&#41;',
         ] as $xss => $expected) {
             static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS for: ' . $xss);
