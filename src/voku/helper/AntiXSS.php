@@ -858,7 +858,7 @@ final class AntiXSS
         }
         if (\count($replaceNeverAllowedCall) > 0) {
             $tmp = \preg_replace(
-                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
+                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?!\s[\p{L}\p{N}\s]*$)(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
                 $str
             );
