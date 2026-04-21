@@ -1145,7 +1145,7 @@ final class AntiXSS
             // data-attribute + base64
             "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
             // old IE, old Netscape
-            'expression\s*(?:\(|&\#40;)' => $this->_replacement,
+            'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $this->_replacement,
             // src="js"
             'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $this->_replacement,
             // comments
