@@ -408,28 +408,42 @@ final class AntiXSS
     ];
 
     /**
+     * JavaScript-specific keywords that are essentially never used in natural-language prose before a
+     * parenthesis. These are matched even when whitespace appears between the keyword and "(" so that
+     * patterns like "eval (variable)" are still caught.
+     *
      * @var string[]
      */
     private $_naughty_javascript_patterns = [
-        'alert',
-        'prompt',
-        'confirm',
-        'cmd',
-        'passthru',
         'eval',
-        'exec',
         'execScript',
         'setTimeout',
         'setInterval',
         'setImmediate',
-        'expression',
-        'system',
+        'cmd',
+        'passthru',
+        'exec',
         'fopen',
         'fsockopen',
-        'file',
         'file_get_contents',
         'readfile',
         'unlink',
+    ];
+
+    /**
+     * Keywords that are also common English words, making them prone to false positives when whitespace
+     * precedes the opening parenthesis (e.g. "operating system (Linux)"). These are only matched when
+     * the keyword is followed immediately by "(" with no intervening whitespace.
+     *
+     * @var string[]
+     */
+    private $_naughty_javascript_patterns_strict = [
+        'alert',
+        'prompt',
+        'confirm',
+        'expression',
+        'system',
+        'file',
     ];
 
     /**
@@ -1824,6 +1838,7 @@ final class AntiXSS
     private function _sanitize_naughty_javascript($str)
     {
         if (\strpos($str, '(') !== false) {
+            // Pass 1 – JS-specific keywords: match even when whitespace separates the keyword from "(".
             $found = false;
             foreach ($this->_naughty_javascript_patterns as $pattern) {
                 if (\strpos($str, $pattern) !== false) {
@@ -1837,6 +1852,25 @@ final class AntiXSS
                 $str = (string) \preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
+                    $str
+                );
+            }
+
+            // Pass 2 – English-word keywords: only match when "(" follows immediately (no whitespace),
+            // to avoid false positives such as "operating system (Linux)" or "file (attachment)".
+            $found = false;
+            foreach ($this->_naughty_javascript_patterns_strict as $pattern) {
+                if (\strpos($str, $pattern) !== false) {
+                    $found = true;
+
+                    break;
+                }
+            }
+
+            if ($found === true) {
+                $str = (string) \preg_replace(
+                    '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns_strict) . ')\((.*)\)#uisU',
+                    '\\1&#40;\\2&#41;',
                     $str
                 );
             }
