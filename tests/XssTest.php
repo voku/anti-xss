@@ -2241,7 +2241,8 @@ nodeValue+outerHTML>/*click me', $str);
     }
 
     /**
-     * @see https://github.com/voku/anti-xss/issues/XXX - "system (" false positive
+     * Keywords followed by a space and opening parenthesis must not be treated as function calls.
+     * Keywords directly followed by '(' (no whitespace) must still be detected as dangerous.
      */
     public function testNaughtyJavascriptKeywordWithSpaceIsNotFalsePositive()
     {
