@@ -423,7 +423,6 @@ final class AntiXSS
         'setInterval',
         'setImmediate',
         'expression',
-        'system',
         'fopen',
         'fsockopen',
         'file',
