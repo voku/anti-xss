@@ -465,6 +465,11 @@ final class AntiXSS
     private $_xss_found;
 
     /**
+     * @var bool
+     */
+    private $_keep_pre_and_code_tag_content = false;
+
+    /**
      * @var string
      */
     private $_cache_evil_attributes_regex_string = '';
@@ -768,6 +773,10 @@ final class AntiXSS
      */
     private function _do_callback_outside_of_pre_and_code_tags($str, callable $callback)
     {
+        if ($this->_keep_pre_and_code_tag_content !== true) {
+            return $callback($str);
+        }
+
         if (
             \stripos($str, '<pre') === false
             &&
@@ -2269,6 +2278,25 @@ final class AntiXSS
 
         $this->_initNeverAllowedStr();
         $this->_initNeverAllowedRegex();
+
+        return $this;
+    }
+
+    /**
+     * Set the option to preserve content inside "pre" and "code" tags.
+     *
+     * <p>
+     * <br />
+     * WARNING: Enable this only if you explicitly want literal code-like text in "pre" / "code" blocks to remain untouched.
+     * </p>
+     *
+     * @param bool $bool
+     *
+     * @return $this
+     */
+    public function setKeepPreAndCodeTagContent($bool): self
+    {
+        $this->_keep_pre_and_code_tag_content = (bool) $bool;
 
         return $this;
     }

@@ -2122,14 +2122,47 @@ nodeValue+outerHTML>/*click me', $str);
             </code></pre>
         ';
 
-        static::assertSame($content, (new AntiXSS())->xss_clean($content));
+        $expected = '
+            <pre><code>
+                
+                    foo();
+                
+            </code></pre>
+        ';
+
+        static::assertSame($expected, (new AntiXSS())->xss_clean($content));
     }
 
-    public function testJavascriptLikeTextInsidePreAndCodeTagsIsPreserved()
+    public function testJavascriptLikeTextInsidePreAndCodeTagsIsSanitizedByDefault()
     {
         $content = "<pre>\n.innerHTML\n.appendChild\neval(1)\n.onclick\n</pre>";
+        $expected = "<pre>\n\n\neval&#40;1&#41;\n.onclick\n</pre>";
 
-        static::assertSame($content, (new AntiXSS())->xss_clean($content));
+        static::assertSame($expected, (new AntiXSS())->xss_clean($content));
+    }
+
+    public function testJavascriptLikeTextInsidePreAndCodeTagsCanBePreserved()
+    {
+        $content = "<pre>\n.innerHTML\n.appendChild\neval(1)\n.onclick\n</pre>";
+        $antiXss = new AntiXSS();
+        $antiXss->setKeepPreAndCodeTagContent(true);
+
+        static::assertSame($content, $antiXss->xss_clean($content));
+    }
+
+    public function testEscapedHtmlInsidePreTagsCanBePreserved()
+    {
+        $content = '
+            <pre><code>
+                &lt;script&gt;
+                    foo();
+                &lt;/script&gt;
+            </code></pre>
+        ';
+        $antiXss = new AntiXSS();
+        $antiXss->setKeepPreAndCodeTagContent(true);
+
+        static::assertSame($content, $antiXss->xss_clean($content));
     }
 
     /**
