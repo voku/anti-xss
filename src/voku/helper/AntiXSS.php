@@ -837,35 +837,14 @@ final class AntiXSS
         // ---
 
         $replaceNeverAllowedCall = [];
-        $hasNeverAllowedBehaviorUrl = false;
         foreach ($this->_never_allowed_call_strings as $call) {
-            if ($call === 'behavior') {
-                if (
-                    \stripos($str, $call) !== false
-                    &&
-                    \preg_match('#behavior\s*:\s*url\s*\(#iu', $str) === 1
-                ) {
-                    $hasNeverAllowedBehaviorUrl = true;
-                }
-
-                continue;
-            }
-
             if (\stripos($str, $call) !== false) {
                 $replaceNeverAllowedCall[] = $call;
             }
         }
         if (\count($replaceNeverAllowedCall) > 0) {
             $tmp = \preg_replace(
-                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?:.*?([/\\\;()\'">]|$))#ius',
-                '$1' . $this->_replacement . '$2',
-                $str
-            );
-            $str = $tmp ?? $str;
-        }
-        if ($hasNeverAllowedBehaviorUrl) {
-            $tmp = \preg_replace(
-                '#([^\p{L}]|^)behavior\s*:\s*url\s*\((?:.*?([/\\\;()\'">]|$))#ius',
+                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?!\s[\p{L}\p{N}\s]*$)(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
                 $str
             );
