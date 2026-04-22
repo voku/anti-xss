@@ -222,6 +222,16 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss->addNeverAllowedStrAfterwards(['&lt;script&gt;', '&lt;/script&gt;']); // re-disallow
     }
 
+    public function testCustomNeverAllowedStrAfterwards()
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->setReplacement('[removed]');
+        $antiXss->addNeverAllowedStrAfterwards(['foobar']);
+
+        static::assertSame('[removed]', $antiXss->xss_clean('foobar'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testRemoveAddEvents()
     {
         // init
@@ -248,6 +258,119 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         foreach ($testArray as $before => $after) {
             static::assertSame($after, $antiXss->xss_clean($before), 'testing: ' . $before);
         }
+    }
+
+    public function testCustomNeverAllowedOnEventsAfterwards()
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->addNeverAllowedOnEventsAfterwards(['foobar']);
+
+        static::assertSame('<x >', $antiXss->xss_clean('<x foobar="alert(1)">'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
+    public function testEmptyArrayMutatorsAreNoOps()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame($antiXss, $antiXss->addEvilAttributes([]));
+        static::assertSame($antiXss, $antiXss->addEvilHtmlTags([]));
+        static::assertSame($antiXss, $antiXss->addNeverAllowedRegex([]));
+        static::assertSame($antiXss, $antiXss->removeNeverAllowedRegex([]));
+        static::assertSame($antiXss, $antiXss->addNeverAllowedOnEventsAfterwards([]));
+        static::assertSame($antiXss, $antiXss->addNeverAllowedStrAfterwards([]));
+        static::assertSame($antiXss, $antiXss->addDoNotCloseHtmlTags([]));
+        static::assertSame($antiXss, $antiXss->addNeverAllowedJsCallbackRegex([]));
+        static::assertSame($antiXss, $antiXss->addNeverAllowedCallStrings([]));
+        static::assertSame($antiXss, $antiXss->removeDoNotCloseHtmlTags([]));
+        static::assertSame($antiXss, $antiXss->addNaughtyJavascriptPatterns([]));
+        static::assertSame($antiXss, $antiXss->removeEvilAttributes([]));
+        static::assertSame($antiXss, $antiXss->removeEvilHtmlTags([]));
+        static::assertSame($antiXss, $antiXss->removeNeverAllowedOnEventsAfterwards([]));
+        static::assertSame($antiXss, $antiXss->removeNeverAllowedStrAfterwards([]));
+        static::assertSame($antiXss, $antiXss->removeNeverAllowedCallStrings([]));
+        static::assertSame($antiXss, $antiXss->removeNeverAllowedJsCallbackRegex([]));
+    }
+
+    public function testRegexBasedCustomEvilAttributeCanBeAddedAndRemoved()
+    {
+        $antiXss = new AntiXSS();
+        $payload = '<x foo123="bar" ok="1">';
+
+        $antiXss->addEvilAttributes(['foo.+']);
+        static::assertSame('<x >', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss->removeEvilAttributes(['foo.+']);
+        static::assertSame($payload, $antiXss->xss_clean($payload));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testCustomCallStringCanBeAddedAndRemoved()
+    {
+        $antiXss = (new AntiXSS())->setReplacement('[removed]');
+        $payload = '<a href="fakescheme:test">x</a>';
+
+        $antiXss->addNeverAllowedCallStrings(['fakescheme']);
+        static::assertSame('<a href="[removed]">x</a>', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss->removeNeverAllowedCallStrings(['fakescheme']);
+        static::assertSame($payload, $antiXss->xss_clean($payload));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testCustomJsCallbackRegexCanBeAddedAndRemoved()
+    {
+        $antiXss = (new AntiXSS())->setReplacement('[removed]');
+        $payload = '<a href="foo.bar">x</a>';
+
+        $antiXss->addNeverAllowedJsCallbackRegex(['foo\\.']);
+        static::assertSame('<a href="[removed]">x</a>', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss->removeNeverAllowedJsCallbackRegex(['foo\\.']);
+        static::assertSame($payload, $antiXss->xss_clean($payload));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testCustomNeverAllowedRegexCanBeAddedAndRemoved()
+    {
+        $antiXss = new AntiXSS();
+        $payload = 'foo123 test';
+
+        $antiXss->addNeverAllowedRegex(['foo123' => '[regex]']);
+        static::assertSame('[regex] test', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss->removeNeverAllowedRegex(['foo123' => '[regex]']);
+        static::assertSame($payload, $antiXss->xss_clean($payload));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testCustomEvilHtmlTagCanBeAddedAndRemoved()
+    {
+        $antiXss = new AntiXSS();
+        $payload = '<customtag>ok</customtag>';
+
+        $antiXss->addEvilHtmlTags(['customtag']);
+        static::assertSame('&lt;customtag&gt;ok&lt;/customtag&gt;', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss->removeEvilHtmlTags(['customtag']);
+        static::assertSame($payload, $antiXss->xss_clean($payload));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testCustomNaughtyJavascriptPatternCanBeAdded()
+    {
+        $antiXss = (new AntiXSS())->setReplacement('[removed]');
+
+        $payload = 'customcall(1)';
+        $antiXss->addNaughtyJavascriptPatterns(['customcall']);
+
+        static::assertSame('customcall&#40;1&#41;', $antiXss->xss_clean($payload));
+        static::assertTrue($antiXss->isXssFound());
     }
 
     public function testRemoveAddRegex()
@@ -1691,6 +1814,30 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
+    public function testInvalidUtf7SequenceIsIgnored()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame('+foo-', $antiXss->xss_clean('+foo-'));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testShortInvalidUtf7SequenceIsIgnored()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame('+A-', $antiXss->xss_clean('+A-'));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testUtf7SequenceWithMixedBytesIsDecodedSafely()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame('&lt;"', $antiXss->xss_clean('+ADwAIgA-'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testXssCleanJsImgRemoval()
     {
         $input = '<img src="&#38&#35&#49&#48&#54&#38&#35&#57&#55&#38&#35&#49&#49&#56&#38&#35&#57&#55&#38&#35&#49&#49&#53&#38&#35&#57&#57&#38&#35&#49&#49&#52&#38&#35&#49&#48&#53&#38&#35&#49&#49&#50&#38&#35&#49&#49&#54&#38&#35&#53&#56&#38&#35&#57&#57&#38&#35&#49&#49&#49&#38&#35&#49&#49&#48&#38&#35&#49&#48&#50&#38&#35&#49&#48&#53&#38&#35&#49&#49&#52&#38&#35&#49&#48&#57&#38&#35&#52&#48&#38&#35&#52&#57&#38&#35&#52&#49">Clickhere';
@@ -2260,6 +2407,70 @@ nodeValue+outerHTML>/*click me', $str);
         $antiXss->setKeepPreAndCodeTagContent(true);
 
         static::assertSame($content, $antiXss->xss_clean($content));
+    }
+
+    public function testKeepPreAndCodeTagContentStillSanitizesStringsWithoutPreOrCodeTags()
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->setKeepPreAndCodeTagContent(true);
+
+        static::assertSame('before eval&#40;1&#41; after', $antiXss->xss_clean('before eval(1) after'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
+    public function testMalformedPreTagStillFallsBackToNormalSanitizing()
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->setKeepPreAndCodeTagContent(true);
+
+        static::assertSame('&lt;pre foo="bar"', $antiXss->xss_clean('<pre foo="bar"'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
+    public function testJavascriptRemovalFallsBackUnderTightBacktrackLimit()
+    {
+        $originalBacktrackLimit = \ini_get('pcre.backtrack_limit');
+
+        try {
+            \ini_set('pcre.backtrack_limit', '6');
+
+            $testCases = [
+                '<a href="javascript:alert(1)" title="x">x</a>' => '<a >x</a>',
+                '<img src="javascript:alert(1)">' => '<img >',
+                '<audio src="javascript:alert(1)"></audio>' => '&lt;audio &gt;&lt;/audio&gt;',
+                '<video src="javascript:alert(1)"></video>' => '&lt;video &gt;&lt;/video&gt;',
+            ];
+
+            foreach ($testCases as $before => $after) {
+                static::assertSame($after, (new AntiXSS())->xss_clean($before), $before);
+            }
+        } finally {
+            if ($originalBacktrackLimit !== false) {
+                \ini_set('pcre.backtrack_limit', (string) $originalBacktrackLimit);
+            }
+        }
+    }
+
+    public function testJsRemovalCallbackHandlesEmptyMatchDefensively()
+    {
+        $antiXss = new AntiXSS();
+        $method = new \ReflectionMethod($antiXss, '_js_removal_callback');
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
+
+        static::assertSame('', $method->invoke($antiXss, ['', 'href="javascript:alert(1)"'], 'href'));
+    }
+
+    public function testUtf7CallbackBackReencodesTrailingBytes()
+    {
+        $antiXss = new AntiXSS();
+        $method = new \ReflectionMethod($antiXss, '_repack_utf7_callback_back');
+        if (\PHP_VERSION_ID < 80100) {
+            $method->setAccessible(true);
+        }
+
+        static::assertSame('prefix+QUI-', $method->invoke($antiXss, ['prefixAB', 'prefix', 'AB']));
     }
 
     /**
