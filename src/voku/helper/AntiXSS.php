@@ -1254,7 +1254,7 @@ final class AntiXSS
         }
 
         if (
-            $canShortCircuit 
+            $canShortCircuit
             &&
             $eventQuickChecks !== []
         ) {
