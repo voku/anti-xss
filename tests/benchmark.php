@@ -52,7 +52,7 @@ $fixturesDir = __DIR__ . '/fixtures';
 
 $cases = [
     'plain_text_small' => [
-        'input' => "Regular prose with punctuation, emoji-free ASCII, prices like <35% and > 1 year, plus harmless onload words in content.",
+        'input' => 'Regular prose with punctuation, emoji-free ASCII, prices like <35% and > 1 year, plus harmless onload words in content.',
         'iterations' => $measureIterations * 20,
     ],
     'safe_html_fragment' => [
