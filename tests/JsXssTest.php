@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use voku\helper\AntiXSS;
 
 /**
@@ -242,35 +243,48 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
     }
 
-    public function testRecentlyAddedMdnEventHandlersAreBlocked()
+    #[DataProvider('provideRecentlyAddedMdnEventHandlers')]
+    public function testRecentlyAddedMdnEventHandlersAreBlocked(string $input, string $expected): void
+    {
+        static::assertSame($expected, (new AntiXSS())->xss_clean($input));
+    }
+
+    public static function provideRecentlyAddedMdnEventHandlers(): array
     {
         $handlers = [
-            'onappinstalled',
-            'onbeforeinstallprompt',
-            'onbeforexrselect',
-            'oncontentvisibilityautostatechange',
-            'ondeviceorientationabsolute',
-            'ongamepadconnected',
-            'ongamepaddisconnected',
-            'onmessageerror',
-            'onorientationchange',
-            'onpagereveal',
-            'onpageswap',
-            'onrejectionhandled',
-            'onscrollend',
-            'onscrollsnapchange',
-            'onscrollsnapchanging',
-            'onsecuritypolicyviolation',
-            'onunhandledrejection',
-            'onvrdisplayactivate',
-            'onvrdisplayconnect',
-            'onvrdisplaydeactivate',
-            'onvrdisplaydisconnect',
-            'onvrdisplaypresentchange',
+            'onappinstalled' => 'onappinstalled',
+            'onbeforeinstallprompt' => 'onbeforeinstallprompt',
+            'onbeforexrselect' => 'onbeforexrselect',
+            'oncontentvisibilityautostatechange' => 'oncontentvisibilityautostatechange',
+            'ondeviceorientationabsolute' => 'ondeviceorientationabsolute',
+            'ongamepadconnected' => 'ongamepadconnected',
+            'ongamepaddisconnected' => 'ongamepaddisconnected',
+            'onmessageerror' => 'onmessageerror',
+            'onorientationchange' => 'onorientationchange',
+            'onpagereveal' => 'onpagereveal',
+            'onpageswap' => 'onpageswap',
+            'onrejectionhandled' => 'onrejectionhandled',
+            'onscrollend' => 'onscrollend',
+            'onscrollsnapchange' => 'onscrollsnapchange',
+            'onscrollsnapchanging' => 'onscrollsnapchanging',
+            'onsecuritypolicyviolation' => 'onsecuritypolicyviolation',
+            'onunhandledrejection' => 'onunhandledrejection',
+            'onvrdisplayactivate' => 'onvrdisplayactivate',
+            'onvrdisplayconnect' => 'onvrdisplayconnect',
+            'onvrdisplaydeactivate' => 'onvrdisplaydeactivate',
+            'onvrdisplaydisconnect' => 'onvrdisplaydisconnect',
+            'onvrdisplaypresentchange' => 'onvrdisplaypresentchange',
         ];
 
-        foreach ($handlers as $handler) {
-            static::assertSame('<div >x</div>', (new AntiXSS())->xss_clean('<div ' . $handler . '="alert(1)">x</div>'));
+        $tests = [];
+
+        foreach ($handlers as $name => $handler) {
+            $tests[$name] = [
+                '<div ' . $handler . '="alert(1)"><i></i></div>',
+                '<div ><i></i></div>',
+            ];
         }
+
+        return $tests;
     }
 }
