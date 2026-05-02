@@ -38,6 +38,8 @@ use const HTML_ENTITIES;
  */
 final class AntiXSS
 {
+    private const MAX_SANITIZATION_PASSES = 100;
+
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
@@ -786,7 +788,10 @@ final class AntiXSS
         $str_backup = $str;
         
         // process
+        $iterations = 0;
         do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
+
             // backup the string (for the loop)
             $str_backup_loop = $str;
 
@@ -869,6 +874,27 @@ final class AntiXSS
         }
 
         return $result . $callback($remaining);
+    }
+
+    /**
+     * @param int    $iterations
+     * @param string $context
+     *
+     * @return void
+     */
+    private function _guardAgainstNonConvergingLoop(&$iterations, $context)
+    {
+        ++$iterations;
+
+        if ($iterations > self::MAX_SANITIZATION_PASSES) {
+            throw new \RuntimeException(
+                'AntiXSS detected a non-converging sanitization loop after '
+                . self::MAX_SANITIZATION_PASSES
+                . ' passes while running '
+                . $context
+                . '.'
+            );
+        }
     }
 
     /**
@@ -985,7 +1011,9 @@ final class AntiXSS
                         continue;
                     }
 
+                    $iterations = 0;
                     do {
+                        $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
                         $count = $temp_count = 0;
 
                         $tmp = \preg_replace(
@@ -1481,7 +1509,9 @@ final class AntiXSS
      */
     private function _remove_disallowed_javascript($str)
     {
+        $iterations = 0;
         do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
             $original = $str;
 
             if (\stripos($str, '<a') !== false) {
@@ -1651,7 +1681,9 @@ final class AntiXSS
             &&
             \in_array('style', $this->_evil_attributes_regex, true)
         ) {
+            $iterations = 0;
             do {
+                $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
                 $count = $temp_count = 0;
 
                 $tmp = \preg_replace(
@@ -1671,7 +1703,9 @@ final class AntiXSS
             $this->_cache_evil_attributes_regex_string .= '|' . \implode('[\w:-]*|', $this->_never_allowed_on_events_afterwards) . '[\w:-]*';
         }
 
+        $iterations = 0;
         do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
             $count = $temp_count = 0;
 
             // find occurrences of illegal attribute strings with and without quotes (" and ' are octal quotes)
@@ -1808,7 +1842,9 @@ final class AntiXSS
         // init
         $strEnd = '';
 
+        $iterations = 0;
         do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
             $original = $str;
 
             if (
@@ -2588,7 +2624,9 @@ final class AntiXSS
         $old_str_backup = $str;
 
         // process
+        $iterations = 0;
         do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
             $old_str = $str;
             $str = $this->_do($str);
         } while ($old_str !== $str);

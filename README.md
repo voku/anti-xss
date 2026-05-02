@@ -157,7 +157,7 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit -c phpunit.xml
 
 ### Mutation testing with static analysis:
 
-CI runs [Infection](https://infection.github.io/) with PHPStan integration on the PHP 8.3 pull-request job. This uses `infection.json5.dist` and keeps the Infection dependency out of the default PHP 7.x install path.
+CI runs [Infection](https://infection.github.io/) with PHPStan integration on the PHP 8.3 pull-request job. This uses `infection.json5.dist`, requires 100% MSI on the mutated diff, and fails on any timed-out mutant so sanitizer loops cannot silently regress.
 
 To run the same toolchain locally on PHP 8.3+:
 
