@@ -424,8 +424,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             $case[0]($antiXss);
             $antiXss->setReplacement('[removed]');
 
-            static::assertSame($case[2], $antiXss->xss_clean($case[1]), 'testing: ' . $name);
-            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $name);
+            static::assertSame($case[2], $antiXss->xss_clean($case[1]), $name);
+            static::assertTrue($antiXss->isXssFound(), $name);
         }
     }
 
