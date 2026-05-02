@@ -6,8 +6,9 @@
     },
     "timeout": 30,
     "threads": "max",
-    "minMsi": 0,
-    "minCoveredMsi": 0,
+    "minMsi": 80,
+    "minCoveredMsi": 80,
+    "ignoreMsiWithNoMutations": true,
     "logs": {
         "text": "build/logs/infection.log",
         "summaryJson": "build/logs/infection-summary.json"
