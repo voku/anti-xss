@@ -174,7 +174,7 @@ You are working in the voku/anti-xss repository.
 4. Prefer reflection-backed test providers over copying the source dictionaries into test files, so newly added entries are covered automatically.
 5. For each dictionary, test both the intended blocking behavior and at least one important boundary rule when relevant (for example strict vs. whitespace-separated JavaScript callbacks, or executable vs. non-executable event attribute forms).
 6. Make the smallest possible production change only if the expanded dictionary coverage exposes a real regression.
-7. Re-run PHPUnit after each small step and continue iterating until you either find and fix at least one real regression or confirm that the dictionary is already covered.
+7. Re-run PHPUnit after each small step and continue iterating across the targeted dictionaries until you find and fix at least one real regression for the task, or confirm that the remaining dictionaries are already covered.
 ```
 
 ## AntiXss methods
