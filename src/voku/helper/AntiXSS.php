@@ -952,7 +952,7 @@ final class AntiXSS
 
         foreach ($array as $eventNameBeginning => $events) {
             $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] =
-                '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')(?<after>\(.*?\)|\s*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
+                '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
         }
 
         $this->_cache_never_allowed_on_events_afterwards_chunks = $array;
@@ -1660,7 +1660,7 @@ final class AntiXSS
 
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
-            $this->_cache_evil_attributes_regex_string .= '|' . \implode('|', $this->_never_allowed_on_events_afterwards);
+            $this->_cache_evil_attributes_regex_string .= '|' . \implode('[\w:-]*|', $this->_never_allowed_on_events_afterwards) . '[\w:-]*';
         }
 
         do {
