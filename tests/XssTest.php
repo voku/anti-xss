@@ -365,6 +365,70 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertTrue($antiXss->isXssFound());
     }
 
+    public function testSecurityOptionMutationsKeepBlockingAfterReplacementChanges()
+    {
+        $cases = [
+            'custom call string' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addNeverAllowedCallStrings(['fakescheme']);
+                },
+                '<a href="fakescheme:test">x</a>',
+                '<a href="[removed]">x</a>',
+            ],
+            'custom javascript callback regex' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addNeverAllowedJsCallbackRegex(['foo\\.']);
+                },
+                '<a href="foo.bar">x</a>',
+                '<a href="[removed]">x</a>',
+            ],
+            'custom afterwards string' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addNeverAllowedStrAfterwards(['foobar']);
+                },
+                'foobar',
+                '[removed]',
+            ],
+            'custom event attribute' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addNeverAllowedOnEventsAfterwards(['foobar']);
+                },
+                '<x foobar="alert(1)">',
+                '<x [removed]>',
+            ],
+            'custom naughty javascript pattern' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addNaughtyJavascriptPatterns(['customcall']);
+                },
+                'customcall(1)',
+                'customcall&#40;1&#41;',
+            ],
+            'custom evil attribute' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addEvilAttributes(['foo.+']);
+                },
+                '<x foo123="bar" ok="1">',
+                '<x [removed]>',
+            ],
+            'custom evil html tag' => [
+                static function (AntiXSS $antiXss) {
+                    $antiXss->addEvilHtmlTags(['customtag']);
+                },
+                '<customtag>ok</customtag>',
+                '&lt;customtag&gt;ok&lt;/customtag&gt;',
+            ],
+        ];
+
+        foreach ($cases as $name => $case) {
+            $antiXss = new AntiXSS();
+            $case[0]($antiXss);
+            $antiXss->setReplacement('[removed]');
+
+            static::assertSame($case[2], $antiXss->xss_clean($case[1]), 'testing: ' . $name);
+            static::assertTrue($antiXss->isXssFound(), 'testing: ' . $name);
+        }
+    }
+
     public function testCustomEvilHtmlTagCanBeAddedAndRemoved()
     {
         $antiXss = new AntiXSS();
