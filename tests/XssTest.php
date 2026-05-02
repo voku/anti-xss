@@ -1976,6 +1976,97 @@ nodeValue+outerHTML>/*click me', $str);
             'todo?: valid string without attribute XSS #7' => [' onend ', true],
         ];
     }
+
+    #[DataProvider('provideBuiltInNeverAllowedStringsAfterwards')]
+    public function testBuiltInNeverAllowedStringsAfterwardsAreRemoved(string $string): void
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->setReplacement('[removed]');
+
+        static::assertSame('[removed]', $antiXss->xss_clean($string), 'testing: ' . $string);
+    }
+
+    public static function provideBuiltInNeverAllowedStringsAfterwards(): array
+    {
+        $tests = [];
+
+        foreach (self::antiXssPrivateStringList('_never_allowed_str_afterwards') as $string) {
+            $tests[$string] = [$string];
+        }
+
+        return $tests;
+    }
+
+    #[DataProvider('provideBuiltInNaughtyJavascriptPatterns')]
+    public function testBuiltInNaughtyJavascriptPatternsAreCovered(string $pattern, bool $expectedWithWhitespace): void
+    {
+        $withoutWhitespace = new AntiXSS();
+        $withoutWhitespace->xss_clean('<p>' . $pattern . '(1)</p>');
+
+        static::assertTrue($withoutWhitespace->isXssFound(), 'testing immediate parentheses: ' . $pattern);
+
+        $withWhitespace = new AntiXSS();
+        $withWhitespace->xss_clean('<p>' . $pattern . ' (1)</p>');
+
+        if ($expectedWithWhitespace) {
+            static::assertTrue($withWhitespace->isXssFound(), 'testing optional whitespace: ' . $pattern);
+        } else {
+            static::assertFalse($withWhitespace->isXssFound(), 'testing whitespace boundary: ' . $pattern);
+        }
+    }
+
+    public static function provideBuiltInNaughtyJavascriptPatterns(): array
+    {
+        $tests = [];
+
+        foreach (self::antiXssPrivateStringList('_naughty_javascript_patterns') as $pattern) {
+            $tests[$pattern . ' / optional whitespace'] = [$pattern, true];
+        }
+
+        foreach (self::antiXssPrivateStringList('_naughty_javascript_patterns_strict') as $pattern) {
+            $tests[$pattern . ' / immediate parentheses only'] = [$pattern, $pattern === 'expression'];
+        }
+
+        return $tests;
+    }
+
+    #[DataProvider('provideBuiltInEvilAttributes')]
+    public function testBuiltInEvilAttributesAreRemoved(string $attribute): void
+    {
+        static::assertSame(
+            '<foo >ok</foo>',
+            (new AntiXSS())->xss_clean('<foo ' . $attribute . '="alert(1)">ok</foo>'),
+            'testing lowercase attribute: ' . $attribute
+        );
+
+        static::assertSame(
+            '<foo >ok</foo>',
+            (new AntiXSS())->xss_clean('<foo ' . \strtoupper($attribute) . '="alert(1)">ok</foo>'),
+            'testing uppercase attribute: ' . $attribute
+        );
+    }
+
+    public static function provideBuiltInEvilAttributes(): array
+    {
+        $tests = [];
+
+        foreach (self::antiXssPrivateStringList('_evil_attributes_regex') as $attribute) {
+            $tests[$attribute] = [$attribute];
+        }
+
+        return $tests;
+    }
+
+    /**
+     * @return string[]
+     */
+    private static function antiXssPrivateStringList(string $propertyName): array
+    {
+        $reflection = new \ReflectionClass(AntiXSS::class);
+        $property = $reflection->getProperty($propertyName);
+
+        return $property->getValue(new AntiXSS());
+    }
     
     public function testXssCleanSanitizeNaughtyHtmlAttributes()
     {

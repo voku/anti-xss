@@ -152,7 +152,29 @@ composer install
 2) The tests can be executed by running this command from the root directory:
 
 ```bash
-./vendor/bin/phpunit
+XDEBUG_MODE=coverage ./vendor/bin/phpunit -c phpunit.xml
+```
+
+### Prompt for future LLM dictionary checks
+
+Use this prompt when you want an LLM to expand regression coverage around AntiXSS dictionaries without manually copying them into tests:
+
+```text
+You are working in the voku/anti-xss repository.
+
+1. Run the current PHPUnit suite first with:
+   XDEBUG_MODE=coverage ./vendor/bin/phpunit -c phpunit.xml
+2. Inspect /src/voku/helper/AntiXSS.php for dictionary-style private arrays such as:
+   - _never_allowed_on_events_afterwards
+   - _evil_attributes_regex
+   - _naughty_javascript_patterns
+   - _naughty_javascript_patterns_strict
+   - _never_allowed_str_afterwards
+3. For each dictionary that has a safe generic assertion shape, add or extend provider-based tests that iterate every current entry automatically.
+4. Prefer reflection-backed test providers over copying the source dictionaries into test files, so newly added entries are covered automatically.
+5. For each dictionary, test both the intended blocking behavior and at least one important boundary rule when relevant (for example strict vs. whitespace-separated JavaScript callbacks, or executable vs. non-executable event attribute forms).
+6. Make the smallest possible production change only if the expanded dictionary coverage exposes a real regression.
+7. Re-run PHPUnit after each small step and continue iterating until you either find and fix at least one real regression or confirm that the dictionary is already covered.
 ```
 
 ## AntiXss methods
