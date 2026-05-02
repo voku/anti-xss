@@ -252,34 +252,34 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
     public static function provideRecentlyAddedMdnEventHandlers(): array
     {
         $handlers = [
-            'onappinstalled' => 'onappinstalled',
-            'onbeforeinstallprompt' => 'onbeforeinstallprompt',
-            'onbeforexrselect' => 'onbeforexrselect',
-            'oncontentvisibilityautostatechange' => 'oncontentvisibilityautostatechange',
-            'ondeviceorientationabsolute' => 'ondeviceorientationabsolute',
-            'ongamepadconnected' => 'ongamepadconnected',
-            'ongamepaddisconnected' => 'ongamepaddisconnected',
-            'onmessageerror' => 'onmessageerror',
-            'onorientationchange' => 'onorientationchange',
-            'onpagereveal' => 'onpagereveal',
-            'onpageswap' => 'onpageswap',
-            'onrejectionhandled' => 'onrejectionhandled',
-            'onscrollend' => 'onscrollend',
-            'onscrollsnapchange' => 'onscrollsnapchange',
-            'onscrollsnapchanging' => 'onscrollsnapchanging',
-            'onsecuritypolicyviolation' => 'onsecuritypolicyviolation',
-            'onunhandledrejection' => 'onunhandledrejection',
-            'onvrdisplayactivate' => 'onvrdisplayactivate',
-            'onvrdisplayconnect' => 'onvrdisplayconnect',
-            'onvrdisplaydeactivate' => 'onvrdisplaydeactivate',
-            'onvrdisplaydisconnect' => 'onvrdisplaydisconnect',
-            'onvrdisplaypresentchange' => 'onvrdisplaypresentchange',
+            'onappinstalled',
+            'onbeforeinstallprompt',
+            'onbeforexrselect',
+            'oncontentvisibilityautostatechange',
+            'ondeviceorientationabsolute',
+            'ongamepadconnected',
+            'ongamepaddisconnected',
+            'onmessageerror',
+            'onorientationchange',
+            'onpagereveal',
+            'onpageswap',
+            'onrejectionhandled',
+            'onscrollend',
+            'onscrollsnapchange',
+            'onscrollsnapchanging',
+            'onsecuritypolicyviolation',
+            'onunhandledrejection',
+            'onvrdisplayactivate',
+            'onvrdisplayconnect',
+            'onvrdisplaydeactivate',
+            'onvrdisplaydisconnect',
+            'onvrdisplaypresentchange',
         ];
 
         $tests = [];
 
-        foreach ($handlers as $name => $handler) {
-            $tests[$name] = [
+        foreach ($handlers as $handler) {
+            $tests[$handler] = [
                 '<div ' . $handler . '="alert(1)"><i></i></div>',
                 '<div ><i></i></div>',
             ];
