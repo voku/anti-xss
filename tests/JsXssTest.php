@@ -243,13 +243,19 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
     }
 
-    #[DataProvider('provideRecentlyAddedMdnEventHandlers')]
-    public function testRecentlyAddedMdnEventHandlersAreBlocked(string $input, string $expected): void
+    #[DataProvider('provideRecentlyAddedMdnEventHandlerAttackVectors')]
+    public function testRecentlyAddedMdnEventHandlersAreBlockedWhileStillAttackVectors(string $input, string $expected): void
     {
         static::assertSame($expected, (new AntiXSS())->xss_clean($input));
     }
 
-    public static function provideRecentlyAddedMdnEventHandlers(): array
+    #[DataProvider('provideRecentlyAddedMdnEventHandlerNonAttackVectors')]
+    public function testRecentlyAddedMdnEventHandlersStopBeingBlockedOnceTheyAreNoLongerExecutableAttributes(string $input, string $expected): void
+    {
+        static::assertSame($expected, (new AntiXSS())->xss_clean($input));
+    }
+
+    public static function provideRecentlyAddedMdnEventHandlerAttackVectors(): array
     {
         $handlers = [
             'onappinstalled',
@@ -276,12 +282,91 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
             'onvrdisplaypresentchange',
         ];
 
+        $patterns = [
+            ['plain', '<div %s="alert(1)"><i></i></div>', '<div ><i></i></div>'],
+            ['uppercase', '<div %s="alert(1)"><i data-case="upper"></i></div>', '<div ><i data-case="upper"></i></div>'],
+            ['whitespace-before-equals', '<div %s ="alert(1)"><i data-case="space"></i></div>', '<div ><i data-case="space"></i></div>'],
+            ['tab-before-equals', "<div %s\t=\"alert(1)\"><i data-case=\"tab\"></i></div>", '<div ><i data-case="tab"></i></div>'],
+            ['newline-before-equals', "<div %s\n=\"alert(1)\"><i data-case=\"newline\"></i></div>", '<div ><i data-case="newline"></i></div>'],
+            ['entity-tab-before-equals', '<div %s&#x09;="alert(1)"><i data-case="entity-tab"></i></div>', '<div ><i data-case="entity-tab"></i></div>'],
+            ['entity-newline-before-equals', '<div %s&#x0A;="alert(1)"><i data-case="entity-newline"></i></div>', '<div ><i data-case="entity-newline"></i></div>'],
+            ['entity-carriage-return-before-equals', '<div %s&#x0D;="alert(1)"><i data-case="entity-cr"></i></div>', '<div ><i data-case="entity-cr"></i></div>'],
+            ['entity-space-before-equals', '<div %s&#x20;="alert(1)"><i data-case="entity-space"></i></div>', '<div ><i data-case="entity-space"></i></div>'],
+            ['entity-equals-short', '<div %s&#61;"alert(1)"><i data-case="entity-equals-short"></i></div>', '<div ><i data-case="entity-equals-short"></i></div>'],
+            ['entity-equals-hex', '<div %s&#x3D;"alert(1)"><i data-case="entity-equals-hex"></i></div>', '<div ><i data-case="entity-equals-hex"></i></div>'],
+            ['entity-equals-long', '<div %s&#00061;"alert(1)"><i data-case="entity-equals-long"></i></div>', '<div ><i data-case="entity-equals-long"></i></div>'],
+            ['entity-equals-padded-hex', '<div %s&#x0000003d;"alert(1)"><i data-case="entity-equals-padded-hex"></i></div>', '<div ><i data-case="entity-equals-padded-hex"></i></div>'],
+            ['unquoted-value', '<div %s=alert(1)><i data-case="unquoted"></i></div>', '<div ><i data-case="unquoted"></i></div>'],
+            ['spaced-unquoted-value', '<div %s = alert(1)><i data-case="spaced-unquoted"></i></div>', '<div ><i data-case="spaced-unquoted"></i></div>'],
+            ['uppercase-attribute', '<div %s="alert(1)"><i data-case="mixed-case"></i></div>', '<div ><i data-case="mixed-case"></i></div>'],
+            ['trailing-text-node', '<div %s="alert(1)">alert(1)<i data-case="text-node"></i></div>', '<div >alert&#40;1&#41;<i data-case="text-node"></i></div>'],
+        ];
+
         $tests = [];
 
-        foreach ($handlers as $handler) {
-            $tests[$handler] = [
-                '<div ' . $handler . '="alert(1)"><i></i></div>',
-                '<div ><i></i></div>',
+        foreach ($handlers as $index => $handler) {
+            [$patternName, $inputTemplate, $expectedTemplate] = $patterns[$index % \count($patterns)];
+
+            if ($patternName === 'uppercase') {
+                $handler = \strtoupper($handler);
+            } elseif ($patternName === 'uppercase-attribute') {
+                $handler = 'oN' . \substr($handler, 2);
+            }
+
+            $tests[$handlers[$index] . ' / ' . $patternName] = [
+                \sprintf($inputTemplate, $handler),
+                $expectedTemplate,
+            ];
+        }
+
+        return $tests;
+    }
+
+    public static function provideRecentlyAddedMdnEventHandlerNonAttackVectors(): array
+    {
+        $handlers = [
+            'onappinstalled',
+            'onbeforeinstallprompt',
+            'onbeforexrselect',
+            'oncontentvisibilityautostatechange',
+            'ondeviceorientationabsolute',
+            'ongamepadconnected',
+            'ongamepaddisconnected',
+            'onmessageerror',
+            'onorientationchange',
+            'onpagereveal',
+            'onpageswap',
+            'onrejectionhandled',
+            'onscrollend',
+            'onscrollsnapchange',
+            'onscrollsnapchanging',
+            'onsecuritypolicyviolation',
+            'onunhandledrejection',
+            'onvrdisplayactivate',
+            'onvrdisplayconnect',
+            'onvrdisplaydeactivate',
+            'onvrdisplaydisconnect',
+            'onvrdisplaypresentchange',
+        ];
+
+        $mutators = [
+            ['entity-in-on', static fn(string $handler): string => 'o&#x6e;' . \substr($handler, 2)],
+            ['entity-in-middle', static fn(string $handler): string => \substr($handler, 0, 5) . '&#x69;' . \substr($handler, 6)],
+            ['missing-last-letter', static fn(string $handler): string => \substr($handler, 0, -1)],
+            ['prefixed-with-x', static fn(string $handler): string => 'x' . $handler],
+            ['namespace-style', static fn(string $handler): string => 'on:' . \substr($handler, 2)],
+            ['underscore-style', static fn(string $handler): string => 'on_' . \substr($handler, 2)],
+        ];
+
+        $tests = [];
+
+        foreach ($handlers as $index => $handler) {
+            [$mutationName, $mutator] = $mutators[$index % \count($mutators)];
+            $mutatedHandler = $mutator($handler);
+
+            $tests[$handler . ' / ' . $mutationName] = [
+                '<div ' . $mutatedHandler . '="alert(1)"><i data-boundary="' . $index . '"></i></div>',
+                '<div ' . $mutatedHandler . '="alert&#40;1&#41;"><i data-boundary="' . $index . '"></i></div>',
             ];
         }
 
