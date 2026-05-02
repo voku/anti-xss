@@ -1977,6 +1977,9 @@ nodeValue+outerHTML>/*click me', $str);
         ];
     }
 
+    /**
+     * @dataProvider provideBuiltInNeverAllowedStringsAfterwards
+     */
     #[DataProvider('provideBuiltInNeverAllowedStringsAfterwards')]
     public function testBuiltInNeverAllowedStringsAfterwardsAreRemoved(string $string): void
     {
@@ -1997,6 +2000,9 @@ nodeValue+outerHTML>/*click me', $str);
         return $tests;
     }
 
+    /**
+     * @dataProvider provideBuiltInNaughtyJavascriptPatterns
+     */
     #[DataProvider('provideBuiltInNaughtyJavascriptPatterns')]
     public function testBuiltInNaughtyJavascriptPatternsAreCovered(string $pattern, bool $expectedWithWhitespace): void
     {
@@ -2030,6 +2036,9 @@ nodeValue+outerHTML>/*click me', $str);
         return $tests;
     }
 
+    /**
+     * @dataProvider provideBuiltInEvilAttributes
+     */
     #[DataProvider('provideBuiltInEvilAttributes')]
     public function testBuiltInEvilAttributesAreRemoved(string $attribute): void
     {

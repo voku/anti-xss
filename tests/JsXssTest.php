@@ -243,12 +243,18 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
     }
 
+    /**
+     * @dataProvider provideRecentlyAddedMdnEventHandlerAttackVectors
+     */
     #[DataProvider('provideRecentlyAddedMdnEventHandlerAttackVectors')]
     public function testRecentlyAddedMdnEventHandlersAreBlockedWhileStillAttackVectors(string $input, string $expected): void
     {
         static::assertSame($expected, (new AntiXSS())->xss_clean($input));
     }
 
+    /**
+     * @dataProvider provideRecentlyAddedMdnEventHandlerNonAttackVectors
+     */
     #[DataProvider('provideRecentlyAddedMdnEventHandlerNonAttackVectors')]
     public function testRecentlyAddedMdnEventHandlersStopBeingBlockedOnceTheyAreNoLongerExecutableAttributes(string $input, string $expected): void
     {
