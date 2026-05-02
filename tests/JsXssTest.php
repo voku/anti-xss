@@ -241,4 +241,36 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('{"text": "<a href=\\"https://google.com\\">Google</a>"}', (new AntiXSS())->xss_clean($input));
     }
+
+    public function testRecentlyAddedMdnEventHandlersAreBlocked()
+    {
+        $handlers = [
+            'onappinstalled',
+            'onbeforeinstallprompt',
+            'onbeforexrselect',
+            'oncontentvisibilityautostatechange',
+            'ondeviceorientationabsolute',
+            'ongamepadconnected',
+            'ongamepaddisconnected',
+            'onmessageerror',
+            'onorientationchange',
+            'onpagereveal',
+            'onpageswap',
+            'onrejectionhandled',
+            'onscrollend',
+            'onscrollsnapchange',
+            'onscrollsnapchanging',
+            'onsecuritypolicyviolation',
+            'onunhandledrejection',
+            'onvrdisplayactivate',
+            'onvrdisplayconnect',
+            'onvrdisplaydeactivate',
+            'onvrdisplaydisconnect',
+            'onvrdisplaypresentchange',
+        ];
+
+        foreach ($handlers as $handler) {
+            static::assertSame('<div >x</div>', (new AntiXSS())->xss_clean('<div ' . $handler . '="alert(1)">x</div>'));
+        }
+    }
 }
