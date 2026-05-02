@@ -2073,6 +2073,7 @@ nodeValue+outerHTML>/*click me', $str);
     {
         $reflection = new \ReflectionClass(AntiXSS::class);
         $property = $reflection->getProperty($propertyName);
+        $property->setAccessible(true);
 
         return $property->getValue(new AntiXSS());
     }
