@@ -365,7 +365,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertTrue($antiXss->isXssFound());
     }
 
-    public function testSecurityOptionMutationsKeepBlockingAfterReplacementChanges()
+    public function testSecurityOptionMutationsStillBlockAfterReplacementChanges()
     {
         $cases = [
             'custom call string' => [
@@ -405,10 +405,10 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ],
             'custom evil attribute' => [
                 static function (AntiXSS $antiXss) {
-                    $antiXss->addEvilAttributes(['foo.+']);
+                    $antiXss->addEvilAttributes(['foo\d+']);
                 },
                 '<x foo123="bar" ok="1">',
-                '<x [removed]>',
+                '<x [removed] ok="1">',
             ],
             'custom evil html tag' => [
                 static function (AntiXSS $antiXss) {
