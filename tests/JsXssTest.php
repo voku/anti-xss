@@ -365,11 +365,11 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         ];
 
         $mutators = [
-            ['entity-in-on', static fn(string $handler): string => 'o&#x6e;' . \substr($handler, 2)],
-            ['entity-in-middle', static fn(string $handler): string => \substr($handler, 0, (int) (\strlen($handler) / 2)) . '&#x69;' . \substr($handler, ((int) (\strlen($handler) / 2)) + 1)],
-            ['prefixed-with-x', static fn(string $handler): string => 'x' . $handler],
-            ['namespace-style', static fn(string $handler): string => 'on:' . \substr($handler, 2)],
-            ['underscore-style', static fn(string $handler): string => 'on_' . \substr($handler, 2)],
+            ['entity-in-on', static fn (string $handler): string => 'o&#x6e;' . \substr($handler, 2)],
+            ['entity-in-middle', static fn (string $handler): string => \substr($handler, 0, (int) (\strlen($handler) / 2)) . '&#x69;' . \substr($handler, ((int) (\strlen($handler) / 2)) + 1)],
+            ['prefixed-with-x', static fn (string $handler): string => 'x' . $handler],
+            ['namespace-style', static fn (string $handler): string => 'on:' . \substr($handler, 2)],
+            ['underscore-style', static fn (string $handler): string => 'on_' . \substr($handler, 2)],
         ];
 
         $tests = [];
