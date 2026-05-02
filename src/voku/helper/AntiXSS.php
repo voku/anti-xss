@@ -1195,21 +1195,29 @@ final class AntiXSS
      */
     private function _initNeverAllowedRegex()
     {
-        $this->_never_allowed_regex = [
+        $this->_never_allowed_regex = $this->_getDefaultNeverAllowedRegex($this->_replacement);
+
+        $this->_rebuildNeverAllowedRegexCache();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function _getDefaultNeverAllowedRegex(string $replacement): array
+    {
+        return [
             // default javascript
-            '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $this->_replacement,
+            '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $replacement,
             // data-attribute + base64
-            "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $this->_replacement,
+            "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
-            'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $this->_replacement,
+            'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
             // src="js"
-            'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $this->_replacement,
+            'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $replacement,
             // comments
             '<!--(.*)-->' => '&lt;!--$1--&gt;',
             '<!--'        => '&lt;!--',
         ];
-
-        $this->_rebuildNeverAllowedRegexCache();
     }
 
     /**
@@ -2452,10 +2460,29 @@ final class AntiXSS
      */
     public function setReplacement($string): self
     {
+        $defaultNeverAllowedRegex = $this->_getDefaultNeverAllowedRegex($this->_replacement);
+        $customNeverAllowedRegex = \array_diff_key($this->_never_allowed_regex, $defaultNeverAllowedRegex);
+        $removedNeverAllowedRegex = \array_diff_key($defaultNeverAllowedRegex, $this->_never_allowed_regex);
+
         $this->_replacement = (string) $string;
 
         $this->_initNeverAllowedStr();
         $this->_initNeverAllowedRegex();
+
+        if ($removedNeverAllowedRegex !== []) {
+            $this->_never_allowed_regex = \array_diff_key($this->_never_allowed_regex, $removedNeverAllowedRegex);
+        }
+
+        if ($customNeverAllowedRegex !== []) {
+            $this->_never_allowed_regex = \array_merge(
+                $customNeverAllowedRegex,
+                $this->_never_allowed_regex
+            );
+        }
+
+        if ($removedNeverAllowedRegex !== [] || $customNeverAllowedRegex !== []) {
+            $this->_rebuildNeverAllowedRegexCache();
+        }
 
         return $this;
     }

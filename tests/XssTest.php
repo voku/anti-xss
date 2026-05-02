@@ -348,6 +348,20 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertFalse($antiXss->isXssFound());
     }
 
+    public function testSetReplacementPreservesNeverAllowedRegexMutations()
+    {
+        $antiXss = new AntiXSS();
+        $antiXss->addNeverAllowedRegex(['foo123' => '[regex]']);
+        $antiXss->removeNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;']);
+        $antiXss->setReplacement('[removed]');
+
+        static::assertSame('[regex] test', $antiXss->xss_clean('foo123 test'));
+        static::assertTrue($antiXss->isXssFound());
+
+        static::assertSame('&lt;!--x-->', $antiXss->xss_clean('<!--x-->'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testCustomEvilHtmlTagCanBeAddedAndRemoved()
     {
         $antiXss = new AntiXSS();
