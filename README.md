@@ -165,7 +165,7 @@ To run the same toolchain locally on PHP 8.3+:
 composer config --no-plugins allow-plugins.infection/extension-installer true
 composer require --dev phpstan/phpstan:^2.1 infection/infection:^0.32.7 --no-update
 composer update
-XDEBUG_MODE=coverage ./vendor/bin/infection --configuration=infection.json5.dist --static-analysis-tool=phpstan
+XDEBUG_MODE=coverage ./vendor/bin/infection --configuration=infection.json5.dist
 ```
 
 ### Prompt for future LLM dictionary checks

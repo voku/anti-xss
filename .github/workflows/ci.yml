@@ -97,7 +97,7 @@ jobs:
           XDEBUG_MODE: coverage
         run: |
           git fetch origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
-          php vendor/bin/infection --configuration=infection.json5.dist --static-analysis-tool=phpstan --git-diff-base="origin/${{ github.base_ref }}" --git-diff-lines
+          php vendor/bin/infection --configuration=infection.json5.dist --git-diff-base="origin/${{ github.base_ref }}" --git-diff-lines
 
       - name: Upload coverage results to Coveralls
         if: ${{ matrix.php == '8.3' && matrix.composer == 'basic' }}
