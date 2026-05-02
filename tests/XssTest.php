@@ -365,7 +365,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertTrue($antiXss->isXssFound());
     }
 
-    public function testSecurityOptionMutationsStillBlockAfterReplacementChanges()
+    public function testCustomSecurityRulesWorkAfterReplacementChange()
     {
         $cases = [
             'custom call string' => [
