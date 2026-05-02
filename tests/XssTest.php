@@ -355,6 +355,9 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss->removeNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;']);
         $antiXss->setReplacement('[removed]');
 
+        static::assertSame('[removed]', $antiXss->xss_clean('document.location'));
+        static::assertTrue($antiXss->isXssFound());
+
         static::assertSame('[regex] test', $antiXss->xss_clean('foo123 test'));
         static::assertTrue($antiXss->isXssFound());
 
