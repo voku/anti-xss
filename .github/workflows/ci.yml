@@ -61,7 +61,8 @@ jobs:
       - name: Install dependencies
         run: |
           if [[ "${{ matrix.php }}" == "8.3" ]]; then
-            composer require phpstan/phpstan --no-update
+            composer config --no-plugins allow-plugins.infection/extension-installer true
+            composer require --dev phpstan/phpstan:^2.1 infection/infection:^0.32.7 --no-update
           fi;
 
           if [[ "${{ matrix.composer }}" == "lowest" ]]; then
@@ -89,6 +90,14 @@ jobs:
         if: ${{ matrix.php == '8.3' }}
         run: |
           php vendor/bin/phpstan analyse
+
+      - name: Run Infection with PHPStan
+        if: ${{ matrix.php == '8.3' && matrix.composer == 'basic' && github.event_name == 'pull_request' }}
+        env:
+          XDEBUG_MODE: coverage
+        run: |
+          git fetch origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          php vendor/bin/infection --configuration=infection.json5.dist --git-diff-base="origin/${{ github.base_ref }}" --git-diff-lines
 
       - name: Upload coverage results to Coveralls
         if: ${{ matrix.php == '8.3' && matrix.composer == 'basic' }}

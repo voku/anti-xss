@@ -155,6 +155,19 @@ composer install
 XDEBUG_MODE=coverage ./vendor/bin/phpunit -c phpunit.xml
 ```
 
+### Mutation testing with static analysis:
+
+CI runs [Infection](https://infection.github.io/) with PHPStan integration on the PHP 8.3 pull-request job. This uses `infection.json5.dist` and keeps the Infection dependency out of the default PHP 7.x install path.
+
+To run the same toolchain locally on PHP 8.3+:
+
+```bash
+composer config --no-plugins allow-plugins.infection/extension-installer true
+composer require --dev phpstan/phpstan:^2.1 infection/infection:^0.32.7 --no-update
+composer update
+XDEBUG_MODE=coverage ./vendor/bin/infection --configuration=infection.json5.dist --static-analysis-tool=phpstan
+```
+
 ### Prompt for future LLM dictionary checks
 
 Use this prompt when you want an LLM to expand regression coverage around AntiXSS dictionaries without manually copying them into tests:

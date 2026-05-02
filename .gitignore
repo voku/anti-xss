@@ -6,6 +6,9 @@
 vendor
 composer.lock
 
+# mutation testing
+infection.json5
+
 # php (phpunit)
 build/logs/
 .phpunit.result.cache

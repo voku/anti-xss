@@ -1,0 +1,22 @@
+{
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "timeout": 30,
+    "threads": "max",
+    "minMsi": 0,
+    "minCoveredMsi": 0,
+    "logs": {
+        "text": "build/logs/infection.log",
+        "summaryJson": "build/logs/infection-summary.json"
+    },
+    "phpUnit": {
+        "configDir": "."
+    },
+    "phpStan": {
+        "configDir": "."
+    },
+    "staticAnalysisTool": "phpstan"
+}
