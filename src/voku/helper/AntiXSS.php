@@ -887,7 +887,13 @@ final class AntiXSS
         ++$iterations;
 
         if ($iterations > self::MAX_SANITIZATION_PASSES) {
-            throw new \RuntimeException('AntiXSS detected a non-converging sanitization loop while running ' . $context . '.');
+            throw new \RuntimeException(
+                'AntiXSS detected a non-converging sanitization loop after '
+                . self::MAX_SANITIZATION_PASSES
+                . ' passes while running '
+                . $context
+                . '.'
+            );
         }
     }
 
