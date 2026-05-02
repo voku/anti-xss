@@ -255,6 +255,21 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, (new AntiXSS())->xss_clean($input));
     }
 
+    public function testRecentlyAddedMdnEventHandlerLookalikesAreNotPartiallyStripped(): void
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame(
+            '<div onmessageerrorx="alert&#40;1&#41;"><i data-regression="suffix-letter"></i></div>',
+            $antiXss->xss_clean('<div onmessageerrorx="alert(1)"><i data-regression="suffix-letter"></i></div>')
+        );
+
+        static::assertSame(
+            '<div onmessageerror-foo="alert&#40;1&#41;"><i data-regression="hyphen-suffix"></i></div>',
+            $antiXss->xss_clean('<div onmessageerror-foo="alert(1)"><i data-regression="hyphen-suffix"></i></div>')
+        );
+    }
+
     public static function provideRecentlyAddedMdnEventHandlerAttackVectors(): array
     {
         $handlers = [
