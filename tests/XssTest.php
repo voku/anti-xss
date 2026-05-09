@@ -590,6 +590,14 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         static::assertFalse($antiXss->isXssFound());
     }
 
+    public function testMalformedOpeningTagIsEscapedOnce()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame('&lt;div x', $antiXss->xss_clean('<div x'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
     public function testXssClean()
     {
         $harm_string = "Hello, i try to <script>alert('Hack');</script> your site";
