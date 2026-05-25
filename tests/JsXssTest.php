@@ -188,6 +188,13 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         $antiXss = new AntiXSS();
         $antiXss->removeEvilAttributes(['style']);
+        $cleaned = $antiXss->xss_clean('<div style="width:\45\58\50\52\45\53\53\49\4f\4e(alert(1))">x</div>');
+        static::assertFalse(strpos($cleaned, 'expression('));
+        static::assertFalse(strpos($cleaned, '\45\58\50\52\45\53\53\49\4f\4e('));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss = new AntiXSS();
+        $antiXss->removeEvilAttributes(['style']);
         $cleaned = $antiXss->xss_clean('<div style=color:expres\sion(1834+{toString:alert})>x</div>');
         static::assertTrue((bool) \preg_match('#^<div style=color:.*>x</div>$#', $cleaned));
         static::assertFalse(strpos($cleaned, 'expression('));

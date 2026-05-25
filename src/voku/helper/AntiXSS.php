@@ -1240,8 +1240,9 @@ final class AntiXSS
             "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
             'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
-            // old IE, with CSS hex-escaped "expression" letters (65=e, 78=x, 70=p, 72=r, 73=s, 69=i, 6f=o, 6e=n)
-            '(?:e|\\\\0{0,5}65\s?)(?:x|\\\\0{0,5}78\s?)(?:p|\\\\0{0,5}70\s?)(?:r|\\\\0{0,5}72\s?)(?:e|\\\\0{0,5}65\s?)(?:s|\\\\0{0,5}73\s?)(?:s|\\\\0{0,5}73\s?)(?:i|\\\\0{0,5}69\s?)(?:o|\\\\0{0,5}6f\s?)(?:n|\\\\0{0,5}6e\s?)\s*(?:\(|&\#40;)' => $replacement,
+            // old IE, with CSS hex-escaped "expression" letters: lower/upper ASCII hex is accepted
+            // (e.g. e\78pression, e\000078 pression, \45\58\50\52\45\53\53\49\4f\4e).
+            '(?:e|\\\\0{0,5}(?:45|65)\s?)(?:x|\\\\0{0,5}(?:58|78)\s?)(?:p|\\\\0{0,5}(?:50|70)\s?)(?:r|\\\\0{0,5}(?:52|72)\s?)(?:e|\\\\0{0,5}(?:45|65)\s?)(?:s|\\\\0{0,5}(?:53|73)\s?)(?:s|\\\\0{0,5}(?:53|73)\s?)(?:i|\\\\0{0,5}(?:49|69)\s?)(?:o|\\\\0{0,5}(?:4f|6f)\s?)(?:n|\\\\0{0,5}(?:4e|6e)\s?)\s*(?:\(|&\#40;)' => $replacement,
             // src="js"
             'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $replacement,
             // comments
