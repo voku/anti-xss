@@ -40,27 +40,6 @@ final class AntiXSS
 {
     private const MAX_SANITIZATION_PASSES = 100;
 
-    /**
-     * Match old IE CSS expression(...) calls, including CSS hex-escaped letters.
-     *
-     * CSS escapes use a backslash, 1-6 hex digits, and optional trailing whitespace.
-     * The pattern covers lower/upper ASCII hex for each "expression" letter, e.g.
-     * e\78pression, e\000078 pression, and \45\58\50\52\45\53\53\49\4f\4e.
-     * Atomic groups keep the fixed-width per-letter alternatives from backtracking.
-     */
-    private const CSS_ESCAPED_EXPRESSION_REGEX =
-        '(?>e|\\\\0{0,5}(?:45|65)\s?)' .
-        '(?>x|\\\\0{0,5}(?:58|78)\s?)' .
-        '(?>p|\\\\0{0,5}(?:50|70)\s?)' .
-        '(?>r|\\\\0{0,5}(?:52|72)\s?)' .
-        '(?>e|\\\\0{0,5}(?:45|65)\s?)' .
-        '(?>s|\\\\0{0,5}(?:53|73)\s?)' .
-        '(?>s|\\\\0{0,5}(?:53|73)\s?)' .
-        '(?>i|\\\\0{0,5}(?:49|69)\s?)' .
-        '(?>o|\\\\0{0,5}(?:4f|6f)\s?)' .
-        '(?>n|\\\\0{0,5}(?:4e|6e)\s?)' .
-        '\s*(?:\(|&\#40;)';
-
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
@@ -162,6 +141,7 @@ final class AntiXSS
         'onBeforeCut',
         'onBeforeInput',
         'onBeforeInstallPrompt',
+        'onBeforeMatch',
         'onBeforePrint',
         'onBeforeDeactivate',
         'onBeforeEditFocus',
@@ -1261,7 +1241,6 @@ final class AntiXSS
             "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
             'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
-            self::CSS_ESCAPED_EXPRESSION_REGEX => $replacement,
             // src="js"
             'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $replacement,
             // comments
