@@ -188,6 +188,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         $antiXss = new AntiXSS();
         $antiXss->removeEvilAttributes(['style']);
+        // Fully CSS hex-encoded "EXPRESSION".
         $cleaned = $antiXss->xss_clean('<div style="width:\45\58\50\52\45\53\53\49\4f\4e(alert(1))">x</div>');
         static::assertFalse(strpos($cleaned, 'expression('));
         static::assertFalse(strpos($cleaned, '\45\58\50\52\45\53\53\49\4f\4e('));
