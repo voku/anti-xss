@@ -141,6 +141,7 @@ final class AntiXSS
         'onBeforeCut',
         'onBeforeInput',
         'onBeforeInstallPrompt',
+        'onBeforeMatch',
         'onBeforePrint',
         'onBeforeDeactivate',
         'onBeforeEditFocus',
