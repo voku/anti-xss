@@ -1240,6 +1240,8 @@ final class AntiXSS
             "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
             'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
+            // old IE, with CSS hex-escaped letters
+            '(?:e|\\\\0{0,5}65\s?)(?:x|\\\\0{0,5}78\s?)(?:p|\\\\0{0,5}70\s?)(?:r|\\\\0{0,5}72\s?)(?:e|\\\\0{0,5}65\s?)(?:s|\\\\0{0,5}73\s?)(?:s|\\\\0{0,5}73\s?)(?:i|\\\\0{0,5}69\s?)(?:o|\\\\0{0,5}6f\s?)(?:n|\\\\0{0,5}6e\s?)\s*(?:\(|&\#40;)' => $replacement,
             // src="js"
             'src\=(?<wrapper>[\'|"]).*\.js(?:\g{wrapper})' => $replacement,
             // comments

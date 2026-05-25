@@ -174,6 +174,20 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         $antiXss = new AntiXSS();
         $antiXss->removeEvilAttributes(['style']);
+        $cleaned = $antiXss->xss_clean('<div style="width:e\78pression(alert(1))">x</div>');
+        static::assertFalse(strpos($cleaned, 'expression('));
+        static::assertFalse(strpos($cleaned, 'e\78pression('));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss = new AntiXSS();
+        $antiXss->removeEvilAttributes(['style']);
+        $cleaned = $antiXss->xss_clean('<div style="width:e\000078 pression(alert(1))">x</div>');
+        static::assertFalse(strpos($cleaned, 'expression('));
+        static::assertFalse(strpos($cleaned, 'e\000078 pression('));
+        static::assertTrue($antiXss->isXssFound());
+
+        $antiXss = new AntiXSS();
+        $antiXss->removeEvilAttributes(['style']);
         $cleaned = $antiXss->xss_clean('<div style=color:expres\sion(1834+{toString:alert})>x</div>');
         static::assertTrue((bool) \preg_match('#^<div style=color:.*>x</div>$#', $cleaned));
         static::assertFalse(strpos($cleaned, 'expression('));
