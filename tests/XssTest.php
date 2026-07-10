@@ -2646,8 +2646,8 @@ nodeValue+outerHTML>/*click me', $str);
             foreach ($testCases as $before) {
                 $after = (new AntiXSS())->xss_clean($before);
 
-                static::assertStringNotContainsStringIgnoringCase('javascript:', $after, $before);
-                static::assertStringNotContainsStringIgnoringCase('<script', $after, $before);
+                static::assertFalse(\stripos($after, 'javascript:') !== false, $before);
+                static::assertFalse(\stripos($after, '<script') !== false, $before);
             }
         } finally {
             if ($originalBacktrackLimit !== false) {
@@ -2711,9 +2711,8 @@ nodeValue+outerHTML>/*click me', $str);
         );
 
         // malformed/unquoted value: the attribute name itself must still be neutralized
-        static::assertStringNotContainsStringIgnoringCase(
-            'onclick',
-            $this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ['<div onclick=alert(1)>x</div>', $names])
+        static::assertFalse(
+            \stripos($this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ['<div onclick=alert(1)>x</div>', $names]), 'onclick') !== false
         );
     }
 

@@ -313,9 +313,8 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
             $antiXss->xss_clean('<div aria-onfocus-hint="x">x</div>')
         );
 
-        static::assertStringContainsString(
-            '300',
-            $antiXss->xss_clean('<div data-onchange-debounce="300">x</div>'),
+        static::assertTrue(
+            \strpos($antiXss->xss_clean('<div data-onchange-debounce="300">x</div>'), '300') !== false,
             'the attribute value must not be deleted just because the compound attribute name contains an event name lookalike'
         );
     }
