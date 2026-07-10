@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection ReturnTypeCanBeDeclaredInspection */
-
 declare(strict_types=1);
 
 namespace voku\helper;
@@ -1703,7 +1701,7 @@ final class AntiXSS
 
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
-            $this->_cache_evil_attributes_regex_string .= '|' . \implode('[\w:-]*|', $this->_never_allowed_on_events_afterwards) . '[\w:-]*';
+            $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')[\w:-]*';
         }
 
         $iterations = 0;

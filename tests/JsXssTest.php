@@ -289,6 +289,37 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    /**
+     * Regression test: the hyphen/colon suffix widening added to catch handler
+     * lookalikes (e.g. "onmessageerror-foo", see
+     * testRecentlyAddedMdnEventHandlerLookalikesAreRemovedWithoutLeavingBrokenAttributes())
+     * must not also swallow unrelated attributes that merely contain an event
+     * name *after* a hyphen inside a longer, legitimate compound attribute
+     * name (e.g. "data-onchange-debounce"). Before the fix, the whole
+     * attribute including its value was deleted; it must now survive with its
+     * value intact, matching pre-4.1.43 behavior.
+     */
+    public function testHyphenatedEventNameLookalikesEmbeddedInLegitimateCompoundAttributesKeepTheirValue(): void
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame(
+            '<div data--debounce="300">x</div>',
+            $antiXss->xss_clean('<div data-onchange-debounce="300">x</div>')
+        );
+
+        static::assertSame(
+            '<div aria--hint="x">x</div>',
+            $antiXss->xss_clean('<div aria-onfocus-hint="x">x</div>')
+        );
+
+        static::assertStringContainsString(
+            '300',
+            $antiXss->xss_clean('<div data-onchange-debounce="300">x</div>'),
+            'the attribute value must not be deleted just because the compound attribute name contains an event name lookalike'
+        );
+    }
+
     public static function provideRecentlyAddedMdnEventHandlerAttackVectors(): array
     {
         $handlers = [
