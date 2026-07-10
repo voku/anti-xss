@@ -1486,6 +1486,137 @@ final class AntiXSS
     }
 
     /**
+     * ASCII-only "is alphanumeric" check for a single byte, deliberately not using
+     * "ctype_alnum()": "ext-ctype" is not declared in "composer.json" and is not
+     * guaranteed to be enabled on every PHP build.
+     *
+     * @param string $byte exactly one byte
+     *
+     * @return bool
+     */
+    private function _isAsciiAlnumByte($byte)
+    {
+        return ($byte >= 'a' && $byte <= 'z')
+            || ($byte >= 'A' && $byte <= 'Z')
+            || ($byte >= '0' && $byte <= '9');
+    }
+
+    /**
+     * Last-resort, backtracking-free removal of "<$tagName ...>" used only when the
+     * normal regex-based removal above could not run at all (e.g. because
+     * "pcre.backtrack_limit" was exhausted, which an attacker can trigger
+     * deliberately with a pathological payload to try to bypass sanitization).
+     *
+     * <p>
+     * <br />
+     * We must never fall back to returning the untouched, still-dangerous input in
+     * that case ("fail open"); instead every occurrence of the tag is destroyed
+     * with the configured replacement ("fail closed"). This only uses "strpos()" and
+     * plain byte comparisons, so it cannot itself be driven into catastrophic backtracking.
+     * </p>
+     *
+     * @param string $str
+     * @param string $tagName tag name without "<", e.g. "a", "img", "script"
+     *
+     * @return string
+     */
+    private function _failClosedRemoveTag($str, $tagName)
+    {
+        $needle = '<' . $tagName;
+        $length = \strlen($str);
+        $result = '';
+        $offset = 0;
+
+        while ($offset < $length && ($pos = \stripos($str, $needle, $offset)) !== false) {
+            $afterName = $pos + \strlen($needle);
+            $nextByte = $afterName < $length ? $str[$afterName] : '';
+
+            if ($nextByte !== '' && $this->_isAsciiAlnumByte($nextByte)) {
+                // e.g. "<audioplayer" is not "<audio"; keep scanning past the false positive
+                $result .= \substr($str, $offset, $afterName - $offset);
+                $offset = $afterName;
+
+                continue;
+            }
+
+            $result .= \substr($str, $offset, $pos - $offset);
+
+            $closePos = \strpos($str, '>', $afterName);
+            if ($closePos === false) {
+                // unterminated tag: drop the remainder rather than risk leaving it intact
+                return $result . $this->_replacement;
+            }
+
+            $result .= $this->_replacement;
+            $offset = $closePos + 1;
+        }
+
+        return $result . \substr($str, $offset);
+    }
+
+    /**
+     * Last-resort, backtracking-free removal of dangerous attributes by name, used
+     * only when the regex-based "_remove_evil_attributes()" could not run at all
+     * (see "_failClosedRemoveTag()" for why we must not fail open in that case).
+     *
+     * @param string   $str
+     * @param string[] $attrNames literal attribute names to strip, e.g. "onclick", "style"
+     *
+     * @return string
+     */
+    private function _failClosedRemoveAttributesByName($str, array $attrNames)
+    {
+        foreach ($attrNames as $attrName) {
+            if ($attrName === '' || \stripos($str, $attrName) === false) {
+                continue;
+            }
+
+            $length = \strlen($str);
+            $needleLen = \strlen($attrName);
+            $result = '';
+            $offset = 0;
+
+            while ($offset < $length && ($pos = \stripos($str, $attrName, $offset)) !== false) {
+                $result .= \substr($str, $offset, $pos - $offset);
+                $cursor = $pos + $needleLen;
+
+                while ($cursor < $length && \strpos(" \t\r\n", $str[$cursor]) !== false) {
+                    ++$cursor;
+                }
+
+                $consumedValue = false;
+                if ($cursor < $length && $str[$cursor] === '=') {
+                    ++$cursor;
+                    while ($cursor < $length && \strpos(" \t\r\n", $str[$cursor]) !== false) {
+                        ++$cursor;
+                    }
+
+                    $quote = $cursor < $length ? $str[$cursor] : '';
+                    if ($quote === '"' || $quote === "'") {
+                        $endQuote = \strpos($str, $quote, $cursor + 1);
+                        if ($endQuote !== false) {
+                            $result .= $this->_replacement;
+                            $offset = $endQuote + 1;
+                            $consumedValue = true;
+                        }
+                    }
+                }
+
+                if (!$consumedValue) {
+                    // no safely-bounded quoted value found right after the name:
+                    // still neutralize the bare name so it cannot act as an executable attribute
+                    $result .= $this->_replacement;
+                    $offset = $pos + $needleLen;
+                }
+            }
+
+            $str = $result . \substr($str, $offset);
+        }
+
+        return $str;
+    }
+
+    /**
      * Remove disallowed Javascript in links or img tags
      *
      * <p>
@@ -1528,7 +1659,7 @@ final class AntiXSS
                         $str
                     );
                 }
-                $str = (string)$strTmp;
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'a');
             }
 
             if (\stripos($str, '<img') !== false) {
@@ -1548,7 +1679,7 @@ final class AntiXSS
                     $str
                 );
                 if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
+                    $strTmp = \preg_replace_callback(
                         '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                         function ($matches) {
                             if (
@@ -1564,7 +1695,7 @@ final class AntiXSS
                         $str
                     );
                 }
-                $str = (string)$strTmp;
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'img');
             }
 
             if (\stripos($str, '<audio') !== false) {
@@ -1574,13 +1705,13 @@ final class AntiXSS
                     $str
                 );
                 if ($strTmp === null) {
-                    $strTmp = (string) \preg_replace_callback(
+                    $strTmp = \preg_replace_callback(
                         '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                         [$this, '_js_src_removal_callback'],
                         $str
                     );
                 }
-                $str = (string)$strTmp;
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'audio');
             }
 
             if (\stripos($str, '<video') !== false) {
@@ -1596,33 +1727,36 @@ final class AntiXSS
                         $str
                     );
                 }
-                $str = (string)$strTmp;
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'video');
             }
 
             if (\stripos($str, '<source') !== false) {
-                $str = (string) \preg_replace_callback(
+                $strTmp = \preg_replace_callback(
                     '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
                     [$this, '_js_src_removal_callback'],
                     $str
                 );
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'source');
             }
 
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
+                $strTmp = \preg_replace(
                     '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
                     $this->_replacement,
                     $str
                 );
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'script');
             }
 
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
-                $str = (string) \preg_replace(
+                $strTmp = \preg_replace(
                     '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
                     $this->_replacement,
                     $str
                 );
+                $str = $strTmp ?? $this->_failClosedRemoveTag($str, 'script');
             }
         } while ($original !== $str);
 
@@ -1718,6 +1852,7 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
+                $temp_count = 0;
                 $strTmp = \preg_replace(
                     '/(?:' . $this->_cache_evil_attributes_regex_string . ')(?:\s*=\s*)(?:\'(?:.*?)\'|"(?:.*?)")/ius',
                     $this->_replacement,
@@ -1726,8 +1861,20 @@ final class AntiXSS
                     $temp_count
                 );
             }
-            $str = (string)$strTmp;
-            $count += $temp_count;
+            if ($strTmp === null) {
+                // both regex attempts failed (e.g. "pcre.backtrack_limit" exhausted): never fall
+                // back to the untouched, still-dangerous input ("fail open"); destroy the
+                // dangerous attributes with a bounded, non-regex scan instead ("fail closed")
+                $strFailClosed = $this->_failClosedRemoveAttributesByName(
+                    $str,
+                    \array_merge($this->_evil_attributes_regex, $this->_never_allowed_on_events_afterwards)
+                );
+                $count += ($strFailClosed !== $str) ? 1 : 0;
+                $str = $strFailClosed;
+            } else {
+                $str = $strTmp;
+                $count += $temp_count;
+            }
 
             $strTmp = \preg_replace(
                 '/(.*?)(<[^>]+)(?<!\p{L})(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius',
@@ -1737,6 +1884,7 @@ final class AntiXSS
                 $temp_count
             );
             if ($strTmp === null) {
+                $temp_count = 0;
                 $strTmp = \preg_replace(
                     '/(?<![\p{L}=])(?:' . $this->_cache_evil_attributes_regex_string . ')\s*=\s*(?:[^\s>]*)/ius',
                     $this->_replacement,
@@ -1745,8 +1893,17 @@ final class AntiXSS
                     $temp_count
                 );
             }
-            $str = (string)$strTmp;
-            $count += $temp_count;
+            if ($strTmp === null) {
+                $strFailClosed = $this->_failClosedRemoveAttributesByName(
+                    $str,
+                    \array_merge($this->_evil_attributes_regex, $this->_never_allowed_on_events_afterwards)
+                );
+                $count += ($strFailClosed !== $str) ? 1 : 0;
+                $str = $strFailClosed;
+            } else {
+                $str = $strTmp;
+                $count += $temp_count;
+            }
         } while ($count);
 
         return (string) $str;

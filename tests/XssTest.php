@@ -2617,6 +2617,18 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertTrue($antiXss->isXssFound());
     }
 
+    /**
+     * Under an artificially tiny "pcre.backtrack_limit", "preg_replace()" /
+     * "preg_replace_callback()" can return null instead of a sanitized result
+     * (this simulates what a deliberate ReDoS-style payload could also trigger
+     * against the real default limit). The exact byte-for-byte fallback output
+     * depends on the PCRE build (PCRE1 vs. PCRE2, JIT on/off, ...), so this
+     * asserts the security property that actually matters -- the dangerous
+     * "javascript:" scheme must never survive in the output -- rather than one
+     * specific skeleton string, which would make the test itself PCRE-version
+     * fragile. See the "fail closed, never fail open" fallbacks in
+     * "_failClosedRemoveTag()".
+     */
     public function testJavascriptRemovalFallsBackUnderTightBacktrackLimit()
     {
         $originalBacktrackLimit = \ini_get('pcre.backtrack_limit');
@@ -2625,20 +2637,84 @@ nodeValue+outerHTML>/*click me', $str);
             \ini_set('pcre.backtrack_limit', '6');
 
             $testCases = [
-                '<a href="javascript:alert(1)" title="x">x</a>' => '<a >x</a>',
-                '<img src="javascript:alert(1)">' => '<img >',
-                '<audio src="javascript:alert(1)"></audio>' => '&lt;audio &gt;&lt;/audio&gt;',
-                '<video src="javascript:alert(1)"></video>' => '&lt;video &gt;&lt;/video&gt;',
+                '<a href="javascript:alert(1)" title="x">x</a>',
+                '<img src="javascript:alert(1)">',
+                '<audio src="javascript:alert(1)"></audio>',
+                '<video src="javascript:alert(1)"></video>',
             ];
 
-            foreach ($testCases as $before => $after) {
-                static::assertSame($after, (new AntiXSS())->xss_clean($before), $before);
+            foreach ($testCases as $before) {
+                $after = (new AntiXSS())->xss_clean($before);
+
+                static::assertStringNotContainsStringIgnoringCase('javascript:', $after, $before);
+                static::assertStringNotContainsStringIgnoringCase('<script', $after, $before);
             }
         } finally {
             if ($originalBacktrackLimit !== false) {
                 \ini_set('pcre.backtrack_limit', (string) $originalBacktrackLimit);
             }
         }
+    }
+
+    /**
+     * Direct unit coverage of the "fail closed, never fail open" helpers used when
+     * the regex-based removal in "_remove_disallowed_javascript()" /
+     * "_remove_evil_attributes()" cannot run at all (e.g. "pcre.backtrack_limit"
+     * exhausted). They must never return the untouched, still-dangerous input.
+     */
+    public function testFailClosedTagRemovalNeverLeavesRawPayload()
+    {
+        $antiXss = new AntiXSS();
+
+        static::assertSame(
+            'x</a>',
+            $this->invokeMethod($antiXss, '_failClosedRemoveTag', ['<a href="javascript:alert(1)" title="x">x</a>', 'a'])
+        );
+        static::assertSame(
+            '',
+            $this->invokeMethod($antiXss, '_failClosedRemoveTag', ['<img src="javascript:alert(1)">', 'img'])
+        );
+        static::assertSame(
+            'prefix alert(1)</script> suffix',
+            $this->invokeMethod($antiXss, '_failClosedRemoveTag', ['prefix <script>alert(1)</script> suffix', 'script'])
+        );
+
+        // must not false-positive on an unrelated tag that merely starts with the same name
+        static::assertSame(
+            '<audioplayer src="ok">keep</audioplayer>',
+            $this->invokeMethod($antiXss, '_failClosedRemoveTag', ['<audioplayer src="ok">keep</audioplayer>', 'audio'])
+        );
+
+        // must not hang/crash on an unterminated tag
+        static::assertSame(
+            'no closing bracket',
+            $this->invokeMethod($antiXss, '_failClosedRemoveTag', ['<a href="ok">no closing bracket', 'a'])
+        );
+    }
+
+    public function testFailClosedAttributeRemovalNeverLeavesRawPayload()
+    {
+        $antiXss = new AntiXSS();
+        $names = ['onclick', 'onload', 'style'];
+
+        static::assertSame(
+            '<div >x</div>',
+            $this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ['<div onclick="alert(1)">x</div>', $names])
+        );
+        static::assertSame(
+            '<div >x</div>',
+            $this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ["<div onclick='alert(1)'>x</div>", $names])
+        );
+        static::assertSame(
+            '<div >x</div>',
+            $this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ['<div style="background:url(javascript:alert(1))">x</div>', $names])
+        );
+
+        // malformed/unquoted value: the attribute name itself must still be neutralized
+        static::assertStringNotContainsStringIgnoringCase(
+            'onclick',
+            $this->invokeMethod($antiXss, '_failClosedRemoveAttributesByName', ['<div onclick=alert(1)>x</div>', $names])
+        );
     }
 
     public function testJsRemovalCallbackHandlesEmptyMatchDefensively()

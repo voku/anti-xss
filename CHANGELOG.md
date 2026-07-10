@@ -8,6 +8,7 @@
 - harden CSS "expression(...)" detection, incl. escaped and uppercase variants, and fix a regex backtracking risk
 - add a hard cap on internal sanitization retry-loops (throws "RuntimeException" instead of looping forever if a loop can't converge)
 - preserve custom / removed "_never_allowed_regex" entries across "setReplacement()" calls
+- fix: several tag/attribute-stripping steps silently wiped the whole string to "" when "preg_replace()"/"preg_replace_callback()" hit "pcre.backtrack_limit" (or its fallback also failed); they now fail closed via a bounded, non-regex removal of the specific dangerous tag/attribute instead of discarding unrelated content or falling back to the still-dangerous raw input
 - add regression test for issue #201 (template + slot "onslotchange" XSS)
 - add mutation testing (Infection) to CI with a diff MSI gate
 
