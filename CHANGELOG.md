@@ -2,6 +2,8 @@
 
 ### master (unreleased)
 
+### 4.1.44 (2026-07-10)
+
 - add more modern DOM event handlers to the blacklist (e.g. "onAppInstalled", "onBeforeInstallPrompt", "onFormData", "onGamepadConnected/Disconnected", "onMessageError", "onScrollEnd", "onSecurityPolicyViolation", "onSlotChange", "onVRDisplay*", ...)
 - harden detection of hyphen-/colon-suffixed event-handler lookalikes (e.g. "onmessageerror-foo") so the whole attribute is removed instead of leaving a broken attribute with leftover payload text
 - fix regression: the lookalike-hardening above could also strip the value of unrelated, legitimate compound attributes that merely contain an event name after a hyphen (e.g. "data-onchange-debounce="300""); only real handler-lookalikes are removed now
