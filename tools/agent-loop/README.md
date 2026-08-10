@@ -18,4 +18,4 @@ Run `agent-loop` from the repository root so its workflow paths are rooted in th
 tools/agent-loop/vendor/bin/agent-loop verify
 ```
 
-The first real task is `ANTI-XSS-1`.
+The first real task is `ANTIXSS-1`.
