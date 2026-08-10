@@ -3,6 +3,10 @@
 /build export-ignore
 /tests export-ignore
 /.agent-loop export-ignore
+/.agent-map export-ignore
+/.codex export-ignore
+/.claude export-ignore
+/.agents export-ignore
 /tools/agent-loop export-ignore
 /todo export-ignore
 /tasks export-ignore
