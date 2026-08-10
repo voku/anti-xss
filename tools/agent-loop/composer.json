@@ -1,0 +1,13 @@
+{
+  "name": "voku/anti-xss-agent-tools",
+  "description": "Repository-local development tooling for voku/anti-xss.",
+  "type": "project",
+  "license": "MIT",
+  "require-dev": {
+    "voku/agent-loop": "^0.13"
+  },
+  "config": {
+    "allow-plugins": false,
+    "sort-packages": true
+  }
+}
