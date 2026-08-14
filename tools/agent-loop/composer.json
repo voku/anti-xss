@@ -4,7 +4,7 @@
   "type": "project",
   "license": "MIT",
   "require-dev": {
-    "voku/agent-loop": "^0.15"
+    "voku/agent-loop": "^0.16"
   },
   "config": {
     "allow-plugins": false,
