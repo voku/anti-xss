@@ -1,6 +1,6 @@
 # Agent Loop development tooling
 
-`voku/anti-xss` supports PHP 7.0+, while `voku/agent-loop` requires PHP 8.3+.
+`voku/anti-xss` supports PHP 7.1+, while `voku/agent-loop` requires PHP 8.3+.
 Keeping the agent tooling in this isolated Composer project prevents the library's
 normal development dependency graph and legacy PHP CI matrix from being raised to
 PHP 8.3.
