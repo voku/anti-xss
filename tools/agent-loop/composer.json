@@ -4,10 +4,13 @@
   "type": "project",
   "license": "MIT",
   "require-dev": {
-    "voku/agent-loop": "^0.13"
+    "voku/agent-loop": "^0.15"
   },
   "config": {
     "allow-plugins": false,
+    "platform": {
+      "php": "8.3.0"
+    },
     "sort-packages": true
   }
 }

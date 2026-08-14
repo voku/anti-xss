@@ -1,13 +1,13 @@
 # ANTIXSS-1: Add modern XSS payload regressions
 
 - **Ticket:** ANTIXSS-1
-- **Lane:** READY
-- **Status:** Selected
+- **Lane:** VERIFY
+- **Status:** Verified
 - **Domain:** Security
 - **Summary:** Add focused regression coverage derived from PayloadsAllTheThings XSS vectors and fix only demonstrated sanitizer gaps.
-- **Next:** Run the new regression test and inspect each failure before changing AntiXSS.
+- **Next:** Merge PR #204 after its final checks pass.
 - **Validation:** php vendor/bin/phpunit -c phpunit.xml tests/PayloadsAllTheThingsTest.php
-- **Priority:** 1
+- **Priority:** 0
 - **Format version:** 1
 
 ## Agent Task Brief

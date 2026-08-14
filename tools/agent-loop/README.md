@@ -11,11 +11,12 @@ Install the repository-local agent tooling with PHP 8.3+:
 composer install --working-dir=tools/agent-loop
 ```
 
-Run `agent-loop` from the repository root so its workflow paths are rooted in the
-`anti-xss` checkout:
+Run `agent-loop` from the repository root so its project root remains the
+`anti-xss` checkout while workflow state stays below `.agent-loop/`:
 
 ```bash
+tools/agent-loop/vendor/bin/agent-loop init paths
 tools/agent-loop/vendor/bin/agent-loop verify
 ```
 
-The first real task is `ANTIXSS-1`.
+The first governed task is `ANTIXSS-1`.
