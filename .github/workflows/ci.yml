@@ -120,3 +120,29 @@ jobs:
           name: logs_composer-${{ matrix.composer }}_php-${{ matrix.php }}
           path: |
             build/logs
+
+  agent-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          coverage: none
+          tools: composer
+
+      - name: Install agent-loop tooling
+        run: composer install --working-dir=tools/agent-loop --no-interaction --prefer-dist
+
+      - name: Check agent-loop platform requirements
+        run: composer check-platform-reqs --working-dir=tools/agent-loop
+
+      - name: Inspect agent-loop paths
+        run: tools/agent-loop/vendor/bin/agent-loop init paths
+
+      - name: Verify imported agent-loop task
+        run: tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1
