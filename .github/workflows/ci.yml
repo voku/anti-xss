@@ -140,6 +140,11 @@ jobs:
       - name: Install project dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Inspect focused PHPUnit suite
+        run: |
+          php vendor/bin/phpunit -c phpunit.xml --list-suites
+          php vendor/bin/phpunit -c phpunit.xml --testsuite=PayloadsAllTheThings --list-tests
+
       - name: Install agent-loop tooling
         run: composer install --working-dir=tools/agent-loop --no-interaction --prefer-dist
 
