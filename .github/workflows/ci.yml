@@ -147,7 +147,7 @@ jobs:
       - name: Verify imported agent-loop task
         run: tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1
 
-      - name: Run governed PR dogfood through review
+      - name: Run governed PR dogfood to close
         run: |
           tools/agent-loop/vendor/bin/agent-loop board card create ANTIXSS-205 \
             --title="Dogfood PR #205 with agent-loop 0.16.3" \
@@ -161,6 +161,7 @@ jobs:
           EOF
 
           tools/agent-loop/vendor/bin/agent-loop map build --paths=src,tests,tools
+          tools/agent-loop/vendor/bin/agent-loop map search-index build
 
           tools/agent-loop/vendor/bin/agent-loop workflow plan ANTIXSS-205 \
             --by lars \
@@ -195,4 +196,21 @@ jobs:
             --by lars
 
           tools/agent-loop/vendor/bin/agent-loop review blindspots ANTIXSS-205
-          tools/agent-loop/vendor/bin/agent-loop workflow status ANTIXSS-205
+          cat .agent-loop/recall/ANTIXSS-205/reviews/ANTIXSS-205.blindspots.md
+
+          tools/agent-loop/vendor/bin/agent-loop session checkpoint ANTIXSS-205 \
+            --title "Review" \
+            --body "review blindspots ANTIXSS-205 was checked; the structured-validation false warning is tracked in voku/agent-recall-compiler#66."
+
+          tools/agent-loop/vendor/bin/agent-loop review blindspots ANTIXSS-205
+          cat .agent-loop/recall/ANTIXSS-205/reviews/ANTIXSS-205.blindspots.md
+
+          tools/agent-loop/vendor/bin/agent-loop workflow learn ANTIXSS-205 \
+            --status follow_up_required \
+            --follow-up voku/agent-recall-compiler#66 \
+            --by lars \
+            --reason "Dogfood exposed that blindspot review ignores task-bound structured validation records and falls back to textual validation markers."
+
+          tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-205
+          tools/agent-loop/vendor/bin/agent-loop workflow close ANTIXSS-205 --status done
+          tools/agent-loop/vendor/bin/agent-loop workflow status ANTIXSS-205 --expect complete
