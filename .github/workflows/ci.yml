@@ -178,9 +178,11 @@ jobs:
             --by lars \
             --file tools/agent-loop/composer.json \
             --file .github/workflows/ci.yml \
+            --file phpunit.xml \
+            --file .agent-loop/todo/cards/ANTIXSS-1.md \
             --goal "Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
-            --validation "php vendor/bin/phpunit -c phpunit.xml --test-suffix=PayloadsAllTheThingsTest.php tests" \
+            --validation "php vendor/bin/phpunit -c phpunit.xml --testsuite=PayloadsAllTheThings" \
             --validation "php vendor/bin/phpunit -c phpunit.xml" \
             --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
             --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
@@ -191,10 +193,10 @@ jobs:
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
           tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
 
-          php vendor/bin/phpunit -c phpunit.xml --test-suffix=PayloadsAllTheThingsTest.php tests
+          php vendor/bin/phpunit -c phpunit.xml --testsuite=PayloadsAllTheThings
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
             --contract-revision 1 \
-            --command "php vendor/bin/phpunit -c phpunit.xml --test-suffix=PayloadsAllTheThingsTest.php tests" \
+            --command "php vendor/bin/phpunit -c phpunit.xml --testsuite=PayloadsAllTheThings" \
             --status passed \
             --exit-code 0 \
             --duration-ms 0 \
