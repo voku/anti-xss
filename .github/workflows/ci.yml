@@ -127,6 +127,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -134,6 +136,9 @@ jobs:
           php-version: 8.3
           coverage: none
           tools: composer
+
+      - name: Install project dependencies
+        run: composer install --no-interaction --prefer-dist
 
       - name: Install agent-loop tooling
         run: composer install --working-dir=tools/agent-loop --no-interaction --prefer-dist
@@ -175,13 +180,34 @@ jobs:
             --file .github/workflows/ci.yml \
             --goal "Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
+            --validation "php vendor/bin/phpunit -c phpunit.xml tests/PayloadsAllTheThingsTest.php" \
+            --validation "php vendor/bin/phpunit -c phpunit.xml" \
             --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
             --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
+            --acceptance "The focused payload regression and full PHPUnit suite both pass." \
             --acceptance "The isolated tool project resolves agent-loop 0.16.3 and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
           tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
+
+          php vendor/bin/phpunit -c phpunit.xml tests/PayloadsAllTheThingsTest.php
+          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
+            --contract-revision 1 \
+            --command "php vendor/bin/phpunit -c phpunit.xml tests/PayloadsAllTheThingsTest.php" \
+            --status passed \
+            --exit-code 0 \
+            --duration-ms 0 \
+            --by lars
+
+          php vendor/bin/phpunit -c phpunit.xml
+          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
+            --contract-revision 1 \
+            --command "php vendor/bin/phpunit -c phpunit.xml" \
+            --status passed \
+            --exit-code 0 \
+            --duration-ms 0 \
+            --by lars
 
           composer check-platform-reqs --working-dir=tools/agent-loop
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
