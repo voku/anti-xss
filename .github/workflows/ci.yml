@@ -191,6 +191,9 @@ jobs:
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
           tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
 
+          php vendor/bin/phpunit -c phpunit.xml --list-tests | tee /tmp/phpunit-tests.txt
+          grep -Ei 'PayloadsAllTheThings|RepresentativePayloads' /tmp/phpunit-tests.txt || true
+
           php vendor/bin/phpunit -c phpunit.xml --filter testRepresentativePayloadsAreNeutralized
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
             --contract-revision 1 \
