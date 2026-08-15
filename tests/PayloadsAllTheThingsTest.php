@@ -10,6 +10,9 @@ use voku\helper\AntiXSS;
  */
 final class PayloadsAllTheThingsTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @group payloads-all-the-things
+     */
     public function testRepresentativePayloadsAreNeutralized()
     {
         foreach ($this->payloads() as $name => $payload) {
