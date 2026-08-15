@@ -1,13 +1,7 @@
 <phpunit bootstrap="tests/bootstrap.php">
-    <testsuites>
-        <testsuite name="Anti-XSS Test Suite">
-            <directory>tests</directory>
-            <exclude>tests/PayloadsAllTheThingsTest.php</exclude>
-        </testsuite>
-        <testsuite name="PayloadsAllTheThings">
-            <file>tests/PayloadsAllTheThingsTest.php</file>
-        </testsuite>
-    </testsuites>
+    <testsuite name="Anti-XSS Test Suite">
+        <directory>tests</directory>
+    </testsuite>
     <source>
         <include>
             <directory suffix=".php">./src/</directory>
