@@ -5,7 +5,7 @@
 - **Status:** Verified
 - **Domain:** Security
 - **Summary:** Add focused regression coverage derived from PayloadsAllTheThings XSS vectors and fix only demonstrated sanitizer gaps.
-- **Validation:** php vendor/bin/phpunit -c phpunit.xml --filter testRepresentativePayloadsAreNeutralized && php vendor/bin/phpunit -c phpunit.xml
+- **Validation:** php vendor/bin/phpunit -c phpunit.xml --group payloads-all-the-things && php vendor/bin/phpunit -c phpunit.xml
 - **Priority:** 0
 - **Format version:** 1
 
