@@ -166,12 +166,12 @@ jobs:
             --by lars \
             --file tools/agent-loop/composer.json \
             --file .github/workflows/ci.yml \
-            --goal="Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
-            --non-goal="Do not change anti-xss runtime behavior." \
-            --validation="composer check-platform-reqs --working-dir=tools/agent-loop" \
-            --validation="tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
-            --acceptance="The isolated tool project resolves agent-loop 0.16.3 and satisfies its platform requirements." \
-            --acceptance="The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
+            --goal "Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
+            --non-goal "Do not change anti-xss runtime behavior." \
+            --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
+            --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
+            --acceptance "The isolated tool project resolves agent-loop 0.16.3 and satisfies its platform requirements." \
+            --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
           tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
@@ -179,20 +179,20 @@ jobs:
           composer check-platform-reqs --working-dir=tools/agent-loop
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
             --contract-revision 1 \
-            --command="composer check-platform-reqs --working-dir=tools/agent-loop" \
-            --status=passed \
-            --exit-code=0 \
-            --duration-ms=0 \
-            --by=lars
+            --command "composer check-platform-reqs --working-dir=tools/agent-loop" \
+            --status passed \
+            --exit-code 0 \
+            --duration-ms 0 \
+            --by lars
 
           tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
             --contract-revision 1 \
-            --command="tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
-            --status=passed \
-            --exit-code=0 \
-            --duration-ms=0 \
-            --by=lars
+            --command "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
+            --status passed \
+            --exit-code 0 \
+            --duration-ms 0 \
+            --by lars
 
           tools/agent-loop/vendor/bin/agent-loop review blindspots ANTIXSS-205
           tools/agent-loop/vendor/bin/agent-loop workflow status ANTIXSS-205
