@@ -180,7 +180,7 @@ jobs:
             --file .github/workflows/ci.yml \
             --goal "Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
-            --validation "php vendor/bin/phpunit -c phpunit.xml --filter PayloadsAllTheThingsTest" \
+            --validation "php vendor/bin/phpunit -c phpunit.xml --filter testRepresentativePayloadsAreNeutralized" \
             --validation "php vendor/bin/phpunit -c phpunit.xml" \
             --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
             --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
@@ -191,10 +191,10 @@ jobs:
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
           tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
 
-          php vendor/bin/phpunit -c phpunit.xml --filter PayloadsAllTheThingsTest
+          php vendor/bin/phpunit -c phpunit.xml --filter testRepresentativePayloadsAreNeutralized
           tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
             --contract-revision 1 \
-            --command "php vendor/bin/phpunit -c phpunit.xml --filter PayloadsAllTheThingsTest" \
+            --command "php vendor/bin/phpunit -c phpunit.xml --filter testRepresentativePayloadsAreNeutralized" \
             --status passed \
             --exit-code 0 \
             --duration-ms 0 \
