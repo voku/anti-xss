@@ -155,18 +155,13 @@ jobs:
       - name: Run governed PR dogfood to close
         run: |
           tools/agent-loop/vendor/bin/agent-loop board card create ANTIXSS-205 \
-            --title="Dogfood PR #205 with agent-loop 0.16.3" \
+            --title="Dogfood PR #205 with agent-loop 0.16.x" \
             --lane=READY \
-            --status=Selected
-
-          cat >> .agent-loop/todo/cards/ANTIXSS-205.md <<'EOF'
-
-          ## Agent Task Brief
-          Validate the repository-local agent-loop upgrade and the imported ANTIXSS-1 workflow state without changing anti-xss runtime behavior.
-          EOF
+            --status=Selected \
+            --brief="Validate the repository-local agent-loop upgrade and the imported ANTIXSS-1 workflow state without changing anti-xss runtime behavior."
 
           cat > .agent-loop/tasks/ANTIXSS-205.md <<'EOF'
-          # ANTIXSS-205: Dogfood PR #205 with agent-loop 0.16.3
+          # ANTIXSS-205: Dogfood PR #205 with agent-loop 0.16.x
 
           Validate the repository-local agent-loop upgrade and the imported ANTIXSS-1 workflow state without changing anti-xss runtime behavior.
           EOF
@@ -179,14 +174,14 @@ jobs:
             --file tools/agent-loop/composer.json \
             --file .github/workflows/ci.yml \
             --file .agent-loop/todo/cards/ANTIXSS-1.md \
-            --goal "Validate PR #205 with the released agent-loop 0.16.3 consumer workflow." \
+            --goal "Validate PR #205 with the released agent-loop 0.16.x consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
             --validation "php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php" \
             --validation "php vendor/bin/phpunit -c phpunit.xml --no-coverage" \
             --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
             --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
             --acceptance "The focused payload regression and full PHPUnit suite both pass." \
-            --acceptance "The isolated tool project resolves agent-loop 0.16.3 and satisfies its platform requirements." \
+            --acceptance "The isolated tool project resolves an allowed agent-loop 0.16.x release and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
           tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
