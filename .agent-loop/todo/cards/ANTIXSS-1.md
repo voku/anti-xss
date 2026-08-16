@@ -5,8 +5,7 @@
 - **Status:** Verified
 - **Domain:** Security
 - **Summary:** Add focused regression coverage derived from PayloadsAllTheThings XSS vectors and fix only demonstrated sanitizer gaps.
-- **Next:** Merge PR #204 after its final checks pass.
-- **Validation:** php vendor/bin/phpunit -c phpunit.xml tests/PayloadsAllTheThingsTest.php
+- **Validation:** php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php && php vendor/bin/phpunit -c phpunit.xml --no-coverage
 - **Priority:** 0
 - **Format version:** 1
 

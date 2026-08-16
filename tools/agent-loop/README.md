@@ -9,6 +9,7 @@ Install the repository-local agent tooling with PHP 8.3+:
 
 ```bash
 composer install --working-dir=tools/agent-loop
+composer check-platform-reqs --working-dir=tools/agent-loop
 ```
 
 Run `agent-loop` from the repository root so its project root remains the
@@ -19,4 +20,5 @@ tools/agent-loop/vendor/bin/agent-loop init paths
 tools/agent-loop/vendor/bin/agent-loop verify
 ```
 
-The first governed task is `ANTIXSS-1`.
+The first tracked board task is `ANTIXSS-1`; this imported tooling state does
+not claim a completed governed Run.
