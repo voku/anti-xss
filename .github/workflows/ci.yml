@@ -174,6 +174,8 @@ jobs:
             --file tools/agent-loop/composer.json \
             --file .github/workflows/ci.yml \
             --file .agent-loop/todo/cards/ANTIXSS-1.md \
+            --scope tools/agent-loop/composer.json \
+            --scope .github/workflows/ci.yml \
             --goal "Validate PR #205 with the released agent-loop 0.16.x consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
             --validation "php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php" \
