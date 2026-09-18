@@ -157,93 +157,82 @@ jobs:
 
       - name: Run governed PR dogfood to close
         run: |
-          tools/agent-loop/vendor/bin/agent-loop board card create ANTIXSS-205 \
-            --title="Dogfood PR #205 with agent-loop 0.16.x" \
-            --lane=READY \
-            --status=Selected \
-            --brief="Validate the repository-local agent-loop upgrade and the imported ANTIXSS-1 workflow state without changing anti-xss runtime behavior."
-
-          cat > .agent-loop/tasks/ANTIXSS-205.md <<'EOF'
-          # ANTIXSS-205: Dogfood PR #205 with agent-loop 0.16.x
+          cat > .agent-loop/tasks/ANTIXSS-209.md <<'EOF'
+          # ANTIXSS-209: Dogfood the agent-loop 0.20.x consumer workflow
 
           Validate the repository-local agent-loop upgrade and the imported ANTIXSS-1 workflow state without changing anti-xss runtime behavior.
           EOF
 
-          tools/agent-loop/vendor/bin/agent-loop map build --paths=src,tests,tools
-          tools/agent-loop/vendor/bin/agent-loop map search-index build
-
-          tools/agent-loop/vendor/bin/agent-loop workflow plan ANTIXSS-205 \
-            --by lars \
+          tools/agent-loop/vendor/bin/agent-loop workflow plan ANTIXSS-209 \
+            --by ci \
             --file tools/agent-loop/composer.json \
             --file .github/workflows/ci.yml \
             --file .agent-loop/todo/cards/ANTIXSS-1.md \
             --scope tools/agent-loop/composer.json \
             --scope .github/workflows/ci.yml \
-            --goal "Validate PR #205 with the released agent-loop 0.16.x consumer workflow." \
+            --goal "Validate PR #209 with the released agent-loop 0.20.x consumer workflow." \
             --non-goal "Do not change anti-xss runtime behavior." \
             --validation "php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php" \
             --validation "php vendor/bin/phpunit -c phpunit.xml --no-coverage" \
             --validation "composer check-platform-reqs --working-dir=tools/agent-loop" \
             --validation "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
             --acceptance "The focused payload regression and full PHPUnit suite both pass." \
-            --acceptance "The isolated tool project resolves an allowed agent-loop 0.16.x release and satisfies its platform requirements." \
+            --acceptance "The isolated tool project resolves an allowed agent-loop 0.20.x release and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
-          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-205 --by lars
-          tools/agent-loop/vendor/bin/agent-loop workflow context ANTIXSS-205 --max-lines 120 --max-bytes 12000
+          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --by ci
+          tools/agent-loop/vendor/bin/agent-loop enter ANTIXSS-209 --format=json > /tmp/agent-loop-enter.json
 
-          php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php
-          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
-            --contract-revision 1 \
-            --command "php vendor/bin/phpunit -c phpunit.xml --no-coverage tests/PayloadsAllTheThingsTest.php" \
-            --status passed \
-            --exit-code 0 \
-            --duration-ms 0 \
-            --by lars
+          php -r '
+          $payload = json_decode((string) file_get_contents("/tmp/agent-loop-enter.json"), true, 512, JSON_THROW_ON_ERROR);
+          if (($payload["mutation_ready"] ?? false) !== true) {
+              fwrite(STDERR, "agent-loop enter did not make ANTIXSS-209 mutation-ready.\n");
+              exit(1);
+          }
+          '
 
-          php vendor/bin/phpunit -c phpunit.xml --no-coverage
-          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
-            --contract-revision 1 \
-            --command "php vendor/bin/phpunit -c phpunit.xml --no-coverage" \
-            --status passed \
-            --exit-code 0 \
-            --duration-ms 0 \
-            --by lars
+          set +e
+          tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json > /tmp/agent-loop-finish.json
+          finish_exit=$?
+          set -e
 
-          composer check-platform-reqs --working-dir=tools/agent-loop
-          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
-            --contract-revision 1 \
-            --command "composer check-platform-reqs --working-dir=tools/agent-loop" \
-            --status passed \
-            --exit-code 0 \
-            --duration-ms 0 \
-            --by lars
+          if [[ "$finish_exit" -ne 0 && "$finish_exit" -ne 1 ]]; then
+            cat /tmp/agent-loop-finish.json
+            exit "$finish_exit"
+          fi
 
-          tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1
-          tools/agent-loop/vendor/bin/agent-loop session validation record ANTIXSS-205 \
-            --contract-revision 1 \
-            --command "tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-1" \
-            --status passed \
-            --exit-code 0 \
-            --duration-ms 0 \
-            --by lars
+          if php -r '
+          $payload = json_decode((string) file_get_contents("/tmp/agent-loop-finish.json"), true, 512, JSON_THROW_ON_ERROR);
+          exit(($payload["complete"] ?? false) === true ? 0 : 1);
+          '; then
+            cp /tmp/agent-loop-finish.json /tmp/agent-loop-complete.json
+          else
+            review_sha="$(
+              php -r '
+              $payload = json_decode((string) file_get_contents("/tmp/agent-loop-finish.json"), true, 512, JSON_THROW_ON_ERROR);
+              $sha = $payload["review_presentation"]["review_sha256"] ?? null;
+              if (!is_string($sha) || $sha === "") {
+                  fwrite(STDERR, "agent-loop finish did not expose a current review SHA.\n");
+                  exit(1);
+              }
+              echo $sha;
+              '
+            )"
 
-          tools/agent-loop/vendor/bin/agent-loop review blindspots ANTIXSS-205
-          cat .agent-loop/recall/ANTIXSS-205/reviews/ANTIXSS-205.blindspots.md
+            tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json \
+              --reviewed-report-sha256 "$review_sha" \
+              --learning no_durable_learning \
+              --learning-reason "Dependency-upgrade dogfood produced no reusable anti-xss project guidance." \
+              --by ci \
+              > /tmp/agent-loop-complete.json
+          fi
 
-          tools/agent-loop/vendor/bin/agent-loop session checkpoint ANTIXSS-205 \
-            --title "Review" \
-            --body "review blindspots ANTIXSS-205 was checked; the remaining security-sensitive-context warning is expected for this XSS-focused repository."
+          php -r '
+          $payload = json_decode((string) file_get_contents("/tmp/agent-loop-complete.json"), true, 512, JSON_THROW_ON_ERROR);
+          if (($payload["complete"] ?? false) !== true || ($payload["next_action"] ?? null) !== "none") {
+              fwrite(STDERR, "ANTIXSS-209 did not complete through the agent-loop finish boundary.\n");
+              exit(1);
+          }
+          '
 
-          tools/agent-loop/vendor/bin/agent-loop review blindspots ANTIXSS-205
-          cat .agent-loop/recall/ANTIXSS-205/reviews/ANTIXSS-205.blindspots.md
-
-          tools/agent-loop/vendor/bin/agent-loop workflow learn ANTIXSS-205 \
-            --status follow_up_required \
-            --follow-up voku/agent-loop#131 \
-            --by lars \
-            --reason "Dogfood showed that the 0.16.3 canonical quick-start approves and compiles Recall before the ranked map search index is built."
-
-          tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-205
-          tools/agent-loop/vendor/bin/agent-loop workflow close ANTIXSS-205 --status done
-          tools/agent-loop/vendor/bin/agent-loop workflow status ANTIXSS-205 --expect complete
+          tools/agent-loop/vendor/bin/agent-loop verify --task-id=ANTIXSS-209
