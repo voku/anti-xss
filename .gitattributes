@@ -9,6 +9,7 @@
 /.styleci.yml export-ignore
 /.gitattributes export-ignore
 /.github export-ignore
+/.oss-scanner export-ignore
 /.gitignore export-ignore
 /.travis.yml export-ignore
 /.whitesource export-ignore
