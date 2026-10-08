@@ -35,3 +35,8 @@ trusted application developer and are NOT attacker controlled.
 Please include a minimal PHP reproducer (input string -> output) and the browser
 context in which it executes. Minimal patches plus a regression test in
 tests/XssTest.php are preferred. Deduplicate by root-cause regex/code path.
+
+## Running the tests
+Use `vendor/bin/phpunit -c phpunit9.xml` (233 tests). Plain `vendor/bin/phpunit` uses
+`phpunit.xml`, which executes no tests with the PHPUnit 12 that the Dockerfile installs.
+Add a regression test to `tests/XssTest.php` for every fix.
