@@ -91,7 +91,7 @@ final class LaravelSecurityTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 '<iframe/src="data:text/html,<iframe%09onload=confirm(1);>">',
-                '&lt;iframe/src="data:text/html,<iframe	[removed]>">',
+                '&lt;iframe/src="data:text/html,&lt;iframe	[removed]&gt;">',
             ],
             [
                 '<math><a/xlink:href=javascript:prompt(1)>X',
