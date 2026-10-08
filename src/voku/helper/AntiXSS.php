@@ -2105,7 +2105,7 @@ final class AntiXSS
             (
                 \strpos($fullMatch, '=') === false
                 &&
-                \strpos($fullMatch, ' ') === false
+                \preg_match('/\s/', $fullMatch) !== 1
                 &&
                 \strpos($fullMatch, ':') === false
                 &&

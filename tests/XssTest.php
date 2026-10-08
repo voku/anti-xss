@@ -31,6 +31,29 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    public function testEvilTagFollowedByNonSpaceWhitespaceIsEncoded()
+    {
+        $tags = ['style', 'svg', 'math', 'frameset', 'STYLE'];
+        $whitespaces = ["\t", "\n", "\r", "\f", "\t\t", " \t"];
+
+        foreach ($tags as $tag) {
+            foreach ($whitespaces as $ws) {
+                $input = '<' . $tag . $ws . '>body{background:url(//evil.example/x)}';
+
+                $xss = new AntiXSS();
+                $result = $xss->xss_clean($input);
+
+                static::assertStringStartsWith('&lt;' . $tag, $result, \json_encode($input));
+                static::assertTrue($xss->isXssFound(), \json_encode($input));
+            }
+        }
+
+        // plain text must stay untouched
+        $xss = new AntiXSS();
+        static::assertSame("a < b\tand c", $xss->xss_clean("a < b\tand c"));
+        static::assertFalse($xss->isXssFound());
+    }
+
     public function testNoXss()
     {
         // init
