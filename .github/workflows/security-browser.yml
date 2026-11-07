@@ -46,7 +46,7 @@ jobs:
           render_browser_dom() {
             local input_file="$1"
             local output_file="$2"
-            "$browser" \
+            if ! "$browser" \
               --headless=new \
               --no-sandbox \
               --disable-gpu \
@@ -54,7 +54,11 @@ jobs:
               --disable-background-networking \
               --virtual-time-budget=2000 \
               --dump-dom "file://$input_file" \
-              > "$output_file" 2> /dev/null
+              > "$output_file" 2> "$RUNNER_TEMP/chrome-stderr.log"; then
+              echo "::error::Headless Chrome failed while rendering $input_file."
+              tail -n 40 "$RUNNER_TEMP/chrome-stderr.log"
+              return 1
+            fi
           }
 
           php tests/browser/ghsa-28pp-7fjp-8v32.php \
