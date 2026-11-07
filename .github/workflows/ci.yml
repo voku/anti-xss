@@ -207,13 +207,21 @@ jobs:
           '; then
             cp /tmp/agent-loop-finish.json /tmp/agent-loop-complete.json
           else
-            cat /tmp/agent-loop-finish.json
             review_sha="$(
               php -r '
               $payload = json_decode((string) file_get_contents("/tmp/agent-loop-finish.json"), true, 512, JSON_THROW_ON_ERROR);
               $sha = $payload["review_presentation"]["review_sha256"] ?? null;
-              if (!is_string($sha) || $sha === "") {
-                  fwrite(STDERR, "agent-loop finish did not expose a current review SHA.\n");
+              $arguments = $payload["next_action_invocation"]["arguments"] ?? null;
+              if ((!is_string($sha) || $sha === "") && is_array($arguments)) {
+                  foreach ($arguments as $index => $argument) {
+                      if ($argument === "--reviewed-report-sha256") {
+                          $sha = $arguments[$index + 1] ?? null;
+                          break;
+                      }
+                  }
+              }
+              if (!is_string($sha) || preg_match("/^sha256:[a-f0-9]{64}$/D", $sha) !== 1) {
+                  fwrite(STDERR, "agent-loop finish did not expose a valid current review SHA.\n");
                   exit(1);
               }
               echo $sha;
