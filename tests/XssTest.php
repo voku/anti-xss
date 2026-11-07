@@ -2814,14 +2814,14 @@ nodeValue+outerHTML>/*click me', $str);
         $cleaned = $antiXss->xss_clean($poc);
         static::assertSame('&lt;geolocation &gt;x&lt;/geolocation&gt;', $cleaned);
         static::assertTrue($antiXss->isXssFound());
-        static::assertStringNotContainsStringIgnoringCase('onvalidationstatuschange', $cleaned);
+        static::assertFalse(\stripos($cleaned, 'onvalidationstatuschange') !== false);
 
         // Permission element with validationstatuschange
         $antiXss = new AntiXSS();
         $cleaned = $antiXss->xss_clean('<permission type="geolocation" onvalidationstatuschange="alert(1)">x</permission>');
         static::assertSame('&lt;permission type="geolocation" &gt;x&lt;/permission&gt;', $cleaned);
         static::assertTrue($antiXss->isXssFound());
-        static::assertStringNotContainsStringIgnoringCase('onvalidationstatuschange', $cleaned);
+        static::assertFalse(\stripos($cleaned, 'onvalidationstatuschange') !== false);
 
         // Standard tag with modern event handlers
         $eventPayloads = [
