@@ -1,0 +1,64 @@
+name: GHSA Chromium browser smoke
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Verify sanitized HTML in a real browser
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          browser="$(command -v google-chrome || command -v chromium || true)"
+          if [[ -z "$browser" ]]; then
+            echo "::error::Chromium/Chrome is unavailable on the runner."
+            exit 1
+          fi
+
+          "$browser" --version
+          php tests/browser/ghsa-28pp-7fjp-8v32.php > "$RUNNER_TEMP/ghsa-28pp-7fjp-8v32.html"
+
+          "$browser" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --disable-background-networking \
+            --virtual-time-budget=2000 \
+            --dump-dom "file://$RUNNER_TEMP/ghsa-28pp-7fjp-8v32.html" \
+            > "$RUNNER_TEMP/browser-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/browser-dom.html"; then
+            echo "::error::The browser DOM did not pass the GHSA smoke assertions."
+            grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/browser-dom.html" || true
+            exit 1
+          fi
+
+          echo "PASS: Chromium parsed the sanitized markup without executable handlers."
