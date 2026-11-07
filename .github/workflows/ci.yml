@@ -180,7 +180,8 @@ jobs:
             --acceptance "The isolated tool project resolves an allowed agent-loop 0.20.x release and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
-          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --by ci
+          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --revision 1 --by ci
+          tools/agent-loop/vendor/bin/agent-loop workflow execution-profile ANTIXSS-209 --profile manual --by ci
           tools/agent-loop/vendor/bin/agent-loop enter ANTIXSS-209 --format=json > /tmp/agent-loop-enter.json
 
           php -r '
