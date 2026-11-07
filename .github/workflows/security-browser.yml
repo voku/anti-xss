@@ -65,7 +65,8 @@ jobs:
             > "$RUNNER_TEMP/ghsa-sanitized.html"
           render_browser_dom "$RUNNER_TEMP/ghsa-sanitized.html" "$RUNNER_TEMP/sanitized-dom.html"
 
-          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/sanitized-dom.html"; then
+          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/sanitized-dom.html" \
+            || ! grep -Fq 'data-ghsa-geolocation-executed="false"' "$RUNNER_TEMP/sanitized-dom.html"; then
             echo "::error::The sanitized browser DOM did not pass GHSA assertions."
             grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/sanitized-dom.html" || true
             exit 1
@@ -77,9 +78,11 @@ jobs:
           render_browser_dom "$RUNNER_TEMP/ghsa-raw.html" "$RUNNER_TEMP/raw-dom.html"
 
           if ! grep -Fq 'data-ghsa-status="fail"' "$RUNNER_TEMP/raw-dom.html" \
-            || ! grep -Fq 'dangerous-element-geolocation' "$RUNNER_TEMP/raw-dom.html"; then
-            echo "::error::The unsanitized negative control did not trigger the browser assertions."
+            || ! grep -Fq 'dangerous-element-geolocation' "$RUNNER_TEMP/raw-dom.html" \
+            || ! grep -Fq 'data-ghsa-geolocation-executed="true"' "$RUNNER_TEMP/raw-dom.html"; then
+            echo "::error::The unsanitized negative control did not prove real geolocation handler execution."
+            grep -o 'data-ghsa-[a-z-]*="[^"]*"' "$RUNNER_TEMP/raw-dom.html" || true
             exit 1
           fi
 
-          echo "PASS: Chromium accepts sanitized DOM and rejects unsanitized GHSA control."
+          echo "PASS: Chromium blocks the sanitized handler and executes the raw geolocation event handler."
