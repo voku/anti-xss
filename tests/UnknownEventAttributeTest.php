@@ -19,8 +19,8 @@ final class UnknownEventAttributeTest extends TestCase
 
         $actual = $sanitizer->xss_clean($input);
 
-        self::assertStringNotContainsString('onvalidationstatuschange=', \strtolower($actual));
-        self::assertStringContainsString('class="safe"', $actual);
+        self::assertSame(false, \strpos(\strtolower($actual), 'onvalidationstatuschange='));
+        self::assertNotSame(false, \strpos($actual, 'class="safe"'));
         self::assertTrue($sanitizer->isXssFound());
     }
 
@@ -31,8 +31,8 @@ final class UnknownEventAttributeTest extends TestCase
 
         $actual = $sanitizer->xss_clean($input);
 
-        self::assertStringContainsString('data-onfuturechange="allowed"', $actual);
-        self::assertStringNotContainsString(' onfuturechange=', \strtolower($actual));
+        self::assertNotSame(false, \strpos($actual, 'data-onfuturechange="allowed"'));
+        self::assertSame(false, \strpos(\strtolower($actual), ' onfuturechange='));
         self::assertTrue($sanitizer->isXssFound());
     }
 
@@ -41,7 +41,7 @@ final class UnknownEventAttributeTest extends TestCase
         $sanitizer = new AntiXSS();
         $actual = $sanitizer->xss_clean('<div onfuturechange=alert(1)>hello</div>');
 
-        self::assertStringNotContainsString('onfuturechange=', \strtolower($actual));
+        self::assertSame(false, \strpos(\strtolower($actual), 'onfuturechange='));
         self::assertTrue($sanitizer->isXssFound());
     }
 
