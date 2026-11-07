@@ -2805,6 +2805,109 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
+    public function testGhsa28pp7fjp8v32GeolocationValidationStatusChange()
+    {
+        $antiXss = new AntiXSS();
+
+        // Reported PoC
+        $poc = '<geolocation onvalidationstatuschange="alert(1)">x</geolocation>';
+        $cleaned = $antiXss->xss_clean($poc);
+        static::assertSame('&lt;geolocation &gt;x&lt;/geolocation&gt;', $cleaned);
+        static::assertTrue($antiXss->isXssFound());
+        static::assertStringNotContainsStringIgnoringCase('onvalidationstatuschange', $cleaned);
+
+        // Permission element with validationstatuschange
+        $antiXss = new AntiXSS();
+        $cleaned = $antiXss->xss_clean('<permission type="geolocation" onvalidationstatuschange="alert(1)">x</permission>');
+        static::assertSame('&lt;permission type="geolocation" &gt;x&lt;/permission&gt;', $cleaned);
+        static::assertTrue($antiXss->isXssFound());
+        static::assertStringNotContainsStringIgnoringCase('onvalidationstatuschange', $cleaned);
+
+        // Standard tag with modern event handlers
+        $eventPayloads = [
+            '<div onvalidationstatuschange="alert(1)">x</div>' => '<div >x</div>',
+            '<div onpromptaction="alert(1)">x</div>'          => '<div >x</div>',
+            '<div onpromptdismiss="alert(1)">x</div>'         => '<div >x</div>',
+            '<div oncontextlost="alert(1)">x</div>'           => '<div >x</div>',
+            '<div oncontextrestored="alert(1)">x</div>'       => '<div >x</div>',
+        ];
+
+        foreach ($eventPayloads as $payload => $expected) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expected, $antiXss->xss_clean($payload));
+            static::assertTrue($antiXss->isXssFound());
+        }
+
+        // Newly added evil HTML tags
+        $tagPayloads = [
+            '<camera>x</camera>'         => '&lt;camera&gt;x&lt;/camera&gt;',
+            '<microphone>x</microphone>' => '&lt;microphone&gt;x&lt;/microphone&gt;',
+            '<portal src="https://evil.com">' => '&lt;portal src="https://evil.com"&gt;',
+        ];
+
+        foreach ($tagPayloads as $payload => $expected) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expected, $antiXss->xss_clean($payload));
+            static::assertTrue($antiXss->isXssFound());
+        }
+    }
+
+    public function testModernBrowserEventHandlers2026()
+    {
+        $modernEvents = [
+            'onAddTrack',
+            'onAutoFill',
+            'onBeforeFilter',
+            'onBlocked',
+            'onComplete',
+            'onConnect',
+            'onCurrentEntryChange',
+            'onDeviceChange',
+            'onDispose',
+            'onEnter',
+            'onEnterPictureInPicture',
+            'onInstallResult',
+            'onLeavePictureInPicture',
+            'onLocation',
+            'onNavigate',
+            'onNavigateError',
+            'onNavigateSuccess',
+            'onOpen',
+            'onOpenerChange',
+            'onOverScrollCancel',
+            'onOverScrollChanging',
+            'onOverScrollEnd',
+            'onOverScrollStart',
+            'onPayerDetailChange',
+            'onPaymentMethodChange',
+            'onRemoveTrack',
+            'onShippingAddressChange',
+            'onShippingOptionChange',
+            'onStream',
+            'onSuccess',
+            'onTimeZoneChange',
+            'onTrack',
+            'onUpgradeNeeded',
+            'onVersionChange',
+            'onVisibilityChange',
+        ];
+
+        foreach ($modernEvents as $event) {
+            $antiXss = new AntiXSS();
+            $payload = '<div ' . \strtolower($event) . '="alert(1)">content</div>';
+            $cleaned = $antiXss->xss_clean($payload);
+
+            static::assertSame('<div >content</div>', $cleaned, 'Failed to clean event: ' . $event);
+            static::assertTrue($antiXss->isXssFound(), 'XSS not marked as found for: ' . $event);
+        }
+
+        // Verify plain prose mentioning these event names is preserved
+        $antiXss = new AntiXSS();
+        $safeProse = 'Documentation: use onvisibilitychange for tab switching, or onopen for websockets.';
+        static::assertSame($safeProse, $antiXss->xss_clean($safeProse));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
     /**
      * Call protected/private method of a class.
      *

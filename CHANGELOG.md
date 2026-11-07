@@ -2,6 +2,10 @@
 
 ### master (unreleased)
 
+### 4.1.46 (2026-11-07)
+
+- security: fix XSS-filter bypass via missing HTML tags (e.g. "<geolocation>", "<permission>", "<camera>", "<microphone>", "<portal>") and missing modern DOM event handlers (e.g. "onvalidationstatuschange", "onpromptaction", "onpromptdismiss", "onnavigate*", "onvisibilitychange", ...) (GHSA-28pp-7fjp-8v32)
+
 ### 4.1.45 (2026-10-09)
 
 - security: fix an XSS-filter bypass where an evil tag followed by a tab, CR, LF or FF instead of a space (e.g. "<style\t>", "<svg\n>", "<math\r>", "<frameset\f>") was emitted unencoded; a raw "<style>" stayed open (its closing tag is encoded) and allowed CSS injection (e.g. "@import", "url()" exfiltration) and swallowed the following page content
