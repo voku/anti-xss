@@ -483,7 +483,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss = new AntiXSS();
 
         $testArray = [
-            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag) -->',
+            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">"  ="alert&#40;\'foo\'&#41;;" (text outside tag) -->',
         ];
 
         $antiXss->removeNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;']); // allow
@@ -2199,8 +2199,9 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<foo prefixOnAttribute="bar">', (new AntiXSS())->xss_clean('<foo prefixOnAttribute="bar">'));
         static::assertSame('<foo>onOutsideOfTag=test</foo>', (new AntiXSS())->xss_clean('<foo>onOutsideOfTag=test</foo>'));
         static::assertSame('onNoTagAtAll = true', (new AntiXSS())->xss_clean('onNoTagAtAll = true'));
-        static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
-        static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
+        // Unknown on* names are reserved for future inline handlers, including in quoted-tag edge cases.
+        static::assertSame('<foo bar=">" baz=\'>\' >', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
+        static::assertSame('<foo bar=">" baz=\'>\' >', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
         static::assertSame('<img src="x" on=""> on=&lt;svg&gt; =alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
         static::assertSame('<img src="on=\'">"&lt;svg&gt; =alert&#40;1&#41; =alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
         static::assertSame('<img src="x"> on=\'x\' =``,alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
