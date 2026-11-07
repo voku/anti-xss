@@ -207,6 +207,7 @@ jobs:
           '; then
             cp /tmp/agent-loop-finish.json /tmp/agent-loop-complete.json
           else
+            cat /tmp/agent-loop-finish.json
             review_sha="$(
               php -r '
               $payload = json_decode((string) file_get_contents("/tmp/agent-loop-finish.json"), true, 512, JSON_THROW_ON_ERROR);
