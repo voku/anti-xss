@@ -228,12 +228,34 @@ jobs:
               '
             )"
 
+            set +e
             tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json \
               --reviewed-report-sha256 "$review_sha" \
-              --learning no_durable_learning \
-              --learning-reason "Dependency-upgrade dogfood produced no reusable anti-xss project guidance." \
               --by ci \
-              > /tmp/agent-loop-complete.json
+              > /tmp/agent-loop-reviewed.json
+            review_exit=$?
+            set -e
+
+            if [[ "$review_exit" -ne 0 && "$review_exit" -ne 1 ]]; then
+              cat /tmp/agent-loop-reviewed.json
+              exit "$review_exit"
+            fi
+
+            if php -r '
+              $payload = json_decode((string) file_get_contents("/tmp/agent-loop-reviewed.json"), true, 512, JSON_THROW_ON_ERROR);
+              exit(($payload["complete"] ?? false) === true ? 0 : 1);
+            '; then
+              cp /tmp/agent-loop-reviewed.json /tmp/agent-loop-complete.json
+            else
+              if ! tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json \
+                --learning no_durable_learning \
+                --learning-reason "Upgrade dogfood produced no reusable anti-xss guidance." \
+                --by ci \
+                > /tmp/agent-loop-complete.json; then
+                cat /tmp/agent-loop-complete.json
+                exit 1
+              fi
+            fi
           fi
 
           php -r '
