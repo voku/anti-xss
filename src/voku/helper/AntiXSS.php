@@ -403,6 +403,7 @@ final class AntiXSS
         'form',
         'frameset',
         'frame',
+        'geolocation',
         'head',
         'html',
         'ilayer',
@@ -1836,6 +1837,8 @@ final class AntiXSS
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
             $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')[\w:-]*';
+            // Browser event handler names evolve: block unknown on* attributes by default.
+            $this->_cache_evil_attributes_regex_string .= '|(?<![\\w-])on[a-z][\\w:-]*';
         }
 
         $iterations = 0;
