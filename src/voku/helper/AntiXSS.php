@@ -1874,6 +1874,7 @@ final class AntiXSS
         $end = \strlen($tag) - 1;
         $cursor = $nameEnd;
         $result = \substr($tag, 0, $nameEnd);
+        $changed = false;
 
         while ($cursor < $end) {
             $start = $cursor;
@@ -1911,7 +1912,8 @@ final class AntiXSS
                 ++$cursor;
             }
 
-            if ($cursor < $end && $tag[$cursor] === '=') {
+            $hasValue = $cursor < $end && $tag[$cursor] === '=';
+            if ($hasValue) {
                 ++$cursor;
                 while ($cursor < $end && \strpos(" \t\r\n\f", $tag[$cursor]) !== false) {
                     ++$cursor;
@@ -1932,12 +1934,15 @@ final class AntiXSS
                 }
             }
 
-            if (\preg_match('/^on[a-z]/i', $name) !== 1) {
+            if ($hasValue && \preg_match('/^on[a-z]/i', $name) === 1) {
+                $changed = true;
+            } else {
                 $result .= \substr($tag, $start, $cursor - $start);
             }
         }
 
-        return $result . '>';
+        // Preserve legacy output byte-for-byte unless an executable attribute was removed.
+        return $changed ? $result . '>' : $tag;
     }
 
     private function _remove_evil_attributes($str)
