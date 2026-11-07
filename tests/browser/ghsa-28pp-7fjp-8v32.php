@@ -18,6 +18,12 @@ $payloads = [
     'geolocation' => '<geolocation onvalidationstatuschange="window.__xssExecuted = true">x</geolocation>',
     'permission' => '<permission type="geolocation" onvalidationstatuschange="window.__xssExecuted = true">x</permission>',
     'modern-event' => '<div onpromptaction="window.__xssExecuted = true">x</div>',
+    'camera' => '<camera onvalidationstatuschange="window.__xssExecuted = true">x</camera>',
+    'microphone' => '<microphone onvalidationstatuschange="window.__xssExecuted = true">x</microphone>',
+    'portal' => '<portal onpromptdismiss="window.__xssExecuted = true">x</portal>',
+    'navigation-event' => '<div onnavigate="window.__xssExecuted = true">x</div>',
+    'visibility-event' => '<div onvisibilitychange="window.__xssExecuted = true">x</div>',
+    'safe-url' => '<a href="https://example.invalid/?onlyEnabled=1">allowed link</a>',
     'safe-content' => '<div class="safe" data-test="preserve">safe text</div>',
 ];
 
@@ -53,7 +59,7 @@ window.addEventListener('load', function () {
     }
 
     const sections = Array.from(document.querySelectorAll('section.sanitized'));
-    if (sections.length !== 4) {
+    if (sections.length !== 10) {
         errors.push('missing-sanitized-cases');
     }
 
@@ -73,12 +79,19 @@ window.addEventListener('load', function () {
 
             element.dispatchEvent(new Event('validationstatuschange', { bubbles: true }));
             element.dispatchEvent(new Event('promptaction', { bubbles: true }));
+            element.dispatchEvent(new Event('navigate', { bubbles: true }));
+            element.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
         }
     }
 
     const safe = document.querySelector('section[data-case="safe-content"] .safe');
     if (safe === null || safe.dataset.test !== 'preserve' || safe.textContent !== 'safe text') {
         errors.push('safe-content-changed');
+    }
+
+    const safeUrl = document.querySelector('section[data-case="safe-url"] a');
+    if (safeUrl === null || safeUrl.getAttribute('href') !== 'https://example.invalid/?onlyEnabled=1') {
+        errors.push('safe-url-changed');
     }
 
     if (window.__xssExecuted === true) {
