@@ -6,6 +6,12 @@ require \dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 use voku\helper\AntiXSS;
 
+// Explicit negative-control mode: render the same payloads without sanitization.
+$rawMode = ($argv[1] ?? null) === '--raw' && \count($argv) === 2;
+if (\count($argv) > 1 && !$rawMode) {
+    throw new \InvalidArgumentException('Expected no arguments or only --raw.');
+}
+
 /**
  * Generate a static browser fixture for GHSA-28pp-7fjp-8v32.
  *
@@ -30,7 +36,7 @@ $payloads = [
 echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GHSA browser smoke</title></head><body>', "\n";
 
 foreach ($payloads as $name => $payload) {
-    $cleaned = (new AntiXSS())->xss_clean($payload);
+    $cleaned = $rawMode ? $payload : (new AntiXSS())->xss_clean($payload);
 
     echo '<section class="sanitized" data-case="',
         \htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
