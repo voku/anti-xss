@@ -21,7 +21,7 @@ if (\count($argv) > 1 && !$rawMode) {
  * @var array<string, string> $payloads
  */
 $payloads = [
-    'geolocation' => '<geolocation onvalidationstatuschange="window.__xssExecuted = true">x</geolocation>',
+    'geolocation' => '<geolocation onvalidationstatuschange="window.__geolocationExecuted = true; window.__xssExecuted = true">x</geolocation>',
     'permission' => '<permission type="geolocation" onvalidationstatuschange="window.__xssExecuted = true">x</permission>',
     'modern-event' => '<div onpromptaction="window.__xssExecuted = true">x</div>',
     'camera' => '<camera onvalidationstatuschange="window.__xssExecuted = true">x</camera>',
@@ -55,9 +55,11 @@ echo '<button id="raw-control" onclick="window.__controlExecuted = true" type="b
 
 window.__controlExecuted = false;
 window.__xssExecuted = false;
+window.__geolocationExecuted = false;
 
 window.addEventListener('load', function () {
     const errors = [];
+    try {
     document.getElementById('raw-control').click();
 
     if (window.__controlExecuted !== true) {
@@ -104,8 +106,14 @@ window.addEventListener('load', function () {
         errors.push('sanitized-handler-executed');
     }
 
-    document.body.dataset.ghsaStatus = errors.length === 0 ? 'pass' : 'fail';
-    document.body.dataset.ghsaDetails = errors.length === 0 ? 'none' : errors.join(',');
+    } catch (error) {
+        errors.push('harness-exception:' + String(error));
+    } finally {
+        document.body.dataset.ghsaExecuted = window.__xssExecuted === true ? 'true' : 'false';
+        document.body.dataset.ghsaGeolocationExecuted = window.__geolocationExecuted === true ? 'true' : 'false';
+        document.body.dataset.ghsaStatus = errors.length === 0 ? 'pass' : 'fail';
+        document.body.dataset.ghsaDetails = errors.length === 0 ? 'none' : errors.join(',');
+    }
 });
 </script>
 </body></html>
