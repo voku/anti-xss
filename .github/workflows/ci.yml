@@ -180,16 +180,8 @@ jobs:
             --acceptance "The isolated tool project resolves an allowed agent-loop 0.20.x release and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
-          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --revision 1 --by ci
-          set +e
+          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --by ci
           tools/agent-loop/vendor/bin/agent-loop enter ANTIXSS-209 --format=json > /tmp/agent-loop-enter.json
-          enter_exit=$?
-          set -e
-          if [[ "$enter_exit" -ne 0 ]]; then
-            echo 'agent-loop enter refused the current task:' >&2
-            cat /tmp/agent-loop-enter.json >&2
-            exit "$enter_exit"
-          fi
 
           php -r '
           $payload = json_decode((string) file_get_contents("/tmp/agent-loop-enter.json"), true, 512, JSON_THROW_ON_ERROR);
@@ -205,8 +197,7 @@ jobs:
           set -e
 
           if [[ "$finish_exit" -ne 0 && "$finish_exit" -ne 1 ]]; then
-            echo 'agent-loop finish refused the current task:' >&2
-            cat /tmp/agent-loop-finish.json >&2
+            cat /tmp/agent-loop-finish.json
             exit "$finish_exit"
           fi
 
@@ -222,7 +213,6 @@ jobs:
               $sha = $payload["review_presentation"]["review_sha256"] ?? null;
               if (!is_string($sha) || $sha === "") {
                   fwrite(STDERR, "agent-loop finish did not expose a current review SHA.\n");
-                fwrite(STDERR, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
                   exit(1);
               }
               echo $sha;
