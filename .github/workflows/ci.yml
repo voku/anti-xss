@@ -180,7 +180,7 @@ jobs:
             --acceptance "The isolated tool project resolves an allowed agent-loop 0.20.x release and satisfies its platform requirements." \
             --acceptance "The imported ANTIXSS-1 state passes task-scoped agent-loop verification."
 
-          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --revision 1 --by ci
+          tools/agent-loop/vendor/bin/agent-loop workflow approve ANTIXSS-209 --by ci
           tools/agent-loop/vendor/bin/agent-loop enter ANTIXSS-209 --format=json > /tmp/agent-loop-enter.json
 
           php -r '
@@ -211,51 +211,20 @@ jobs:
               php -r '
               $payload = json_decode((string) file_get_contents("/tmp/agent-loop-finish.json"), true, 512, JSON_THROW_ON_ERROR);
               $sha = $payload["review_presentation"]["review_sha256"] ?? null;
-              $arguments = $payload["next_action_invocation"]["arguments"] ?? null;
-              if ((!is_string($sha) || $sha === "") && is_array($arguments)) {
-                  foreach ($arguments as $index => $argument) {
-                      if ($argument === "--reviewed-report-sha256") {
-                          $sha = $arguments[$index + 1] ?? null;
-                          break;
-                      }
-                  }
-              }
-              if (!is_string($sha) || preg_match("/^sha256:[a-f0-9]{64}$/D", $sha) !== 1) {
-                  fwrite(STDERR, "agent-loop finish did not expose a valid current review SHA.\n");
+              if (!is_string($sha) || $sha === "") {
+                  fwrite(STDERR, "agent-loop finish did not expose a current review SHA.\n");
                   exit(1);
               }
               echo $sha;
               '
             )"
 
-            set +e
             tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json \
               --reviewed-report-sha256 "$review_sha" \
+              --learning no_durable_learning \
+              --learning-reason "Dependency-upgrade dogfood produced no reusable anti-xss project guidance." \
               --by ci \
-              > /tmp/agent-loop-reviewed.json
-            review_exit=$?
-            set -e
-
-            if [[ "$review_exit" -ne 0 && "$review_exit" -ne 1 ]]; then
-              cat /tmp/agent-loop-reviewed.json
-              exit "$review_exit"
-            fi
-
-            if php -r '
-              $payload = json_decode((string) file_get_contents("/tmp/agent-loop-reviewed.json"), true, 512, JSON_THROW_ON_ERROR);
-              exit(($payload["complete"] ?? false) === true ? 0 : 1);
-            '; then
-              cp /tmp/agent-loop-reviewed.json /tmp/agent-loop-complete.json
-            else
-              if ! tools/agent-loop/vendor/bin/agent-loop finish ANTIXSS-209 --format=json \
-                --learning no_durable_learning \
-                --learning-reason "Upgrade dogfood produced no reusable anti-xss guidance." \
-                --by ci \
-                > /tmp/agent-loop-complete.json; then
-                cat /tmp/agent-loop-complete.json
-                exit 1
-              fi
-            fi
+              > /tmp/agent-loop-complete.json
           fi
 
           php -r '
