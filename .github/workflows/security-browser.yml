@@ -43,22 +43,39 @@ jobs:
           fi
 
           "$browser" --version
-          php tests/browser/ghsa-28pp-7fjp-8v32.php > "$RUNNER_TEMP/ghsa-28pp-7fjp-8v32.html"
+          render_browser_dom() {
+            local input_file="$1"
+            local output_file="$2"
+            "$browser" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --disable-dev-shm-usage \
+              --disable-background-networking \
+              --virtual-time-budget=2000 \
+              --dump-dom "file://$input_file" \
+              > "$output_file" 2> /dev/null
+          }
 
-          "$browser" \
-            --headless=new \
-            --no-sandbox \
-            --disable-gpu \
-            --disable-dev-shm-usage \
-            --disable-background-networking \
-            --virtual-time-budget=2000 \
-            --dump-dom "file://$RUNNER_TEMP/ghsa-28pp-7fjp-8v32.html" \
-            > "$RUNNER_TEMP/browser-dom.html"
+          php tests/browser/ghsa-28pp-7fjp-8v32.php \
+            > "$RUNNER_TEMP/ghsa-sanitized.html"
+          render_browser_dom "$RUNNER_TEMP/ghsa-sanitized.html" "$RUNNER_TEMP/sanitized-dom.html"
 
-          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/browser-dom.html"; then
-            echo "::error::The browser DOM did not pass the GHSA smoke assertions."
-            grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/browser-dom.html" || true
+          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/sanitized-dom.html"; then
+            echo "::error::The sanitized browser DOM did not pass GHSA assertions."
+            grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/sanitized-dom.html" || true
             exit 1
           fi
 
-          echo "PASS: Chromium parsed the sanitized markup without executable handlers."
+          # Prove the browser assertion would reject the actual unsanitized markup.
+          php tests/browser/ghsa-28pp-7fjp-8v32.php --raw \
+            > "$RUNNER_TEMP/ghsa-raw.html"
+          render_browser_dom "$RUNNER_TEMP/ghsa-raw.html" "$RUNNER_TEMP/raw-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="fail"' "$RUNNER_TEMP/raw-dom.html" \
+            || ! grep -Fq 'dangerous-element-geolocation' "$RUNNER_TEMP/raw-dom.html"; then
+            echo "::error::The unsanitized negative control did not trigger the browser assertions."
+            exit 1
+          fi
+
+          echo "PASS: Chromium accepts sanitized DOM and rejects unsanitized GHSA control."
