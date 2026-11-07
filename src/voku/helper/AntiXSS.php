@@ -805,6 +805,9 @@ final class AntiXSS
             // remove strings that are never allowed
             $str = $this->_do_callback_outside_of_pre_and_code_tags($str, [$this, '_do_never_allowed']);
     
+            // remove new browser on* event attributes before the legacy denylist pass
+            $str = $this->_remove_unknown_event_attributes($str);
+
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
     
@@ -1311,11 +1314,6 @@ final class AntiXSS
             $eventQuickChecks[] = (string) \substr($event, 0, \min(3, \strlen($event)));
         }
 
-        // Future on* handlers must be checked even when the explicit event list is empty.
-        if ($canShortCircuit) {
-            $quickChecks[] = 'on';
-        }
-
         if (
             $canShortCircuit
             &&
@@ -1769,6 +1767,51 @@ final class AntiXSS
     }
 
     /**
+     * Remove unknown HTML inline-event attributes without scanning quoted attribute values.
+     *
+     * Explicitly configured known events retain their existing removal behavior.
+     * Only syntactically complete opening tags are considered here; malformed markup
+     * remains subject to the existing sanitizer passes.
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_unknown_event_attributes($str)
+    {
+        if (\strpos($str, '<') === false || \stripos($str, 'on') === false) {
+            return $str;
+        }
+
+        $knownEvents = \array_map('strtolower', $this->_never_allowed_on_events_afterwards);
+        $tagRegex = '~<[a-z][\w:-]*(?:[^>"\']|"[^"]*"|\'[^\']*\')*>~iu';
+        $attributeRegex = '~"[^"]*"(*SKIP)(*F)|\'[^\']*\'(*SKIP)(*F)|(?<=[\s/])(?<name>on[a-z][a-z0-9]*)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)~iu';
+
+        $result = \preg_replace_callback(
+            $tagRegex,
+            function ($matches) use ($attributeRegex, $knownEvents) {
+                $tag = \preg_replace_callback(
+                    $attributeRegex,
+                    function ($attribute) use ($knownEvents) {
+                        if (\in_array(\strtolower($attribute['name']), $knownEvents, true)) {
+                            return $attribute[0];
+                        }
+
+                        return $this->_replacement;
+                    },
+                    $matches[0]
+                );
+
+                // A PCRE failure must not return a possibly executable opening tag.
+                return $tag ?? \htmlspecialchars($matches[0], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            },
+            $str
+        );
+
+        return $result ?? \htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /**
      * Remove Evil HTML Attributes (like event handlers and style).
      *
      * It removes the evil attribute and either:
@@ -1841,8 +1884,6 @@ final class AntiXSS
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
             $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')[\w:-]*';
-            // New browser events may not be present in our explicit denylist.
-            $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])on[\w:-]*';
         }
 
         $iterations = 0;
