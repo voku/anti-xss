@@ -1936,6 +1936,8 @@ final class AntiXSS
 
             if ($hasValue && \preg_match('/^on[a-z]/i', $name) === 1) {
                 $changed = true;
+                // Match the legacy sanitizer: keep whitespace preceding a removed attribute.
+                $result .= \substr($tag, $start, $attributeStart - $start);
             } else {
                 $result .= \substr($tag, $start, $cursor - $start);
             }
