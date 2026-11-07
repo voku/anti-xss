@@ -1311,6 +1311,11 @@ final class AntiXSS
             $eventQuickChecks[] = (string) \substr($event, 0, \min(3, \strlen($event)));
         }
 
+        // Future on* handlers must be checked even when the explicit event list is empty.
+        if ($canShortCircuit) {
+            $quickChecks[] = 'on';
+        }
+
         if (
             $canShortCircuit
             &&
@@ -1836,6 +1841,8 @@ final class AntiXSS
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
             $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')[\w:-]*';
+            // New browser events may not be present in our explicit denylist.
+            $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])on[\w:-]*';
         }
 
         $iterations = 0;
