@@ -1,0 +1,88 @@
+name: GHSA Chromium browser smoke
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Verify sanitized HTML in a real browser
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          browser="$(command -v google-chrome || command -v chromium || true)"
+          if [[ -z "$browser" ]]; then
+            echo "::error::Chromium/Chrome is unavailable on the runner."
+            exit 1
+          fi
+
+          "$browser" --version
+          render_browser_dom() {
+            local input_file="$1"
+            local output_file="$2"
+            if ! "$browser" \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --disable-dev-shm-usage \
+              --disable-background-networking \
+              --virtual-time-budget=2000 \
+              --dump-dom "file://$input_file" \
+              > "$output_file" 2> "$RUNNER_TEMP/chrome-stderr.log"; then
+              echo "::error::Headless Chrome failed while rendering $input_file."
+              tail -n 40 "$RUNNER_TEMP/chrome-stderr.log"
+              return 1
+            fi
+          }
+
+          php tests/browser/ghsa-28pp-7fjp-8v32.php \
+            > "$RUNNER_TEMP/ghsa-sanitized.html"
+          render_browser_dom "$RUNNER_TEMP/ghsa-sanitized.html" "$RUNNER_TEMP/sanitized-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/sanitized-dom.html" \
+            || ! grep -Fq 'data-ghsa-geolocation-executed="false"' "$RUNNER_TEMP/sanitized-dom.html"; then
+            echo "::error::The sanitized browser DOM did not pass GHSA assertions."
+            grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/sanitized-dom.html" || true
+            exit 1
+          fi
+
+          # Prove the browser assertion would reject the actual unsanitized markup.
+          php tests/browser/ghsa-28pp-7fjp-8v32.php --raw \
+            > "$RUNNER_TEMP/ghsa-raw.html"
+          render_browser_dom "$RUNNER_TEMP/ghsa-raw.html" "$RUNNER_TEMP/raw-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="fail"' "$RUNNER_TEMP/raw-dom.html" \
+            || ! grep -Fq 'dangerous-element-geolocation' "$RUNNER_TEMP/raw-dom.html" \
+            || ! grep -Fq 'data-ghsa-geolocation-executed="true"' "$RUNNER_TEMP/raw-dom.html"; then
+            echo "::error::The unsanitized negative control did not prove real geolocation handler execution."
+            grep -o 'data-ghsa-[a-z-]*="[^"]*"' "$RUNNER_TEMP/raw-dom.html" || true
+            exit 1
+          fi
+
+          echo "PASS: Chromium blocks the sanitized handler and executes the raw geolocation event handler."
