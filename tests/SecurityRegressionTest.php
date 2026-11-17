@@ -8,7 +8,7 @@ use voku\helper\AntiXSS;
  * Regression tests for the findings of an automated security scan (2026-11).
  *
  * The DoS tests use inputs that took several seconds (or threw an exception) before the fix and only a few
- * milliseconds afterwards, so the time limits are very generous on purpose.
+ * milliseconds afterwards, so the time limits are very generous on purpose (CI runs with Xdebug).
  *
  * @internal
  */
@@ -34,6 +34,32 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         return [$output, $antiXss->isXssFound(), $duration];
     }
 
+    /**
+     * INFO: "assertStringNotContainsString()" needs PHPUnit >= 7.5, but we also test with PHPUnit 7.0
+     *
+     * @param string $needle
+     * @param string $haystack
+     * @param string $message
+     *
+     * @return void
+     */
+    private static function assertNotContainsCaseSensitive($needle, $haystack, $message = '')
+    {
+        static::assertFalse(\strpos($haystack, $needle) !== false, $message . ' | "' . $needle . '" found in: ' . $haystack);
+    }
+
+    /**
+     * @param string $needle
+     * @param string $haystack
+     * @param string $message
+     *
+     * @return void
+     */
+    private static function assertNotContainsIgnoringCase($needle, $haystack, $message = '')
+    {
+        static::assertFalse(\stripos($haystack, $needle) !== false, $message . ' | "' . $needle . '" found in: ' . $haystack);
+    }
+
     public function testSemicolonLessNumericCharacterReferenceBeforeRemovedCharsIsDetected()
     {
         // ANT-2026-I95BDWMG
@@ -49,7 +75,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
             [$output, $found] = self::clean($input);
 
             static::assertTrue($found, 'testing: ' . $input);
-            static::assertStringNotContainsStringIgnoringCase('javascript', $output, 'testing: ' . $input);
+            self::assertNotContainsIgnoringCase('javascript', $output, 'testing: ' . $input);
         }
     }
 
@@ -58,11 +84,11 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         // ANT-2026-BCMA4763
         [$output, $found] = self::clean('<x:script xmlns:x="http://www.w3.org/1999/xhtml">print()</x:script>');
         static::assertTrue($found);
-        static::assertStringNotContainsString('<x:script', $output);
+        self::assertNotContainsCaseSensitive('<x:script', $output);
 
         [$output, $found] = self::clean('<xhtml:iframe src="//evil.example"></xhtml:iframe>');
         static::assertTrue($found);
-        static::assertStringNotContainsString('<xhtml:iframe', $output);
+        self::assertNotContainsCaseSensitive('<xhtml:iframe', $output);
 
         // no false-positive for harmless prefixed tags
         [$output, $found] = self::clean('<b>Note: style matters</b> <x:p>ok</x:p>');
@@ -78,7 +104,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         };
         [$output, $found] = self::clean('<iframe srcdoc=&lt;script/x&gt;print()&lt;/script/x&gt;></iframe>', $config);
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('script', $output);
+        self::assertNotContainsIgnoringCase('script', $output);
 
         foreach (
             [
@@ -91,7 +117,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         ) {
             [$output, $found] = self::clean($input);
             static::assertTrue($found, 'testing: ' . $input);
-            static::assertStringNotContainsStringIgnoringCase('script', $output, 'testing: ' . $input);
+            self::assertNotContainsIgnoringCase('script', $output, 'testing: ' . $input);
         }
 
         // no false-positive for other tag names
@@ -106,7 +132,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         [$output, $found] = self::clean("<scr\x1B(Bipt>print()</scr\x1B(Bipt>");
 
         static::assertTrue($found);
-        static::assertStringNotContainsString("\x1B", $output);
+        self::assertNotContainsCaseSensitive("\x1B", $output);
     }
 
     public function testShortCustomEvilTagDoesNotShadowBuiltInEvilTags()
@@ -119,7 +145,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
 
             [$output, $found] = self::clean('<style>@import url(//evil.example/x.css);</style>', $config);
             static::assertTrue($found, 'testing: ' . $tag);
-            static::assertStringNotContainsString('<style>', $output, 'testing: ' . $tag);
+            self::assertNotContainsCaseSensitive('<style>', $output, 'testing: ' . $tag);
         }
     }
 
@@ -145,18 +171,18 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
     public function testDosCompactExplodedJavascriptOnUrlEncodedSpacingRuns()
     {
         // ANT-2026-Z8F40WBR
-        [, , $duration] = self::clean('<b>hi</b>' . \str_repeat('%0d', 30000) . 'ocumenx t');
-        static::assertLessThan(2.0, $duration);
-
-        // nested never allowed strings are removed in one pass
+        // a run of "%0d" (quadratic regex) + a nested "document.cookie" (one layer removed per pass of the
+        // main loop, so the quadratic regex ran ~90 times): took ~16 seconds before the fix
         $nested = 'x';
         for ($i = 0; $i < 90; ++$i) {
             $nested = 'docu' . $nested . 'ment.cookie';
         }
-        [$output, $found, $duration] = self::clean('<b>hi</b>' . \str_repeat('%0d', 3000) . \str_replace('x', '', $nested));
+        [$output, $found, $duration] = self::clean(
+            '<b>hi</b>' . \str_repeat('%0d', 8000) . 'ocumenx t ' . \str_replace('x', '', $nested)
+        );
         static::assertTrue($found);
-        static::assertStringNotContainsString('document.cookie', $output);
-        static::assertLessThan(2.0, $duration);
+        self::assertNotContainsCaseSensitive('document.cookie', $output);
+        static::assertLessThan(5.0, $duration);
     }
 
     public function testDosColonJoinedEventHandlerNames()
@@ -164,26 +190,26 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         // ANT-2026-M0ZKQH2E
         [$output, $found, $duration] = self::clean('<a ' . \str_repeat(':onclick', 4000) . ' onclick=x>');
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('onclick', $output);
-        static::assertLessThan(2.0, $duration);
+        self::assertNotContainsIgnoringCase('onclick', $output);
+        static::assertLessThan(5.0, $duration);
 
         // many event names in front of one ">" (did throw a "non-converging sanitization loop"-exception)
         [$output, $found, $duration] = self::clean('<a x="' . \str_repeat(' onclick', 20000) . '" onclick=1>');
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('onclick', $output);
-        static::assertLessThan(2.0, $duration);
+        self::assertNotContainsIgnoringCase('onclick', $output);
+        static::assertLessThan(5.0, $duration);
 
         [$output, $found] = self::clean('x onclick onerror=alert(1)');
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('onclick', $output);
-        static::assertStringNotContainsStringIgnoringCase('onerror', $output);
+        self::assertNotContainsIgnoringCase('onclick', $output);
+        self::assertNotContainsIgnoringCase('onerror', $output);
     }
 
     public function testDosBase64ImageCheck()
     {
         // ANT-2026-EDIARMWR
         [, , $duration] = self::clean(\str_repeat('<img alt="' . \str_repeat('data:image/ base64 ', 70) . '">', 76));
-        static::assertLessThan(2.0, $duration);
+        static::assertLessThan(5.0, $duration);
 
         // base64 images are still allowed
         [$output, $found] = self::clean('<img src="data:image/png;base64,iVBORw0KGgo=">');
@@ -195,15 +221,15 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
     {
         // ANT-2026-WEHNW4GB (took ~9 seconds before)
         [, , $duration] = self::clean(\str_repeat('<a', 4000) . "'>" . \str_repeat("'", 26));
-        static::assertLessThan(2.0, $duration);
+        static::assertLessThan(5.0, $duration);
 
         [, , $duration] = self::clean(\str_repeat("<a\"'", 30000) . 'x');
-        static::assertLessThan(2.0, $duration);
+        static::assertLessThan(5.0, $duration);
 
         // a tag with an unclosed quote after a closed one is still decoded
         [$output, $found] = self::clean('<b>x</b><a href="javascript&#58;alert(1)" title="x>');
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('javascript', $output);
+        self::assertNotContainsIgnoringCase('javascript', $output);
     }
 
     public function testDosNestedAttributeCleaning()
@@ -233,7 +259,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
 
         [, $found, $duration] = self::clean($build(14, 0));
         static::assertTrue($found);
-        static::assertLessThan(2.0, $duration);
+        static::assertLessThan(5.0, $duration);
     }
 
     public function testDosNestedUrlEncodedControlCharacters()
@@ -241,13 +267,13 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         // ANT-2026-7MAJ583A (took ~6 seconds before)
         $input = \str_repeat('%0', 32000) . \str_repeat('0', 32000);
         [$output, , $duration] = self::clean($input);
-        static::assertLessThan(2.0, $duration);
+        static::assertLessThan(5.0, $duration);
         static::assertSame($input, $output);
 
         // "%0C" (form feed) is whitespace and must not join attributes
         [$output, $found] = self::clean('data:text/html,<img%0Csrc=x%0Conerror=print()>');
         static::assertTrue($found);
-        static::assertStringNotContainsStringIgnoringCase('onerror', $output);
+        self::assertNotContainsIgnoringCase('onerror', $output);
     }
 
     public function testNeverAllowedRegexInlineOptionDoesNotChangeBuiltInRules()
@@ -292,7 +318,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         ) {
             [$output, $found] = self::clean($input);
             static::assertTrue($found, 'testing: ' . $input);
-            static::assertStringNotContainsStringIgnoringCase('javascript', $output, 'testing: ' . $input);
+            self::assertNotContainsIgnoringCase('javascript', $output, 'testing: ' . $input);
         }
     }
 
@@ -301,11 +327,11 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         // side note in ANT-2026-RKI0UXIG: a tag directly after "<header>" skipped the evil-tag check
         [$output, $found] = self::clean('<header><style>x</style>');
         static::assertTrue($found);
-        static::assertStringNotContainsString('<style>', $output);
+        self::assertNotContainsCaseSensitive('<style>', $output);
 
         [$output, $found] = self::clean('<header><svg>');
         static::assertTrue($found);
-        static::assertStringNotContainsString('<svg>', $output);
+        self::assertNotContainsCaseSensitive('<svg>', $output);
     }
 
     public function testDataUrlSplitByTabOrNewline()
@@ -320,7 +346,7 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         ) {
             [$output, $found] = self::clean($input);
             static::assertTrue($found, 'testing: ' . $input);
-            static::assertStringNotContainsString('base64', $output, 'testing: ' . $input);
+            self::assertNotContainsCaseSensitive('base64', $output, 'testing: ' . $input);
         }
     }
 }

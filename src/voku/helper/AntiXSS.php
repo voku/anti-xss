@@ -1532,9 +1532,12 @@ final class AntiXSS
                 continue;
             }
 
-            if (\ord($char) >= 0x80 && \preg_match('/^\s/u', (string) \substr($str, $i, 4)) === 1) {
+            if (
+                \ord($char) >= 0x80
+                &&
+                \preg_match('/^\s/u', (string) \substr($str, $i, 4), $matchesSpace) === 1
+            ) {
                 // e.g. a non-breaking space; skip all bytes of this char
-                \preg_match('/^\s/u', (string) \substr($str, $i, 4), $matchesSpace);
                 $i += \strlen($matchesSpace[0]) - 1;
 
                 continue;
