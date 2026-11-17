@@ -869,9 +869,7 @@ final class AntiXSS
 
             // INFO: only check the next char (max. 4 bytes) and not "$str" with an offset, because with "/u"
             //       older PHP versions (PCRE1) validate the whole subject on every call (quadratic runtime)
-            if ($pos >= $length) {
-                break;
-            }
+            // INFO: "$pos" is always valid here, because "$start < $lastGt"
             $leadByte = \ord($str[$pos]);
             if ($leadByte < 0x80) {
                 $charLength = 1;
@@ -902,11 +900,6 @@ final class AntiXSS
             $visited = [];
             $end = null;
             while ($index !== null && isset($positions[$index])) {
-                if (!$reachable && !$openDouble && !$openSingle) {
-                    // inside of a quote that can never be closed
-                    break;
-                }
-
                 $stateKey = ($index << 3) | ($reachable ? 4 : 0) | ($openDouble ? 2 : 0) | ($openSingle ? 1 : 0);
                 if (isset($failed[$stateKey])) {
                     break;
@@ -1482,12 +1475,8 @@ final class AntiXSS
         $str = $prefix . $tail['pre'];
 
         // a: "[^\p{L}]*?(?:=|&equals;)"
-        if (\preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA) === 1) {
-            $pos = \strlen($matchesA[0]);
-        } else {
-            // invalid UTF-8 etc.: be strict
-            $pos = 0;
-        }
+        // (invalid UTF-8 etc.: be strict)
+        $pos = \preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA) === 1 ? \strlen($matchesA[0]) : 0;
         if ($pos >= $prefixLength) {
             $a = $tail['a'];
         } else {
@@ -1502,11 +1491,7 @@ final class AntiXSS
         $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) === 1;
 
         // the first chars (not bytes, so that we never cut an UTF-8 char)
-        if (\preg_match('/^.{0,16}/us', $str, $matchesPre) === 1) {
-            $pre = $matchesPre[0];
-        } else {
-            $pre = '';
-        }
+        $pre = \preg_match('/^.{0,16}/us', $str, $matchesPre) === 1 ? $matchesPre[0] : '';
 
         return [
             'a'   => $a,
@@ -1558,17 +1543,7 @@ final class AntiXSS
                 continue;
             }
 
-            if (
-                \ord($char) >= 0x80
-                &&
-                \preg_match('/^\s/u', (string) \substr($str, $i, 4), $matchesSpace) === 1
-            ) {
-                // e.g. a non-breaking space; skip all bytes of this char
-                $i += \strlen($matchesSpace[0]) - 1;
-
-                continue;
-            }
-
+            // INFO: non-ASCII whitespace (e.g. a non-breaking space) is already normalized in "_do()"
             return false;
         }
 

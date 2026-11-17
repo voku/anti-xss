@@ -337,6 +337,59 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         self::assertNotContainsCaseSensitive('<svg>', $output);
     }
 
+    public function testHtmlTagsWithNonAsciiNamesAreDecoded()
+    {
+        // tag names that start with a 2-, 3- or 4-byte letter are still decoded (and checked)
+        foreach (["\u{E9}a", "\u{4E2D}", "\u{1D49C}"] as $tagName) {
+            [$output, $found] = self::clean('<' . $tagName . ' href="javascript&#58;alert(1)">x');
+            static::assertTrue($found, 'testing: ' . $tagName);
+            self::assertNotContainsIgnoringCase('javascript', $output, 'testing: ' . $tagName);
+        }
+
+        // a non-letter after "<" is not a tag (same result as before the linear scan)
+        [$output, $found] = self::clean("<\u{20AC} 5> x");
+        static::assertTrue($found);
+        static::assertSame("&lt;\u{20AC} 5&gt; x", $output);
+    }
+
+    public function testEventHandlerRemovalWithReplacementAndUnicodeSpace()
+    {
+        $config = static function (AntiXSS $antiXss) {
+            $antiXss->setReplacement('[removed]');
+        };
+        [$output, $found] = self::clean('x onclick onerror=alert(1)', $config);
+        static::assertTrue($found);
+        self::assertNotContainsIgnoringCase('onclick', $output);
+        self::assertNotContainsIgnoringCase('onerror', $output);
+
+        // a non-breaking space in front of "=" (no ">" after it)
+        [$output, $found] = self::clean("x onclick \u{A0}[a]=alert(1)");
+        static::assertTrue($found);
+        self::assertNotContainsIgnoringCase('onclick', $output);
+    }
+
+    public function testRemoveNeverAllowedRegexByListOfRegexesOrReplacements()
+    {
+        // a list of regexes (values) removes these regexes
+        static::assertSame('&lt;!--', (new AntiXSS())->xss_clean('<!--'));
+        $antiXss = new AntiXSS();
+        $antiXss->removeNeverAllowedRegex(['<!--']);
+        static::assertSame('<!--', $antiXss->xss_clean('<!--'));
+
+        // BC: a list of replacements removes all regexes with this replacement
+        $antiXss = new AntiXSS();
+        $antiXss->removeNeverAllowedRegex(['']);
+        static::assertSame('document.location', $antiXss->xss_clean('document.location'));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
+    public function testBase64BeforeDataImageIsNotAnAllowedBase64Image()
+    {
+        [$output, $found] = self::clean('<img alt="base64," src="javascript:alert(1)" title="data:image/png">');
+        static::assertTrue($found);
+        self::assertNotContainsIgnoringCase('javascript', $output);
+    }
+
     public function testDataUrlSplitByTabOrNewline()
     {
         // ANT-2026-A7VEVFY6
