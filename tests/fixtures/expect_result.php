@@ -70,7 +70,7 @@ return [
   43 => '<image name=body><image name=adoptNode>@mmrupp<image name=firstElementChild>&lt;svg &gt;',
   44 => '<a href="(1)">@shafigullin<a>',
   45 => '<image name=activeElement>&lt;svg &gt;',
-  46 => '<image name=body><img >&lt;&gt;, &lt;&gt;',
+  46 => '<image name=body><img >&lt;svg  autofocus&gt;, &lt;keygen  autofocus&gt;',
   47 => '<div  x=yscript: n>@superevr</div>',
   48 => '&lt;button remove=me   &gt;@giutro',
   49 => '<a href="">CLICK ME (bypass by @shafigullin)</a>',
@@ -145,7 +145,7 @@ return [
   108 => '<div id="52"><x >//["\'`-->]]>]</div><div id="53">&lt;xml id="xss" src="test.htc"&gt;&lt;/xml&gt;',
   109 => '<label dataformatas="html" datasrc="#xss" datafld="payload"></label>//["\'`-->]]>]</div>',
   110 => '<div id="54">//["\'`-->]]>]</div>',
-  111 => '<div id="55">&lt;video&gt;&lt; &gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
+  111 => '<div id="55">&lt;video&gt;&lt;source &gt;//["\'`-->]]>]</div>',
   112 => '<div id="56">&lt;video &gt;&lt;source&gt;&lt;/source&gt;&lt;/video&gt;//["\'`-->]]>]</div>',
   113 => '<div id="57"><b 0&lt;/b>//["\'`-->]]>]</div>',
   114 => '<div id="58"><b></b><alert&#40;58&#41;&lt;/b></b>//["\'`-->]]>]</div>',
@@ -153,7 +153,9 @@ return [
   116 => '<div id="60"><div >XXX</div>//["\'`-->]]>]</div>',
   117 => '<div id="62">&lt;!-- IE 6-8 --&gt;
 <x \'="foo"><x foo=\'><img >
-& foo=\'&gt;&lt;img \'',
+&lt;!-- IE 6-9 --&gt;
+&lt;! \'="foo"&gt;&lt;x foo=\'&gt;&lt;img \'&gt;
+&lt;? \'="foo"&gt;&lt;x foo=\'&gt;&lt;img \'&gt;//["\'`--&gt;]]&gt;]&lt;/div&gt;',
   118 => '<div id="63">&lt;embed src="(63)"&gt;&lt;/embed&gt; // O10.10↓, OM10.0↓, GC6↓, FF
 <img src="(2)">
 <image src="(2)"> // IE6, O10.10↓, OM10.0↓
@@ -311,7 +313,7 @@ xmlns:svg="http://www.w3.org/2000/svg"&gt;
 //["\'`-->]]>]</div>',
   173 => '<div id="124"> // Safari 5.0, Chrome 9, 10
  // Safari 5.0//["\'`-->]]>]</div>',
-  174 => '<div id="125">&lt;?xml version="1.0"?&gt;&lt;?xml-stylesheet type="text/xml" href="#stylesheet"?&gt;&lt;!DOCTYPE doc [&lt;!ATTLIST xsl:stylesheet  id    ID    #REQUIRED>]>&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">        <xsl:template match="/">            &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;&lt;/iframe&gt;        </xsl:template>    </xsl:stylesheet>    <circle fill="red" r="40"></circle>&lt;/svg&gt;//["\'`-->]]>]</div>',
+  174 => '<div id="125">&lt;?xml version="1.0"?&gt;&lt;?xml-stylesheet type="text/xml" href="#stylesheet"?&gt;&lt;!DOCTYPE doc [&lt;!ATTLIST xsl:stylesheet  id    ID    #REQUIRED>]>&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;    &lt;xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;        <xsl:template match="/">            &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;&lt;/iframe&gt;        </xsl:template>    &lt;/xsl:stylesheet&gt;    <circle fill="red" r="40"></circle>&lt;/svg&gt;//["\'`-->]]>]</div>',
   175 => '<div id="126">&lt;object id="x" classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598"&gt;&lt;/object&gt;
 &lt;object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"  &gt;<param name=postdomevents />&lt;/object&gt;//["\'`-->]]>]</div>',
   176 => '<div id="127">&lt;svg xmlns="http://www.w3.org/2000/svg" id="x"&gt;

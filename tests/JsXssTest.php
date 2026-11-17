@@ -151,10 +151,10 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
 
         static::assertSame('<slot >fallback</slot>', (new AntiXSS())->xss_clean('<slot onslotchange=alert(1)>fallback</slot>'));
 
-        static::assertSame('<div><template shadowrootmode="open"><slot ></slot></template><span>x</span></div>', (new AntiXSS())->xss_clean('<div><template shadowrootmode="open"><slot onslotchange=alert(1)></slot></template><span>x</span></div>'));
+        static::assertSame('<div><template ><slot ></slot></template><span>x</span></div>', (new AntiXSS())->xss_clean('<div><template shadowrootmode="open"><slot onslotchange=alert(1)></slot></template><span>x</span></div>'));
 
         // https://github.com/voku/anti-xss/issues/201
-        static::assertSame('<template shadowrootmode=open><slot >', (new AntiXSS())->xss_clean('<template shadowrootmode=open><slot onslotchange=fetch(\'exemple.com\')>'));
+        static::assertSame('<template ><slot >', (new AntiXSS())->xss_clean('<template shadowrootmode=open><slot onslotchange=fetch(\'exemple.com\')>'));
 
         static::assertSame('&lt;form &gt;&lt;button&gt;go&lt;/button&gt;&lt;/form&gt;', (new AntiXSS())->xss_clean('<form onformdata=alert(1)><button>go</button></form>'));
 

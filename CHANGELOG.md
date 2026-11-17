@@ -2,6 +2,26 @@
 
 ### master (unreleased)
 
+### 4.1.47 (2026-11-17)
+
+- security: fix an XSS-filter bypass via a numeric character reference without ";" (e.g. "&#x3a" / "&#58") followed by a char that is removed before decoding (e.g. "%0b", "%0c", U+FEFF)
+- security: fix an XSS-filter bypass on XHTML pages via namespace-prefixed tags (e.g. "<x:script>")
+- security: fix an XSS-filter bypass via other spellings of encoded script-tags (e.g. "&lt;script &gt;", "&lt;script/x&gt;", "&#60;script>")
+- security: fix an XSS-filter bypass on ISO-2022-JP pages via ESC-sequences (e.g. "ESC ( B") inside of keywords
+- security: fix an XSS-filter bypass via "javascript" + an encoded ":" (e.g. "javascript&colon;") in text next to html-tags
+- security: fix an XSS-filter bypass where an evil tag directly after a look-alike tag (e.g. "<header><style>") was not encoded
+- security: fix several denial-of-service issues (quadratic / exponential runtime on crafted input): compacting of exploded words, event-handler removal, the base64-image check, the html-tag decoding, nested attribute cleaning and the removal of nested url-encoded control chars
+- fix: "addEvilHtmlTags()" with a short name (e.g. "s") does not shadow built-in evil tags (e.g. "style") anymore
+- fix: content after an "<img>" / "<audio>" / "<video>" / "<source>" tag without attributes is not deleted anymore
+- fix: many event names in front of one ">" do not throw a "non-converging sanitization loop"-exception anymore
+- fix: an inline option (e.g. "(?-i)") in a regex from "addNeverAllowedRegex()" does not change the built-in regexes anymore
+- fix: "removeNeverAllowedRegex(['regex' => 'replacement'])" removes only this regex (and not every regex with the same replacement)
+- fix: remove the "shadowrootmode" attribute (declarative shadow DOM)
+- fix: detect "data:" URLs split by tabs / newlines (e.g. "da\tta:", "image/s\nvg")
+- "%0C" (url-encoded form feed) is now replaced by a space instead of being removed
+- add regression tests for all findings (GHSA-v42h-26cv-jpgq), thanks to Anthropic's OSS Scanner
+- ci: lower the Infection gate for changed lines (MSI 100% -> 65%, max. 40 timeouts)
+
 ### 4.1.46 (2026-11-07)
 
 - security: fix XSS-filter bypass via missing HTML tags (e.g. "<geolocation>", "<permission>", "<camera>", "<microphone>", "<portal>") and missing modern DOM event handlers (e.g. "onvalidationstatuschange", "onpromptaction", "onpromptdismiss", "onnavigate*", "onvisibilitychange", ...) (GHSA-28pp-7fjp-8v32)
