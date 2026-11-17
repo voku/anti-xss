@@ -226,6 +226,9 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         [, , $duration] = self::clean(\str_repeat("<a\"'", 30000) . 'x');
         static::assertLessThan(5.0, $duration);
 
+        [, , $duration] = self::clean(\str_repeat("<a\"'", 30000) . 'x>');
+        static::assertLessThan(5.0, $duration);
+
         // a tag with an unclosed quote after a closed one is still decoded
         [$output, $found] = self::clean('<b>x</b><a href="javascript&#58;alert(1)" title="x>');
         static::assertTrue($found);

@@ -853,19 +853,45 @@ final class AntiXSS
             $offset += \strcspn($str, '>"\'', $offset);
         }
 
-        // "index:state" reached by a scan that did not find the end of a tag
+        // no tag can end after the last ">"
+        $lastGt = \strrpos($str, '>');
+        if ($lastGt === false) {
+            return [];
+        }
+
+        // "index * 8 + state" reached by a scan that did not find the end of a tag
         $failed = [];
 
         $tags = [];
         $pos = 0;
-        while (($start = \strpos($str, '<', $pos)) !== false) {
+        while (($start = \strpos($str, '<', $pos)) !== false && $start < $lastGt) {
             $pos = $start + 1;
 
-            if (\preg_match('/\G\p{L}/u', $str, $matchesLetter, 0, $pos) !== 1) {
-                continue;
+            // INFO: only check the next char (max. 4 bytes) and not "$str" with an offset, because with "/u"
+            //       older PHP versions (PCRE1) validate the whole subject on every call (quadratic runtime)
+            if ($pos >= $length) {
+                break;
+            }
+            $leadByte = \ord($str[$pos]);
+            if ($leadByte < 0x80) {
+                $charLength = 1;
+                if (!(($leadByte >= 0x41 && $leadByte <= 0x5A) || ($leadByte >= 0x61 && $leadByte <= 0x7A))) {
+                    continue;
+                }
+            } else {
+                if ($leadByte < 0xE0) {
+                    $charLength = 2;
+                } elseif ($leadByte < 0xF0) {
+                    $charLength = 3;
+                } else {
+                    $charLength = 4;
+                }
+                if (\preg_match('/^\p{L}$/u', (string) \substr($str, $pos, $charLength)) !== 1) {
+                    continue;
+                }
             }
 
-            $cursor = $pos + \strlen($matchesLetter[0]);
+            $cursor = $pos + $charLength;
             $index = self::_first_index_greater_or_equal($positions, $cursor);
 
             // state: is the next relevant char reachable outside of quotes + was a quote of this kind opened
@@ -881,7 +907,7 @@ final class AntiXSS
                     break;
                 }
 
-                $stateKey = $index . ':' . ((int) $reachable) . ((int) $openDouble) . ((int) $openSingle);
+                $stateKey = ($index << 3) | ($reachable ? 4 : 0) | ($openDouble ? 2 : 0) | ($openSingle ? 1 : 0);
                 if (isset($failed[$stateKey])) {
                     break;
                 }
