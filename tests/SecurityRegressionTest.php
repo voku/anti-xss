@@ -289,6 +289,17 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         static::assertTrue($antiXss->isXssFound());
     }
 
+    public function testNeverAllowedRegexWithStartOfPatternDirective()
+    {
+        // "(*UCP)" is only valid at the start of a pattern, so it must not break the combined regex
+        $antiXss = new AntiXSS();
+        $antiXss->addNeverAllowedRegex(['(*UCP)foo\w' => '']);
+
+        static::assertSame('', $antiXss->xss_clean('DOCUMENT.LOCATION'));
+        static::assertTrue($antiXss->isXssFound());
+        static::assertSame('x  y', $antiXss->xss_clean('x fooß y'));
+    }
+
     public function testRemoveNeverAllowedRegexRemovesOnlyTheGivenRegex()
     {
         // ANT-2026-FQPY2TCU
@@ -398,6 +409,8 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
                 "data:image/s\tvg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+",
                 "data:image/s\nvg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+",
                 "da\tta:text/html;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+",
+                "data:image/\tsvg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+",
+                "data:image/\nsvg+xml;base64,PHN2ZyBvbmxvYWQ9YWxlcnQoMSk+",
             ] as $input
         ) {
             [$output, $found] = self::clean($input);

@@ -580,6 +580,13 @@ final class AntiXSS
     private $_cache_never_allowed_regex_string = '';
 
     /**
+     * Regexes that start with a start-of-pattern directive (e.g. "(*UCP)") and can not be combined.
+     *
+     * @var string[]
+     */
+    private $_cache_never_allowed_regex_standalone = [];
+
+    /**
      * @var string
      */
     private $_cache__evil_html_tags_str = '';
@@ -1101,11 +1108,12 @@ final class AntiXSS
                 break;
             }
 
-            $stack = [];
-            $stackSize = 0;
+            // INFO: a pre-allocated string is used as stack (one byte per char), to keep the memory usage low
             $length = \strlen($str);
+            $stack = \str_repeat(' ', $length);
+            $stackSize = 0;
             for ($i = 0; $i < $length; ++$i) {
-                $stack[] = $str[$i];
+                $stack[$stackSize] = $str[$i];
                 ++$stackSize;
 
                 if (
@@ -1128,20 +1136,17 @@ final class AntiXSS
                             \strpos('0123456789abcdefABCDEF', $second) !== false
                         )
                     ) {
-                        \array_pop($stack);
-                        \array_pop($stack);
-                        \array_pop($stack);
                         $stackSize -= 3;
 
                         if ($first === '0' && ($second === 'c' || $second === 'C')) {
-                            $stack[] = ' ';
+                            $stack[$stackSize] = ' ';
                             ++$stackSize;
                         }
                     }
                 }
             }
 
-            $str = \implode('', $stack);
+            $str = (string) \substr($stack, 0, $stackSize);
         } while ($strBefore !== $str);
 
         return $str;
@@ -1278,6 +1283,15 @@ final class AntiXSS
         if ($this->_cache_never_allowed_regex_string) {
             $tmp = \preg_replace(
                 '#' . $this->_cache_never_allowed_regex_string . '#ius',
+                $this->_replacement,
+                $str
+            );
+            $str = $tmp ?? $str;
+        }
+
+        foreach ($this->_cache_never_allowed_regex_standalone as $regex) {
+            $tmp = \preg_replace(
+                '#' . $regex . '#ius',
                 $this->_replacement,
                 $str
             );
@@ -1823,7 +1837,7 @@ final class AntiXSS
             // data-attribute + base64
             //
             // INFO: browsers remove tabs and newlines in URLs, so "da\tta:" is "data:" and "image/s\nvg" is "image/svg"
-            "([\"'])?d[\t\n\r]*+a[\t\n\r]*+t[\t\n\r]*+a\s*:\s*(?!image\s*\/\s*(?!s[\t\n\r]*+v[\t\n\r]*+g))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
+            "([\"'])?d[\t\n\r]*+a[\t\n\r]*+t[\t\n\r]*+a\s*:\s*(?!image\s*+\/\s*+(?!s[\t\n\r]*+v[\t\n\r]*+g))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
             'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
             // src="js"
@@ -1843,8 +1857,16 @@ final class AntiXSS
         $regexCombined = [];
         $regexReplacements = [];
 
+        $regexStandalone = [];
         foreach ($this->_never_allowed_regex as $regex => $replacement) {
             if ($replacement === $this->_replacement) {
+                // INFO: a start-of-pattern directive (e.g. "(*UCP)") is only valid at the start of a pattern
+                if (\strpos((string) $regex, '(*') === 0) {
+                    $regexStandalone[] = (string) $regex;
+
+                    continue;
+                }
+
                 $regexCombined[] = $regex;
 
                 continue;
@@ -1859,6 +1881,7 @@ final class AntiXSS
             ? ''
             : '(?:' . \implode(')|(?:', $regexCombined) . ')';
         $this->_cache_never_allowed_regex_replacements = $regexReplacements;
+        $this->_cache_never_allowed_regex_standalone = $regexStandalone;
     }
 
     /**
