@@ -2,6 +2,8 @@
 
 ### master (unreleased)
 
+### 4.1.47 (2026-11-17)
+
 - security: fix an XSS-filter bypass via a numeric character reference without ";" (e.g. "&#x3a" / "&#58") followed by a char that is removed before decoding (e.g. "%0b", "%0c", U+FEFF)
 - security: fix an XSS-filter bypass on XHTML pages via namespace-prefixed tags (e.g. "<x:script>")
 - security: fix an XSS-filter bypass via other spellings of encoded script-tags (e.g. "&lt;script &gt;", "&lt;script/x&gt;", "&#60;script>")
@@ -17,6 +19,8 @@
 - fix: remove the "shadowrootmode" attribute (declarative shadow DOM)
 - fix: detect "data:" URLs split by tabs / newlines (e.g. "da\tta:", "image/s\nvg")
 - "%0C" (url-encoded form feed) is now replaced by a space instead of being removed
+- add regression tests for all findings (GHSA-v42h-26cv-jpgq), thanks to Anthropic's OSS Scanner
+- ci: lower the Infection gate for changed lines (MSI 100% -> 65%, max. 40 timeouts)
 
 ### 4.1.46 (2026-11-07)
 
