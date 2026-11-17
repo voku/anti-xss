@@ -1235,8 +1235,10 @@ final class AntiXSS
             }
         }
         if (\count($replaceNeverAllowedCall) > 0) {
+            // INFO: also with an encoded ":" (e.g. "javascript&colon;"), because text between html-tags is
+            //       not entity-decoded here, but the browser decodes it e.g. in an attribute value
             $tmp = \preg_replace(
-                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*:(?!\s[\p{L}\p{N}\s]*$)(?:.*?([/\\\;()\'">]|$))#ius',
+                '#([^\p{L}]|^)(?:' . \implode('|', $replaceNeverAllowedCall) . ')\s*(?::|&colon;|&\#0*+58;?|&\#x0*+3a;?)(?!\s[\p{L}\p{N}\s]*$)(?:.*?([/\\\;()\'">]|$))#ius',
                 '$1' . $this->_replacement . '$2',
                 $str
             );
@@ -2638,9 +2640,12 @@ final class AntiXSS
             }
 
             $str = (string) \preg_replace_callback(
+                // INFO: "rest" must not consume the "<" of a following tag (e.g. "<header><style>"), otherwise
+                //       that tag is skipped by this pass
+                //
                 // INFO: "prefix" -> XML namespace prefix (e.g. "<x:script>"), that is a real "script"-element on
                 //       XHTML pages (application/xhtml+xml), if "x" is bound to the XHTML namespace
-                '#<(?<start>/*\s*)(?<prefix>(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
+                '#<(?<start>/*\s*)(?<prefix>(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>>*+(?:<(?![\p{L}/!?])>*+)*+)#ius',
                 [$this, '_sanitize_naughty_html_callback'],
                 $str
             );

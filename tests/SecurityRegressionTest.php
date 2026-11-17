@@ -280,6 +280,34 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<template ></template>', $output);
     }
 
+    public function testEncodedColonAfterJavascriptBetweenTagsIsDetected()
+    {
+        // side note in ANT-2026-M5424N6G: "javascript&colon;print()//<b>" (e.g. printed into <a href="OUT">)
+        foreach (
+            [
+                'javascript&colon;print()//<b>',
+                '<b>x</b>javascript&#58print()//',
+                '<b>x</b>javascript&#x3a;print()//',
+            ] as $input
+        ) {
+            [$output, $found] = self::clean($input);
+            static::assertTrue($found, 'testing: ' . $input);
+            static::assertStringNotContainsStringIgnoringCase('javascript', $output, 'testing: ' . $input);
+        }
+    }
+
+    public function testEvilTagDirectlyAfterLookalikeTagIsEncoded()
+    {
+        // side note in ANT-2026-RKI0UXIG: a tag directly after "<header>" skipped the evil-tag check
+        [$output, $found] = self::clean('<header><style>x</style>');
+        static::assertTrue($found);
+        static::assertStringNotContainsString('<style>', $output);
+
+        [$output, $found] = self::clean('<header><svg>');
+        static::assertTrue($found);
+        static::assertStringNotContainsString('<svg>', $output);
+    }
+
     public function testDataUrlSplitByTabOrNewline()
     {
         // ANT-2026-A7VEVFY6

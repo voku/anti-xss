@@ -6,6 +6,8 @@
 - security: fix an XSS-filter bypass on XHTML pages via namespace-prefixed tags (e.g. "<x:script>")
 - security: fix an XSS-filter bypass via other spellings of encoded script-tags (e.g. "&lt;script &gt;", "&lt;script/x&gt;", "&#60;script>")
 - security: fix an XSS-filter bypass on ISO-2022-JP pages via ESC-sequences (e.g. "ESC ( B") inside of keywords
+- security: fix an XSS-filter bypass via "javascript" + an encoded ":" (e.g. "javascript&colon;") in text next to html-tags
+- security: fix an XSS-filter bypass where an evil tag directly after a look-alike tag (e.g. "<header><style>") was not encoded
 - security: fix several denial-of-service issues (quadratic / exponential runtime on crafted input): compacting of exploded words, event-handler removal, the base64-image check, the html-tag decoding, nested attribute cleaning and the removal of nested url-encoded control chars
 - fix: "addEvilHtmlTags()" with a short name (e.g. "s") does not shadow built-in evil tags (e.g. "style") anymore
 - fix: content after an "<img>" / "<audio>" / "<video>" / "<source>" tag without attributes is not deleted anymore
