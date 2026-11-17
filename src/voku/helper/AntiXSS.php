@@ -38,6 +38,13 @@ final class AntiXSS
 {
     private const MAX_SANITIZATION_PASSES = 100;
 
+    /**
+     * Max. depth of nested "xss_clean()"-calls (via a clone) for attribute values.
+     *
+     * INFO: without a limit the runtime is exponential in the nesting depth of crafted input
+     */
+    private const MAX_NESTED_CLEAN_DEPTH = 2;
+
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
@@ -417,6 +424,9 @@ final class AntiXSS
      */
     private $_evil_attributes_regex = [
         'style',
+        // declarative shadow DOM: "<template shadowrootmode=open>" can hide the rest of the page
+        'shadowrootmode',
+        'shadowroot',
         'xmlns:xdp',
         'formaction',
         'form',
@@ -553,6 +563,13 @@ final class AntiXSS
     private $_keep_pre_and_code_tag_content = false;
 
     /**
+     * Depth of nested "xss_clean()"-calls via a clone (0 === not nested).
+     *
+     * @var int
+     */
+    private $_nested_clean_depth = 0;
+
+    /**
      * @var string
      */
     private $_cache_evil_attributes_regex_string = '';
@@ -653,7 +670,10 @@ final class AntiXSS
                 $this->_cache_compact_exploded_words[$word] = [
                     'chunk' => $chunkWord,
                     'split' => $splitWord,
-                    'regex' => '~(?<before>[^\p{L}]|^)(?<word>' . $chunkWord . ')(?<after>[^\p{L}@.!?\' ]|$)~ius',
+                    // INFO: "(?<!%0)" -> never start a word on the last char of an url-encoded spacing-token
+                    //       (e.g. the "d" in "%0d", the "e" in "%0e" or the "b" in "%0b"), otherwise a long run of
+                    //       these tokens makes every single token a possible match start (quadratic runtime / ReDoS)
+                    'regex' => '~(?<before>[^\p{L}]|^)(?<!%0)(?<word>' . $chunkWord . ')(?<after>[^\p{L}@.!?\' ]|$)~ius',
                 ];
             }
 
@@ -716,7 +736,11 @@ final class AntiXSS
 
         // protect GET variables without XSS in URLs
         $needProtection = true;
-        if (\strpos($str, '=') !== false) {
+        if (
+            \strpos($str, '=') !== false
+            &&
+            $this->_nested_clean_depth < self::MAX_NESTED_CLEAN_DEPTH
+        ) {
             $strCopy = $str;
             $matchesTmp = [];
             while (\preg_match("/[?|&]?[\p{L}\d_\-\[\]]+\s*=\s*([\"'])(?<attr>[^\1]*?)\\1/u", $strCopy, $matches)) {
@@ -732,7 +756,7 @@ final class AntiXSS
                 $needProtection = false;
                 foreach ($matchesTmp as $matches) {
                     if ($matches['attr'] !== '') {
-                        $tmpAntiXss = clone $this;
+                        $tmpAntiXss = $this->_clone_for_nested_clean();
 
                         $urlPartClean = $tmpAntiXss->xss_clean((string) $matches['attr']);
 
@@ -760,6 +784,19 @@ final class AntiXSS
     }
 
     /**
+     * Clone this instance for a nested "xss_clean()"-call (e.g. for an attribute value).
+     *
+     * @return self
+     */
+    private function _clone_for_nested_clean()
+    {
+        $tmpAntiXss = clone $this;
+        ++$tmpAntiXss->_nested_clean_depth;
+
+        return $tmpAntiXss;
+    }
+
+    /**
      * Decode the html-tags but keep links without XSS.
      *
      * @param string $str
@@ -768,24 +805,154 @@ final class AntiXSS
      */
     private function _decode_string($str)
     {
-        static $REGEX_FOR_HTML_TAGS = '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU';
+        if (\strpos($str, '<') !== false) {
+            $tags = $this->_find_html_tags($str);
+            if ($tags !== []) {
+                $result = '';
+                $offset = 0;
+                foreach ($tags as $tag) {
+                    $result .= \substr($str, $offset, $tag[0] - $offset);
+                    $result .= $this->_decode_entity([(string) \substr($str, $tag[0], $tag[1] - $tag[0])]);
+                    $offset = $tag[1];
+                }
 
-        if (
-            \strpos($str, '<') !== false
-            &&
-            \preg_match($REGEX_FOR_HTML_TAGS, $str)
-        ) {
-            $tmp = \preg_replace_callback(
-                $REGEX_FOR_HTML_TAGS,
-                [$this, '_decode_entity'],
-                $str
-            );
-            $str = $tmp ?? $str;
-        } else {
-            $str = UTF8::rawurldecode($str);
+                return $result . \substr($str, $offset);
+            }
         }
 
-        return $str;
+        return UTF8::rawurldecode($str);
+    }
+
+    /**
+     * Find html-tags ("<" + letter ... ">", where a ">" inside of quotes does not end the tag).
+     *
+     * <p>
+     * <br />
+     * INFO: This replaces the regex '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU', which was exponential on runs
+     *       of quotes without a reachable ">" (ReDoS). This scan follows all ways the regex could match at
+     *       once (a quote can be closed by any later quote of the same kind) and returns the first ">" that
+     *       is reachable outside of quotes. States from which a previous scan did not find the end of a tag
+     *       are remembered, so that no part of the string is scanned twice in the same state (linear time).
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return array<int, array{0: int, 1: int}>
+     *                                           <p>list of [start, end) offsets</p>
+     */
+    private function _find_html_tags($str)
+    {
+        $length = \strlen($str);
+
+        // offsets of all chars that are relevant for the scan
+        $positions = [];
+        $offset = \strcspn($str, '>"\'');
+        while ($offset < $length) {
+            $positions[] = $offset;
+            ++$offset;
+            $offset += \strcspn($str, '>"\'', $offset);
+        }
+
+        // "index:state" reached by a scan that did not find the end of a tag
+        $failed = [];
+
+        $tags = [];
+        $pos = 0;
+        while (($start = \strpos($str, '<', $pos)) !== false) {
+            $pos = $start + 1;
+
+            if (\preg_match('/\G\p{L}/u', $str, $matchesLetter, 0, $pos) !== 1) {
+                continue;
+            }
+
+            $cursor = $pos + \strlen($matchesLetter[0]);
+            $index = self::_first_index_greater_or_equal($positions, $cursor);
+
+            // state: is the next relevant char reachable outside of quotes + was a quote of this kind opened
+            $reachable = true;
+            $openDouble = false;
+            $openSingle = false;
+
+            $visited = [];
+            $end = null;
+            while ($index !== null && isset($positions[$index])) {
+                if (!$reachable && !$openDouble && !$openSingle) {
+                    // inside of a quote that can never be closed
+                    break;
+                }
+
+                $stateKey = $index . ':' . ((int) $reachable) . ((int) $openDouble) . ((int) $openSingle);
+                if (isset($failed[$stateKey])) {
+                    break;
+                }
+                $visited[] = $stateKey;
+
+                $char = $str[$positions[$index]];
+                if ($char === '>') {
+                    if ($reachable) {
+                        $end = $positions[$index] + 1;
+
+                        break;
+                    }
+
+                    // a ">" inside of quotes
+                    ++$index;
+
+                    continue;
+                }
+
+                // quote: it can close any already opened quote of this kind (".*\1" can be extended to any
+                //        later quote), and it opens a new quote if it's reachable outside of quotes
+                if ($char === '"') {
+                    $nextReachable = $openDouble;
+                    $openDouble = $openDouble || $reachable;
+                } else {
+                    $nextReachable = $openSingle;
+                    $openSingle = $openSingle || $reachable;
+                }
+                $reachable = $nextReachable;
+
+                ++$index;
+            }
+
+            if ($end === null) {
+                foreach ($visited as $visitedKey) {
+                    $failed[$visitedKey] = true;
+                }
+
+                continue;
+            }
+
+            $tags[] = [$start, $end];
+            $pos = $end;
+        }
+
+        return $tags;
+    }
+
+    /**
+     * Binary search in a sorted list of ints.
+     *
+     * @param int[] $list
+     * @param int   $value
+     *
+     * @return int|null
+     *                  <p>the index of the first element >= $value, or null</p>
+     */
+    private static function _first_index_greater_or_equal(array $list, $value)
+    {
+        $low = 0;
+        $high = \count($list);
+        while ($low < $high) {
+            $mid = ($low + $high) >> 1;
+            if ($list[$mid] < $value) {
+                $low = $mid + 1;
+            } else {
+                $high = $mid;
+            }
+        }
+
+        return $low < \count($list) ? $low : null;
     }
 
     /**
@@ -815,8 +982,16 @@ final class AntiXSS
         // replace the diamond question mark (�) and invalid-UTF8 chars
         $str = UTF8::replace_diamond_question_mark($str, '');
 
-        // replace invisible characters with one single space
-        $str = UTF8::remove_invisible_characters($str, true, '', false);
+        // terminate numeric character references without ";" (e.g. "&#x3a" or "&#58"), before the next steps
+        // remove or decode the chars after it, otherwise e.g. "&#x3a%0bfetch(1)" would become "&#x3afetch(1)"
+        // here (U+3AFE), but "javascript:%0bfetch(1)" in the browser
+        if (\strpos($str, '&#') !== false) {
+            $tmp = \preg_replace('/&#(?:[xX][0-9a-fA-F]++|[0-9]++)(?!;)/', '$0;', $str);
+            $str = $tmp ?? $str;
+        }
+
+        // remove invisible characters (also url-encoded ones like "%00")
+        $str = $this->_remove_invisible_characters($str);
 
         // decode UTF-7 characters
         $str = $this->_repack_utf7($str);
@@ -870,6 +1045,86 @@ final class AntiXSS
             $this->_xss_found = !($str_backup === $str);
         }
         
+        return $str;
+    }
+
+    /**
+     * Remove invisible characters, also url-encoded control characters ("%00" - "%1F", except "%09", "%0A" and
+     * "%0D"), like "UTF8::remove_invisible_characters($str, true, '', false)", but in linear time.
+     *
+     * <p>
+     * <br />
+     * INFO: The vendor method repeats its regex until nothing changes, so that nested escapes like
+     *       "%0%0%000" needed one (full) regex pass per level (quadratic runtime). Here the url-encoded
+     *       control characters are removed via a stack, which also removes escapes that are only formed
+     *       by removing an inner one. "%0C" (form feed) is HTML whitespace, so it's replaced by a space.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_invisible_characters($str)
+    {
+        $iterations = 0;
+        do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
+            $strBefore = $str;
+
+            // raw control characters etc. (without the url-encoded ones)
+            $str = UTF8::remove_invisible_characters($str, false, '', false);
+
+            if (\strpos($str, '%') === false) {
+                break;
+            }
+
+            if (\preg_match('/%[01]/', $str) !== 1) {
+                break;
+            }
+
+            $stack = [];
+            $stackSize = 0;
+            $length = \strlen($str);
+            for ($i = 0; $i < $length; ++$i) {
+                $stack[] = $str[$i];
+                ++$stackSize;
+
+                if (
+                    $stackSize >= 3
+                    &&
+                    $stack[$stackSize - 3] === '%'
+                ) {
+                    $first = $stack[$stackSize - 2];
+                    $second = $stack[$stackSize - 1];
+                    if (
+                        (
+                            $first === '0'
+                            &&
+                            \strpos('012345678bcefBCEF', $second) !== false
+                        )
+                        ||
+                        (
+                            $first === '1'
+                            &&
+                            \strpos('0123456789abcdefABCDEF', $second) !== false
+                        )
+                    ) {
+                        \array_pop($stack);
+                        \array_pop($stack);
+                        \array_pop($stack);
+                        $stackSize -= 3;
+
+                        if ($first === '0' && ($second === 'c' || $second === 'C')) {
+                            $stack[] = ' ';
+                            ++$stackSize;
+                        }
+                    }
+                }
+            }
+
+            $str = \implode('', $stack);
+        } while ($strBefore !== $str);
+
         return $str;
     }
 
@@ -958,11 +1213,18 @@ final class AntiXSS
             $NEVER_ALLOWED_CACHE['keys'] = \array_keys($this->_never_allowed_str);
         }
 
-        $str = \str_ireplace(
-            $NEVER_ALLOWED_CACHE['keys'],
-            $this->_never_allowed_str,
-            $str
-        );
+        // INFO: repeat until nothing changes, so that nested strings like "docdocument.cookieument.cookie"
+        //       are removed here and not only one layer per (expensive) pass of the main loop in "_do()"
+        $iterations = 0;
+        do {
+            $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
+            $strBefore = $str;
+            $str = \str_ireplace(
+                $NEVER_ALLOWED_CACHE['keys'],
+                $this->_never_allowed_str,
+                $str
+            );
+        } while ($strBefore !== $str);
 
         // ---
 
@@ -1023,13 +1285,263 @@ final class AntiXSS
         }
 
         foreach ($array as $eventNameBeginning => $events) {
+            // INFO: longest names first, so that e.g. "onLoadEnd" is not matched as "onLoad" + "End"
+            \usort(
+                $events,
+                static function ($a, $b) {
+                    return \strlen($b) <=> \strlen($a);
+                }
+            );
+
+            // INFO: only the "before"-part and the event name are matched here, the "after"-part is checked
+            //       in "_remove_never_allowed_on_events_afterwards()" without regex-backtracking
             $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] =
-                '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')(?<after>\(.*?\)|.*?>|(?:\s|\[.*?\])*?=(?:\s|\[.*?\])*?|(?:\s|\[.*?\])*?&equals;(?:\s|\[.*?\])*?|[^\p{L}]*?=[^\p{L}]*?|[^\p{L}]*?&equals;[^\p{L}]*?|$|\s*?>*?$)';
+                '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')';
         }
 
         $this->_cache_never_allowed_on_events_afterwards_chunks = $array;
 
         return $this->_cache_never_allowed_on_events_afterwards_chunks;
+    }
+
+    /**
+     * Remove all event names (e.g. "onclick") that are followed by something that makes them usable as
+     * an event handler ("(...)", "=", a later ">" or the end of the string).
+     *
+     * <p>
+     * <br />
+     * INFO: This replaces a regex like "onclick(.*?>|=|$|...)", which removed only one name per ">" and per
+     *       pass (so that e.g. 2000 names needed 2000 passes) and which was quadratic as a lookahead. Here the
+     *       names are processed from the end of the string to the start, and the "after"-part of each name
+     *       is checked against the text that follows it *after* the removal of the following names. So the
+     *       result is the same as running the old regex until nothing changes, but in one linear pass.
+     * </p>
+     *
+     * @param string $str
+     * @param string $regexNames <p>regex for the "before"-part + event names</p>
+     *
+     * @return string
+     */
+    private function _remove_never_allowed_on_events_afterwards($str, $regexNames)
+    {
+        if (
+            !\preg_match_all(
+                '#' . $regexNames . '#ius',
+                $str,
+                $matches,
+                \PREG_SET_ORDER | \PREG_OFFSET_CAPTURE
+            )
+        ) {
+            return $str;
+        }
+
+        $length = \strlen($str);
+        $lastGt = \strrpos($str, '>');
+        $lastClosingParenthesis = \strrpos($str, ')');
+
+        // summary of the (already cleaned) text after the current event name
+        $tail = $this->_events_tail_summary_empty();
+
+        $remove = [];
+        $names = [];
+        for ($i = \count($matches) - 1; $i >= 0; --$i) {
+            $match = $matches[$i];
+            $matchStart = (int) $match[0][1];
+            $nameStart = $matchStart + \strlen($match['before'][0]);
+            $nameEnd = $matchStart + \strlen($match[0][0]);
+            $names[$i] = [$nameStart, $nameEnd];
+
+            $gapEnd = isset($names[$i + 1]) ? $names[$i + 1][0] : $length;
+            $gap = (string) \substr($str, $nameEnd, $gapEnd - $nameEnd);
+
+            $tailAfterName = $this->_events_tail_summary_compose($gap, $tail);
+
+            $isEvent = (
+                // "onclick ... >"
+                ($lastGt !== false && $lastGt >= $nameEnd)
+                ||
+                // "onclick(...)"
+                (
+                    $gap !== ''
+                    &&
+                    $gap[0] === '('
+                    &&
+                    $lastClosingParenthesis !== false
+                    &&
+                    $lastClosingParenthesis > $nameEnd
+                )
+                ||
+                // "onclick=", "onclick&equals;", "onclick [foo] =", "onclick" at the end
+                $tailAfterName['a']
+                ||
+                $tailAfterName['b']
+                ||
+                $tailAfterName['c']
+            );
+
+            $remove[$i] = $isEvent;
+
+            // summary of the text starting at this event name (after cleaning) for the previous name
+            if ($isEvent) {
+                $tail = $this->_replacement === ''
+                    ? $tailAfterName
+                    : $this->_events_tail_summary_compose($this->_replacement, $tailAfterName);
+            } else {
+                $tail = $this->_events_tail_summary_compose(
+                    (string) \substr($str, $nameStart, $nameEnd - $nameStart),
+                    $tailAfterName
+                );
+            }
+        }
+
+        $result = '';
+        $offset = 0;
+        for ($i = 0, $count = \count($names); $i < $count; ++$i) {
+            $name = $names[$i];
+            if ($remove[$i] !== true) {
+                continue;
+            }
+
+            $result .= \substr($str, $offset, $name[0] - $offset) . $this->_replacement;
+            $offset = $name[1];
+        }
+
+        if ($offset === 0) {
+            return $str;
+        }
+
+        return $result . \substr($str, $offset);
+    }
+
+    /**
+     * @return array{a: bool, b: bool, bin: bool, c: bool, pre: string}
+     */
+    private function _events_tail_summary_empty()
+    {
+        return [
+            'a'   => false,
+            'b'   => false,
+            'bin' => false,
+            'c'   => true,
+            'pre' => '',
+        ];
+    }
+
+    /**
+     * Summary of "$prefix . <text summarized by $tail>", without building that (maybe long) text.
+     *
+     * <p>
+     * <br />
+     * a   -> starts with "[^\p{L}]*?(?:=|&equals;)"<br />
+     * b   -> starts with "(?:\s|\[[^\]]*\])*(?:=|&equals;)"<br />
+     * bin -> like "b", but starting inside of "[...]"<br />
+     * c   -> only whitespace<br />
+     * pre -> the first bytes (to detect "&equals;" across the border)
+     * </p>
+     *
+     * @param string $prefix
+     * @param array{a: bool, b: bool, bin: bool, c: bool, pre: string} $tail
+     *
+     * @return array{a: bool, b: bool, bin: bool, c: bool, pre: string}
+     */
+    private function _events_tail_summary_compose($prefix, array $tail)
+    {
+        if ($prefix === '') {
+            return $tail;
+        }
+
+        $prefixLength = \strlen($prefix);
+        $str = $prefix . $tail['pre'];
+
+        // a: "[^\p{L}]*?(?:=|&equals;)"
+        if (\preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA) === 1) {
+            $pos = \strlen($matchesA[0]);
+        } else {
+            // invalid UTF-8 etc.: be strict
+            $pos = 0;
+        }
+        if ($pos >= $prefixLength) {
+            $a = $tail['a'];
+        } else {
+            $a = $str[$pos] === '=' || $str[$pos] === '&';
+        }
+
+        // b: "(?:\s|\[[^\]]*\])*(?:=|&equals;)" (outside and inside of "[...]")
+        $b = $this->_events_tail_scan_b($prefix, false, $tail);
+        $bin = $this->_events_tail_scan_b($prefix, true, $tail);
+
+        // c: only whitespace
+        $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) === 1;
+
+        // the first chars (not bytes, so that we never cut an UTF-8 char)
+        if (\preg_match('/^.{0,16}/us', $str, $matchesPre) === 1) {
+            $pre = $matchesPre[0];
+        } else {
+            $pre = '';
+        }
+
+        return [
+            'a'   => $a,
+            'b'   => $b,
+            'bin' => $bin,
+            'c'   => $c,
+            'pre' => $pre,
+        ];
+    }
+
+    /**
+     * @param string $prefix
+     * @param bool   $inside
+     * @param array{a: bool, b: bool, bin: bool, c: bool, pre: string} $tail
+     *
+     * @return bool
+     */
+    private function _events_tail_scan_b($prefix, $inside, array $tail)
+    {
+        $length = \strlen($prefix);
+        $str = $prefix . $tail['pre'];
+
+        for ($i = 0; $i < $length; ++$i) {
+            $char = $str[$i];
+
+            if ($inside) {
+                if ($char === ']') {
+                    $inside = false;
+                }
+
+                continue;
+            }
+
+            if ($char === '[') {
+                $inside = true;
+
+                continue;
+            }
+
+            if ($char === '=') {
+                return true;
+            }
+
+            if ($char === '&') {
+                return \stripos($str, '&equals;', $i) === $i;
+            }
+
+            if (\strpos(" \t\n\r\f\v", $char) !== false) {
+                continue;
+            }
+
+            if (\ord($char) >= 0x80 && \preg_match('/^\s/u', (string) \substr($str, $i, 4)) === 1) {
+                // e.g. a non-breaking space; skip all bytes of this char
+                \preg_match('/^\s/u', (string) \substr($str, $i, 4), $matchesSpace);
+                $i += \strlen($matchesSpace[0]) - 1;
+
+                continue;
+            }
+
+            return false;
+        }
+
+        return $inside ? $tail['bin'] : $tail['b'];
     }
 
     /**
@@ -1060,29 +1572,49 @@ final class AntiXSS
                     $iterations = 0;
                     do {
                         $this->_guardAgainstNonConvergingLoop($iterations, __METHOD__);
-                        $count = $temp_count = 0;
+                        $strBefore = $str;
 
-                        $tmp = \preg_replace(
-                            '#' . $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] . '#ius',
-                            '$1' . $this->_replacement . '$2',
+                        $str = $this->_remove_never_allowed_on_events_afterwards(
                             $str,
-                            -1,
-                            $temp_count
+                            $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning]
                         );
-                        $str = $tmp ?? $str;
-                        $count += $temp_count;
-                    } while ($count);
+                    } while ($strBefore !== $str);
 
                     break;
                 }
             }
         }
 
-        return (string) \str_ireplace(
+        $str = (string) \str_ireplace(
             $this->_never_allowed_str_afterwards,
             $this->_replacement,
             $str
         );
+
+        // also remove all other spellings of the encoded tags from "_never_allowed_str_afterwards" (e.g.
+        // "&lt;script&gt;"), that a browser would decode into the same tag (e.g. in a "srcdoc"-attribute):
+        // "&lt;script &gt;", "&lt;script/x&gt;", "&#60;script>", "&LTscript\t>", ...
+        if (\strpos($str, '&') !== false) {
+            $tagNames = [];
+            foreach ($this->_never_allowed_str_afterwards as $neverAllowedStr) {
+                if (\preg_match('#^&lt;/?([a-z][a-z\d-]*+)&gt;$#i', $neverAllowedStr, $matchesTagName) === 1) {
+                    if (\stripos($str, $matchesTagName[1]) !== false) {
+                        $tagNames[\strtolower($matchesTagName[1])] = \preg_quote($matchesTagName[1], '#');
+                    }
+                }
+            }
+
+            if ($tagNames !== []) {
+                $tmp = \preg_replace(
+                    '#(?:&lt;?|&\#0*+60;?|&\#x0*+3c;?)(?:/|&sol;|&\#0*+47;?|&\#x0*+2f;?)?(?:' . \implode('|', $tagNames) . ')(?=[\s/>]|&(?:gt;?|sol;|tab;|newline;|\#0*+(?:62|47|9|10|12|13|32);?|\#x0*+(?:3e|2f|9|a|c|d|20);?))#i',
+                    $this->_replacement,
+                    $str
+                );
+                $str = $tmp ?? $str;
+            }
+        }
+
+        return $str;
     }
 
     /**
@@ -1283,7 +1815,9 @@ final class AntiXSS
             // default javascript
             '(\(?:?document\)?|\(?:?window\)?(?:\.document)?)\.(?:location|on\w*)' => $replacement,
             // data-attribute + base64
-            "([\"'])?data\s*:\s*(?!image\s*\/\s*(?!svg.*?))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
+            //
+            // INFO: browsers remove tabs and newlines in URLs, so "da\tta:" is "data:" and "image/s\nvg" is "image/svg"
+            "([\"'])?d[\t\n\r]*+a[\t\n\r]*+t[\t\n\r]*+a\s*:\s*(?!image\s*\/\s*(?!s[\t\n\r]*+v[\t\n\r]*+g))[^\1]*?base64[^\1]*?,[^\1]*?\1?" => $replacement,
             // old IE, old Netscape
             'expres(?:\\\\|\s)*sion\s*(?:\(|&\#40;)' => $replacement,
             // src="js"
@@ -1313,7 +1847,11 @@ final class AntiXSS
             $regexReplacements[$regex] = $replacement;
         }
 
-        $this->_cache_never_allowed_regex_string = \implode('|', $regexCombined);
+        // INFO: every regex in its own group, so that e.g. an inline option like "(?-i)" in a custom regex
+        //       does not change the following (built-in) regexes
+        $this->_cache_never_allowed_regex_string = $regexCombined === []
+            ? ''
+            : '(?:' . \implode(')|(?:', $regexCombined) . ')';
         $this->_cache_never_allowed_regex_replacements = $regexReplacements;
     }
 
@@ -1443,11 +1981,16 @@ final class AntiXSS
                 $needProtection = !$isValidAttributeUrl;
 
                 if ($needProtection) {
-                    $tmpAntiXss = clone $this;
+                    if ($this->_nested_clean_depth >= self::MAX_NESTED_CLEAN_DEPTH) {
+                        // too deeply nested for another clean: fail closed
+                        $nestedXssFound = true;
+                    } else {
+                        $tmpAntiXss = $this->_clone_for_nested_clean();
+                        $tmpAntiXss->xss_clean((string) $matchInner[0]);
+                        $nestedXssFound = $tmpAntiXss->isXssFound() === true;
+                    }
 
-                    $tmpAntiXss->xss_clean((string) $matchInner[0]);
-
-                    if ($tmpAntiXss->isXssFound() === true) {
+                    if ($nestedXssFound) {
                         $foundSomethingBad = true;
                         $this->_xss_found = true;
 
@@ -1657,6 +2200,38 @@ final class AntiXSS
     }
 
     /**
+     * Check for a base64 encoded image ("data:image/...base64...,") in the attributes of an "<img>"-tag.
+     *
+     * <p>
+     * <br />
+     * INFO: This was a regex with adjacent unbounded quantifiers (".*" + "[^\1]*", where "\1" in a
+     *       double-quoted PHP string is the byte 0x01), which was quadratic on many "data:image/" without a
+     *       comma (ReDoS). The first "data:image/" has the most text after it, so it's enough to check that one.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return bool
+     */
+    private function _is_base64_image($str)
+    {
+        if (\strpos($str, 'base64') === false) {
+            return false;
+        }
+
+        if (\preg_match('/data\s*+:\s*+image\s*+\//iu', $str, $matches, \PREG_OFFSET_CAPTURE) !== 1) {
+            return false;
+        }
+
+        $base64Pos = \strpos($str, 'base64', (int) $matches[0][1] + \strlen($matches[0][0]));
+        if ($base64Pos === false) {
+            return false;
+        }
+
+        return \strpos($str, ',', $base64Pos + 6) !== false;
+    }
+
+    /**
      * Remove disallowed Javascript in links or img tags
      *
      * <p>
@@ -1704,13 +2279,9 @@ final class AntiXSS
 
             if (\stripos($str, '<img') !== false) {
                 $strTmp = \preg_replace_callback(
-                    '#<img[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                    '#<img[^\p{L}@>]+([^>]*?)(?:\s?/?>|$)#iu',
                     function ($matches) {
-                        if (
-                            \strpos($matches[1], 'base64') !== false
-                            &&
-                            \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
-                        ) {
+                        if ($this->_is_base64_image($matches[1])) {
                             return $matches[0];
                         }
 
@@ -1720,13 +2291,9 @@ final class AntiXSS
                 );
                 if ($strTmp === null) {
                     $strTmp = \preg_replace_callback(
-                        '#<img[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        '#<img[^\p{L}@>]+([^>]*)(?:\s?/?>|$)#iu',
                         function ($matches) {
-                            if (
-                                \strpos($matches[1], 'base64') !== false
-                                &&
-                                \preg_match("/([\"'])?data\s*:\s*(?:image\s*\/.*)[^\1]*base64[^\1]*,[^\1]*\1?/iUus", $matches[1])
-                            ) {
+                            if ($this->_is_base64_image($matches[1])) {
                                 return $matches[0];
                             }
 
@@ -1740,13 +2307,13 @@ final class AntiXSS
 
             if (\stripos($str, '<audio') !== false) {
                 $strTmp = \preg_replace_callback(
-                    '#<audio[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                    '#<audio[^\p{L}@>]+([^>]*?)(?:\s?/?>|$)#iu',
                     [$this, '_js_src_removal_callback'],
                     $str
                 );
                 if ($strTmp === null) {
                     $strTmp = \preg_replace_callback(
-                        '#<audio[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        '#<audio[^\p{L}@>]+([^>]*)(?:\s?/?>|$)#iu',
                         [$this, '_js_src_removal_callback'],
                         $str
                     );
@@ -1756,13 +2323,13 @@ final class AntiXSS
 
             if (\stripos($str, '<video') !== false) {
                 $strTmp = \preg_replace_callback(
-                    '#<video[^\p{L}@]+([^>]*?)(?:\s?/?>|$)#iu',
+                    '#<video[^\p{L}@>]+([^>]*?)(?:\s?/?>|$)#iu',
                     [$this, '_js_src_removal_callback'],
                     $str
                 );
                 if ($strTmp === null) {
                     $strTmp = \preg_replace_callback(
-                        '#<video[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                        '#<video[^\p{L}@>]+([^>]*)(?:\s?/?>|$)#iu',
                         [$this, '_js_src_removal_callback'],
                         $str
                     );
@@ -1772,7 +2339,7 @@ final class AntiXSS
 
             if (\stripos($str, '<source') !== false) {
                 $strTmp = \preg_replace_callback(
-                    '#<source[^\p{L}@]+([^>]*)(?:\s?/?>|$)#iu',
+                    '#<source[^\p{L}@>]+([^>]*)(?:\s?/?>|$)#iu',
                     [$this, '_js_src_removal_callback'],
                     $str
                 );
@@ -1782,7 +2349,7 @@ final class AntiXSS
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
                 $strTmp = \preg_replace(
-                    '#(?:%3C|¼|<)\s*script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
+                    '#(?:%3C|¼|<)\s*(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?script[^\p{L}@]+(?:[^>]*)(?:\s?/?(?:%3E|¾|>)|$)#iu',
                     $this->_replacement,
                     $str
                 );
@@ -1792,7 +2359,7 @@ final class AntiXSS
             if (\stripos($str, 'script') !== false) {
                 // INFO: US-ASCII: ¼ === <
                 $strTmp = \preg_replace(
-                    '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
+                    '#(?:%3C|¼|<)[^\p{L}@]*/*[^\p{L}@]*(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?(?:script[^\p{L}@]+).*(?:%3E|¾|>)?#iUus',
                     $this->_replacement,
                     $str
                 );
@@ -1875,7 +2442,10 @@ final class AntiXSS
 
         if (!$this->_cache_evil_attributes_regex_string) {
             $this->_cache_evil_attributes_regex_string = \implode('|', $this->_evil_attributes_regex);
-            $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')[\w:-]*';
+            // INFO: the suffix stops at a ":" that starts a new "on..." name, otherwise a long run like
+            //       ":onclick:onclick:onclick..." makes every name a match start whose suffix runs to the end
+            //       of the run (quadratic backtracking / ReDoS); "onclick:onerror=" is still matched via "onerror"
+            $this->_cache_evil_attributes_regex_string .= '|(?<![\w-])(?:' . \implode('|', $this->_never_allowed_on_events_afterwards) . ')(?:[\w-]|:(?!on))*+';
         }
 
         $iterations = 0;
@@ -2054,11 +2624,23 @@ final class AntiXSS
             }
 
             if (!$this->_cache__evil_html_tags_str) {
-                $this->_cache__evil_html_tags_str = \implode('|', $this->_evil_html_tags);
+                // INFO: longest names first, otherwise e.g. a short name added via "addEvilHtmlTags(['s'])"
+                //       would match "<style>" as "s" + "tyle" and the "skip some edge-cases"-check in
+                //       "_sanitize_naughty_html_callback()" would keep the tag
+                $evilHtmlTags = \array_values(\array_unique($this->_evil_html_tags));
+                \usort(
+                    $evilHtmlTags,
+                    static function ($a, $b) {
+                        return \strlen($b) <=> \strlen($a);
+                    }
+                );
+                $this->_cache__evil_html_tags_str = \implode('|', $evilHtmlTags);
             }
 
             $str = (string) \preg_replace_callback(
-                '#<(?<start>/*\s*)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
+                // INFO: "prefix" -> XML namespace prefix (e.g. "<x:script>"), that is a real "script"-element on
+                //       XHTML pages (application/xhtml+xml), if "x" is bound to the XHTML namespace
+                '#<(?<start>/*\s*)(?<prefix>(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>[><]*)#ius',
                 [$this, '_sanitize_naughty_html_callback'],
                 $str
             );
@@ -2165,7 +2747,7 @@ final class AntiXSS
             return $fullMatch;
         }
 
-        return '&lt;' . $matches['start'] . $matches['tagName'] . $matches['end'] // encode opening brace
+        return '&lt;' . $matches['start'] . ($matches['prefix'] ?? '') . $matches['tagName'] . $matches['end'] // encode opening brace
                // encode captured opening or closing brace to prevent recursive vectors
                . \str_replace(
                    [
@@ -2336,10 +2918,30 @@ final class AntiXSS
             return $this;
         }
 
-        $this->_never_allowed_regex = \array_diff(
-            $this->_never_allowed_regex,
-            \array_intersect($strings, $this->_never_allowed_regex)
-        );
+        // INFO: the regex is the key, the value is only the replacement (and the same for most of the regexes),
+        //       so ['regex' => 'replacement'] (like for "addNeverAllowedRegex()") removes only "regex"
+        //       and not every other regex with the same replacement
+        foreach ($strings as $key => $value) {
+            if (\is_string($key)) {
+                unset($this->_never_allowed_regex[$key]);
+
+                continue;
+            }
+
+            if (isset($this->_never_allowed_regex[$value])) {
+                unset($this->_never_allowed_regex[$value]);
+
+                continue;
+            }
+
+            // BC: a list of replacements
+            $this->_never_allowed_regex = \array_filter(
+                $this->_never_allowed_regex,
+                static function ($replacement) use ($value) {
+                    return $replacement !== $value;
+                }
+            );
+        }
 
         $this->_rebuildNeverAllowedRegexCache();
 
@@ -2828,6 +3430,13 @@ final class AntiXSS
             $old_str = $str;
             $str = $this->_do($str);
         } while ($old_str !== $str);
+
+        // A raw ESC byte is removed by the cleaning above, but on pages decoded as ISO-2022-JP the browser
+        // also drops escape sequences like "ESC ( B", so that e.g. "<scr\x1B(Bipt>" becomes "<script>" there.
+        // So we must not return the original (unchecked) bytes in this case.
+        if (\strpos((string) $old_str_backup, "\x1B") !== false) {
+            $this->_xss_found = true;
+        }
 
         // keep the old value, if there wasn't any XSS attack
         if ($this->isXssFound() !== true) {
