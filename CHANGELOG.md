@@ -2,7 +2,7 @@
 
 ### master (unreleased)
 
-### 4.1.48 (unreleased)
+### 4.1.48 (2026-11-18)
 
 - security: fix a memory-amplification (denial of service) regression from 4.1.47: the event-handler removal needed ~150x and the html-tag scan ~35x the memory of the input (e.g. 1.5 MB of " onclick" needed > 200 MB); both now need ~4x (like 4.1.46)
 - add memory-budget regression tests (in a separate PHP process with a fixed "memory_limit")
