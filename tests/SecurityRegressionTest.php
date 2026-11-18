@@ -379,6 +379,17 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         self::assertNotContainsIgnoringCase('onclick', $output);
     }
 
+    public function testEventHandlerRemovalWithControlCharsInReplacement()
+    {
+        // "\x01" / "\x02" are used as internal markers, so they must not confuse the event removal
+        $config = static function (AntiXSS $antiXss) {
+            $antiXss->setReplacement("[\x01]");
+        };
+        [$output, $found] = self::clean('x onclick onerror=alert(1) <b onclick=1>', $config);
+        static::assertTrue($found);
+        static::assertSame('x [] []=alert&#40;1&#41; <b []>', $output);
+    }
+
     public function testRemoveNeverAllowedRegexByListOfRegexesOrReplacements()
     {
         // a list of regexes (values) removes these regexes
@@ -399,6 +410,59 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         [$output, $found] = self::clean('<img alt="base64," src="javascript:alert(1)" title="data:image/png">');
         static::assertTrue($found);
         self::assertNotContainsIgnoringCase('javascript', $output);
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function memoryBudgetProvider(): array
+    {
+        // [input (1.5 MB), memory_limit]: 4.1.47 needed 223 MB / 57 MB for the first two inputs,
+        // now all inputs need <= 34 MB
+        return [
+            // event names: "preg_match_all()" + arrays needed ~150x the input
+            'event names'          => ['str_repeat(" onclick", 190000) . ">"', '64M'],
+            // many tags: an array with all tags + an array with all relevant offsets needed ~35x the input
+            'many tags'            => ['str_repeat("<b>x</b>", 190000)', '32M'],
+            // quotes: bitmap for the visited scan states
+            'quotes'               => ['str_repeat("<a\"\'", 375000) . ">"', '64M'],
+            // nested url-encoded control chars: stack for the removal
+            'url-encoded controls' => ['str_repeat("%0", 375000) . str_repeat("0", 375000)', '32M'],
+        ];
+    }
+
+    /**
+     * Memory-amplification regression test, in its own PHP process (without Xdebug).
+     *
+     * @dataProvider memoryBudgetProvider
+     *
+     * @param string $inputExpression
+     * @param string $memoryLimit
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('memoryBudgetProvider')]
+    public function testMemoryBudget($inputExpression, $memoryLimit)
+    {
+        $script = '<?php require ' . \var_export(\dirname(__DIR__) . '/vendor/autoload.php', true) . ';'
+                  . '$input = ' . $inputExpression . ';'
+                  . '(new \voku\helper\AntiXSS())->xss_clean($input);'
+                  . 'echo "OK " . \round(\memory_get_peak_usage() / 1048576) . " MB";';
+
+        $file = (string) \tempnam(\sys_get_temp_dir(), 'anti_xss_memory_');
+        \file_put_contents($file, $script);
+
+        $output = [];
+        \exec(
+            'XDEBUG_MODE=off ' . \escapeshellarg(\PHP_BINARY)
+            . ' -d memory_limit=' . $memoryLimit . ' -d max_execution_time=0 ' . \escapeshellarg($file) . ' 2>&1',
+            $output,
+            $exitCode
+        );
+        \unlink($file);
+
+        static::assertSame(0, $exitCode, $inputExpression . ': ' . \implode("\n", $output));
+        static::assertStringStartsWith('OK', (string) \end($output), $inputExpression);
     }
 
     public function testDataUrlSplitByTabOrNewline()

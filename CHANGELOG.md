@@ -2,6 +2,12 @@
 
 ### master (unreleased)
 
+### 4.1.48 (unreleased)
+
+- security: fix a memory-amplification (denial of service) regression from 4.1.47: the event-handler removal needed ~150x and the html-tag scan ~35x the memory of the input (e.g. 1.5 MB of " onclick" needed > 200 MB); both now need ~4x (like 4.1.46)
+- add memory-budget regression tests (in a separate PHP process with a fixed "memory_limit")
+- add a Chromium browser test for the XSS-filter bypasses fixed in 4.1.47 (GHSA-v42h-26cv-jpgq), incl. a raw negative control
+
 ### 4.1.47 (2026-11-17)
 
 - security: fix an XSS-filter bypass via a numeric character reference without ";" (e.g. "&#x3a" / "&#58") followed by a char that is removed before decoding (e.g. "%0b", "%0c", U+FEFF)
