@@ -813,16 +813,15 @@ final class AntiXSS
     private function _decode_string($str)
     {
         if (\strpos($str, '<') !== false) {
-            $tags = $this->_find_html_tags($str);
-            if ($tags !== []) {
-                $result = '';
-                $offset = 0;
-                foreach ($tags as $tag) {
-                    $result .= \substr($str, $offset, $tag[0] - $offset);
-                    $result .= $this->_decode_entity([(string) \substr($str, $tag[0], $tag[1] - $tag[0])]);
-                    $offset = $tag[1];
-                }
+            $result = '';
+            $offset = 0;
+            foreach ($this->_find_html_tags($str) as $tag) {
+                $result .= \substr($str, $offset, $tag[0] - $offset);
+                $result .= $this->_decode_entity([(string) \substr($str, $tag[0], $tag[1] - $tag[0])]);
+                $offset = $tag[1];
+            }
 
+            if ($offset > 0) {
                 return $result . \substr($str, $offset);
             }
         }
@@ -838,44 +837,41 @@ final class AntiXSS
      * INFO: This replaces the regex '/<\p{L}+(?:[^>"\']|(["\']).*\1)*>/usU', which was exponential on runs
      *       of quotes without a reachable ">" (ReDoS). This scan follows all ways the regex could match at
      *       once (a quote can be closed by any later quote of the same kind) and returns the first ">" that
-     *       is reachable outside of quotes. States from which a previous scan did not find the end of a tag
-     *       are remembered, so that no part of the string is scanned twice in the same state (linear time).
+     *       is reachable outside of quotes. States that a previous scan already visited are remembered in a
+     *       bitmap (one byte per input byte), so that no part of the string is scanned twice in the same
+     *       state: linear time and linear (1x) memory. The tags are yielded one by one, so that no list of
+     *       all tags is built.
      * </p>
      *
      * @param string $str
      *
-     * @return array<int, array{0: int, 1: int}>
-     *                                           <p>list of [start, end) offsets</p>
+     * @return \Generator<int, array{0: int, 1: int}>
+     *                                                  <p>[start, end) offsets of the tags</p>
      */
     private function _find_html_tags($str)
     {
-        $length = \strlen($str);
-
-        // offsets of all chars that are relevant for the scan
-        $positions = [];
-        $offset = \strcspn($str, '>"\'');
-        while ($offset < $length) {
-            $positions[] = $offset;
-            ++$offset;
-            $offset += \strcspn($str, '>"\'', $offset);
-        }
-
         // no tag can end after the last ">"
         $lastGt = \strrpos($str, '>');
         if ($lastGt === false) {
-            return [];
+            return;
         }
 
-        // "index * 8 + state" reached by a scan that did not find the end of a tag
-        $failed = [];
+        $length = \strlen($str);
 
-        $tags = [];
+        // bitmap: bit "state" is set for an offset, if a scan already was at this offset in this state
+        $visited = null;
+
+        // cache for the first relevant char after a tag name (no '>', '"' or "'" in [$cacheFrom, $cacheTo))
+        $cacheFrom = -1;
+        $cacheTo = -1;
+
         $pos = 0;
         while (($start = \strpos($str, '<', $pos)) !== false && $start < $lastGt) {
             $pos = $start + 1;
 
             // INFO: only check the next char (max. 4 bytes) and not "$str" with an offset, because with "/u"
-            //       older PHP versions (PCRE1) validate the whole subject on every call (quadratic runtime)
+            //       PHP validates the whole subject on every call (quadratic runtime)
+            //
             // INFO: "$pos" is always valid here, because "$start < $lastGt"
             $leadByte = \ord($str[$pos]);
             if ($leadByte < 0x80) {
@@ -897,88 +893,68 @@ final class AntiXSS
             }
 
             $cursor = $pos + $charLength;
-            $index = self::_first_index_greater_or_equal($positions, $cursor);
+            if ($cursor < $cacheFrom || $cursor > $cacheTo) {
+                $cacheFrom = $cursor;
+                $cacheTo = $cursor + \strcspn($str, '>"\'', $cursor);
+            }
+            $next = $cacheTo;
 
             // state: is the next relevant char reachable outside of quotes + was a quote of this kind opened
             $reachable = true;
             $openDouble = false;
             $openSingle = false;
 
-            $visited = [];
             $end = null;
-            while ($index !== null && isset($positions[$index])) {
-                $stateKey = ($index << 3) | ($reachable ? 4 : 0) | ($openDouble ? 2 : 0) | ($openSingle ? 1 : 0);
-                if (isset($failed[$stateKey])) {
+            while ($next < $length) {
+                if ($reachable && $openDouble && $openSingle) {
+                    // INFO: from this state on, every quote keeps the state "reachable" (both kinds of quotes
+                    //       are open, so every quote can close one), so the tag ends at the next ">"
+                    $gt = \strpos($str, '>', $next);
+                    $end = $gt === false ? null : $gt + 1;
+
                     break;
                 }
-                $visited[] = $stateKey;
 
-                $char = $str[$positions[$index]];
+                $stateBit = 1 << (($reachable ? 4 : 0) | ($openDouble ? 2 : 0) | ($openSingle ? 1 : 0));
+                if ($visited === null) {
+                    $visited = \str_repeat("\0", $length);
+                } elseif ((\ord($visited[$next]) & $stateBit) !== 0) {
+                    // INFO: a previous scan was here in the same state and did not find the end of a tag
+                    //       (a successful scan only visits offsets in front of the next start)
+                    break;
+                }
+                $visited[$next] = \chr(\ord($visited[$next]) | $stateBit);
+
+                $char = $str[$next];
                 if ($char === '>') {
                     if ($reachable) {
-                        $end = $positions[$index] + 1;
+                        $end = $next + 1;
 
                         break;
                     }
-
-                    // a ">" inside of quotes
-                    ++$index;
-
-                    continue;
-                }
-
-                // quote: it can close any already opened quote of this kind (".*\1" can be extended to any
-                //        later quote), and it opens a new quote if it's reachable outside of quotes
-                if ($char === '"') {
+                } elseif ($char === '"') {
+                    // quote: it can close any already opened quote of this kind (".*\1" can be extended to any
+                    //        later quote), and it opens a new quote if it's reachable outside of quotes
                     $nextReachable = $openDouble;
                     $openDouble = $openDouble || $reachable;
+                    $reachable = $nextReachable;
                 } else {
                     $nextReachable = $openSingle;
                     $openSingle = $openSingle || $reachable;
+                    $reachable = $nextReachable;
                 }
-                $reachable = $nextReachable;
 
-                ++$index;
+                $next += 1 + \strcspn($str, '>"\'', $next + 1);
             }
 
             if ($end === null) {
-                foreach ($visited as $visitedKey) {
-                    $failed[$visitedKey] = true;
-                }
-
                 continue;
             }
 
-            $tags[] = [$start, $end];
+            yield [$start, $end];
+
             $pos = $end;
         }
-
-        return $tags;
-    }
-
-    /**
-     * Binary search in a sorted list of ints.
-     *
-     * @param int[] $list
-     * @param int   $value
-     *
-     * @return int|null
-     *                  <p>the index of the first element >= $value, or null</p>
-     */
-    private static function _first_index_greater_or_equal(array $list, $value)
-    {
-        $low = 0;
-        $high = \count($list);
-        while ($low < $high) {
-            $mid = ($low + $high) >> 1;
-            if ($list[$mid] < $value) {
-                $low = $mid + 1;
-            } else {
-                $high = $mid;
-            }
-        }
-
-        return $low < \count($list) ? $low : null;
     }
 
     /**
@@ -1331,7 +1307,7 @@ final class AntiXSS
             // INFO: only the "before"-part and the event name are matched here, the "after"-part is checked
             //       in "_remove_never_allowed_on_events_afterwards()" without regex-backtracking
             $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] =
-                '(?<before>[^\p{L}@.!?>]|^)(?:' . \implode('|', $events) . ')';
+                '(?<before>[^\p{L}@.!?>]|^)(?<name>' . \implode('|', $events) . ')';
         }
 
         $this->_cache_never_allowed_on_events_afterwards_chunks = $array;
@@ -1359,41 +1335,60 @@ final class AntiXSS
      */
     private function _remove_never_allowed_on_events_afterwards($str, $regexNames)
     {
-        if (
-            !\preg_match_all(
-                '#' . $regexNames . '#ius',
-                $str,
-                $matches,
-                \PREG_SET_ORDER | \PREG_OFFSET_CAPTURE
-            )
-        ) {
+        // INFO: "\x01" and "\x02" are used as markers below (control chars, already removed in "_do()")
+        if (\strpos($str, "\x01") !== false || \strpos($str, "\x02") !== false) {
+            $str = \str_replace(["\x01", "\x02"], '', $str);
+        }
+
+        // INFO: mark the event names via "preg_replace()" instead of "preg_match_all()", because the
+        //       match-arrays of "preg_match_all()" need ~150x the memory of the input
+        $count = 0;
+        $marked = \preg_replace(
+            '#' . $regexNames . '#ius',
+            '${1}' . "\x01" . '${2}' . "\x02",
+            $str,
+            -1,
+            $count
+        );
+        if ($marked === null || $count === 0) {
             return $str;
         }
 
-        $length = \strlen($str);
-        $lastGt = \strrpos($str, '>');
-        $lastClosingParenthesis = \strrpos($str, ')');
+        // offsets of all names ("\x01" and "\x02"), packed into a string (8 bytes per name)
+        $offsets = '';
+        $offset = 0;
+        while (($nameStart = \strpos($marked, "\x01", $offset)) !== false) {
+            $nameEnd = (int) \strpos($marked, "\x02", $nameStart);
+            $offsets .= \pack('NN', $nameStart, $nameEnd);
+            $offset = $nameEnd + 1;
+        }
+        $count = (int) (\strlen($offsets) / 8);
+
+        $length = \strlen($marked);
+        $lastGt = \strrpos($marked, '>');
+        $lastClosingParenthesis = \strrpos($marked, ')');
 
         // summary of the (already cleaned) text after the current event name
         $tail = $this->_events_tail_summary_empty();
 
-        $remove = [];
-        $names = [];
-        for ($i = \count($matches) - 1; $i >= 0; --$i) {
-            $match = $matches[$i];
-            $matchStart = (int) $match[0][1];
-            $nameStart = $matchStart + \strlen($match['before'][0]);
-            $nameEnd = $matchStart + \strlen($match[0][0]);
-            $names[$i] = [$nameStart, $nameEnd];
+        // one byte per name: "1" -> remove it
+        $remove = \str_repeat('0', $count);
 
-            $gapEnd = isset($names[$i + 1]) ? $names[$i + 1][0] : $length;
-            $gap = (string) \substr($str, $nameEnd, $gapEnd - $nameEnd);
+        $gapEnd = $length;
+        for ($i = $count - 1; $i >= 0; --$i) {
+            /** @var int[] $name */
+            $name = \unpack('Nstart/Nend', \substr($offsets, $i * 8, 8));
+            // offsets of the event name (without the markers)
+            $nameStart = $name['start'] + 1;
+            $nameEnd = $name['end'];
+
+            $gap = (string) \substr($marked, $nameEnd + 1, $gapEnd - $nameEnd - 1);
 
             $tailAfterName = $this->_events_tail_summary_compose($gap, $tail);
 
             $isEvent = (
                 // "onclick ... >"
-                ($lastGt !== false && $lastGt >= $nameEnd)
+                ($lastGt !== false && $lastGt > $nameEnd)
                 ||
                 // "onclick(...)"
                 (
@@ -1414,38 +1409,39 @@ final class AntiXSS
                 $tailAfterName['c']
             );
 
-            $remove[$i] = $isEvent;
-
             // summary of the text starting at this event name (after cleaning) for the previous name
             if ($isEvent) {
+                $remove[$i] = '1';
                 $tail = $this->_replacement === ''
                     ? $tailAfterName
                     : $this->_events_tail_summary_compose($this->_replacement, $tailAfterName);
             } else {
                 $tail = $this->_events_tail_summary_compose(
-                    (string) \substr($str, $nameStart, $nameEnd - $nameStart),
+                    (string) \substr($marked, $nameStart, $nameEnd - $nameStart),
                     $tailAfterName
                 );
             }
+
+            $gapEnd = $name['start'];
         }
 
+        // build the result (without the markers)
         $result = '';
         $offset = 0;
-        for ($i = 0, $count = \count($names); $i < $count; ++$i) {
-            $name = $names[$i];
-            if ($remove[$i] !== true) {
-                continue;
+        for ($i = 0; $i < $count; ++$i) {
+            /** @var int[] $name */
+            $name = \unpack('Nstart/Nend', \substr($offsets, $i * 8, 8));
+
+            $result .= \substr($marked, $offset, $name['start'] - $offset);
+            if ($remove[$i] === '1') {
+                $result .= $this->_replacement;
+            } else {
+                $result .= \substr($marked, $name['start'] + 1, $name['end'] - $name['start'] - 1);
             }
-
-            $result .= \substr($str, $offset, $name[0] - $offset) . $this->_replacement;
-            $offset = $name[1];
+            $offset = $name['end'] + 1;
         }
 
-        if ($offset === 0) {
-            return $str;
-        }
-
-        return $result . \substr($str, $offset);
+        return $result . \substr($marked, $offset);
     }
 
     /**

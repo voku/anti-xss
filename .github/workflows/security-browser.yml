@@ -86,3 +86,30 @@ jobs:
           fi
 
           echo "PASS: Chromium blocks the sanitized handler and executes the raw geolocation event handler."
+
+          # GHSA-v42h-26cv-jpgq (4.1.47): XSS-filter bypasses, checked on the DOM / URLs as parsed by Chromium.
+          php tests/browser/ghsa-v42h-26cv-jpgq.php \
+            > "$RUNNER_TEMP/v42h-sanitized.html"
+          render_browser_dom "$RUNNER_TEMP/v42h-sanitized.html" "$RUNNER_TEMP/v42h-sanitized-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="pass"' "$RUNNER_TEMP/v42h-sanitized-dom.html" \
+            || ! grep -Fq 'data-ghsa-executed="false"' "$RUNNER_TEMP/v42h-sanitized-dom.html"; then
+            echo "::error::The sanitized browser DOM did not pass the GHSA-v42h-26cv-jpgq assertions."
+            grep -o 'data-ghsa-details="[^"]*"' "$RUNNER_TEMP/v42h-sanitized-dom.html" || true
+            exit 1
+          fi
+
+          # Prove the browser assertions would reject (and execute) the actual unsanitized payloads.
+          php tests/browser/ghsa-v42h-26cv-jpgq.php --raw \
+            > "$RUNNER_TEMP/v42h-raw.html"
+          render_browser_dom "$RUNNER_TEMP/v42h-raw.html" "$RUNNER_TEMP/v42h-raw-dom.html"
+
+          if ! grep -Fq 'data-ghsa-status="fail"' "$RUNNER_TEMP/v42h-raw-dom.html" \
+            || ! grep -Fq 'javascript-url-numeric-reference-hex' "$RUNNER_TEMP/v42h-raw-dom.html" \
+            || ! grep -Fq 'data-ghsa-executed="true"' "$RUNNER_TEMP/v42h-raw-dom.html"; then
+            echo "::error::The unsanitized GHSA-v42h-26cv-jpgq negative control did not prove real execution."
+            grep -o 'data-ghsa-[a-z]*="[^"]*"' "$RUNNER_TEMP/v42h-raw-dom.html" || true
+            exit 1
+          fi
+
+          echo "PASS: Chromium blocks the sanitized GHSA-v42h-26cv-jpgq payloads and executes the raw ones."
