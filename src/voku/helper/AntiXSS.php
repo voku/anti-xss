@@ -910,9 +910,7 @@ final class AntiXSS
                     // INFO: from this state on, every quote keeps the state "reachable" (both kinds of quotes
                     //       are open, so every quote can close one), so the tag ends at the next ">"
                     $gt = \strpos($str, '>', $next);
-                    if ($gt !== false) {
-                        $end = $gt + 1;
-                    }
+                    $end = $gt === false ? null : $gt + 1;
 
                     break;
                 }
