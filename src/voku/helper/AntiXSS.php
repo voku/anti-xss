@@ -906,6 +906,17 @@ final class AntiXSS
 
             $end = null;
             while ($next < $length) {
+                if ($reachable && $openDouble && $openSingle) {
+                    // INFO: from this state on, every quote keeps the state "reachable" (both kinds of quotes
+                    //       are open, so every quote can close one), so the tag ends at the next ">"
+                    $gt = \strpos($str, '>', $next);
+                    if ($gt !== false) {
+                        $end = $gt + 1;
+                    }
+
+                    break;
+                }
+
                 $stateBit = 1 << (($reachable ? 4 : 0) | ($openDouble ? 2 : 0) | ($openSingle ? 1 : 0));
                 if ($visited === null) {
                     $visited = \str_repeat("\0", $length);
