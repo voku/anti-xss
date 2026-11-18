@@ -313,7 +313,7 @@ xmlns:svg="http://www.w3.org/2000/svg"&gt;
 //["\'`-->]]>]</div>',
   173 => '<div id="124"> // Safari 5.0, Chrome 9, 10
  // Safari 5.0//["\'`-->]]>]</div>',
-  174 => '<div id="125">&lt;?xml version="1.0"?&gt;&lt;?xml-stylesheet type="text/xml" href="#stylesheet"?&gt;&lt;!DOCTYPE doc [&lt;!ATTLIST xsl:stylesheet  id    ID    #REQUIRED>]>&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;    &lt;xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;        <xsl:template match="/">            &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;&lt;/iframe&gt;        </xsl:template>    &lt;/xsl:stylesheet&gt;    <circle fill="red" r="40"></circle>&lt;/svg&gt;//["\'`-->]]>]</div>',
+  174 => '<div id="125">&lt;?xml version="1.0"?&gt;&lt;?xml-stylesheet type="text/xml" href="#stylesheet"?&gt;&lt;!DOCTYPE doc [&lt;!ATTLIST xsl:stylesheet  id    ID    #REQUIRED>]>&lt;svg xmlns="http://www.w3.org/2000/svg"&gt;    <xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">        <xsl:template match="/">            &lt;iframe xmlns="http://www.w3.org/1999/xhtml" src="(125)"&gt;&lt;/iframe&gt;        </xsl:template>    </xsl:stylesheet>    <circle fill="red" r="40"></circle>&lt;/svg&gt;//["\'`-->]]>]</div>',
   175 => '<div id="126">&lt;object id="x" classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598"&gt;&lt;/object&gt;
 &lt;object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"  &gt;<param name=postdomevents />&lt;/object&gt;//["\'`-->]]>]</div>',
   176 => '<div id="127">&lt;svg xmlns="http://www.w3.org/2000/svg" id="x"&gt;

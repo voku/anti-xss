@@ -2,6 +2,9 @@
 
 ### master (unreleased)
 
+- fix regression from 4.1.47: harmless HTML from Microsoft Word / Excel (e.g. "<o:Title>", "<x:Selected/>", "<x:Header>", "<x:FormulaHidden/>") was encoded and reported as XSS; a tag with an XML namespace prefix is now only treated as an evil tag, if its local name is exactly the (lowercase) evil tag name (e.g. "<x:script>")
+- fix regression from 4.1.47: ANSI color codes (e.g. "ESC [ 32 m") were removed and reported as XSS; only the ISO-2022-JP escape sequences ("ESC (" and "ESC $") are treated as XSS now
+- tests: add a regression test for harmless real-world content (unchanged + not reported as XSS, like in 4.1.46)
 - tests: the browser tests initialize their "payload executed" flags before any payload is rendered
 - tests: add a deterministic differential corpus (2,000 seeded inputs, compared with the results of 4.1.48 / 4.1.47)
 - ci: raise the Infection gate for changed lines from 65% to 70% MSI (measured: 73.7% for 4.1.47, 97% for 4.1.48)

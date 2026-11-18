@@ -2749,6 +2749,21 @@ final class AntiXSS
         // init
         $fullMatch = $matches[0];
 
+        // A tag with an XML namespace prefix (e.g. "<x:script>") is only an XHTML element, if the local name
+        // is exactly the (lowercase) element name: XML names are case-sensitive and end at a non-name char.
+        // So e.g. "<o:Title>" (Word), "<x:Selected/>" or "<x:Header>" (Excel) are no evil tags.
+        if (
+            ($matches['prefix'] ?? '') !== ''
+            &&
+            (
+                !\in_array($matches['tagName'], $this->_evil_html_tags, true)
+                ||
+                \preg_match('/^[\p{L}\p{N}_.:-]/u', $matches['end']) === 1
+            )
+        ) {
+            return $fullMatch;
+        }
+
         // skip some edge-cases
         /** @noinspection NotOptimalIfConditionsInspection */
         if (
@@ -3460,9 +3475,14 @@ final class AntiXSS
         } while ($old_str !== $str);
 
         // A raw ESC byte is removed by the cleaning above, but on pages decoded as ISO-2022-JP the browser
-        // also drops escape sequences like "ESC ( B", so that e.g. "<scr\x1B(Bipt>" becomes "<script>" there.
-        // So we must not return the original (unchecked) bytes in this case.
-        if (\strpos((string) $old_str_backup, "\x1B") !== false) {
+        // also drops its escape sequences ("ESC ( B", "ESC ( J", "ESC ( I", "ESC $ @", "ESC $ B"), so that e.g.
+        // "<scr\x1B(Bipt>" becomes "<script>" there. So we must not return the original (unchecked) bytes in
+        // this case. Other ESC sequences (e.g. ANSI colors "ESC [ 32 m") are shown as U+FFFD, so they are kept.
+        if (
+            \strpos((string) $old_str_backup, "\x1B") !== false
+            &&
+            \preg_match('/\x1B[($]/', (string) $old_str_backup) === 1
+        ) {
             $this->_xss_found = true;
         }
 
