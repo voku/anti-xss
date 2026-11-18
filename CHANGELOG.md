@@ -2,6 +2,10 @@
 
 ### master (unreleased)
 
+- tests: the browser tests initialize their "payload executed" flags before any payload is rendered
+- tests: add a deterministic differential corpus (2,000 seeded inputs, compared with the results of 4.1.48 / 4.1.47)
+- ci: raise the Infection gate for changed lines from 65% to 70% MSI (measured: 73.7% for 4.1.47, 97% for 4.1.48)
+
 ### 4.1.48 (2026-11-18)
 
 - security: fix a memory-amplification (denial of service) regression from 4.1.47: the event-handler removal needed ~150x and the html-tag scan ~35x the memory of the input (e.g. 1.5 MB of " onclick" needed > 200 MB); both now need ~4x (like 4.1.46)

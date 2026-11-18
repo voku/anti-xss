@@ -33,7 +33,11 @@ $payloads = [
     'safe-content' => '<div class="safe" data-test="preserve">safe text</div>',
 ];
 
-echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GHSA browser smoke</title></head><body>', "\n";
+// INFO: the flags are initialized before any payload is rendered, so that a payload that runs while the page is
+//       parsed can not be hidden by a later reset
+echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GHSA browser smoke</title>',
+    '<script>window.__controlExecuted = false; window.__xssExecuted = false; window.__geolocationExecuted = false;</script>',
+    '</head><body>', "\n";
 
 foreach ($payloads as $name => $payload) {
     $cleaned = $rawMode ? $payload : (new AntiXSS())->xss_clean($payload);
@@ -52,10 +56,6 @@ echo '<button id="raw-control" onclick="window.__controlExecuted = true" type="b
 ?>
 <script>
 'use strict';
-
-window.__controlExecuted = false;
-window.__xssExecuted = false;
-window.__geolocationExecuted = false;
 
 window.addEventListener('load', function () {
     const errors = [];

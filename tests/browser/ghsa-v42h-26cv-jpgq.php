@@ -50,7 +50,10 @@ $payloads = [
     'safe-content' => ['<div class="safe" data-test="preserve">safe text</div>', null],
 ];
 
-echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GHSA-v42h-26cv-jpgq browser smoke</title></head><body>', "\n";
+// INFO: the flag is initialized before any payload is rendered, so that a payload that runs while the page is
+//       parsed can not be hidden by a later reset
+echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GHSA-v42h-26cv-jpgq browser smoke</title>',
+    '<script>window.__xssExecuted = false;</script></head><body>', "\n";
 
 foreach ($payloads as $name => [$payload, $config]) {
     $antiXss = new AntiXSS();
@@ -70,8 +73,6 @@ foreach ($payloads as $name => [$payload, $config]) {
 ?>
 <script>
 'use strict';
-
-window.__xssExecuted = false;
 
 window.addEventListener('load', function () {
     const errors = [];
