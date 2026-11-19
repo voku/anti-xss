@@ -477,8 +477,12 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
         }
 
         // ~1 MB with 100000 event handlers: the found attributes are capped at 10000, so the peak memory is a few MB
+        //
+        // INFO: without "memory_reset_peak_usage()" (PHP < 8.2), the peak can be from an earlier test, so it's only
+        //       measured with PHP >= 8.2
         $input = \str_repeat('<b onfoo=1>', 100000);
-        if (\function_exists('memory_reset_peak_usage')) {
+        $measurePeak = \function_exists('memory_reset_peak_usage');
+        if ($measurePeak) {
             \memory_reset_peak_usage();
         }
         $before = \memory_get_usage();
@@ -486,7 +490,9 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
         $peak = \memory_get_peak_usage() - $before;
 
         static::assertSame(\str_repeat('<b >', 100000), $output);
-        static::assertLessThan(16 * 1024 * 1024, $peak);
+        if ($measurePeak) {
+            static::assertLessThan(16 * 1024 * 1024, $peak);
+        }
     }
 
     /**
