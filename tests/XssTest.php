@@ -88,7 +88,6 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9"                                                                                                                                                                                        => ' foo ' . "\xe2\x80\xa8" . ' öäü' . "\xe2\x80\xa9",
             " foo\t foo "                                                                                                                                                                                                                             => ' foo	 foo ',
             'a="get";'                                                                                                                                                                                                                                => 'a="get";',
-            '<x 1=">" onxxx=1 (text outside tag)'                                                                                                                                                                                                     => '<x 1=">" onxxx=1 (text outside tag)',
             '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>'                                                                                                                    => '<a href="https://url.com" target="_blank" style="color: rgb(0, 161, 222);">Click Here for the 2017 Summit Review</a>',
             '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>'                                                                                                                                                     => '<a href="https://url.com" target="_blank">Click Here for the 2017 Summit Review</a>',
             'foo Mondragon bar'                                                                                                                                                                                                                       => 'foo Mondragon bar',
@@ -261,7 +260,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss = new AntiXSS();
 
         $testArray = [
-            '<x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x 1=">" onxxx=1 onAbort="alert&#40;\'foo\'&#41;;" (text outside tag)',
+            '<x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x 1=">"  onAbort="alert&#40;\'foo\'&#41;;" (text outside tag)',
         ];
 
         $antiXss->removeNeverAllowedOnEventsAfterwards(['onAbort']); // allow
@@ -275,7 +274,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         // ---
 
         $testArray = [
-            '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag)',
+            '<x foo="+ - & ? ! ö ä ? `" 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag)' => '<x foo="+ - & ? ! ö ä ? `" 1=">"   (text outside tag)',
         ];
 
         foreach ($testArray as $before => $after) {
@@ -483,7 +482,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         $antiXss = new AntiXSS();
 
         $testArray = [
-            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag) -->',
+            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">"   (text outside tag) -->',
         ];
 
         $antiXss->removeNeverAllowedRegex(['<!--(.*)-->' => '&lt;!--$1--&gt;']); // allow
@@ -497,7 +496,7 @@ final class XssTest extends \PHPUnit\Framework\TestCase
         // ---
 
         $testArray = [
-            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">" onxxx=1 ="alert&#40;\'foo\'&#41;;" (text outside tag) --&gt;',
+            '<!-- <x 1=">" onxxx=1 onAbort="alert(\'foo\');" (text outside tag) -->' => '&lt;!-- <x 1=">"   (text outside tag) --&gt;',
         ];
         foreach ($testArray as $before => $after) {
             static::assertSame($after, $antiXss->xss_clean($before), 'testing: ' . $before);
@@ -659,8 +658,8 @@ final class XssTest extends \PHPUnit\Framework\TestCase
             '<img/src=">" onerror=alert(1)>
       <button/a=">" autofocus onfocus=alert&#40;1&#40;></button>
       <button a=">" autofocus onfocus=alert&#40;1&#40;>' => '<img/>" =alert&#40;1&#41;>
-      &lt;button/a="&gt;" autofocus =alert&#40;1&#40;>&lt;/button&gt;
-      &lt;button a="&gt;" autofocus =alert&#40;1&#40;>', // autofocus trick | https://html5sec.org/#7
+      &lt;button/a="&gt;" autofocus >&lt;/button&gt;
+      &lt;button a="&gt;" autofocus >', // autofocus trick | https://html5sec.org/#7
             'http://vulnerable.info/poc/poc.php?foo=%3Csvg%3E%3Cscript%3E/%3C1/%3Ealert(document.domain)%3C/script%3E%3C/svg%3E'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        => 'http://vulnerable.info/poc/poc.php?foo=&lt;svg&gt;&lt;/svg&gt;',
             '"><svg><script>/<@/>alert(1337)</script>'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  => '">&lt;svg&gt;alert&#40;1337&#41;', // Bypassing Chrome’s Anti-XSS Filter | 2015: http://vulnerable.info/bypassing-chromes-anti-xss-filter/
             'Location: https://www.google.com%3a443%2fcse%2ftools%2fcreate_onthefly%3b%3c%2ftextarea%3e%3csvg%2fonload%3dalert%28document%2edomain%29%3e%3b%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           => 'Location: https://www.google.com:443/cse/tools/create_onthefly;&lt;/textarea&gt;&lt;svg/&gt;;/../../../../../../../../../../../../../../', // Google XSS in IE | 2015: http://blog.bentkowski.info/2015/04/xss-via-host-header-cse.html
@@ -971,11 +970,11 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED&gt;',
             // Filter Bypass - Tricks (http://brutelogic.com.br/docs/advanced-xss.pdf)
             //
             // Spacers
-            '<x%09onxxx=1' => '&lt;x	onxxx=1',
-            '<x%0Aonxxx=1' => '&lt;x' . "\nonxxx=1",
-            '<x%0Conxxx=1' => '&lt;x onxxx=1',
-            '<x%0Donxxx=1' => '&lt;x' . "\ronxxx=1",
-            '<x%2Fonxxx=1' => '&lt;x/onxxx=1',
+            '<x%09onxxx=1' => '&lt;x	',
+            '<x%0Aonxxx=1' => '&lt;x' . "\n",
+            '<x%0Conxxx=1' => '&lt;x ',
+            '<x%0Donxxx=1' => '&lt;x' . "\r",
+            '<x%2Fonxxx=1' => '&lt;x/',
 
             '<img alt=\'Right click and share me!\' src=% />' => '<img alt=\'Right click and share me!\' />',
 
@@ -983,15 +982,15 @@ org/xss.swf" AllowScriptAccess="always"&gt;&lt;/EMBED&gt;',
             '<IMG SRC="j a v a s c r i p t:alert(\'XSS\');">' => '<IMG SRC="(\'XSS\');">',
             '<IMG SRC="j a v a ｓ c ｒ ｉ ｐ t:alert(\'XSS\');">' => '<IMG src="">',
             // Quotes
-            '<x 1=\'1\'onxxx=1' => '&lt;x 1=\'1\'onxxx=1',
-            '<x 1="1"onxxx=1'   => '&lt;x 1="1"onxxx=1',
+            '<x 1=\'1\'onxxx=1' => '&lt;x 1=\'1\'',
+            '<x 1="1"onxxx=1'   => '&lt;x 1="1"',
             // Mimetism
-            '<x </onxxx=hack (closing tag)' => '&lt;x &lt;/onxxx=hack (closing tag)',
-            '<http://onxxx%3Dhack/ (URL)'   => '&lt;http://onxxx=hack/ (URL)',
-            '<x </onxxx=1 (closing tag)'    => '&lt;x &lt;/onxxx=1 (closing tag)',
-            '<http://onxxx%3D1/ (URL)'      => '&lt;http://onxxx=1/ (URL)',
+            '<x </onxxx=hack (closing tag)' => '&lt;x &lt;/ (closing tag)',
+            '<http://onxxx%3Dhack/ (URL)'   => '&lt;http:// (URL)',
+            '<x </onxxx=1 (closing tag)'    => '&lt;x &lt;/ (closing tag)',
+            '<http://onxxx%3D1/ (URL)'      => '&lt;http:// (URL)',
             // Combo
-            '<x%2F1=">%22OnClick%3D1' => '<x/1=">"=1',
+            '<x%2F1=">%22OnClick%3D1' => '<x/1=">"',
             // Location Based Payloads
             //
             // Location
@@ -1106,14 +1105,14 @@ textContent>click me!',
         <svg onload=write()>";
 
         $expected = '<A/hREf="">z
-        <d3"&lt;"/>[confirm``]"&lt;"&gt;z
-        &lt;d3/&gt;z
-        &lt;details open &gt;
+        <d3"&lt;"/&lt;">z
+        <d3/>z
+        <details open >
         &lt;"&gt;/*"/=`&lt;`[confir\u006d``]&gt;z
         &lt;a href="(1)"&gt;click
         &lt;a &gt;click
         
-        &lt;svg/x="&gt;"/=confirm&#40;&#41;//
+        &lt;svg/x="&gt;"/
         &lt;--`&lt;img/&gt; --!&gt;
         &lt;svg
 
@@ -1409,7 +1408,7 @@ HTML;
         &lt;"&gt;/*"/=`&lt;`[confir\u006d``]&gt;z
         &lt;a href="(1)"&gt;click
         
-        &lt;svg/x="&gt;"/=confirm&#40;&#41;//
+        &lt;svg/x="&gt;"/
         &lt;--`&lt;img/&gt; --!&gt;
         &lt;svg
 
@@ -1435,10 +1434,10 @@ HTML;
                 0  => '',
                 1  => '        <details open >',
                 2  => '        &lt;"&gt;/*',
-                3  => '        <w="/x="y>"/=`&lt;`[confir\u006d``]&gt;z',
+                3  => '        <w="/x="y>"/>z',
                 4  => '        <a href="(1)">click',
                 5  => '        ',
-                6  => '        &lt;svg/x="&gt;"/=confirm&#40;&#41;//',
+                6  => '        &lt;svg/x="&gt;"/',
                 7  => '        &lt;--`&lt;img/&gt; --!&gt;',
                 8  => "        &lt;svg\n",
                 9  => '        (((confirm)))``x>',
@@ -2209,8 +2208,8 @@ nodeValue+outerHTML>/*click me', $str);
         static::assertSame('<foo prefixOnAttribute="bar">', (new AntiXSS())->xss_clean('<foo prefixOnAttribute="bar">'));
         static::assertSame('<foo>onOutsideOfTag=test</foo>', (new AntiXSS())->xss_clean('<foo>onOutsideOfTag=test</foo>'));
         static::assertSame('onNoTagAtAll = true', (new AntiXSS())->xss_clean('onNoTagAtAll = true'));
-        static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
-        static::assertSame('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
+        static::assertSame('<foo bar=">" baz=\'>\' >', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan="quotes">'));
+        static::assertSame('<foo bar=">" baz=\'>\' >', (new AntiXSS())->xss_clean('<foo bar=">" baz=\'>\' onAfterGreaterThan=noQuotes>'));
         static::assertSame('<img src="x" on=""> on=&lt;svg&gt; =alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="x" on=""> on=<svg> onerror=alert(1)>'));
         static::assertSame('<img src="on=\'">"&lt;svg&gt; =alert&#40;1&#41; =alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="on=\'">"<svg> onerror=alert(1) onmouseover=alert(1)>'));
         static::assertSame('<img src="x"> on=\'x\' =``,alert&#40;1&#41;>', (new AntiXSS())->xss_clean('<img src="x"> on=\'x\' onerror=``,alert(1)>'));
@@ -2813,6 +2812,52 @@ nodeValue+outerHTML>/*click me', $str);
             static::assertSame($expected, $antiXss->xss_clean($xss), 'missed XSS for: ' . $xss);
             static::assertTrue($antiXss->isXssFound(), 'missed XSS for: ' . $xss);
         }
+    }
+
+    public function testWebKitGestureAndForceTouchEventHandlers()
+    {
+        // Reported PoCs: WebKit-only event handlers on standard tags
+        $payloads = [
+            '<div ongesturestart="alert(1)">x</div>'          => '<div >x</div>',
+            '<a ongesturechange="location=name">x</a>'        => '<a >x</a>',
+            '<p ongestureend=alert(1)>x</p>'                  => '<p >x</p>',
+            '<div onwebkitmouseforcedown="alert(1)">x</div>'  => '<div >x</div>',
+            '<div onwebkitmouseforceup="alert(1)">x</div>'    => '<div >x</div>',
+            '<div onwebkitmouseforcechanged="alert(1)">x</div>' => '<div >x</div>',
+            '<div onwebkitmouseforcewillbegin="alert(1)">x</div>' => '<div >x</div>',
+            '<div onoverscroll="alert(1)">x</div>'            => '<div >x</div>',
+            '<img onbeforeload="alert(1)">'                   => '<img >',
+            '<a ONGESTURESTART = "location=name" href="#">x</a>' => '<a  href="#">x</a>',
+        ];
+
+        foreach ($payloads as $payload => $expected) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expected, $antiXss->xss_clean($payload), $payload);
+            static::assertTrue($antiXss->isXssFound(), $payload);
+        }
+
+        // Other WebKit media / EME handlers
+        foreach ([
+            'onwebkitbeginfullscreen',
+            'onwebkitendfullscreen',
+            'onwebkitpresentationmodechanged',
+            'onwebkitplaybacktargetavailabilitychanged',
+            'onwebkitcurrentplaybacktargetiswirelesschanged',
+            'onwebkitneedkey',
+            'onwebkitkeyadded',
+            'onwebkitkeyerror',
+            'onwebkitkeymessage',
+        ] as $event) {
+            $antiXss = new AntiXSS();
+            $cleaned = $antiXss->xss_clean('<div ' . $event . '="alert(1)">x</div>');
+            static::assertSame('<div >x</div>', $cleaned, $event);
+            static::assertTrue($antiXss->isXssFound(), $event);
+        }
+
+        // Harmless text that only mentions the names is unchanged
+        $antiXss = new AntiXSS();
+        static::assertSame('Safari fires ongesturestart events', $antiXss->xss_clean('Safari fires ongesturestart events'));
+        static::assertFalse($antiXss->isXssFound());
     }
 
     public function testGhsa28pp7fjp8v32GeolocationValidationStatusChange()

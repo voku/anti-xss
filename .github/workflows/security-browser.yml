@@ -113,3 +113,93 @@ jobs:
           fi
 
           echo "PASS: Chromium blocks the sanitized GHSA-v42h-26cv-jpgq payloads and executes the raw ones."
+
+          # 4.1.50: event handler attributes ("on" + any letters) are removed structurally, not only by the list:
+          # all known event names (tests/fixtures/browser-event-handlers.txt), random unknown names and parser
+          # context tricks, parsed one by one by Chromium's HTML parser.
+          php tests/browser/event-handler-attributes.php \
+            > "$RUNNER_TEMP/events-sanitized.html"
+          render_browser_dom "$RUNNER_TEMP/events-sanitized.html" "$RUNNER_TEMP/events-sanitized-dom.html"
+
+          if ! grep -Fq 'data-events-status="pass"' "$RUNNER_TEMP/events-sanitized-dom.html" \
+            || ! grep -Fq 'data-events-executed="false"' "$RUNNER_TEMP/events-sanitized-dom.html"; then
+            echo "::error::The sanitized browser DOM still contains event handler attributes."
+            grep -o 'data-events-[a-z-]*="[^"]*"' "$RUNNER_TEMP/events-sanitized-dom.html" || true
+            exit 1
+          fi
+
+          # Prove the browser assertions would reject (and execute) the actual unsanitized payloads.
+          php tests/browser/event-handler-attributes.php --raw \
+            > "$RUNNER_TEMP/events-raw.html"
+          render_browser_dom "$RUNNER_TEMP/events-raw.html" "$RUNNER_TEMP/events-raw-dom.html"
+
+          if ! grep -Fq 'data-events-status="fail"' "$RUNNER_TEMP/events-raw-dom.html" \
+            || ! grep -Fq 'event-attribute:known-onabort:onabort' "$RUNNER_TEMP/events-raw-dom.html" \
+            || ! grep -Fq 'data-events-executed="true"' "$RUNNER_TEMP/events-raw-dom.html"; then
+            echo "::error::The unsanitized event handler negative control did not prove real execution."
+            grep -o 'data-events-[a-z-]*="[^"]*"' "$RUNNER_TEMP/events-raw-dom.html" | cut -c1-500 || true
+            exit 1
+          fi
+
+          echo "PASS: Chromium sees no event handler attribute in the sanitized output and executes the raw ones."
+
+  # The same generated fixtures in all three engines (Playwright is a CI-only tool, not a dependency of the library).
+  browser-engines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm install --no-save --no-audit --no-fund --prefix tests/browser playwright@1.63.0
+          npx --prefix tests/browser playwright install --with-deps ${{ matrix.engine }}
+
+      - name: Verify sanitized and raw fixtures in ${{ matrix.engine }}
+        shell: bash
+        env:
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          set -euo pipefail
+
+          run_fixture() {
+            local fixture="$1" prefix="$2" raw_expectation="${3:-fail}" name
+            name="$(basename "$fixture" .php)"
+
+            php "$fixture" > "$RUNNER_TEMP/$name-sanitized.html"
+            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-sanitized.html" "$prefix" pass
+
+            # negative control: the unsanitized payloads must be detected and (if this engine supports them) execute
+            php "$fixture" --raw > "$RUNNER_TEMP/$name-raw.html"
+            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-raw.html" "$prefix" "$raw_expectation"
+          }
+
+          run_fixture tests/browser/event-handler-attributes.php events
+          # GHSA-28pp uses Chromium-only events ("onvalidationstatuschange", "onpromptaction", ...): Firefox and
+          # WebKit do not execute them, so their raw control only has to be detected there
+          if [[ "$ENGINE" == chromium ]]; then
+            run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa fail
+          else
+            run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa detected
+          fi
+          run_fixture tests/browser/ghsa-v42h-26cv-jpgq.php ghsa

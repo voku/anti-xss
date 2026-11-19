@@ -47,6 +47,13 @@ final class AntiXSS
 
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
+    /**
+     * All printable ASCII chars ("!" - "~").
+     *
+     * @var string
+     */
+    const PRINTABLE_ASCII_CHARS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
 
     /**
@@ -621,6 +628,14 @@ final class AntiXSS
      */
     private $_cache_can_short_circuit_evil_attributes = true;
 
+    /**
+     * Event handler attributes that were explicitly allowed via "removeNeverAllowedOnEventsAfterwards()"
+     * (lowercase name => true), so that "_remove_event_handler_attributes()" keeps them, too.
+     *
+     * @var array<string, true>
+     */
+    private $_allowed_on_event_attributes = [];
+
     public function __construct()
     {
         $this->_initNeverAllowedStr();
@@ -702,7 +717,7 @@ final class AntiXSS
                 [$this, '_compact_exploded_words_callback'],
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         return $str;
@@ -771,7 +786,7 @@ final class AntiXSS
                             $this->_xss_found = true;
 
                             $urlPartClean = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $urlPartClean);
-                            $urlPartClean = UTF8::rawurldecode($urlPartClean);
+                            $urlPartClean = $this->_rawurldecode($urlPartClean);
                             $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $urlPartClean);
 
                             $str = \str_ireplace($matches['attr'], $urlPartClean, $str);
@@ -783,7 +798,7 @@ final class AntiXSS
 
         if ($needProtection) {
             $str = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $str);
-            $str = $this->_entity_decode(UTF8::rawurldecode($str));
+            $str = $this->_entity_decode($this->_rawurldecode($str));
             $str = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $str);
         }
 
@@ -826,7 +841,7 @@ final class AntiXSS
             }
         }
 
-        return UTF8::rawurldecode($str);
+        return $this->_rawurldecode($str);
     }
 
     /**
@@ -887,7 +902,7 @@ final class AntiXSS
                 } else {
                     $charLength = 4;
                 }
-                if (\preg_match('/^\p{L}$/u', (string) \substr($str, $pos, $charLength)) !== 1) {
+                if (\preg_match('/^\p{L}$/u', (string) \substr($str, $pos, $charLength)) === 0) {
                     continue;
                 }
             }
@@ -989,7 +1004,7 @@ final class AntiXSS
         // here (U+3AFE), but "javascript:%0bfetch(1)" in the browser
         if (\strpos($str, '&#') !== false) {
             $tmp = \preg_replace('/&#(?:[xX][0-9a-fA-F]++|[0-9]++)(?!;)/', '$0;', $str);
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // remove invisible characters (also url-encoded ones like "%00")
@@ -1004,7 +1019,7 @@ final class AntiXSS
         // remove all >= 4-Byte chars if needed
         if ($this->_stripe_4byte_chars) {
             $tmp = \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // backup the string (for later comparison)
@@ -1027,6 +1042,9 @@ final class AntiXSS
             // remove strings that are never allowed
             $str = $this->_do_callback_outside_of_pre_and_code_tags($str, [$this, '_do_never_allowed']);
     
+            // remove all event handler attributes ("on" + any name), also unknown / future events
+            $str = $this->_remove_event_handler_attributes($str);
+
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
     
@@ -1074,13 +1092,18 @@ final class AntiXSS
             $strBefore = $str;
 
             // raw control characters etc. (without the url-encoded ones)
-            $str = UTF8::remove_invisible_characters($str, false, '', false);
+            $str = $this->_failClosedVendorCall(
+                static function ($str) {
+                    return UTF8::remove_invisible_characters($str, false, '', false);
+                },
+                $str
+            );
 
             if (\strpos($str, '%') === false) {
                 break;
             }
 
-            if (\preg_match('/%[01]/', $str) !== 1) {
+            if (\preg_match('/%[01]/', $str) === 0) {
                 break;
             }
 
@@ -1242,7 +1265,7 @@ final class AntiXSS
                 '$1' . $this->_replacement . '$2',
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // ---
@@ -1253,7 +1276,7 @@ final class AntiXSS
                 $replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         if ($this->_cache_never_allowed_regex_string) {
@@ -1262,7 +1285,7 @@ final class AntiXSS
                 $this->_replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         foreach ($this->_cache_never_allowed_regex_standalone as $regex) {
@@ -1271,7 +1294,7 @@ final class AntiXSS
                 $this->_replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         return $str;
@@ -1307,7 +1330,7 @@ final class AntiXSS
             // INFO: only the "before"-part and the event name are matched here, the "after"-part is checked
             //       in "_remove_never_allowed_on_events_afterwards()" without regex-backtracking
             $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] =
-                '(?<before>[^\p{L}@.!?>]|^)(?<name>' . \implode('|', $events) . ')';
+                '(?<before>[^\p{L}@.!?>-]|^)(?<name>' . \implode('|', $events) . ')';
         }
 
         $this->_cache_never_allowed_on_events_afterwards_chunks = $array;
@@ -1350,7 +1373,10 @@ final class AntiXSS
             -1,
             $count
         );
-        if ($marked === null || $count === 0) {
+        if ($marked === null) {
+            return $this->_failClosedNeutralize($str);
+        }
+        if ($count === 0) {
             return $str;
         }
 
@@ -1486,8 +1512,12 @@ final class AntiXSS
 
         // a: "[^\p{L}]*?(?:=|&equals;)"
         // (invalid UTF-8 etc.: be strict)
-        $pos = \preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA) === 1 ? \strlen($matchesA[0]) : 0;
-        if ($pos >= $prefixLength) {
+        $matchA = \preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA);
+        $pos = $matchA === 1 ? \strlen($matchesA[0]) : 0;
+        if ($matchA === false) {
+            // PCRE failed: fail closed (remove the name)
+            $a = true;
+        } elseif ($pos >= $prefixLength) {
             $a = $tail['a'];
         } else {
             $a = $str[$pos] === '=' || $str[$pos] === '&';
@@ -1498,7 +1528,7 @@ final class AntiXSS
         $bin = $this->_events_tail_scan_b($prefix, true, $tail);
 
         // c: only whitespace
-        $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) === 1;
+        $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) !== 0;
 
         // the first chars (not bytes, so that we never cut an UTF-8 char)
         $pre = \preg_match('/^.{0,16}/us', $str, $matchesPre) === 1 ? $matchesPre[0] : '';
@@ -1613,7 +1643,11 @@ final class AntiXSS
         if (\strpos($str, '&') !== false) {
             $tagNames = [];
             foreach ($this->_never_allowed_str_afterwards as $neverAllowedStr) {
-                if (\preg_match('#^&lt;/?([a-z][a-z\d-]*+)&gt;$#i', $neverAllowedStr, $matchesTagName) === 1) {
+                $matchTagName = \preg_match('#^&lt;/?([a-z][a-z\d-]*+)&gt;$#i', $neverAllowedStr, $matchesTagName);
+                if ($matchTagName === false) {
+                    return $this->_failClosedNeutralize($str);
+                }
+                if ($matchTagName === 1) {
                     if (\stripos($str, $matchesTagName[1]) !== false) {
                         $tagNames[\strtolower($matchesTagName[1])] = \preg_quote($matchesTagName[1], '#');
                     }
@@ -1626,7 +1660,7 @@ final class AntiXSS
                     $this->_replacement,
                     $str
                 );
-                $str = $tmp ?? $str;
+                $str = $tmp ?? $this->_failClosedNeutralize($str);
             }
         }
 
@@ -1647,11 +1681,13 @@ final class AntiXSS
         $flags = ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE;
 
         // decode-again, for e.g. HHVM or miss configured applications ...
-        if (
-            \strpos($str, '&') !== false
-            &&
-            \preg_match_all('/(?<html_entity>&[A-Za-z]{2,};{0})/', $str, $matches)
-        ) {
+        $entityMatches = \strpos($str, '&') !== false
+            ? \preg_match_all('/(?<html_entity>&[A-Za-z]{2,};{0})/', $str, $matches)
+            : 0;
+        if ($entityMatches === false) {
+            return $this->_failClosedNeutralize($str);
+        }
+        if ($entityMatches > 0) {
             if ($HTML_ENTITIES_CACHE === null) {
                 // links:
                 // - http://dev.w3.org/html5/html-author/charref
@@ -1995,13 +2031,19 @@ final class AntiXSS
         $replacer = $this->_filter_attributes($match[1]);
 
         // filter for "$search"-attributes
-        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) === 1) {
+        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) !== 0) {
             // 1: whitespace before "=", 2: whitespace after "=", 3: quote wrapper, 4: attribute value
             $pattern = '#' . \preg_quote($search, '#') . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
             $isValidAttributeUrl = false;
-            if (\preg_match($pattern, $match[1], $matchInner)) {
+            $matchInnerResult = \preg_match($pattern, $match[1], $matchInner);
+            if ($matchInnerResult === false) {
+                // PCRE failed: fail closed (remove the attribute)
+                $foundSomethingBad = true;
+                $this->_xss_found = true;
+                $replacer = $this->_failClosedRemoveAttributesByName($replacer, [$search]);
+            } elseif ($matchInnerResult === 1) {
                 $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($matchInner[4]);
                 $needProtection = !$isValidAttributeUrl;
 
@@ -2024,7 +2066,7 @@ final class AntiXSS
                             $search . '${1}=${2}"' . $this->_replacement . '"',
                             $replacer
                         );
-                        $replacer = $tmp ?? $replacer;
+                        $replacer = $tmp ?? $this->_failClosedRemoveAttributesByName($replacer, [$search]);
                     }
                 }
             }
@@ -2041,13 +2083,21 @@ final class AntiXSS
                 }
                 $pattern = '#' . $search . '=.*(?:' . $patternTmp . \implode('|', $this->_never_allowed_js_callback_regex) . ')#ius';
                 $matchInner = [];
-                if (\preg_match($pattern, $match[1], $matchInner)) {
-                    $tmp = \preg_replace(
-                        $pattern,
-                        $search . '="' . $this->_replacement . '"',
-                        $replacer
-                    );
-                    $replacer = $tmp ?? $replacer;
+                $matchInnerResult = \preg_match($pattern, $match[1], $matchInner);
+                if ($matchInnerResult !== 0) {
+                    $tmp = $matchInnerResult === 1
+                        ? \preg_replace(
+                            $pattern,
+                            $search . '="' . $this->_replacement . '"',
+                            $replacer
+                        )
+                        : null;
+                    if ($tmp === null) {
+                        // PCRE failed: fail closed (remove the attribute)
+                        $this->_xss_found = true;
+                        $tmp = $this->_failClosedRemoveAttributesByName($replacer, [$search]);
+                    }
+                    $replacer = $tmp;
                 }
             }
         }
@@ -2160,6 +2210,131 @@ final class AntiXSS
         }
 
         return $result . \substr($str, $offset);
+    }
+
+    /**
+     * The terminal fail-closed fallback, if a sanitizing step could not run, because PCRE failed (e.g.
+     * "pcre.backtrack_limit" exhausted, also with "pcre.jit" disabled). It does not use PCRE.
+     *
+     * <p>
+     * <br />
+     * Security invariant of the result (also if it's used in an attribute value):
+     * - no "<", ">", '"', "'" -> no tag, no attribute, no attribute break-out
+     * - no ":" -> no URL scheme (e.g. "javascript:"), also no encoded one: character references are decoded first
+     *   and every remaining "&" is encoded, so e.g. "&#58;", "&#x3a", "&colon;" can not become a ":" in the browser
+     * - no control chars, which could hide e.g. a "javascript:" from other filters
+     * - no "+" -> no UTF-7 shift sequence (e.g. "+ADw-script+AD4-"), if the page is decoded as UTF-7
+     *
+     * It's lossy on purpose (only used, if a step could not run at all) and idempotent (encode(decode(result)) is the
+     * result), so the cleaning loops still converge. It reports the input as XSS.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _failClosedNeutralize($str)
+    {
+        $this->_xss_found = true;
+
+        $str = \html_entity_decode($str, \ENT_QUOTES | \ENT_HTML5, 'UTF-8');
+
+        $remove = [':', '+'];
+        foreach (\array_merge(\range(0, 8), [11, 12], \range(14, 31), [127]) as $byte) {
+            $remove[] = \chr($byte);
+        }
+        $str = \str_replace($remove, '', $str);
+
+        // INFO: "double_encode" -> also every "&" of a not decoded reference (e.g. "&#58" without ";") is encoded
+        $str = \htmlspecialchars($str, \ENT_QUOTES | \ENT_SUBSTITUTE | \ENT_HTML401, 'UTF-8', true);
+
+        return $str;
+    }
+
+    /**
+     * "UTF8::rawurldecode()", but the "%uXXXX" escapes are decoded here (without PCRE) and PCRE failures in the
+     * vendor method fail closed (see "_failClosedVendorCall()").
+     *
+     * <p>
+     * <br />
+     * INFO: The vendor method decodes "%uXXXX" only, if its "preg_match()" succeeds; if that fails, a later
+     *       successful PCRE call resets "preg_last_error()", so the failure was not visible and "%u003C" (= "<")
+     *       stayed encoded. Here they are replaced like in "UTF8::urldecode_unicode_helper()"
+     *       ('/%u([0-9a-fA-F]{3,4})/' -> '&#x\\1;'), so the vendor method has nothing left to skip.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _rawurldecode($str)
+    {
+        if (\strpos($str, '%u') !== false) {
+            $result = '';
+            $offset = 0;
+            while (($pos = \strpos($str, '%u', $offset)) !== false) {
+                $hexLength = \strspn($str, '0123456789abcdefABCDEF', $pos + 2, 4);
+                if ($hexLength < 3) {
+                    $result .= \substr($str, $offset, $pos + 2 - $offset);
+                    $offset = $pos + 2;
+
+                    continue;
+                }
+
+                $result .= \substr($str, $offset, $pos - $offset) . '&#x' . \substr($str, $pos + 2, $hexLength) . ';';
+                $offset = $pos + 2 + $hexLength;
+            }
+            $str = $result . \substr($str, $offset);
+        }
+
+        return $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str);
+    }
+
+    /**
+     * Call a "portable-utf8" method, that uses PCRE internally, and fail closed, if PCRE failed in there.
+     *
+     * <p>
+     * <br />
+     * INFO: These methods cast a failed "preg_replace()" to "" ("(string) preg_replace()"), so that the string was
+     *       erased before the backup in "_do()" and "xss_clean()" returned the original, unchecked input.
+     * </p>
+     *
+     * @param callable $call <p>callable(string): string</p>
+     * @param string   $str
+     *
+     * @return string
+     */
+    private function _failClosedVendorCall(callable $call, $str)
+    {
+        // reset "preg_last_error()"
+        \preg_match('/^/', '');
+
+        $result = (string) $call($str);
+
+        if (
+            \preg_last_error() !== \PREG_NO_ERROR
+            ||
+            // printable ASCII chars are never removed or decoded into nothing, so "" means, that PCRE failed
+            ($result === '' && \strcspn($str, self::PRINTABLE_ASCII_CHARS) < \strlen($str))
+        ) {
+            return $this->_failClosedNeutralize($str);
+        }
+
+        return $result;
+    }
+
+    /**
+     * The result of a sanitizing "preg_replace()" / "preg_replace_callback()", or the fail-closed fallback, if PCRE
+     * failed ("null"), see "_failClosedNeutralize()".
+     *
+     * @param string|null $result
+     * @param string      $str    <p>the input of the failed step</p>
+     *
+     * @return string
+     */
+    private function _failClosedOnNull($result, $str)
+    {
+        return $result ?? $this->_failClosedNeutralize($str);
     }
 
     /**
@@ -2396,6 +2571,213 @@ final class AntiXSS
     }
 
     /**
+     * Remove every attribute whose name starts with "on" (e.g. "onclick", but also event handlers that are not
+     * on the "_never_allowed_on_events_afterwards" list, like "ongesturestart" or events that browsers add later).
+     *
+     * <p>
+     * <br />
+     * INFO: The attributes are found with the states of the HTML tokenizer (WHATWG HTML, "Tokenization": tag open,
+     *       tag name, before / after attribute name, attribute name, before attribute value, attribute value and
+     *       self-closing start tag state), so that only attribute *names* are matched and not text or attribute
+     *       values like 'data-onclick="..."', 'title="onclick ..."' or 'class="onboarding"'.
+     *
+     *       The tokenizer starts at *every* "<" + ASCII letter (also inside of attribute values, comments,
+     *       "<textarea>", "<script>", ...), because what a "<" means depends on markup that is not parsed here,
+     *       e.g. '<textarea><p title="</textarea><img onfoo=...>">'. So every possible start tag is checked.
+     *
+     *       Runtime: a scan stops at a "before attribute name" position that an earlier scan already reached (the
+     *       rest of the tag is the same), and a start inside an already scanned tag name is skipped. If the scanned
+     *       bytes or the number of found attributes still exceed a linear budget, all 'on...=' after whitespace,
+     *       "/" or a quote are removed instead ("fail closed", see "_remove_event_handler_attributes_fail_closed()").
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_event_handler_attributes($str)
+    {
+        // quick check: an attribute name starts after whitespace, "/" or a quote (after a quoted value), and an event
+        // handler attribute is "on" + ASCII letters + optional whitespace + "=" (without a value it does nothing)
+        //
+        // INFO: only "0" (no match) skips the scan; if PCRE fails ("false"), the scan runs ("fail closed"), it does
+        //       not use PCRE itself
+        if (
+            \strpos($str, '<') === false
+            ||
+            \preg_match('#[\t\n\f\r /"\']on[a-z]++[\t\n\f\r ]*+=#i', $str) === 0
+        ) {
+            return $str;
+        }
+
+        $length = \strlen($str);
+        $whitespace = " \t\n\f\r";
+        $budget = 8 * $length + 4096;
+
+        /** @var array<int, array{0: int, 1: int}> $ranges [start, end) offsets of the attributes */
+        $ranges = [];
+
+        // bitmap: "\1" at the positions where a scan was in the "before attribute name" state
+        $visited = null;
+
+        $tagNameEnd = -1;
+        $pos = 0;
+        while (($lt = \strpos($str, '<', $pos)) !== false) {
+            $pos = $lt + 1;
+            if ($pos >= $length) {
+                break;
+            }
+
+            // "tag open state": only "<" + ASCII letter starts a start tag
+            $byte = \ord($str[$pos]);
+            if (!(($byte >= 0x41 && $byte <= 0x5A) || ($byte >= 0x61 && $byte <= 0x7A))) {
+                continue;
+            }
+
+            // a start inside of an already scanned tag name has the same tag name end -> same attributes
+            if ($pos < $tagNameEnd) {
+                continue;
+            }
+
+            // "tag name state"
+            $i = $pos + \strcspn($str, $whitespace . '/>', $pos);
+            $tagNameEnd = $i;
+            $budget -= $i - $pos;
+
+            while ($i < $length) {
+                if ($budget < 0 || \count($ranges) > 10000) {
+                    return $this->_remove_event_handler_attributes_fail_closed($str);
+                }
+
+                // "before attribute name", "self-closing start tag" and "after attribute value (quoted)" state
+                //
+                // INFO: every scanned byte is charged against the budget (+ 1 per step for the constant work)
+                $skipped = \strspn($str, $whitespace . '/', $i);
+                $i += $skipped;
+                $budget -= $skipped + 1;
+                if ($i >= $length || $str[$i] === '>') {
+                    break;
+                }
+
+                if ($visited === null) {
+                    $visited = \str_repeat("\0", $length);
+                } elseif ($visited[$i] !== "\0") {
+                    // an earlier scan was here in the same state, so it already checked the rest of this tag
+                    break;
+                }
+                $visited[$i] = "\1";
+
+                // "attribute name state" (the first char can be "=")
+                $nameStart = $i;
+                $i += 1 + \strcspn($str, $whitespace . '/>=', $i + 1);
+                $nameLength = $i - $nameStart;
+
+                // "after attribute name state"
+                $i += \strspn($str, $whitespace, $i);
+                $budget -= $i - $nameStart;
+                if ($i >= $length || $str[$i] !== '=') {
+                    // no value: the next attribute, "/" or ">" (an event handler without a value does nothing)
+                    continue;
+                }
+
+                // "before attribute value state"
+                $equalsSign = $i;
+                ++$i;
+                $i += \strspn($str, $whitespace, $i);
+                if ($i >= $length) {
+                    $valueEnd = $length;
+                } elseif ($str[$i] === '"' || $str[$i] === '\'') {
+                    // "attribute value (double-quoted / single-quoted) state"
+                    $closingQuote = \strpos($str, $str[$i], $i + 1);
+                    $valueEnd = $closingQuote === false ? $length : $closingQuote + 1;
+                } elseif ($str[$i] === '>') {
+                    // missing value: the ">" ends the tag
+                    $valueEnd = $i;
+                } else {
+                    // "attribute value (unquoted) state"
+                    $valueEnd = $i + \strcspn($str, $whitespace . '>', $i);
+                }
+                $budget -= $valueEnd - $equalsSign;
+                $i = $valueEnd;
+
+                // INFO: every event handler attribute is "on" + ASCII letters; lookalikes like "on:click",
+                //       "on_load" or "on-click" are never executed by a browser, so they are kept
+                if (
+                    $nameLength > 2
+                    &&
+                    \substr_compare($str, 'on', $nameStart, 2, true) === 0
+                    &&
+                    \strspn($str, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', $nameStart + 2, $nameLength - 2) === $nameLength - 2
+                    &&
+                    !isset($this->_allowed_on_event_attributes[\strtolower((string) \substr($str, $nameStart, $nameLength))])
+                ) {
+                    $ranges[] = [$nameStart, $valueEnd];
+                }
+            }
+        }
+
+        // INFO: if the budget was exceeded in the last scan, the scan is already done and the result is exact
+
+        if ($ranges === []) {
+            return $str;
+        }
+
+        // the scans of different starts can find overlapping attributes: remove the union of all ranges
+        \usort(
+            $ranges,
+            static function ($a, $b) {
+                return $a[0] <=> $b[0];
+            }
+        );
+
+        $result = '';
+        $offset = 0;
+        foreach ($ranges as $range) {
+            if ($range[1] <= $offset) {
+                continue;
+            }
+
+            if ($range[0] >= $offset) {
+                $result .= \substr($str, $offset, $range[0] - $offset) . $this->_replacement;
+            }
+            $offset = $range[1];
+        }
+
+        return $result . \substr($str, $offset);
+    }
+
+    /**
+     * Conservative variant of "_remove_event_handler_attributes()" for inputs that exceed its runtime budget:
+     * remove every "on" + ASCII letters + "=" + value after whitespace, "/" or a quote, also outside of tags.
+     *
+     * <p>
+     * <br />
+     * INFO: All quantifiers are possessive and the names end at a quote, so the regex runs in linear time. If
+     *       PCRE still fails, "_failClosedNeutralize()" is used (the same terminal fallback as everywhere else).
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_event_handler_attributes_fail_closed($str)
+    {
+        $allowed = $this->_allowed_on_event_attributes;
+        $replacement = $this->_replacement;
+
+        $tmp = \preg_replace_callback(
+            '#(?<=[\t\n\f\r /"\'])(on[a-z]++)[\t\n\f\r ]*+=[\t\n\f\r ]*+(?:"[^"]*+"?|\'[^\']*+\'?|[^\t\n\f\r >]*+)#i',
+            static function ($matches) use ($allowed, $replacement) {
+                return isset($allowed[\strtolower($matches[1])]) ? $matches[0] : $replacement;
+            },
+            $str
+        );
+
+        // INFO: if PCRE fails here, too, use the terminal fallback (no markup at all)
+        return $tmp ?? $this->_failClosedNeutralize($str);
+    }
+
+    /**
      * Remove Evil HTML Attributes (like event handlers and style).
      *
      * It removes the evil attribute and either:
@@ -2460,7 +2842,7 @@ final class AntiXSS
                     -1,
                     $temp_count
                 );
-                $str = $tmp ?? $str;
+                $str = $tmp ?? $this->_failClosedNeutralize($str);
                 $count += $temp_count;
             } while ($count);
         }
@@ -2559,11 +2941,11 @@ final class AntiXSS
             return $str;
         }
 
-        return (string) \preg_replace_callback(
+        return $this->_failClosedOnNull(\preg_replace_callback(
             $REGEX_FOR_CONTENT,
             [$this, '_repack_utf7_callback'],
             $str
-        );
+        ), $str);
     }
 
     /**
@@ -2662,7 +3044,7 @@ final class AntiXSS
                 $this->_cache__evil_html_tags_str = \implode('|', $evilHtmlTags);
             }
 
-            $str = (string) \preg_replace_callback(
+            $str = $this->_failClosedOnNull(\preg_replace_callback(
                 // INFO: "rest" must not consume the "<" of a following tag (e.g. "<header><style>"), otherwise
                 //       that tag is skipped by this pass
                 //
@@ -2671,7 +3053,7 @@ final class AntiXSS
                 '#<(?<start>/*\s*)(?<prefix>(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>>*+(?:<(?![\p{L}/!?])>*+)*+)#ius',
                 [$this, '_sanitize_naughty_html_callback'],
                 $str
-            );
+            ), $str);
 
             if (\strpos($str, '<') === false) {
                 return $str;
@@ -2685,7 +3067,7 @@ final class AntiXSS
                 return '';
             }
 
-            $str = (string) \preg_replace_callback(
+            $str = $this->_failClosedOnNull(\preg_replace_callback(
                 '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS', // tags without comments
                 function ($matches) {
                     if (
@@ -2701,7 +3083,7 @@ final class AntiXSS
                     return $this->_close_html_callback($matches);
                 },
                 $str
-            );
+            ), $str);
 
             if ($str === $strEnd) {
                 return (string) $str;
@@ -2770,7 +3152,7 @@ final class AntiXSS
             (
                 \strpos($fullMatch, '=') === false
                 &&
-                \preg_match('/\s/', $fullMatch) !== 1
+                \preg_match('/\s/', $fullMatch) === 0
                 &&
                 \strpos($fullMatch, ':') === false
                 &&
@@ -2840,11 +3222,11 @@ final class AntiXSS
             }
 
             if ($found === true) {
-                $str = (string) \preg_replace(
+                $str = $this->_failClosedOnNull(\preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
-                );
+                ), $str);
             }
 
             // Pass 2 – English-word keywords: only match when "(" follows immediately (no whitespace),
@@ -2859,11 +3241,11 @@ final class AntiXSS
             }
 
             if ($found === true) {
-                $str = (string) \preg_replace(
+                $str = $this->_failClosedOnNull(\preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns_strict) . ')\((.*)\)#uisU',
                     '\\1&#40;\\2&#41;',
                     $str
-                );
+                ), $str);
             }
         }
 
@@ -2994,6 +3376,13 @@ final class AntiXSS
     /**
      * Add some strings to the "_never_allowed_on_events_afterwards"-array.
      *
+     * <p>
+     * <br />
+     * INFO: You don't need this for new browser events: every attribute "on" + ASCII letters (e.g. "onclick", but
+     *       also "ongesturestart" or a future event) is removed anyway. Use it for other names, or to disallow an
+     *       event again, that was allowed via "removeNeverAllowedOnEventsAfterwards()".
+     * </p>
+     *
      * @param string[] $strings
      *
      * @return $this
@@ -3012,6 +3401,10 @@ final class AntiXSS
             $strings,
             $this->_never_allowed_on_events_afterwards
         );
+
+        foreach ($strings as $string) {
+            unset($this->_allowed_on_event_attributes[\strtolower($string)]);
+        }
 
         $this->_rebuildEvilAttributesQuickChecksCache();
 
@@ -3226,6 +3619,9 @@ final class AntiXSS
      * <p>
      * <br />
      * WARNING: Use this method only if you have a really good reason.
+     * <br />
+     * INFO: A removed event (e.g. "onAbort") is also allowed as an attribute ("onabort=..."), only names that
+     *       are on the list can be allowed. All other "on" + ASCII letters attributes are always removed.
      * </p>
      *
      * @param string[] $strings
@@ -3242,10 +3638,17 @@ final class AntiXSS
         $this->_cache_evil_attributes_regex_string = '';
         $this->_resetNeverAllowedOnEventsAfterwardsCache();
 
+        $removed = \array_intersect($strings, $this->_never_allowed_on_events_afterwards);
+
         $this->_never_allowed_on_events_afterwards = \array_diff(
             $this->_never_allowed_on_events_afterwards,
-            \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
+            $removed
         );
+
+        // INFO: also keep these event handler attributes in "_remove_event_handler_attributes()"
+        foreach ($removed as $string) {
+            $this->_allowed_on_event_attributes[\strtolower($string)] = true;
+        }
 
         $this->_rebuildEvilAttributesQuickChecksCache();
 
@@ -3481,7 +3884,7 @@ final class AntiXSS
         if (
             \strpos((string) $old_str_backup, "\x1B") !== false
             &&
-            \preg_match('/\x1B[($]/', (string) $old_str_backup) === 1
+            \preg_match('/\x1B[($]/', (string) $old_str_backup) !== 0
         ) {
             $this->_xss_found = true;
         }

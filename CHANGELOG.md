@@ -1,6 +1,18 @@
 # Changelog
 
-### master (unreleased)
+### 4.1.50 (2026-11-19)
+
+- security: "xss_clean()" fails closed, if PCRE fails (e.g. "pcre.backtrack_limit" exhausted, also with "pcre.jit" disabled): before, e.g. "pcre.jit=0" + "pcre.backtrack_limit=1" returned '<script>alert(1)</script>' unchanged with "isXssFound() === false", because a failed "preg_replace()" erased the string before the backup (also inside "portable-utf8", e.g. "UTF8::rawurldecode()" / "UTF8::remove_invisible_characters()"), and other steps kept the unfiltered string ("$tmp ?? $str"); every PCRE call on the cleaning path was checked: a failed guard now runs its step, a failed removal uses a non-regex fallback ("_failClosedRemoveAttributesByName()" or the one terminal fallback "_failClosedNeutralize()": decode character references, remove ":", "+" and control chars, HTML-encode everything incl. every remaining "&", so that the result has no tag and no URL scheme, also in a quoted attribute), the "portable-utf8" calls are checked via "preg_last_error()", and "%uXXXX" is decoded without PCRE (a failure in "portable-utf8" there was hidden by a later successful PCRE call)
+- tests: add "PcreFailureTest" (every "pcre.jit" 0 / 1 + "pcre.backtrack_limit" 1 - 1000 setting in a separate PHP process, also for the code coverage; the existing test only used a tight limit with the JIT enabled, which hides most failures) and direct tests of the fail-closed fallbacks
+- security: remove every event handler attribute ("on" + ASCII letters as attribute name, e.g. "ongesturestart", "onwebkitmouseforcedown" or a future event), not only the names on "_never_allowed_on_events_afterwards"; the attributes are found with the rules of the HTML tokenizer (from every possible start tag), so text and attribute values like 'title="onreading mode"', 'data-onclick' or "on:click" are kept (WebKit gesture / force-touch events were not on the list and stayed executable in Safari)
+- security: with the old list, 264 - 281 (depending on the payload) of 514 event names known to the specs and browser engines survived "xss_clean()"; now none does (checked in PHP and in Chromium, also for random unknown names)
+- fix: an event name directly after a "-" is not removed from text and attribute names anymore (e.g. 'data-onclick="..."' was changed to 'data-="..."', 'aria-onfocus-hint' to 'aria--hint')
+- breaking (security): unknown "on..." attributes with a value are removed now, e.g. '<x onxxx=1>' (they were kept as unknown names before); "removeNeverAllowedOnEventsAfterwards()" still allows the removed names
+- tests: add "EventHandlerAttributeTest" (contract, syntax variations, seeded random event names, parser contexts, public API, runtime budget / fail-closed fallback), benign content cases and a Chromium browser test ("tests/browser/event-handler-attributes.php", also in CI)
+- tests: add "tests/fixtures/browser-event-handlers.txt" (514 names, generated from pinned upstream revisions by "build/event-handlers/extract.py") as a test resource; the runtime list is unchanged; names that start with "on" but are not "on" + ASCII letters are listed there as "excluded" (currently none), so that a new one shows up in the check
+- tests: regenerate the differential corpus (18 of 2000 results changed, all reviewed)
+
+### 4.1.49 (2026-11-18)
 
 - fix regression from 4.1.47: harmless HTML from Microsoft Word / Excel (e.g. "<o:Title>", "<x:Selected/>", "<x:Header>", "<x:FormulaHidden/>") was encoded and reported as XSS; a tag with an XML namespace prefix is now only treated as an evil tag, if its local name is exactly the (lowercase) evil tag name (e.g. "<x:script>")
 - fix regression from 4.1.47: ANSI color codes (e.g. "ESC [ 32 m") were removed and reported as XSS; only the ISO-2022-JP escape sequences ("ESC (" and "ESC $") are treated as XSS now
