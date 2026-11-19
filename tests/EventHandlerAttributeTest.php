@@ -441,6 +441,42 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Both sides of the limits (10000 found attributes, scan budget) remove every event handler, and the memory
+     * usage stays linear (the found attributes are capped, the "visited" bitmap has 1 byte per input byte).
+     *
+     * @return void
+     */
+    public function testLimitsDoNotWeakenTheFilterAndMemoryStaysBounded()
+    {
+        $method = new \ReflectionMethod(AntiXSS::class, '_remove_event_handler_attributes');
+        $method->setAccessible(true);
+        $antiXss = new AntiXSS();
+
+        foreach ([9999, 10000, 10001, 10002] as $count) {
+            $output = $method->invoke($antiXss, \str_repeat('<b onfoo=1>', $count) . 'x');
+            static::assertSame(\str_repeat('<b >', $count) . 'x', $output, (string) $count);
+        }
+
+        // scan budget: "8 * length + 4096" bytes; below and above it
+        foreach ([100, 400, 2000, 20000] as $count) {
+            $output = $method->invoke($antiXss, '<a x=' . \str_repeat('<b/y=', $count) . ' onfoo=1>');
+            self::assertNotContainsIgnoringCase('onfoo', $output, (string) $count);
+        }
+
+        // ~1 MB with 100000 event handlers: the found attributes are capped at 10000, so the peak memory is a few MB
+        $input = \str_repeat('<b onfoo=1>', 100000);
+        if (\function_exists('memory_reset_peak_usage')) {
+            \memory_reset_peak_usage();
+        }
+        $before = \memory_get_usage();
+        $output = $method->invoke($antiXss, $input);
+        $peak = \memory_get_peak_usage() - $before;
+
+        static::assertSame(\str_repeat('<b >', 100000), $output);
+        static::assertLessThan(16 * 1024 * 1024, $peak);
+    }
+
+    /**
      * The fallback is fail-closed: if PCRE fails, every "on" after whitespace, "/" or a quote is removed.
      *
      * @return void
