@@ -20,3 +20,6 @@ build/logs/
 tests/browser/node_modules/
 tests/browser/package.json
 tests/browser/package-lock.json
+
+# python
+__pycache__/
