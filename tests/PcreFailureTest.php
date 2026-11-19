@@ -12,8 +12,8 @@ use voku\helper\AntiXSS;
  * (and "isXssFound() === false"): a failed "preg_replace()" erased the string before the backup in "_do()", so
  * that the result looked unchanged; other steps kept the unfiltered string ("$tmp ?? $str").
  *
- * Every PCRE setting runs in its own process, because PHP caches compiled patterns (a pattern that was compiled with
- * the JIT in this process would not fail here).
+ * Every PCRE setting runs in its own process ("@runInSeparateProcess"), because PHP caches compiled patterns (a
+ * pattern that was compiled with the JIT in this process would not fail here).
  *
  * @internal
  */
@@ -54,37 +54,6 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
             '<textarea><p title="</textarea><img src=x onerror=alert(1)>"></textarea>',
             \str_repeat('a', 3000) . '<script>alert(1)</script>',
         ];
-    }
-
-    /**
-     * @param string[] $payloads
-     * @param string   $jit
-     * @param int      $backtrackLimit
-     *
-     * @return array<int, array{output: string|null, found: bool|null, error: string|null}>
-     */
-    private static function cleanInProcess(array $payloads, $jit, $backtrackLimit): array
-    {
-        $command = \escapeshellarg(\PHP_BINARY)
-            . ' -d pcre.jit=' . $jit
-            . ' -d pcre.backtrack_limit=' . $backtrackLimit
-            . ' ' . \escapeshellarg(__DIR__ . '/pcre/run-payloads.php');
-
-        $process = \proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-        static::assertIsResource($process);
-
-        \fwrite($pipes[0], (string) \json_encode($payloads));
-        \fclose($pipes[0]);
-        $stdout = (string) \stream_get_contents($pipes[1]);
-        $stderr = (string) \stream_get_contents($pipes[2]);
-        \fclose($pipes[1]);
-        \fclose($pipes[2]);
-        \proc_close($process);
-
-        $results = \json_decode($stdout, true);
-        static::assertIsArray($results, $stderr . $stdout);
-
-        return $results;
     }
 
     /**
@@ -132,54 +101,179 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function testXssCleanFailsClosedIfPcreFails()
+    /**
+     * @return array<string, array{0: string, 1: int}>
+     */
+    public static function providePcreSettings(): array
     {
-        if (!\function_exists('proc_open')) {
-            static::markTestSkipped('"proc_open()" is not available');
-        }
-
-        $payloads = self::payloads();
-
-        $failures = [];
+        $settings = [];
         foreach (['0', '1'] as $jit) {
             foreach ([1, 2, 3, 6, 16, 100, 1000] as $backtrackLimit) {
-                foreach (self::cleanInProcess($payloads, $jit, $backtrackLimit) as $i => $result) {
-                    $setting = 'pcre.jit=' . $jit . ', pcre.backtrack_limit=' . $backtrackLimit . ': ' . $payloads[$i];
+                $settings['pcre.jit=' . $jit . ', pcre.backtrack_limit=' . $backtrackLimit] = [$jit, $backtrackLimit];
+            }
+        }
 
-                    if ($result['error'] !== null) {
-                        $failures[] = $setting . ' => ' . $result['error'];
+        return $settings;
+    }
 
-                        continue;
-                    }
+    /**
+     * INFO: in a separate process, so that no pattern was compiled (e.g. with the JIT) before the settings are used;
+     *       PHPUnit also collects the code coverage of separate processes
+     *
+     * @dataProvider providePcreSettings
+     *
+     * @runInSeparateProcess
+     *
+     * @preserveGlobalState disabled
+     *
+     * @param string $jit
+     * @param int    $backtrackLimit
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('providePcreSettings')]
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
+    public function testXssCleanFailsClosedIfPcreFails($jit, $backtrackLimit)
+    {
+        $payloads = self::payloads();
 
-                    $dangers = self::dangers((string) $result['output']);
-                    if ($dangers !== []) {
-                        $failures[] = $setting . ' => ' . $result['output'] . ' (' . \implode(', ', $dangers) . ')';
-                    }
+        $originalJit = \ini_get('pcre.jit');
+        $originalBacktrackLimit = \ini_get('pcre.backtrack_limit');
+        \ini_set('pcre.jit', $jit);
+        \ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
 
-                    // every payload must be reported as XSS (with the default settings, it's reported, too); so the
-                    // original input is never returned unchecked
-                    if ($result['found'] !== true) {
-                        $failures[] = $setting . ' => ' . $result['output'] . ' (not reported as XSS)';
-                    }
-                }
+        $results = [];
+        try {
+            foreach ($payloads as $payload) {
+                $antiXss = new AntiXSS();
+                $results[] = [$antiXss->xss_clean($payload), $antiXss->isXssFound()];
+            }
+        } finally {
+            \ini_set('pcre.jit', (string) $originalJit);
+            \ini_set('pcre.backtrack_limit', (string) $originalBacktrackLimit);
+        }
+
+        $failures = [];
+        foreach ($results as $i => $result) {
+            $dangers = self::dangers($result[0]);
+            if ($dangers !== []) {
+                $failures[] = $payloads[$i] . ' => ' . $result[0] . ' (' . \implode(', ', $dangers) . ')';
+            }
+
+            // every payload must be reported as XSS (with the default settings, it's reported, too); so the
+            // original input is never returned unchecked
+            if ($result[1] !== true) {
+                $failures[] = $payloads[$i] . ' => ' . $result[0] . ' (not reported as XSS)';
             }
         }
 
         static::assertSame([], $failures);
     }
 
-    public function testHarmlessContentIsUnchangedIfPcreWorks()
+    /**
+     * @param string $name
+     *
+     * @return \ReflectionMethod
+     */
+    private static function method($name): \ReflectionMethod
     {
-        if (!\function_exists('proc_open')) {
-            static::markTestSkipped('"proc_open()" is not available');
+        $method = new \ReflectionMethod(AntiXSS::class, $name);
+        $method->setAccessible(true);
+
+        return $method;
+    }
+
+    public function testNeutralizeFallback()
+    {
+        $antiXss = new AntiXSS();
+        $neutralize = self::method('_failClosedNeutralize');
+
+        $cases = [
+            '<a href="javascript:alert(1)">x</a>' => '&lt;a href=&quot;javascriptalert(1)&quot;&gt;x&lt;/a&gt;',
+            "a+b & c\x00d\x1Fe\x7Ff"              => 'a&#43;b &amp; cdef',
+            "keep\t\n\r whitespace"               => "keep\t\n\r whitespace",
+            '+ADw-script+AD4-'                    => '&#43;ADw-script&#43;AD4-',
+            "it's"                                => 'it&#039;s',
+        ];
+        foreach ($cases as $input => $expected) {
+            $output = $neutralize->invoke($antiXss, $input);
+
+            static::assertSame($expected, $output, $input);
+            // idempotent, so that the cleaning loops converge
+            static::assertSame($output, $neutralize->invoke($antiXss, $output), $input);
         }
 
-        // the default settings in a fresh process (the same code path as with a failing PCRE, but without failures)
-        $harmless = ['<p class="x">Hello <b>world</b></p>', 'plain text: online, on time', '<a href="https://example.com/?a=1">x</a>'];
-        foreach (self::cleanInProcess($harmless, '1', 1000000) as $i => $result) {
-            static::assertSame($harmless[$i], $result['output']);
-            static::assertFalse($result['found']);
+        static::assertTrue($antiXss->isXssFound());
+    }
+
+    public function testOnNullFallback()
+    {
+        $antiXss = new AntiXSS();
+        $onNull = self::method('_failClosedOnNull');
+
+        static::assertSame('result', $onNull->invoke($antiXss, 'result', '<b>'));
+        static::assertNull($antiXss->isXssFound());
+
+        static::assertSame('&lt;b&gt;', $onNull->invoke($antiXss, null, '<b>'));
+        static::assertTrue($antiXss->isXssFound());
+    }
+
+    public function testVendorCallFallback()
+    {
+        $vendorCall = self::method('_failClosedVendorCall');
+
+        // the vendor result is used, if PCRE did not fail
+        $antiXss = new AntiXSS();
+        static::assertSame('A', $vendorCall->invoke($antiXss, 'strtoupper', 'a'));
+        static::assertNull($antiXss->isXssFound());
+
+        // "" is a valid result for invisible chars only
+        static::assertSame('', $vendorCall->invoke($antiXss, static function () {
+            return '';
+        }, "\x00\x01"));
+        static::assertNull($antiXss->isXssFound());
+
+        // "" for printable input: PCRE failed in the vendor code ("(string) preg_replace()")
+        static::assertSame('&lt;b&gt;', $vendorCall->invoke($antiXss, static function () {
+            return '';
+        }, '<b>'));
+        static::assertTrue($antiXss->isXssFound());
+
+        // a PCRE error in the vendor code, also if its result looks fine (here: invalid UTF-8 with "/u")
+        $antiXss = new AntiXSS();
+        $output = $vendorCall->invoke($antiXss, static function ($str) {
+            \preg_match('/x/u', "\xC3\x28");
+
+            return $str;
+        }, '<b>');
+        static::assertSame('&lt;b&gt;', $output);
+        static::assertTrue($antiXss->isXssFound());
+
+        // an old PCRE error (from before the vendor call) is not reported as a failure of the vendor call
+        \preg_match('/x/u', "\xC3\x28");
+        $antiXss = new AntiXSS();
+        static::assertSame('B', $vendorCall->invoke($antiXss, 'strtoupper', 'b'));
+        static::assertNull($antiXss->isXssFound());
+    }
+
+    /**
+     * The default settings in a fresh process (the same code path as with a failing PCRE, but without failures).
+     *
+     * @runInSeparateProcess
+     *
+     * @preserveGlobalState disabled
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
+    public function testHarmlessContentIsUnchangedIfPcreWorks()
+    {
+        foreach (['<p class="x">Hello <b>world</b></p>', 'plain text: online, on time', '<a href="https://example.com/?a=1">x</a>'] as $harmless) {
+            $antiXss = new AntiXSS();
+            static::assertSame($harmless, $antiXss->xss_clean($harmless));
+            static::assertFalse($antiXss->isXssFound());
         }
     }
 }
