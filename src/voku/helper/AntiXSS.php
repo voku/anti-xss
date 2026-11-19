@@ -2435,10 +2435,13 @@ final class AntiXSS
     {
         // quick check: an attribute name starts after whitespace, "/" or a quote (after a quoted value), and an event
         // handler attribute is "on" + ASCII letters + optional whitespace + "=" (without a value it does nothing)
+        //
+        // INFO: only "0" (no match) skips the scan; if PCRE fails ("false"), the scan runs ("fail closed"), it does
+        //       not use PCRE itself
         if (
             \strpos($str, '<') === false
             ||
-            \preg_match('#[\t\n\f\r /"\']on[a-z]++[\t\n\f\r ]*+=#i', $str) !== 1
+            \preg_match('#[\t\n\f\r /"\']on[a-z]++[\t\n\f\r ]*+=#i', $str) === 0
         ) {
             return $str;
         }

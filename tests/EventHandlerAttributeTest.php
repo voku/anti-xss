@@ -472,6 +472,52 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * The structural filter must not fail open if PCRE fails: a failed quick check ("false", not "0") runs the
+     * scan, which does not use PCRE.
+     *
+     * @return void
+     */
+    public function testStructuralFilterIsFailClosedIfPcreFails()
+    {
+        $method = new \ReflectionMethod(AntiXSS::class, '_remove_event_handler_attributes');
+        $method->setAccessible(true);
+        $antiXss = new AntiXSS();
+
+        $cases = [
+            '<div onfoo="alert(1)" class=keep>x</div>' => '<div  class=keep>x</div>',
+            '<a ongesturechange=location=name>x</a>'   => '<a >x</a>',
+            '<p title="onreading mode">Read</p>'       => '<p title="onreading mode">Read</p>',
+        ];
+
+        $backtrackLimit = \ini_get('pcre.backtrack_limit');
+        $jit = \ini_get('pcre.jit');
+        \ini_set('pcre.jit', '0');
+        \ini_set('pcre.backtrack_limit', '1');
+
+        try {
+            // INFO: make sure that PCRE really fails in this test
+            $pcreFails = \preg_match('#[\t\n\f\r /"\']on[a-z]++[\t\n\f\r ]*+=#i', '<div onfoo="alert(1)">') === false;
+
+            $outputs = [];
+            foreach ($cases as $input => $expected) {
+                $outputs[$input] = $method->invoke($antiXss, $input);
+            }
+
+            // the fallback (budget exceeded) with failing PCRE
+            $fallback = $method->invoke($antiXss, '<a x=' . \str_repeat('<b/y=', 2000) . ' onfoo=1>');
+        } finally {
+            \ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
+            \ini_set('pcre.jit', (string) $jit);
+        }
+
+        static::assertTrue($pcreFails);
+        foreach ($cases as $input => $expected) {
+            static::assertSame($expected, $outputs[$input], $input);
+        }
+        self::assertNotContainsIgnoringCase('onfoo', $fallback);
+    }
+
+    /**
      * Every event handler name that a spec or a browser engine knows (see the header of the fixture file for the
      * sources and "build/event-handlers/extract.py" to update it) must be removed, also without the list.
      *
