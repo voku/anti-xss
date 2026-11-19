@@ -47,6 +47,13 @@ final class AntiXSS
 
     const VOKU_ANTI_XSS_GT = 'voku::anti-xss::gt';
 
+    /**
+     * All printable ASCII chars ("!" - "~").
+     *
+     * @var string
+     */
+    const PRINTABLE_ASCII_CHARS = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
     const VOKU_ANTI_XSS_LT = 'voku::anti-xss::lt';
 
     /**
@@ -710,7 +717,7 @@ final class AntiXSS
                 [$this, '_compact_exploded_words_callback'],
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         return $str;
@@ -779,7 +786,7 @@ final class AntiXSS
                             $this->_xss_found = true;
 
                             $urlPartClean = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $urlPartClean);
-                            $urlPartClean = UTF8::rawurldecode($urlPartClean);
+                            $urlPartClean = $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $urlPartClean);
                             $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $urlPartClean);
 
                             $str = \str_ireplace($matches['attr'], $urlPartClean, $str);
@@ -791,7 +798,7 @@ final class AntiXSS
 
         if ($needProtection) {
             $str = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $str);
-            $str = $this->_entity_decode(UTF8::rawurldecode($str));
+            $str = $this->_entity_decode($this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str));
             $str = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $str);
         }
 
@@ -834,7 +841,7 @@ final class AntiXSS
             }
         }
 
-        return UTF8::rawurldecode($str);
+        return $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str);
     }
 
     /**
@@ -895,7 +902,7 @@ final class AntiXSS
                 } else {
                     $charLength = 4;
                 }
-                if (\preg_match('/^\p{L}$/u', (string) \substr($str, $pos, $charLength)) !== 1) {
+                if (\preg_match('/^\p{L}$/u', (string) \substr($str, $pos, $charLength)) === 0) {
                     continue;
                 }
             }
@@ -997,7 +1004,7 @@ final class AntiXSS
         // here (U+3AFE), but "javascript:%0bfetch(1)" in the browser
         if (\strpos($str, '&#') !== false) {
             $tmp = \preg_replace('/&#(?:[xX][0-9a-fA-F]++|[0-9]++)(?!;)/', '$0;', $str);
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // remove invisible characters (also url-encoded ones like "%00")
@@ -1012,7 +1019,7 @@ final class AntiXSS
         // remove all >= 4-Byte chars if needed
         if ($this->_stripe_4byte_chars) {
             $tmp = \preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $str);
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // backup the string (for later comparison)
@@ -1085,13 +1092,18 @@ final class AntiXSS
             $strBefore = $str;
 
             // raw control characters etc. (without the url-encoded ones)
-            $str = UTF8::remove_invisible_characters($str, false, '', false);
+            $str = $this->_failClosedVendorCall(
+                static function ($str) {
+                    return UTF8::remove_invisible_characters($str, false, '', false);
+                },
+                $str
+            );
 
             if (\strpos($str, '%') === false) {
                 break;
             }
 
-            if (\preg_match('/%[01]/', $str) !== 1) {
+            if (\preg_match('/%[01]/', $str) === 0) {
                 break;
             }
 
@@ -1253,7 +1265,7 @@ final class AntiXSS
                 '$1' . $this->_replacement . '$2',
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         // ---
@@ -1264,7 +1276,7 @@ final class AntiXSS
                 $replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         if ($this->_cache_never_allowed_regex_string) {
@@ -1273,7 +1285,7 @@ final class AntiXSS
                 $this->_replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         foreach ($this->_cache_never_allowed_regex_standalone as $regex) {
@@ -1282,7 +1294,7 @@ final class AntiXSS
                 $this->_replacement,
                 $str
             );
-            $str = $tmp ?? $str;
+            $str = $tmp ?? $this->_failClosedNeutralize($str);
         }
 
         return $str;
@@ -1361,7 +1373,10 @@ final class AntiXSS
             -1,
             $count
         );
-        if ($marked === null || $count === 0) {
+        if ($marked === null) {
+            return $this->_failClosedNeutralize($str);
+        }
+        if ($count === 0) {
             return $str;
         }
 
@@ -1497,8 +1512,12 @@ final class AntiXSS
 
         // a: "[^\p{L}]*?(?:=|&equals;)"
         // (invalid UTF-8 etc.: be strict)
-        $pos = \preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA) === 1 ? \strlen($matchesA[0]) : 0;
-        if ($pos >= $prefixLength) {
+        $matchA = \preg_match('/^(?>[^\p{L}=&]++|&(?!equals;))*+/iu', $str, $matchesA);
+        $pos = $matchA === 1 ? \strlen($matchesA[0]) : 0;
+        if ($matchA === false) {
+            // PCRE failed: fail closed (remove the name)
+            $a = true;
+        } elseif ($pos >= $prefixLength) {
             $a = $tail['a'];
         } else {
             $a = $str[$pos] === '=' || $str[$pos] === '&';
@@ -1509,7 +1528,7 @@ final class AntiXSS
         $bin = $this->_events_tail_scan_b($prefix, true, $tail);
 
         // c: only whitespace
-        $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) === 1;
+        $c = $tail['c'] && \preg_match('/^\s*$/u', $prefix) !== 0;
 
         // the first chars (not bytes, so that we never cut an UTF-8 char)
         $pre = \preg_match('/^.{0,16}/us', $str, $matchesPre) === 1 ? $matchesPre[0] : '';
@@ -1624,7 +1643,11 @@ final class AntiXSS
         if (\strpos($str, '&') !== false) {
             $tagNames = [];
             foreach ($this->_never_allowed_str_afterwards as $neverAllowedStr) {
-                if (\preg_match('#^&lt;/?([a-z][a-z\d-]*+)&gt;$#i', $neverAllowedStr, $matchesTagName) === 1) {
+                $matchTagName = \preg_match('#^&lt;/?([a-z][a-z\d-]*+)&gt;$#i', $neverAllowedStr, $matchesTagName);
+                if ($matchTagName === false) {
+                    return $this->_failClosedNeutralize($str);
+                }
+                if ($matchTagName === 1) {
                     if (\stripos($str, $matchesTagName[1]) !== false) {
                         $tagNames[\strtolower($matchesTagName[1])] = \preg_quote($matchesTagName[1], '#');
                     }
@@ -1637,7 +1660,7 @@ final class AntiXSS
                     $this->_replacement,
                     $str
                 );
-                $str = $tmp ?? $str;
+                $str = $tmp ?? $this->_failClosedNeutralize($str);
             }
         }
 
@@ -1658,11 +1681,13 @@ final class AntiXSS
         $flags = ENT_QUOTES | ENT_HTML5 | ENT_DISALLOWED | ENT_SUBSTITUTE;
 
         // decode-again, for e.g. HHVM or miss configured applications ...
-        if (
-            \strpos($str, '&') !== false
-            &&
-            \preg_match_all('/(?<html_entity>&[A-Za-z]{2,};{0})/', $str, $matches)
-        ) {
+        $entityMatches = \strpos($str, '&') !== false
+            ? \preg_match_all('/(?<html_entity>&[A-Za-z]{2,};{0})/', $str, $matches)
+            : 0;
+        if ($entityMatches === false) {
+            return $this->_failClosedNeutralize($str);
+        }
+        if ($entityMatches > 0) {
             if ($HTML_ENTITIES_CACHE === null) {
                 // links:
                 // - http://dev.w3.org/html5/html-author/charref
@@ -2006,13 +2031,19 @@ final class AntiXSS
         $replacer = $this->_filter_attributes($match[1]);
 
         // filter for "$search"-attributes
-        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) === 1) {
+        if (\preg_match('#(?:^|[ \t])' . \preg_quote($search, '#') . '[ \t]*=#iu', $match[1]) !== 0) {
             // 1: whitespace before "=", 2: whitespace after "=", 3: quote wrapper, 4: attribute value
             $pattern = '#' . \preg_quote($search, '#') . '([ \t]*)=([ \t]*)([\'"])(.*)(?:\3)#isU';
             $matchInner = [];
             $foundSomethingBad = false;
             $isValidAttributeUrl = false;
-            if (\preg_match($pattern, $match[1], $matchInner)) {
+            $matchInnerResult = \preg_match($pattern, $match[1], $matchInner);
+            if ($matchInnerResult === false) {
+                // PCRE failed: fail closed (remove the attribute)
+                $foundSomethingBad = true;
+                $this->_xss_found = true;
+                $replacer = $this->_failClosedRemoveAttributesByName($replacer, [$search]);
+            } elseif ($matchInnerResult === 1) {
                 $isValidAttributeUrl = $this->_isValidUrlForCallbackBypass($matchInner[4]);
                 $needProtection = !$isValidAttributeUrl;
 
@@ -2035,7 +2066,7 @@ final class AntiXSS
                             $search . '${1}=${2}"' . $this->_replacement . '"',
                             $replacer
                         );
-                        $replacer = $tmp ?? $replacer;
+                        $replacer = $tmp ?? $this->_failClosedRemoveAttributesByName($replacer, [$search]);
                     }
                 }
             }
@@ -2052,13 +2083,21 @@ final class AntiXSS
                 }
                 $pattern = '#' . $search . '=.*(?:' . $patternTmp . \implode('|', $this->_never_allowed_js_callback_regex) . ')#ius';
                 $matchInner = [];
-                if (\preg_match($pattern, $match[1], $matchInner)) {
-                    $tmp = \preg_replace(
-                        $pattern,
-                        $search . '="' . $this->_replacement . '"',
-                        $replacer
-                    );
-                    $replacer = $tmp ?? $replacer;
+                $matchInnerResult = \preg_match($pattern, $match[1], $matchInner);
+                if ($matchInnerResult !== 0) {
+                    $tmp = $matchInnerResult === 1
+                        ? \preg_replace(
+                            $pattern,
+                            $search . '="' . $this->_replacement . '"',
+                            $replacer
+                        )
+                        : null;
+                    if ($tmp === null) {
+                        // PCRE failed: fail closed (remove the attribute)
+                        $this->_xss_found = true;
+                        $tmp = $this->_failClosedRemoveAttributesByName($replacer, [$search]);
+                    }
+                    $replacer = $tmp;
                 }
             }
         }
@@ -2171,6 +2210,88 @@ final class AntiXSS
         }
 
         return $result . \substr($str, $offset);
+    }
+
+    /**
+     * Fail-closed fallback for a sanitizing step, that could not run, because PCRE failed (e.g. "pcre.backtrack_limit"
+     * exhausted, also with "pcre.jit" disabled): neutralize all markup and all URL schemes without PCRE.
+     *
+     * <p>
+     * <br />
+     * INFO: Without "<" there is no tag (no attributes, no script), without ":" there is no URL scheme (e.g.
+     *       "javascript:") - also if the output is used in an attribute. This is lossy, but it's only used, if a step
+     *       could not be done at all; the previous code kept the unfiltered string ("$tmp ?? $str") or erased it
+     *       ("(string) preg_replace(...)"), so that "xss_clean()" could return the original, unchecked input.
+     *       It's idempotent (no double-encoding), so the cleaning loops still converge.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _failClosedNeutralize($str)
+    {
+        $this->_xss_found = true;
+
+        // control chars (except "\t", "\n", "\r") can hide e.g. a "javascript:" from other filters
+        $controlChars = [];
+        foreach (\array_merge(\range(0, 8), [11, 12], \range(14, 31), [127]) as $byte) {
+            $controlChars[] = \chr($byte);
+        }
+
+        // "+" -> no UTF-7 shift sequence (e.g. "+ADw-script+AD4-"), if the page is decoded as UTF-7
+        return \str_replace(
+            \array_merge([':', '+'], $controlChars),
+            \array_merge(['', '&#43;'], \array_fill(0, \count($controlChars), '')),
+            \htmlspecialchars($str, \ENT_QUOTES | \ENT_SUBSTITUTE | \ENT_HTML401, 'UTF-8', false)
+        );
+    }
+
+    /**
+     * Call a "portable-utf8" method, that uses PCRE internally, and fail closed, if PCRE failed in there.
+     *
+     * <p>
+     * <br />
+     * INFO: These methods cast a failed "preg_replace()" to "" ("(string) preg_replace()"), so that the string was
+     *       erased before the backup in "_do()" and "xss_clean()" returned the original, unchecked input.
+     * </p>
+     *
+     * @param callable $call <p>callable(string): string</p>
+     * @param string   $str
+     *
+     * @return string
+     */
+    private function _failClosedVendorCall(callable $call, $str)
+    {
+        // reset "preg_last_error()"
+        \preg_match('/^/', '');
+
+        $result = (string) $call($str);
+
+        if (
+            \preg_last_error() !== \PREG_NO_ERROR
+            ||
+            // printable ASCII chars are never removed or decoded into nothing, so "" means, that PCRE failed
+            ($result === '' && \strcspn($str, self::PRINTABLE_ASCII_CHARS) < \strlen($str))
+        ) {
+            return $this->_failClosedNeutralize($str);
+        }
+
+        return $result;
+    }
+
+    /**
+     * The result of a sanitizing "preg_replace()" / "preg_replace_callback()", or the fail-closed fallback, if PCRE
+     * failed ("null"), see "_failClosedNeutralize()".
+     *
+     * @param string|null $result
+     * @param string      $str    <p>the input of the failed step</p>
+     *
+     * @return string
+     */
+    private function _failClosedOnNull($result, $str)
+    {
+        return $result ?? $this->_failClosedNeutralize($str);
     }
 
     /**
@@ -2679,7 +2800,7 @@ final class AntiXSS
                     -1,
                     $temp_count
                 );
-                $str = $tmp ?? $str;
+                $str = $tmp ?? $this->_failClosedNeutralize($str);
                 $count += $temp_count;
             } while ($count);
         }
@@ -2778,11 +2899,11 @@ final class AntiXSS
             return $str;
         }
 
-        return (string) \preg_replace_callback(
+        return $this->_failClosedOnNull(\preg_replace_callback(
             $REGEX_FOR_CONTENT,
             [$this, '_repack_utf7_callback'],
             $str
-        );
+        ), $str);
     }
 
     /**
@@ -2881,7 +3002,7 @@ final class AntiXSS
                 $this->_cache__evil_html_tags_str = \implode('|', $evilHtmlTags);
             }
 
-            $str = (string) \preg_replace_callback(
+            $str = $this->_failClosedOnNull(\preg_replace_callback(
                 // INFO: "rest" must not consume the "<" of a following tag (e.g. "<header><style>"), otherwise
                 //       that tag is skipped by this pass
                 //
@@ -2890,7 +3011,7 @@ final class AntiXSS
                 '#<(?<start>/*\s*)(?<prefix>(?:[\p{L}_][\p{L}\p{N}_.-]*+:)?)(?<tagName>' . $this->_cache__evil_html_tags_str . ')(?<end>[^><]*)(?<rest>>*+(?:<(?![\p{L}/!?])>*+)*+)#ius',
                 [$this, '_sanitize_naughty_html_callback'],
                 $str
-            );
+            ), $str);
 
             if (\strpos($str, '<') === false) {
                 return $str;
@@ -2904,7 +3025,7 @@ final class AntiXSS
                 return '';
             }
 
-            $str = (string) \preg_replace_callback(
+            $str = $this->_failClosedOnNull(\preg_replace_callback(
                 '#<(?!!--|!\[)((?<start>/*\s*)((?<tagName>[\p{L}:]+)(?=[^\p{L}]|$|)|.+)[^\s"\'\p{L}>/=]*[^>]*)(?<closeTag>>)?#iusS', // tags without comments
                 function ($matches) {
                     if (
@@ -2920,7 +3041,7 @@ final class AntiXSS
                     return $this->_close_html_callback($matches);
                 },
                 $str
-            );
+            ), $str);
 
             if ($str === $strEnd) {
                 return (string) $str;
@@ -2989,7 +3110,7 @@ final class AntiXSS
             (
                 \strpos($fullMatch, '=') === false
                 &&
-                \preg_match('/\s/', $fullMatch) !== 1
+                \preg_match('/\s/', $fullMatch) === 0
                 &&
                 \strpos($fullMatch, ':') === false
                 &&
@@ -3059,11 +3180,11 @@ final class AntiXSS
             }
 
             if ($found === true) {
-                $str = (string) \preg_replace(
+                $str = $this->_failClosedOnNull(\preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns) . ')(\s*)\((.*)\)#uisU',
                     '\\1\\2&#40;\\3&#41;',
                     $str
-                );
+                ), $str);
             }
 
             // Pass 2 – English-word keywords: only match when "(" follows immediately (no whitespace),
@@ -3078,11 +3199,11 @@ final class AntiXSS
             }
 
             if ($found === true) {
-                $str = (string) \preg_replace(
+                $str = $this->_failClosedOnNull(\preg_replace(
                     '#(?<!\p{L})(' . \implode('|', $this->_naughty_javascript_patterns_strict) . ')\((.*)\)#uisU',
                     '\\1&#40;\\2&#41;',
                     $str
-                );
+                ), $str);
             }
         }
 
@@ -3721,7 +3842,7 @@ final class AntiXSS
         if (
             \strpos((string) $old_str_backup, "\x1B") !== false
             &&
-            \preg_match('/\x1B[($]/', (string) $old_str_backup) === 1
+            \preg_match('/\x1B[($]/', (string) $old_str_backup) !== 0
         ) {
             $this->_xss_found = true;
         }
