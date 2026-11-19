@@ -292,6 +292,72 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Edge cases of the tokenizer itself (without the other filters).
+     *
+     * @return void
+     */
+    public function testTokenizerEdgeCases()
+    {
+        $method = new \ReflectionMethod(AntiXSS::class, '_remove_event_handler_attributes');
+        $method->setAccessible(true);
+        $antiXss = new AntiXSS();
+
+        $cases = [
+            // first char of the tag name: ASCII letters only, also the boundaries "A", "Z", "a", "z"
+            '<A onfoo=1>'                  => '<A >',
+            '<Z onfoo=1>'                  => '<Z >',
+            '<a onfoo=1>'                  => '<a >',
+            '<z onfoo=1>'                  => '<z >',
+            '<@ onfoo=1>'                  => '<@ onfoo=1>',
+            '<[ onfoo=1>'                  => '<[ onfoo=1>',
+            '<{ onfoo=1>'                  => '<{ onfoo=1>',
+            '<1 onfoo=1>'                  => '<1 onfoo=1>',
+            // only "on" + ASCII letters is an event handler
+            '<div onfoo1=x onbar=1>'       => '<div onfoo1=x >',
+            '<div on1foo=x onbar=1>'       => '<div on1foo=x >',
+            // ranges found by different starts: out of order (the inner start is found later) ...
+            '<a x=\'<b onfoo=1 \' onbar=2>' => '<a x=\'<b  \' >',
+            // ... and nested (the inner attribute is inside of the value of the outer one)
+            '<a onx="<b ony=1>" z=1>'      => '<a  z=1>',
+            '<a onx="<b ony=1 onz=2>">'    => '<a >',
+            // a start inside of an already scanned tag name
+            '<b<b<b onfoo=1>'              => '<b<b<b >',
+            // missing value / value until the end
+            '<div onfoo=>x'                => '<div >x',
+            '<div onfoo="1'                => '<div ',
+            '<div onfoo= '                 => '<div ',
+        ];
+
+        foreach ($cases as $input => $expected) {
+            static::assertSame($expected, $method->invoke($antiXss, $input), $input);
+        }
+    }
+
+    /**
+     * The fallback (too many event handlers) is more conservative than the tokenizer: it also removes "on...=" in
+     * text, but it keeps allowed event handlers (case-insensitive).
+     *
+     * @return void
+     */
+    public function testFallbackIsMoreConservativeAndKeepsAllowedEventHandlers()
+    {
+        $method = new \ReflectionMethod(AntiXSS::class, '_remove_event_handler_attributes');
+        $method->setAccessible(true);
+
+        $antiXss = new AntiXSS();
+        $antiXss->removeNeverAllowedOnEventsAfterwards(['onAbort']);
+
+        $input = \str_repeat('<b onfoo=1>', 10001) . ' text onbar=1 <x ONABORT=1>';
+        $output = $method->invoke($antiXss, $input);
+
+        static::assertSame(\str_repeat('<b >', 10001) . ' text  <x ONABORT=1>', $output);
+
+        // below the limit: the tokenizer keeps the text
+        $input = \str_repeat('<b onfoo=1>', 100) . ' text onbar=1 <x ONABORT=1>';
+        static::assertSame(\str_repeat('<b >', 100) . ' text onbar=1 <x ONABORT=1>', $method->invoke($antiXss, $input));
+    }
+
+    /**
      * "removeNeverAllowedOnEventsAfterwards()" allows an event handler (also for the structural filter); it can be
      * disallowed again with "addNeverAllowedOnEventsAfterwards()". Unknown names can not be allowed this way.
      *
