@@ -417,7 +417,6 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
             '<a x=' . \str_repeat('<b/y=', 40000) . ' onfoo=1>',
             // more than 10000 event handlers
             '<a ' . \str_repeat('onfoo=1 ', 12000) . '>',
-            \str_repeat('<b onfoo=1>', 12000),
             \str_repeat('<a onfoo="', 20000),
         ];
 
@@ -428,6 +427,20 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
             static::assertTrue($found);
             static::assertLessThan(5.0, $duration);
         }
+
+        // more than 10000 event handlers in separate tags
+        //
+        // INFO: the runtime of this filter is checked (the other filters need most of the time for 12000 tags, also
+        //       without this filter, e.g. > 5 seconds on PHP 7.1 with Xdebug code coverage)
+        $method = new \ReflectionMethod(AntiXSS::class, '_remove_event_handler_attributes');
+        $method->setAccessible(true);
+        $start = \microtime(true);
+        $output = $method->invoke(new AntiXSS(), \str_repeat('<b onfoo=1>', 12000));
+        static::assertLessThan(5.0, \microtime(true) - $start);
+        static::assertSame(\str_repeat('<b >', 12000), $output);
+        list($output, $found) = self::clean(\str_repeat('<b onfoo=1>', 12000));
+        self::assertNotContainsIgnoringCase('onfoo=', $output);
+        static::assertTrue($found);
 
         // the fallback keeps allowed event handlers, too
         list($output) = self::clean(
