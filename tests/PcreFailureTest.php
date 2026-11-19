@@ -276,7 +276,6 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
         }
         static::assertSame('&lt;div onclick=alert(1)&gt;x&lt;/div&gt;', $output);
         static::assertTrue($antiXss->isXssFound());
-
     }
 
     /**
