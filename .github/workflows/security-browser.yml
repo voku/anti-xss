@@ -183,17 +183,23 @@ jobs:
           set -euo pipefail
 
           run_fixture() {
-            local fixture="$1" prefix="$2" name
+            local fixture="$1" prefix="$2" raw_expectation="${3:-fail}" name
             name="$(basename "$fixture" .php)"
 
             php "$fixture" > "$RUNNER_TEMP/$name-sanitized.html"
             node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-sanitized.html" "$prefix" pass
 
-            # negative control: the unsanitized payloads must be detected and really execute in this engine
+            # negative control: the unsanitized payloads must be detected and (if this engine supports them) execute
             php "$fixture" --raw > "$RUNNER_TEMP/$name-raw.html"
-            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-raw.html" "$prefix" fail
+            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-raw.html" "$prefix" "$raw_expectation"
           }
 
           run_fixture tests/browser/event-handler-attributes.php events
-          run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa
+          # GHSA-28pp uses Chromium-only events ("onvalidationstatuschange", "onpromptaction", ...): Firefox and
+          # WebKit do not execute them, so their raw control only has to be detected there
+          if [[ "$ENGINE" == chromium ]]; then
+            run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa fail
+          else
+            run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa detected
+          fi
           run_fixture tests/browser/ghsa-v42h-26cv-jpgq.php ghsa

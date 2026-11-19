@@ -1,11 +1,13 @@
 // Run a generated browser fixture in Chromium, Firefox or WebKit (Playwright, dev-only - not a dependency of the
 // library) and check the verdict that the fixture's own script writes into <body data-*>.
 //
-// Usage: node tests/browser/run-browsers.mjs <chromium|firefox|webkit> <fixture.html> <prefix> <pass|fail>
+// Usage: node tests/browser/run-browsers.mjs <chromium|firefox|webkit> <fixture.html> <prefix> <pass|fail|detected>
 //
-//   prefix: the dataset prefix of the fixture ("events" for event-handler-attributes.php, "ghsa" for the GHSA ones)
-//   pass:   sanitized output - status "pass" and nothing executed
-//   fail:   unsanitized negative control - status "fail" and the payload really executed in this engine
+//   prefix:   the dataset prefix of the fixture ("events" for event-handler-attributes.php, "ghsa" for the GHSA ones)
+//   pass:     sanitized output - status "pass" and nothing executed
+//   fail:     unsanitized negative control - status "fail" and the payload really executed in this engine
+//   detected: unsanitized negative control with payloads that this engine does not execute (e.g. Chromium-only
+//             events like "onvalidationstatuschange" in Firefox / WebKit) - status "fail", no execution required
 import { chromium, firefox, webkit } from 'playwright';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
@@ -13,8 +15,8 @@ import { resolve } from 'node:path';
 const [engineName, file, prefix, expectation] = process.argv.slice(2);
 const engines = { chromium, firefox, webkit };
 
-if (!engines[engineName] || !file || !prefix || !['pass', 'fail'].includes(expectation)) {
-    console.error('Usage: node run-browsers.mjs <chromium|firefox|webkit> <fixture.html> <prefix> <pass|fail>');
+if (!engines[engineName] || !file || !prefix || !['pass', 'fail', 'detected'].includes(expectation)) {
+    console.error('Usage: node run-browsers.mjs <chromium|firefox|webkit> <fixture.html> <prefix> <pass|fail|detected>');
     process.exit(2);
 }
 
@@ -44,7 +46,7 @@ try {
 
     const ok = expectation === 'pass'
         ? status === 'pass' && !executed
-        : status === 'fail' && executed;
+        : status === 'fail' && (executed || expectation === 'detected');
     if (!ok) {
         console.error('::error::' + engineName + ': expected "' + expectation + '" for ' + file
             + ', got status "' + status + '", executed: ' + executed);
