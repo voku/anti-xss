@@ -236,7 +236,7 @@
     },
     {
         "input": "+ADw-%0b-onclick",
-        "output": "&lt;-",
+        "output": "&lt;-onclick",
         "found": true
     },
     {
@@ -421,7 +421,7 @@
     },
     {
         "input": "&lt;script</script><iframe &colon;<!--<-onclick",
-        "output": "&lt;iframe :&lt;!--&lt;-",
+        "output": "&lt;iframe :&lt;!--&lt;-onclick",
         "found": true
     },
     {
@@ -1131,8 +1131,8 @@
     },
     {
         "input": " &gt;/<img>/shadowrootmode-onclick%00<img>=\"srcdoc=%0c",
-        "output": " &gt;/<img>/shadowrootmode-<img>=\"srcdoc= ",
-        "found": true
+        "output": " &gt;/<img>/shadowrootmode-onclick%00<img>=\"srcdoc=%0c",
+        "found": false
     },
     {
         "input": "data:-->onerror=",
@@ -1331,7 +1331,7 @@
     },
     {
         "input": "document.cookie)<!--onerror=onclickhref=",
-        "output": ")&lt;!--=onclickhref=",
+        "output": ")&lt;!--onerror=onclickhref=",
         "found": true
     },
     {
@@ -1806,7 +1806,7 @@
     },
     {
         "input": "<iframe onerror='PHNjcmlwdD4=<img +ADw-\t&#x3a <iframe \n",
-        "output": "&lt;iframe  &lt;\t: &lt;iframe \n",
+        "output": "&lt;iframe ",
         "found": true
     },
     {
@@ -2916,7 +2916,7 @@
     },
     {
         "input": "document.cookieurl((onerror=%00<img >:\\-onclick",
-        "output": "url((=<img >:\\-",
+        "output": "url((=<img >:\\-onclick",
         "found": true
     },
     {
@@ -3171,7 +3171,7 @@
     },
     {
         "input": "-%0bshadowrootmode&quot;<!--onerror=b<style>expression(",
-        "output": "-shadowrootmode\"&lt;!--=b&lt;style&gt;",
+        "output": "-shadowrootmode\"&lt;!--onerror=b&lt;style&gt;",
         "found": true
     },
     {
@@ -3361,7 +3361,7 @@
     },
     {
         "input": "base64,&#58data:-onload(<script><script>`\n<style>src=)<img>",
-        "output": "base64,&#58;data:-(`\n&lt;style&gt;src=)<img>",
+        "output": "base64,&#58;data:-onload(`\n&lt;style&gt;src=)<img>",
         "found": true
     },
     {
@@ -3636,8 +3636,8 @@
     },
     {
         "input": "url(-onerror=",
-        "output": "url(-=",
-        "found": true
+        "output": "url(-onerror=",
+        "found": false
     },
     {
         "input": "/\tshadowrootmodePHNjcmlwdD4=%3C\n<svg<x:script>onerror=\t`expression(-+ADw-",
@@ -3906,7 +3906,7 @@
     },
     {
         "input": "<svg)text/html=&#x3a><!--onload<x:script>srcdoc=onerror=onload)style=",
-        "output": "&lt;svg)text/html=:&gt;&lt;!--",
+        "output": "&lt;svg)text/html=:&gt;&lt;!--onload",
         "found": true
     },
     {
@@ -3926,7 +3926,7 @@
     },
     {
         "input": "&#58base64,<!--expression(%00onerror=/-",
-        "output": ":base64,&lt;!--=/-",
+        "output": ":base64,&lt;!--onerror=/-",
         "found": true
     },
     {
@@ -5761,7 +5761,7 @@
     },
     {
         "input": "base64,<style><!--onload<img>alert(1)alert(1)image/svg+xml </script>",
-        "output": "base64,&lt;style&gt;&lt;!--<img>alert&#40;1&#41;alert&#40;1&#41;image/svg+xml ",
+        "output": "base64,&lt;style&gt;&lt;!--onload<img>alert&#40;1&#41;alert&#40;1&#41;image/svg+xml ",
         "found": true
     },
     {
@@ -5936,7 +5936,7 @@
     },
     {
         "input": "&lt;document.cookie+ADw-1-b<!--onerror=<!--x1srcdoc=</script>",
-        "output": "&lt;&lt;1-b&lt;!--=&lt;!--x1srcdoc=",
+        "output": "&lt;&lt;1-b&lt;!--onerror=&lt;!--x1srcdoc=",
         "found": true
     },
     {
@@ -6156,7 +6156,7 @@
     },
     {
         "input": "\\%253Chref=document.cookieshadowrootmode<img>%0c<img></script>java%00<!--onerror=",
-        "output": "\\%253Chref=shadowrootmode<img> <img>java&lt;!--=",
+        "output": "\\%253Chref=shadowrootmode<img> <img>java&lt;!--onerror=",
         "found": true
     },
     {
@@ -8151,7 +8151,7 @@
     },
     {
         "input": "\"-onclick</script>",
-        "output": "\"-",
+        "output": "\"-onclick",
         "found": true
     },
     {
@@ -8671,7 +8671,7 @@
     },
     {
         "input": "base64,/-onerror=\"<script><style>onload",
-        "output": "base64,/-=\"",
+        "output": "base64,/-onerror=\"",
         "found": true
     },
     {
@@ -9636,7 +9636,7 @@
     },
     {
         "input": "&#x3a-onload&gt;data:<script>%0c<header>&#x3a;&lt;document.cookie&#x3ab",
-        "output": ":->data::&lt;\u03ab",
+        "output": ":-onload>data::&lt;\u03ab",
         "found": true
     },
     {
@@ -9996,7 +9996,7 @@
     },
     {
         "input": "%3Cbjava\"<svg/\t-onclick\nonload",
-        "output": "&lt;bjava\"&lt;svg/\t-\n",
+        "output": "&lt;bjava\"&lt;svg/\t-onclick\n",
         "found": true
     }
 ]

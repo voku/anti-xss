@@ -113,3 +113,32 @@ jobs:
           fi
 
           echo "PASS: Chromium blocks the sanitized GHSA-v42h-26cv-jpgq payloads and executes the raw ones."
+
+          # 4.1.49: event handler attributes ("on" + any letters) are removed structurally, not only by the list:
+          # all known event names (tests/fixtures/browser-event-handlers.txt), random unknown names and parser
+          # context tricks, parsed one by one by Chromium's HTML parser.
+          php tests/browser/event-handler-attributes.php \
+            > "$RUNNER_TEMP/events-sanitized.html"
+          render_browser_dom "$RUNNER_TEMP/events-sanitized.html" "$RUNNER_TEMP/events-sanitized-dom.html"
+
+          if ! grep -Fq 'data-events-status="pass"' "$RUNNER_TEMP/events-sanitized-dom.html" \
+            || ! grep -Fq 'data-events-executed="false"' "$RUNNER_TEMP/events-sanitized-dom.html"; then
+            echo "::error::The sanitized browser DOM still contains event handler attributes."
+            grep -o 'data-events-[a-z-]*="[^"]*"' "$RUNNER_TEMP/events-sanitized-dom.html" || true
+            exit 1
+          fi
+
+          # Prove the browser assertions would reject (and execute) the actual unsanitized payloads.
+          php tests/browser/event-handler-attributes.php --raw \
+            > "$RUNNER_TEMP/events-raw.html"
+          render_browser_dom "$RUNNER_TEMP/events-raw.html" "$RUNNER_TEMP/events-raw-dom.html"
+
+          if ! grep -Fq 'data-events-status="fail"' "$RUNNER_TEMP/events-raw-dom.html" \
+            || ! grep -Fq 'event-attribute:known-onabort:onabort' "$RUNNER_TEMP/events-raw-dom.html" \
+            || ! grep -Fq 'data-events-executed="true"' "$RUNNER_TEMP/events-raw-dom.html"; then
+            echo "::error::The unsanitized event handler negative control did not prove real execution."
+            grep -o 'data-events-[a-z-]*="[^"]*"' "$RUNNER_TEMP/events-raw-dom.html" | cut -c1-500 || true
+            exit 1
+          fi
+
+          echo "PASS: Chromium sees no event handler attribute in the sanitized output and executes the raw ones."

@@ -298,18 +298,20 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
      * name (e.g. "data-onchange-debounce"). Before the fix, the whole
      * attribute including its value was deleted; it must now survive with its
      * value intact, matching pre-4.1.43 behavior.
+     *
+     * Since 4.1.49 the name is kept, too: an event name directly after a "-" is never an event handler.
      */
     public function testHyphenatedEventNameLookalikesEmbeddedInLegitimateCompoundAttributesKeepTheirValue(): void
     {
         $antiXss = new AntiXSS();
 
         static::assertSame(
-            '<div data--debounce="300">x</div>',
+            '<div data-onchange-debounce="300">x</div>',
             $antiXss->xss_clean('<div data-onchange-debounce="300">x</div>')
         );
 
         static::assertSame(
-            '<div aria--hint="x">x</div>',
+            '<div aria-onfocus-hint="x">x</div>',
             $antiXss->xss_clean('<div aria-onfocus-hint="x">x</div>')
         );
 

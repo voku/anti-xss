@@ -7,7 +7,7 @@ use voku\helper\AntiXSS;
 /**
  * Harmless real-world content must stay unchanged and must not be reported as XSS.
  *
- * Every case here behaved like this in 4.1.46. Two of the 4.1.47 security fixes broke some of them:
+ * Every case here behaved like this in 4.1.46 (except where noted). Two of the 4.1.47 security fixes broke some of them:
  * - the namespace-prefix rule ("<x:script>") also encoded Office HTML like "<o:Title>", "<x:Selected/>",
  *   "<x:Header>" (XML names are case-sensitive and end at a non-name char, so these are no XHTML elements)
  * - the ISO-2022-JP rule treated every ESC byte as XSS, also ANSI color codes in log output
@@ -43,6 +43,21 @@ final class BenignContentRegressionTest extends \PHPUnit\Framework\TestCase
             'percent signs'         => ['Discount 10%0 off? No: 10% off, 100%25 sure, %0d%0a done'],
             'nested quotes'         => ['<p title=\'He said "hi"\'>Quote</p> and <span title="it\'s">x</span>'],
             'template'              => ['<template id="row"><td>cell</td></template>'],
+            // "on" in names and values that are no event handler attributes (see "EventHandlerAttributeTest")
+            'event word in title'   => ['<p title="onreading mode">Read</p>'],
+            'url with on params'    => ['<a href="https://example.com/?online=1&amp;onboarding=2">x</a>'],
+            'svelte syntax'         => ['<div on:click="save">Save</div>'],
+            'vue syntax'            => ['<div v-on:click="save" @click="save">Save</div>'],
+            'xml config'            => ['<config><option name="online" value="on"/></config>'],
+            'xml on elements'       => ['<onboarding><online>yes</online></onboarding>'],
+            'log line'              => ['2026-11-19 ERROR handler onfoo=null failed (retry on=3)'],
+            'json'                  => ['{"online":true,"onboarding":"done","onfoo":"x"}'],
+            'email text'            => ["Hi,\nplease switch onboarding=on before Monday.\n> quoted: onfoo=1\nThanks"],
+            'markdown code'         => ['Set `onfoo=1` and <kbd>on</kbd> to enable it.'],
+            'on with digits'        => ['<my-el on1="x" on-x="y">z</my-el>'],
+            // before 4.1.49, the event name after the "-" was removed
+            'custom data attributes' => ['<div data-onupdate="manual" data-ontext="label" data-onclick="example">Example</div>'],
+            'aria attribute'        => ['<div aria-onfocus-hint="x" class="onboarding">x</div>'],
         ];
     }
 

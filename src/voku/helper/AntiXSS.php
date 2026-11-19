@@ -128,11 +128,7 @@ final class AntiXSS
     private $_never_allowed_on_events_afterwards = [
         'onAbort',
         'onActivate',
-        'onactive',
-        'onaddsourcebuffer',
-        'onaddstream',
         'onAddTrack',
-        'onadvertisementreceived',
         'onAttribute',
         'onAfterPrint',
         'onAfterScriptExecute',
@@ -143,24 +139,14 @@ final class AntiXSS
         'onAnimationStart',
         'onAppInstalled',
         'onAriaRequest',
-        'onaudioend',
-        'onaudioprocess',
-        'onaudiostart',
         'onAutoComplete',
         'onAutoCompleteError',
         'onAutoFill',
         'onAuxClick',
-        'onavailabilitychanged',
-        'onbackgroundfetchabort',
-        'onbackgroundfetchclick',
-        'onbackgroundfetchfail',
-        'onbackgroundfetchsuccess',
         'onBeforeActivate',
         'onBeforeCopy',
-        'onbeforecreatepolicy',
         'onBeforeCut',
         'onBeforeInput',
-        'onBeforeLoad',
         'onBeforeInstallPrompt',
         'onBeforeMatch',
         'onBeforePrint',
@@ -175,90 +161,41 @@ final class AntiXSS
         'onBeforeUpdate',
         'onBeforeXRSelect',
         'onBegin',
-        'onbitrateinfochange',
         'onBlocked',
         'onBlur',
         'onBounce',
-        'onboundary',
-        'onbroadcast',
-        'onbufferedamountlow',
-        'onbufferedchange',
-        'oncached',
         'onCancel',
-        'oncanmakepayment',
         'onCanPlay',
         'onCanPlayThrough',
-        'oncaptureaction',
-        'oncapturedmousechange',
-        'oncapturehandlechange',
         'onCellChange',
         'onChange',
-        'oncharacterboundsupdate',
-        'oncharacteristicvaluechanged',
-        'onchargingchange',
-        'onchargingtimechange',
-        'oncheckboxstatechange',
-        'onchecked',
-        'onchecking',
         'onClick',
-        'onclipboardchange',
         'onClose',
-        'onclosing',
         'onCommand',
         'onCompassNeedsCalibration',
         'onComplete',
-        'oncompositionend',
-        'oncompositionstart',
-        'oncompositionupdate',
-        'onconfigurationchange',
         'onConnect',
-        'oncontentdelete',
         'onContentVisibilityAutoStateChange',
         'onContextLost',
-        'oncontextoverflow',
         'onContextRestored',
         'onContextMenu',
-        'oncontrollerchange',
         'onControlSelect',
-        'oncookiechange',
-        'oncoordinatorstatechange',
         'onCopy',
-        'oncouponcodechanged',
-        'oncsrcchange',
         'onCueChange',
         'onCurrentEntryChange',
-        'oncurrentscreenchange',
         'onCut',
         'onDataAvailable',
-        'ondatachannel',
         'onDataSetChanged',
         'onDataSetComplete',
         'onDblClick',
         'onDeactivate',
-        'ondequeue',
         'onDeviceChange',
         'onDeviceLight',
         'onDeviceMotion',
         'onDeviceOrientation',
         'onDeviceOrientationAbsolute',
         'onDeviceProximity',
-        'ondischargingtimechange',
-        'ondisconnect',
         'onDispose',
-        'ondomactivate',
-        'ondomattrmodified',
-        'ondomcharacterdatamodified',
-        'ondomcontentloaded',
-        'ondomfocusin',
-        'ondomfocusout',
-        'ondommousescroll',
-        'ondomnodeinserted',
-        'ondomnodeinsertedintodocument',
-        'ondomnoderemoved',
-        'ondomnoderemovedfromdocument',
-        'ondomsubtreemodified',
-        'ondownloading',
-        'ondownloadprogress',
         'onDrag',
         'onDragDrop',
         'onDragEnd',
@@ -269,9 +206,7 @@ final class AntiXSS
         'onDragStart',
         'onDrop',
         'onDurationChange',
-        'onelementgeometryupdate',
         'onEmptied',
-        'onencrypted',
         'onEnd',
         'onEnded',
         'onEnter',
@@ -279,8 +214,6 @@ final class AntiXSS
         'onError',
         'onErrorUpdate',
         'onExit',
-        'onfencedtreeclick',
-        'onfetch',
         'onFilterChange',
         'onFinish',
         'onFocus',
@@ -289,63 +222,22 @@ final class AntiXSS
         'onFormChange',
         'onFormData',
         'onFormInput',
-        'onframeratechange',
-        'onfreeze',
         'onFullScreenChange',
         'onFullScreenError',
-        'ongamepadaxismove',
-        'ongamepadbuttondown',
-        'ongamepadbuttonup',
         'onGamepadConnected',
         'onGamepadDisconnected',
-        'ongamepadrawinputchanged',
-        'ongatheringstatechange',
-        'ongattserverdisconnected',
-        'ongeometrychange',
-        'ongestureflingstart',
-        'ongesturelongpress',
-        'ongesturescrollend',
-        'ongesturescrollstart',
-        'ongesturescrollupdate',
-        'ongestureshowpress',
-        'ongesturetap',
-        'ongesturetapdown',
-        'ongesturetapunconfirmed',
         'onGotPointerCapture',
-        'onGestureChange',
-        'onGestureEnd',
-        'onGestureStart',
         'onHashChange',
-        'onhdrheadroomchange',
         'onHelp',
-        'onicecandidate',
-        'onicecandidateerror',
-        'onicecandidatepairadd',
-        'onicecandidatepairnominate',
-        'onicecandidatepairremove',
-        'oniceconnectionstatechange',
-        'onicegatheringstatechange',
-        'onimmersivechange',
-        'onimmersiveerror',
-        'oninactive',
         'onInput',
-        'oninstall',
         'onInstallResult',
-        'oninterest',
-        'oninterfacerequest',
         'onInvalid',
-        'onisolationchange',
-        'onjobstatechange',
         'onKeyDown',
-        'onkeyframerequest',
         'onKeyPress',
-        'onkeystatuseschange',
         'onKeyUp',
         'onLanguageChange',
-        'onlayoutchange',
         'onLayoutComplete',
         'onLeavePictureInPicture',
-        'onlevelchange',
         'onLoad',
         'onLoadEnd',
         'onLoadedData',
@@ -353,21 +245,14 @@ final class AntiXSS
         'onLoadStart',
         'onLocation',
         'onLoseCapture',
-        'onloseinterest',
         'onLostPointerCapture',
-        'onmanagedconfigurationchange',
-        'onmark',
-        'onmaxwritewithoutresponsesizechanged',
         'onMediaComplete',
         'onMediaError',
-        'onmerchantvalidation',
         'onMessage',
         'onMessageError',
-        'onmidimessage',
         'onMouseDown',
         'onMouseEnter',
         'onMouseLeave',
-        'onmouselongtap',
         'onMouseMove',
         'onMouseOut',
         'onMouseOver',
@@ -376,32 +261,6 @@ final class AntiXSS
         'onMove',
         'onMoveEnd',
         'onMoveStart',
-        'onmozaccesskeynotfound',
-        'onmozafterpaint',
-        'onmozedgeuicanceled',
-        'onmozedgeuicompleted',
-        'onmozedgeuistarted',
-        'onmozmagnifygesture',
-        'onmozmagnifygesturestart',
-        'onmozmagnifygestureupdate',
-        'onmozmouseexplorebytouch',
-        'onmozmousehittest',
-        'onmozmousepixelscroll',
-        'onmozpresstapgesture',
-        'onmozrotategesture',
-        'onmozrotategesturestart',
-        'onmozrotategestureupdate',
-        'onmozscrolledareachanged',
-        'onmozswipegesture',
-        'onmozswipegestureend',
-        'onmozswipegesturemaystart',
-        'onmozswipegesturestart',
-        'onmozswipegestureupdate',
-        'onmoztapgesture',
-        'onmozvisualresize',
-        'onmozvisualscroll',
-        'onmute',
-        'onnavbeforefocus',
         'onNavigate',
         'onNavigateError',
         'onNavigateSuccess',
@@ -432,22 +291,12 @@ final class AntiXSS
         'onMsPointerUp',
         'onMsSiteModeJumpListItemRemoved',
         'onMsThumbnailClick',
-        'onnavnotarget',
-        'onnegotiationneeded',
-        'onnexttrack',
-        'onnomatch',
-        'onnotificationclick',
-        'onnotificationclose',
-        'onnoupdate',
-        'onobsolete',
         'onOffline',
         'onOnline',
         'onOpen',
         'onOpenerChange',
         'onOrientationChange',
         'onOutOfSync',
-        'onoverflow',
-        'onOverScroll',
         'onOverScrollCancel',
         'onOverScrollChanging',
         'onOverScrollEnd',
@@ -457,15 +306,10 @@ final class AntiXSS
         'onPageReveal',
         'onPageShow',
         'onPageSwap',
-        'onpaint',
         'onPaste',
         'onPayerDetailChange',
-        'onpaymentauthorized',
         'onPaymentMethodChange',
         'onPause',
-        'onpaymentmethodselected',
-        'onpaymentrequest',
-        'onperiodicsync',
         'onPlay',
         'onPlaying',
         'onPointerCancel',
@@ -479,48 +323,22 @@ final class AntiXSS
         'onPointerOver',
         'onPointerRawUpdate',
         'onPointerUp',
-        'onpopoverhide',
-        'onpopovershow',
         'onPopState',
-        'onpopuphidden',
-        'onpopuphiding',
-        'onpopupshowing',
-        'onpopupshown',
-        'onportalactivate',
-        'onprerenderingchange',
-        'onprevioustrack',
-        'onprioritychange',
-        'onprocessorerror',
         'onProgress',
         'onPromptAction',
         'onPromptDismiss',
         'onPropertyChange',
-        'onpush',
-        'onpushsubscriptionchange',
         'onqt_error',
-        'onqualitychange',
-        'onquotaoverflow',
-        'onradiostatechange',
         'onRateChange',
-        'onreading',
-        'onreadingerror',
         'onReadyStateChange',
         'onReceived',
-        'onredraw',
-        'onreflectionchange',
         'onRejectionHandled',
-        'onrelease',
-        'onremove',
-        'onremovesourcebuffer',
-        'onremovestream',
         'onRemoveTrack',
         'onRepeat',
         'onReset',
         'onResize',
         'onResizeEnd',
         'onResizeStart',
-        'onresourcetimingbufferfull',
-        'onresult',
         'onResume',
         'onReverse',
         'onRowDelete',
@@ -531,10 +349,6 @@ final class AntiXSS
         'onRowsEnter',
         'onRowsExit',
         'onRowsInserted',
-        'onrtcsenderencodedsource',
-        'onrtctransform',
-        'onsamplebufferfull',
-        'onscreenschange',
         'onScroll',
         'onScrollEnd',
         'onScrollSnapChange',
@@ -543,65 +357,29 @@ final class AntiXSS
         'onSeek',
         'onSeeked',
         'onSeeking',
-        'onserviceadded',
-        'onservicechanged',
-        'onserviceremoved',
         'onShippingAddressChange',
-        'onshippingcontactselected',
-        'onshippingmethodselected',
         'onShippingOptionChange',
         'onSecurityPolicyViolation',
         'onSelect',
         'onSelectionChange',
         'onSelectStart',
-        'onsignalingstatechange',
-        'onsinkchange',
         'onSlotChange',
-        'onsnapchanged',
-        'onsnapchanging',
-        'onsoundend',
-        'onsoundstart',
-        'onsourceclose',
-        'onsourceended',
-        'onsourceopen',
-        'onspeechend',
-        'onspeechstart',
-        'onsqueeze',
-        'onsqueezeend',
-        'onsqueezestart',
-        'onssrcchange',
         'onStalled',
-        'onstatechange',
         'onStorage',
         'onStorageCommit',
         'onStream',
         'onStart',
         'onStop',
         'onShow',
-        'onsvgload',
-        'onsvgscroll',
-        'onsync',
         'onSyncRestored',
         'onSubmit',
         'onSuccess',
         'onSuspend',
         'onSynchRestored',
-        'onsystemstatusbarclick',
-        'onterminate',
-        'ontext',
-        'ontextformatupdate',
-        'ontextinput',
-        'ontextupdate',
         'onTimeError',
-        'ontimeout',
         'onTimeUpdate',
         'onTimeZoneChange',
         'onTimer',
-        'ontonechange',
-        'ontoolactivated',
-        'ontoolcancel',
-        'ontoolchange',
-        'ontouchforcechange',
         'onTrack',
         'onTrackChange',
         'onTransitionEnd',
@@ -615,30 +393,14 @@ final class AntiXSS
         'onTouchStart',
         'onTransitionCancel',
         'onTransitionEnd',
-        'ontypechange',
-        'onuareplaceend',
-        'onuareplacestart',
-        'onunbounded',
-        'onuncapturederror',
-        'onunderflow',
         'onUnload',
         'onUnhandledRejection',
-        'onunmute',
-        'onupdate',
-        'onupdateend',
-        'onupdatefound',
-        'onupdateready',
-        'onupdatestart',
         'onUpgradeNeeded',
         'onURLFlip',
         'onUserProximity',
-        'onvalidatemerchant',
         'onValidationStatusChange',
         'onVersionChange',
         'onVisibilityChange',
-        'onvisibilitymaskchange',
-        'onvoiceschanged',
-        'onvolumetricchange',
         'onVRDisplayActivate',
         'onVRDisplayConnect',
         'onVRDisplayDeactivate',
@@ -646,57 +408,13 @@ final class AntiXSS
         'onVRDisplayPresentChange',
         'onVolumeChange',
         'onWaiting',
-        'onwarning',
-        'onwebglcontextcreationerror',
-        'onwebglcontextlost',
-        'onwebglcontextrestored',
         'onWebKitAnimationEnd',
         'onWebKitAnimationIteration',
         'onWebKitAnimationStart',
-        'onwebkitassociateformcontrols',
-        'onwebkitautofillrequest',
-        'onwebkitbeforeblur',
-        'onwebkitbeforefocus',
-        'onwebkitbeforetextinserted',
-        'onWebKitBeginFullScreen',
-        'onwebkitcameramoved',
-        'onwebkitcameraviewchanged',
-        'onWebKitCurrentPlaybackTargetIsWirelessChanged',
-        'onwebkiteditablecontentchanged',
-        'onWebKitEndFullScreen',
-        'onwebkitexternalplaybackchanged',
-        'onwebkitfocusedelementdisconnected',
         'onWebKitFullScreenChange',
         'onWebKitFullScreenError',
-        'onWebKitKeyAdded',
-        'onWebKitKeyError',
-        'onWebKitKeyMessage',
-        'onwebkitmediasessionmetadatachanged',
-        'onWebKitMouseForceChanged',
-        'onWebKitMouseForceDown',
-        'onWebKitMouseForceUp',
-        'onWebKitMouseForceWillBegin',
-        'onWebKitNeedKey',
-        'onwebkitnetworkinfochange',
-        'onWebKitPlaybackTargetAvailabilityChanged',
-        'onWebKitPresentationModeChanged',
-        'onwebkitprojectionchanged',
-        'onwebkitremovesourcebuffer',
-        'onwebkitsourceclose',
-        'onwebkitsourceended',
-        'onwebkitsourceopen',
-        'onwebkitspeechchange',
-        'onwebkitsubmit',
         'onWebKitTransitionEnd',
-        'onwebkitusertextinput',
-        'onwebkitvisibilitychange',
         'onWheel',
-        'onwritablechange',
-        'onwrite',
-        'onwriteend',
-        'onwritestart',
-        'onzoom',
-        'onzoomlevelchange',
     ];
 
     /**
@@ -902,6 +620,14 @@ final class AntiXSS
      * @var bool
      */
     private $_cache_can_short_circuit_evil_attributes = true;
+
+    /**
+     * Event handler attributes that were explicitly allowed via "removeNeverAllowedOnEventsAfterwards()"
+     * (lowercase name => true), so that "_remove_event_handler_attributes()" keeps them, too.
+     *
+     * @var array<string, true>
+     */
+    private $_allowed_on_event_attributes = [];
 
     public function __construct()
     {
@@ -1309,6 +1035,9 @@ final class AntiXSS
             // remove strings that are never allowed
             $str = $this->_do_callback_outside_of_pre_and_code_tags($str, [$this, '_do_never_allowed']);
     
+            // remove all event handler attributes ("on" + any name), also unknown / future events
+            $str = $this->_remove_event_handler_attributes($str);
+
             // remove evil attributes such as style, onclick and xmlns
             $str = $this->_remove_evil_attributes($str);
     
@@ -1574,8 +1303,7 @@ final class AntiXSS
         $array = [];
 
         foreach ($this->_never_allowed_on_events_afterwards as $event) {
-            // INFO: lowercase, so that e.g. "onA..." and "ona..." are in the same chunk (the regex is case-insensitive)
-            $array[\strtolower($event[0] . $event[1] . $event[2])][] = $event;
+            $array[$event[0] . $event[1] . $event[2]][] = $event;
         }
 
         foreach ($array as $eventNameBeginning => $events) {
@@ -1590,7 +1318,7 @@ final class AntiXSS
             // INFO: only the "before"-part and the event name are matched here, the "after"-part is checked
             //       in "_remove_never_allowed_on_events_afterwards()" without regex-backtracking
             $this->_cache_never_allowed_on_events_afterwards_regex[$eventNameBeginning] =
-                '(?<before>[^\p{L}@.!?>]|^)(?<name>' . \implode('|', $events) . ')';
+                '(?<before>[^\p{L}@.!?>-]|^)(?<name>' . \implode('|', $events) . ')';
         }
 
         $this->_cache_never_allowed_on_events_afterwards_chunks = $array;
@@ -2679,6 +2407,211 @@ final class AntiXSS
     }
 
     /**
+     * Remove every attribute whose name starts with "on" (e.g. "onclick", but also event handlers that are not
+     * on the "_never_allowed_on_events_afterwards" list, like "ongesturestart" or events that browsers add later).
+     *
+     * <p>
+     * <br />
+     * INFO: The attributes are found with the states of the HTML tokenizer (WHATWG HTML, "Tokenization": tag open,
+     *       tag name, before / after attribute name, attribute name, before attribute value, attribute value and
+     *       self-closing start tag state), so that only attribute *names* are matched and not text or attribute
+     *       values like 'data-onclick="..."', 'title="onclick ..."' or 'class="onboarding"'.
+     *
+     *       The tokenizer starts at *every* "<" + ASCII letter (also inside of attribute values, comments,
+     *       "<textarea>", "<script>", ...), because what a "<" means depends on markup that is not parsed here,
+     *       e.g. '<textarea><p title="</textarea><img onfoo=...>">'. So every possible start tag is checked.
+     *
+     *       Runtime: a scan stops at a "before attribute name" position that an earlier scan already reached (the
+     *       rest of the tag is the same), and a start inside an already scanned tag name is skipped. If the scanned
+     *       bytes or the number of found attributes still exceed a linear budget, all 'on...=' after whitespace,
+     *       "/" or a quote are removed instead ("fail closed", see "_remove_event_handler_attributes_fail_closed()").
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_event_handler_attributes($str)
+    {
+        // quick check: an attribute name starts after whitespace, "/" or a quote (after a quoted value), and an event
+        // handler attribute is "on" + ASCII letters + optional whitespace + "=" (without a value it does nothing)
+        if (
+            \strpos($str, '<') === false
+            ||
+            \preg_match('#[\t\n\f\r /"\']on[a-z]++[\t\n\f\r ]*+=#i', $str) !== 1
+        ) {
+            return $str;
+        }
+
+        $length = \strlen($str);
+        $whitespace = " \t\n\f\r";
+        $budget = 8 * $length + 4096;
+
+        /** @var array<int, array{0: int, 1: int}> $ranges [start, end) offsets of the attributes */
+        $ranges = [];
+
+        // bitmap: "\1" at the positions where a scan was in the "before attribute name" state
+        $visited = null;
+
+        $tagNameEnd = -1;
+        $pos = 0;
+        while (($lt = \strpos($str, '<', $pos)) !== false) {
+            $pos = $lt + 1;
+            if ($pos >= $length) {
+                break;
+            }
+
+            // "tag open state": only "<" + ASCII letter starts a start tag
+            $byte = \ord($str[$pos]);
+            if (!(($byte >= 0x41 && $byte <= 0x5A) || ($byte >= 0x61 && $byte <= 0x7A))) {
+                continue;
+            }
+
+            // a start inside of an already scanned tag name has the same tag name end -> same attributes
+            if ($pos < $tagNameEnd) {
+                continue;
+            }
+
+            // "tag name state"
+            $i = $pos + \strcspn($str, $whitespace . '/>', $pos);
+            $tagNameEnd = $i;
+            $budget -= $i - $pos;
+
+            while ($i < $length) {
+                // "before attribute name", "self-closing start tag" and "after attribute value (quoted)" state
+                $i += \strspn($str, $whitespace . '/', $i);
+                if ($i >= $length || $str[$i] === '>') {
+                    break;
+                }
+
+                if ($visited === null) {
+                    $visited = \str_repeat("\0", $length);
+                } elseif ($visited[$i] !== "\0") {
+                    // an earlier scan was here in the same state, so it already checked the rest of this tag
+                    break;
+                }
+                $visited[$i] = "\1";
+
+                // "attribute name state" (the first char can be "=")
+                $nameStart = $i;
+                $i += 1 + \strcspn($str, $whitespace . '/>=', $i + 1);
+                $nameLength = $i - $nameStart;
+
+                // "after attribute name state"
+                $i += \strspn($str, $whitespace, $i);
+                $budget -= $i - $nameStart;
+                if ($i >= $length || $str[$i] !== '=') {
+                    // no value: the next attribute, "/" or ">" (an event handler without a value does nothing)
+                    continue;
+                }
+
+                // "before attribute value state"
+                ++$i;
+                $i += \strspn($str, $whitespace, $i);
+                if ($i >= $length) {
+                    $valueEnd = $length;
+                } elseif ($str[$i] === '"' || $str[$i] === '\'') {
+                    // "attribute value (double-quoted / single-quoted) state"
+                    $closingQuote = \strpos($str, $str[$i], $i + 1);
+                    $valueEnd = $closingQuote === false ? $length : $closingQuote + 1;
+                } elseif ($str[$i] === '>') {
+                    // missing value: the ">" ends the tag
+                    $valueEnd = $i;
+                } else {
+                    // "attribute value (unquoted) state"
+                    $valueEnd = $i + \strcspn($str, $whitespace . '>', $i);
+                }
+                $budget -= $valueEnd - $i;
+                $i = $valueEnd;
+
+                // INFO: every event handler attribute is "on" + ASCII letters; lookalikes like "on:click",
+                //       "on_load" or "on-click" are never executed by a browser, so they are kept
+                if (
+                    $nameLength > 2
+                    &&
+                    \substr_compare($str, 'on', $nameStart, 2, true) === 0
+                    &&
+                    \strspn($str, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', $nameStart + 2, $nameLength - 2) === $nameLength - 2
+                    &&
+                    !isset($this->_allowed_on_event_attributes[\strtolower((string) \substr($str, $nameStart, $nameLength))])
+                ) {
+                    $ranges[] = [$nameStart, $valueEnd];
+                }
+
+                if ($budget < 0 || \count($ranges) > 10000) {
+                    return $this->_remove_event_handler_attributes_fail_closed($str);
+                }
+            }
+
+            if ($budget < 0) {
+                return $this->_remove_event_handler_attributes_fail_closed($str);
+            }
+        }
+
+        if ($ranges === []) {
+            return $str;
+        }
+
+        // the scans of different starts can find overlapping attributes: remove the union of all ranges
+        \usort(
+            $ranges,
+            static function ($a, $b) {
+                return $a[0] <=> $b[0];
+            }
+        );
+
+        $result = '';
+        $offset = 0;
+        foreach ($ranges as $range) {
+            if ($range[1] <= $offset) {
+                continue;
+            }
+
+            if ($range[0] >= $offset) {
+                $result .= \substr($str, $offset, $range[0] - $offset) . $this->_replacement;
+            }
+            $offset = $range[1];
+        }
+
+        return $result . \substr($str, $offset);
+    }
+
+    /**
+     * Conservative variant of "_remove_event_handler_attributes()" for inputs that exceed its runtime budget:
+     * remove every "on" + ASCII letters + "=" + value after whitespace, "/" or a quote, also outside of tags.
+     *
+     * <p>
+     * <br />
+     * INFO: All quantifiers are possessive and the names end at a quote, so the regex runs in linear time. If
+     *       PCRE still fails, every "on" after whitespace, "/" or a quote is removed ("fail closed").
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _remove_event_handler_attributes_fail_closed($str)
+    {
+        $allowed = $this->_allowed_on_event_attributes;
+        $replacement = $this->_replacement;
+
+        $tmp = \preg_replace_callback(
+            '#(?<=[\t\n\f\r /"\'])(on[a-z]++)[\t\n\f\r ]*+=[\t\n\f\r ]*+(?:"[^"]*+"?|\'[^\']*+\'?|[^\t\n\f\r >]*+)#i',
+            static function ($matches) use ($allowed, $replacement) {
+                return isset($allowed[\strtolower($matches[1])]) ? $matches[0] : $replacement;
+            },
+            $str
+        );
+        if ($tmp !== null) {
+            return $tmp;
+        }
+
+        $tmp = \preg_replace('#(?<=[\t\n\f\r /"\'])on#i', $replacement, $str);
+
+        return $tmp ?? \str_ireplace('on', $replacement, $str);
+    }
+
+    /**
      * Remove Evil HTML Attributes (like event handlers and style).
      *
      * It removes the evil attribute and either:
@@ -3277,6 +3210,13 @@ final class AntiXSS
     /**
      * Add some strings to the "_never_allowed_on_events_afterwards"-array.
      *
+     * <p>
+     * <br />
+     * INFO: You don't need this for new browser events: every attribute "on" + ASCII letters (e.g. "onclick", but
+     *       also "ongesturestart" or a future event) is removed anyway. Use it for other names, or to disallow an
+     *       event again, that was allowed via "removeNeverAllowedOnEventsAfterwards()".
+     * </p>
+     *
      * @param string[] $strings
      *
      * @return $this
@@ -3295,6 +3235,10 @@ final class AntiXSS
             $strings,
             $this->_never_allowed_on_events_afterwards
         );
+
+        foreach ($strings as $string) {
+            unset($this->_allowed_on_event_attributes[\strtolower($string)]);
+        }
 
         $this->_rebuildEvilAttributesQuickChecksCache();
 
@@ -3509,6 +3453,9 @@ final class AntiXSS
      * <p>
      * <br />
      * WARNING: Use this method only if you have a really good reason.
+     * <br />
+     * INFO: A removed event (e.g. "onAbort") is also allowed as an attribute ("onabort=..."), only names that
+     *       are on the list can be allowed. All other "on" + ASCII letters attributes are always removed.
      * </p>
      *
      * @param string[] $strings
@@ -3525,10 +3472,17 @@ final class AntiXSS
         $this->_cache_evil_attributes_regex_string = '';
         $this->_resetNeverAllowedOnEventsAfterwardsCache();
 
+        $removed = \array_intersect($strings, $this->_never_allowed_on_events_afterwards);
+
         $this->_never_allowed_on_events_afterwards = \array_diff(
             $this->_never_allowed_on_events_afterwards,
-            \array_intersect($strings, $this->_never_allowed_on_events_afterwards)
+            $removed
         );
+
+        // INFO: also keep these event handler attributes in "_remove_event_handler_attributes()"
+        foreach ($removed as $string) {
+            $this->_allowed_on_event_attributes[\strtolower($string)] = true;
+        }
 
         $this->_rebuildEvilAttributesQuickChecksCache();
 

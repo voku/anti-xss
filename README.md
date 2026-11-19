@@ -284,6 +284,13 @@ Add some strings to the "_never_allowed_js_callback_regex"-array.
 <a href="#voku-php-readme-class-methods">↑</a>
 Add some strings to the "_never_allowed_on_events_afterwards"-array.
 
+<p>
+<br />
+INFO: You don't need this for new browser events: every attribute "on" + ASCII letters (e.g. "onclick", but
+      also "ongesturestart" or a future event) is removed anyway. Use it for other names, or to disallow an
+      event again, that was allowed via "removeNeverAllowedOnEventsAfterwards()".
+</p>
+
 **Parameters:**
 - `string[] $strings`
 
@@ -432,6 +439,9 @@ Remove some strings from the "_never_allowed_on_events_afterwards"-array.
 <p>
 <br />
 WARNING: Use this method only if you have a really good reason.
+<br />
+INFO: A removed event (e.g. "onAbort") is also allowed as an attribute ("onabort=..."), only names that
+      are on the list can be allowed. All other "on" + ASCII letters attributes are always removed.
 </p>
 
 **Parameters:**
