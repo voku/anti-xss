@@ -8,7 +8,7 @@ use voku\helper\AntiXSS;
  * "xss_clean()" must fail closed, if PCRE fails (e.g. "pcre.backtrack_limit" exhausted, also with "pcre.jit"
  * disabled): it must never return the original, unchecked input or skip a sanitizing step.
  *
- * Before 4.1.49, e.g. "pcre.jit=0" + "pcre.backtrack_limit=1" returned '<script>alert(1)</script>' unchanged
+ * Before 4.1.50, e.g. "pcre.jit=0" + "pcre.backtrack_limit=1" returned '<script>alert(1)</script>' unchanged
  * (and "isXssFound() === false"): a failed "preg_replace()" erased the string before the backup in "_do()", so
  * that the result looked unchanged; other steps kept the unfiltered string ("$tmp ?? $str").
  *

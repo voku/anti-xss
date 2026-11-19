@@ -11,7 +11,7 @@ use voku\helper\AntiXSS;
  * The corpus was generated with 4.1.48 and was identical with 4.1.47. Any change in the output of the sanitizer
  * shows up here, so changes in behaviour are always visible and reviewed.
  *
- * Regenerated for 4.1.49 (18 of 2000 results changed, all reviewed): event names directly after a "-" are kept
+ * Regenerated for 4.1.50 (18 of 2000 results changed, all reviewed): event names directly after a "-" are kept
  * (e.g. "&lt;-onclick", "<!--onerror="), and an event handler attribute with an unclosed quoted value is removed
  * up to the end of the input.
  *

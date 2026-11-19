@@ -55,7 +55,7 @@ final class BenignContentRegressionTest extends \PHPUnit\Framework\TestCase
             'email text'            => ["Hi,\nplease switch onboarding=on before Monday.\n> quoted: onfoo=1\nThanks"],
             'markdown code'         => ['Set `onfoo=1` and <kbd>on</kbd> to enable it.'],
             'on with digits'        => ['<my-el on1="x" on-x="y">z</my-el>'],
-            // before 4.1.49, the event name after the "-" was removed
+            // before 4.1.50, the event name after the "-" was removed
             'custom data attributes' => ['<div data-onupdate="manual" data-ontext="label" data-onclick="example">Example</div>'],
             'aria attribute'        => ['<div aria-onfocus-hint="x" class="onboarding">x</div>'],
         ];

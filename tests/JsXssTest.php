@@ -299,7 +299,7 @@ final class JsXssTest extends \PHPUnit\Framework\TestCase
      * attribute including its value was deleted; it must now survive with its
      * value intact, matching pre-4.1.43 behavior.
      *
-     * Since 4.1.49 the name is kept, too: an event name directly after a "-" is never an event handler.
+     * Since 4.1.50 the name is kept, too: an event name directly after a "-" is never an event handler.
      */
     public function testHyphenatedEventNameLookalikesEmbeddedInLegitimateCompoundAttributesKeepTheirValue(): void
     {

@@ -114,7 +114,7 @@ jobs:
 
           echo "PASS: Chromium blocks the sanitized GHSA-v42h-26cv-jpgq payloads and executes the raw ones."
 
-          # 4.1.49: event handler attributes ("on" + any letters) are removed structurally, not only by the list:
+          # 4.1.50: event handler attributes ("on" + any letters) are removed structurally, not only by the list:
           # all known event names (tests/fixtures/browser-event-handlers.txt), random unknown names and parser
           # context tricks, parsed one by one by Chromium's HTML parser.
           php tests/browser/event-handler-attributes.php \

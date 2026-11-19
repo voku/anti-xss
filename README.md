@@ -51,7 +51,7 @@ for context-specific output encoding.
 
 ### Event handler attributes
 
-Since 4.1.49, every attribute whose name is `on` + ASCII letters and that has a value is removed, e.g. `onclick`, but
+Since 4.1.50, every attribute whose name is `on` + ASCII letters and that has a value is removed, e.g. `onclick`, but
 also events that are not on any list (like Safari's `ongesturestart`) or that browsers add in the future. The list of
 event names (`_never_allowed_on_events_afterwards`) is not needed for this anymore.
 

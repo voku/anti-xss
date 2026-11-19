@@ -13,7 +13,7 @@ if (\count($argv) > 1 && !$rawMode) {
 }
 
 /**
- * Generate a static browser fixture for the structural event handler filter (4.1.49).
+ * Generate a static browser fixture for the structural event handler filter (4.1.50).
  *
  * 1. Every case is parsed by the browser (DOMParser, one document per case, so that a broken case can not hide the
  *    next ones): no element may have an attribute "on" + ASCII letters, and the harmless cases must keep their
