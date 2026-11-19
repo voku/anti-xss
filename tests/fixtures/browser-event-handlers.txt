@@ -9,6 +9,10 @@
 # - blink:       core/html/html_attribute_names.json5, core/svg/svg_attribute_names.json5, core/events/event_type_names.json5 (Chromium 2bcfe1515f03)
 # - gecko:       dom/events/EventNameList.h (mozilla/gecko-dev 5836a062726f)
 #
+# Excluded (start with "on", but are not "on" + ASCII letters, so the runtime rule does not remove them; a new
+# entry here means that the assumption "every event handler is 'on' + ASCII letters" must be checked again):
+#   (none)
+#
 # Format: <name> <sources>
 onabort blink-attr,blink-event,gecko-event,spec-events,spec-idl,webkit-attr,webkit-event
 onabortpayment blink-event

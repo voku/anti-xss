@@ -786,7 +786,7 @@ final class AntiXSS
                             $this->_xss_found = true;
 
                             $urlPartClean = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $urlPartClean);
-                            $urlPartClean = $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $urlPartClean);
+                            $urlPartClean = $this->_rawurldecode($urlPartClean);
                             $urlPartClean = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $urlPartClean);
 
                             $str = \str_ireplace($matches['attr'], $urlPartClean, $str);
@@ -798,7 +798,7 @@ final class AntiXSS
 
         if ($needProtection) {
             $str = \str_replace(['&lt;', '&gt;'], [self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], $str);
-            $str = $this->_entity_decode($this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str));
+            $str = $this->_entity_decode($this->_rawurldecode($str));
             $str = \str_replace([self::VOKU_ANTI_XSS_LT, self::VOKU_ANTI_XSS_GT], ['&lt;', '&gt;'], $str);
         }
 
@@ -841,7 +841,7 @@ final class AntiXSS
             }
         }
 
-        return $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str);
+        return $this->_rawurldecode($str);
     }
 
     /**
@@ -2213,16 +2213,20 @@ final class AntiXSS
     }
 
     /**
-     * Fail-closed fallback for a sanitizing step, that could not run, because PCRE failed (e.g. "pcre.backtrack_limit"
-     * exhausted, also with "pcre.jit" disabled): neutralize all markup and all URL schemes without PCRE.
+     * The terminal fail-closed fallback, if a sanitizing step could not run, because PCRE failed (e.g.
+     * "pcre.backtrack_limit" exhausted, also with "pcre.jit" disabled). It does not use PCRE.
      *
      * <p>
      * <br />
-     * INFO: Without "<" there is no tag (no attributes, no script), without ":" there is no URL scheme (e.g.
-     *       "javascript:") - also if the output is used in an attribute. This is lossy, but it's only used, if a step
-     *       could not be done at all; the previous code kept the unfiltered string ("$tmp ?? $str") or erased it
-     *       ("(string) preg_replace(...)"), so that "xss_clean()" could return the original, unchecked input.
-     *       It's idempotent (no double-encoding), so the cleaning loops still converge.
+     * Security invariant of the result (also if it's used in an attribute value):
+     * - no "<", ">", '"', "'" -> no tag, no attribute, no attribute break-out
+     * - no ":" -> no URL scheme (e.g. "javascript:"), also no encoded one: character references are decoded first
+     *   and every remaining "&" is encoded, so e.g. "&#58;", "&#x3a", "&colon;" can not become a ":" in the browser
+     * - no control chars, which could hide e.g. a "javascript:" from other filters
+     * - no "+" -> no UTF-7 shift sequence (e.g. "+ADw-script+AD4-"), if the page is decoded as UTF-7
+     *
+     * It's lossy on purpose (only used, if a step could not run at all) and idempotent (encode(decode(result)) is the
+     * result), so the cleaning loops still converge. It reports the input as XSS.
      * </p>
      *
      * @param string $str
@@ -2233,18 +2237,57 @@ final class AntiXSS
     {
         $this->_xss_found = true;
 
-        // control chars (except "\t", "\n", "\r") can hide e.g. a "javascript:" from other filters
-        $controlChars = [];
+        $str = \html_entity_decode($str, \ENT_QUOTES | \ENT_HTML5, 'UTF-8');
+
+        $remove = [':', '+'];
         foreach (\array_merge(\range(0, 8), [11, 12], \range(14, 31), [127]) as $byte) {
-            $controlChars[] = \chr($byte);
+            $remove[] = \chr($byte);
+        }
+        $str = \str_replace($remove, '', $str);
+
+        // INFO: "double_encode" -> also every "&" of a not decoded reference (e.g. "&#58" without ";") is encoded
+        $str = \htmlspecialchars($str, \ENT_QUOTES | \ENT_SUBSTITUTE | \ENT_HTML401, 'UTF-8', true);
+
+        return $str;
+    }
+
+    /**
+     * "UTF8::rawurldecode()", but the "%uXXXX" escapes are decoded here (without PCRE) and PCRE failures in the
+     * vendor method fail closed (see "_failClosedVendorCall()").
+     *
+     * <p>
+     * <br />
+     * INFO: The vendor method decodes "%uXXXX" only, if its "preg_match()" succeeds; if that fails, a later
+     *       successful PCRE call resets "preg_last_error()", so the failure was not visible and "%u003C" (= "<")
+     *       stayed encoded. Here they are replaced like in "UTF8::urldecode_unicode_helper()"
+     *       ('/%u([0-9a-fA-F]{3,4})/' -> '&#x\\1;'), so the vendor method has nothing left to skip.
+     * </p>
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    private function _rawurldecode($str)
+    {
+        if (\strpos($str, '%u') !== false) {
+            $result = '';
+            $offset = 0;
+            while (($pos = \strpos($str, '%u', $offset)) !== false) {
+                $hexLength = \strspn($str, '0123456789abcdefABCDEF', $pos + 2, 4);
+                if ($hexLength < 3) {
+                    $result .= \substr($str, $offset, $pos + 2 - $offset);
+                    $offset = $pos + 2;
+
+                    continue;
+                }
+
+                $result .= \substr($str, $offset, $pos - $offset) . '&#x' . \substr($str, $pos + 2, $hexLength) . ';';
+                $offset = $pos + 2 + $hexLength;
+            }
+            $str = $result . \substr($str, $offset);
         }
 
-        // "+" -> no UTF-7 shift sequence (e.g. "+ADw-script+AD4-"), if the page is decoded as UTF-7
-        return \str_replace(
-            \array_merge([':', '+'], $controlChars),
-            \array_merge(['', '&#43;'], \array_fill(0, \count($controlChars), '')),
-            \htmlspecialchars($str, \ENT_QUOTES | \ENT_SUBSTITUTE | \ENT_HTML401, 'UTF-8', false)
-        );
+        return $this->_failClosedVendorCall([UTF8::class, 'rawurldecode'], $str);
     }
 
     /**
@@ -2607,7 +2650,11 @@ final class AntiXSS
                 }
 
                 // "before attribute name", "self-closing start tag" and "after attribute value (quoted)" state
-                $i += \strspn($str, $whitespace . '/', $i);
+                //
+                // INFO: every scanned byte is charged against the budget (+ 1 per step for the constant work)
+                $skipped = \strspn($str, $whitespace . '/', $i);
+                $i += $skipped;
+                $budget -= $skipped + 1;
                 if ($i >= $length || $str[$i] === '>') {
                     break;
                 }
@@ -2634,6 +2681,7 @@ final class AntiXSS
                 }
 
                 // "before attribute value state"
+                $equalsSign = $i;
                 ++$i;
                 $i += \strspn($str, $whitespace, $i);
                 if ($i >= $length) {
@@ -2649,7 +2697,7 @@ final class AntiXSS
                     // "attribute value (unquoted) state"
                     $valueEnd = $i + \strcspn($str, $whitespace . '>', $i);
                 }
-                $budget -= $valueEnd - $i;
+                $budget -= $valueEnd - $equalsSign;
                 $i = $valueEnd;
 
                 // INFO: every event handler attribute is "on" + ASCII letters; lookalikes like "on:click",
@@ -2705,7 +2753,7 @@ final class AntiXSS
      * <p>
      * <br />
      * INFO: All quantifiers are possessive and the names end at a quote, so the regex runs in linear time. If
-     *       PCRE still fails, every "on" after whitespace, "/" or a quote is removed ("fail closed").
+     *       PCRE still fails, "_failClosedNeutralize()" is used (the same terminal fallback as everywhere else).
      * </p>
      *
      * @param string $str
@@ -2724,13 +2772,9 @@ final class AntiXSS
             },
             $str
         );
-        if ($tmp !== null) {
-            return $tmp;
-        }
 
-        $tmp = \preg_replace('#(?<=[\t\n\f\r /"\'])on#i', $replacement, $str);
-
-        return $tmp ?? \str_ireplace('on', $replacement, $str);
+        // INFO: if PCRE fails here, too, use the terminal fallback (no markup at all)
+        return $tmp ?? $this->_failClosedNeutralize($str);
     }
 
     /**

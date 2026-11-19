@@ -67,10 +67,15 @@ def tar_members(data, suffix):
 
 def main():
     names = {}
+    # names that start with "on", but are not "on" + ASCII letters: the runtime rule of "_remove_event_handler_attributes()"
+    # ignores them, so they are listed in the fixture, to make a new one (= a possibly wrong assumption) visible
+    excluded = {}
 
     def add(source, name):
         if re.fullmatch(r'on[A-Za-z]+', name):
             names.setdefault(name.lower(), set()).add(source)
+        elif re.fullmatch(r'on\S+', name):
+            excluded.setdefault(name.lower(), set()).add(source)
 
     for _, idl in tar_members(fetch('webref_idl'), '.idl'):
         for m in re.finditer(r'attribute\s+(?:EventHandler|OnErrorEventHandler|OnBeforeUnloadEventHandler)\??\s+(on\w+)', idl):
@@ -90,7 +95,7 @@ def main():
         for m in re.finditer(r'"(on[\w-]+)"', fetch(key).decode('utf-8')):
             add('blink-attr', m.group(1))
     for m in re.finditer(r'"([\w-]+)"', fetch('blink_events').decode('utf-8')):
-        if m.group(1) not in BLINK_NON_EVENTS:
+        if m.group(1).lower() not in BLINK_NON_EVENTS:
             add('blink-event', 'on' + m.group(1))
 
     for m in re.finditer(r'^\s*\w*EVENT\((\w+),', fetch('gecko_events').decode('utf-8'), re.M):
@@ -108,8 +113,12 @@ def main():
 # - blink:       core/html/html_attribute_names.json5, core/svg/svg_attribute_names.json5, core/events/event_type_names.json5 (Chromium %s)
 # - gecko:       dom/events/EventNameList.h (mozilla/gecko-dev %s)
 #
+# Excluded (start with "on", but are not "on" + ASCII letters, so the runtime rule does not remove them; a new
+# entry here means that the assumption "every event handler is 'on' + ASCII letters" must be checked again):
+%s#
 # Format: <name> <sources>
-''' % (len(names), WEBREF_IDL, WEBREF_EVENTS, WEBKIT[:12], CHROMIUM[:12], GECKO_DEV[:12])
+''' % (len(names), WEBREF_IDL, WEBREF_EVENTS, WEBKIT[:12], CHROMIUM[:12], GECKO_DEV[:12],
+       ''.join('#   %s %s\n' % (name, ','.join(sorted({s.split(':')[0] for s in sources}))) for name, sources in sorted(excluded.items())) or '#   (none)\n')
 
     content = header + ''.join(
         '%s %s\n' % (name, ','.join(sorted({s.split(':')[0] for s in sources})))

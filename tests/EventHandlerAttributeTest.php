@@ -477,7 +477,7 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * The fallback is fail-closed: if PCRE fails, every "on" after whitespace, "/" or a quote is removed.
+     * The fallback is fail-closed: if PCRE fails, the terminal fallback "_failClosedNeutralize()" removes all markup.
      *
      * @return void
      */
@@ -503,8 +503,11 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
             \ini_set('pcre.jit', (string) $jit);
         }
 
-        self::assertNotContainsIgnoringCase(' on', $output);
-        self::assertNotContainsIgnoringCase('"on', $output);
+        // INFO: with the JIT, this pattern (already compiled in this process) may not fail; both results are safe
+        if ($output !== '<div class=keep  data-x=1>online</div>') {
+            static::assertSame('&lt;div class=keep onfoo=&quot;1&quot; data-x=1&gt;online&lt;/div&gt;', $output);
+            static::assertTrue($antiXss->isXssFound());
+        }
     }
 
     /**
@@ -550,7 +553,8 @@ final class EventHandlerAttributeTest extends \PHPUnit\Framework\TestCase
         foreach ($cases as $input => $expected) {
             static::assertSame($expected, $outputs[$input], $input);
         }
-        self::assertNotContainsIgnoringCase('onfoo', $fallback);
+        // the fallback removes the event handler, or (if PCRE fails there, too) all markup
+        self::assertNoEventHandlerAttributeLeft($fallback);
     }
 
     /**

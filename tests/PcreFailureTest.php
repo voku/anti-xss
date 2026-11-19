@@ -313,6 +313,26 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
         static::assertTrue($antiXssDecode->isXssFound());
     }
 
+    /**
+     * "%uXXXX" is decoded without PCRE (the vendor method skipped it, if its "preg_match()" failed, and a later
+     * successful PCRE call hid the failure).
+     *
+     * @return void
+     */
+    public function testRawurldecodeDoesNotSkipUnicodeEscapesIfPcreFails()
+    {
+        $antiXss = new AntiXSS();
+        $rawurldecode = self::method('_rawurldecode');
+
+        foreach (['%u003C' => '<', '%u03C' => '<', '%u3C' => '%u3C', 'a%u00e4b' => "a\u{e4}b", '%u12' => '%u12', '%uZZZZ' => '%uZZZZ', '%%u003C' => '%<'] as $input => $expected) {
+            static::assertSame($expected, $rawurldecode->invoke($antiXss, $input), $input);
+            static::assertSame(\voku\helper\UTF8::rawurldecode($input), $rawurldecode->invoke($antiXss, $input), $input);
+        }
+
+        $output = (string) self::invokeWithFailingPcre(new AntiXSS(), '_rawurldecode', ['%u003Cscript%u003E']);
+        static::assertFalse(\strpos($output, '%u') !== false, $output);
+    }
+
     public function testNeutralizeFallback()
     {
         $antiXss = new AntiXSS();
@@ -320,9 +340,15 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
 
         $cases = [
             '<a href="javascript:alert(1)">x</a>' => '&lt;a href=&quot;javascriptalert(1)&quot;&gt;x&lt;/a&gt;',
-            "a+b & c\x00d\x1Fe\x7Ff"              => 'a&#43;b &amp; cdef',
+            "a+b & c\x00d\x1Fe\x7Ff"              => 'ab &amp; cdef',
             "keep\t\n\r whitespace"               => "keep\t\n\r whitespace",
-            '+ADw-script+AD4-'                    => '&#43;ADw-script&#43;AD4-',
+            '+ADw-script+AD4-'                    => 'ADw-scriptAD4-',
+            // encoded ":" (also without ";", which browsers decode, too) -> no URL scheme in an attribute
+            'javascript&#58;alert(1)'             => 'javascriptalert(1)',
+            'javascript&#x3a;alert(1)'            => 'javascriptalert(1)',
+            'javascript&colon;alert(1)'           => 'javascriptalert(1)',
+            'javascript&#58alert(1)'              => 'javascript&amp;#58alert(1)',
+            '&amp;#58;'                           => '&amp;#58;',
             "it's"                                => 'it&#039;s',
         ];
         foreach ($cases as $input => $expected) {
