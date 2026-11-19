@@ -142,3 +142,58 @@ jobs:
           fi
 
           echo "PASS: Chromium sees no event handler attribute in the sanitized output and executes the raw ones."
+
+  # The same generated fixtures in all three engines (Playwright is a CI-only tool, not a dependency of the library).
+  browser-engines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm install --no-save --no-audit --no-fund --prefix tests/browser playwright@1.63.0
+          npx --prefix tests/browser playwright install --with-deps ${{ matrix.engine }}
+
+      - name: Verify sanitized and raw fixtures in ${{ matrix.engine }}
+        shell: bash
+        env:
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          set -euo pipefail
+
+          run_fixture() {
+            local fixture="$1" prefix="$2" name
+            name="$(basename "$fixture" .php)"
+
+            php "$fixture" > "$RUNNER_TEMP/$name-sanitized.html"
+            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-sanitized.html" "$prefix" pass
+
+            # negative control: the unsanitized payloads must be detected and really execute in this engine
+            php "$fixture" --raw > "$RUNNER_TEMP/$name-raw.html"
+            node tests/browser/run-browsers.mjs "$ENGINE" "$RUNNER_TEMP/$name-raw.html" "$prefix" fail
+          }
+
+          run_fixture tests/browser/event-handler-attributes.php events
+          run_fixture tests/browser/ghsa-28pp-7fjp-8v32.php ghsa
+          run_fixture tests/browser/ghsa-v42h-26cv-jpgq.php ghsa

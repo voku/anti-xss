@@ -19,7 +19,12 @@ if (\count($argv) > 1 && !$rawMode) {
  *    next ones): no element may have an attribute "on" + ASCII letters, and the harmless cases must keep their
  *    attributes. The attributes of an element are found by the HTML tokenizer, which is the same in all browsers,
  *    so this also shows that e.g. Safari can not see an "ongesturestart" attribute.
- * 2. Payloads that run without user interaction are rendered into the page, to check that nothing is executed.
+ * 2. Independent of the PHP tokenizer: seeded random markup is cleaned and the output is parsed by the browser in
+ *    several parser contexts (body, <svg>, <math>, <table>, <select>, <noscript>, <template>); no element may have an
+ *    event handler attribute with a value. This includes outputs of the conservative fallback (> 10000 handlers).
+ * 3. Payloads that run without user interaction are rendered into the page, to check that nothing is executed.
+ *
+ * The same file is used for Chromium, Firefox and WebKit (see "tests/browser/run-browsers.mjs").
  */
 $known = [];
 foreach (\file(\dirname(__DIR__) . '/fixtures/browser-event-handlers.txt', \FILE_IGNORE_NEW_LINES | \FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
@@ -59,16 +64,36 @@ $attacks += [
     'context-mathml'          => '<math><mi onfoo=1>x</mi></math>',
 ];
 
-/** @var array<string, array{0: string, 1: string, 2: string}> $benign case => [html, selector, attribute] */
+/** @var array<string, array{0: string, 1: string, 2: string, 3: string}> $benign case => [html, selector, attribute, exact value] */
 $benign = [
-    'data-onclick'      => ['<div data-onclick="example">x</div>', 'div', 'data-onclick'],
-    'data-onupdate'     => ['<div data-onupdate="manual">Example</div>', 'div', 'data-onupdate'],
-    'aria-onfocus-hint' => ['<div aria-onfocus-hint="x">x</div>', 'div', 'aria-onfocus-hint'],
-    'title-onreading'   => ['<p title="onreading mode">Read</p>', 'p', 'title'],
-    'class-onboarding'  => ['<div class="onboarding">x</div>', 'div', 'class'],
-    'svelte-on-click'   => ['<div on:click="save">Save</div>', 'div', 'on:click'],
-    'url-online'        => ['<a href="https://example.invalid/?online=1">x</a>', 'a', 'href'],
+    'data-onclick'      => ['<div data-onclick="example">x</div>', 'div', 'data-onclick', 'example'],
+    'data-onupdate'     => ['<div data-onupdate="manual">Example</div>', 'div', 'data-onupdate', 'manual'],
+    'data-ontext'       => ['<div data-ontext="label">Example</div>', 'div', 'data-ontext', 'label'],
+    'aria-onfocus-hint' => ['<div aria-onfocus-hint="x">x</div>', 'div', 'aria-onfocus-hint', 'x'],
+    'title-onreading'   => ['<p title="onreading mode">Read</p>', 'p', 'title', 'onreading mode'],
+    'class-onboarding'  => ['<div class="onboarding">x</div>', 'div', 'class', 'onboarding'],
+    'svelte-on-click'   => ['<div on:click="save">Save</div>', 'div', 'on:click', 'save'],
+    'url-online'        => ['<a href="https://example.invalid/?online=1">x</a>', 'a', 'href', 'https://example.invalid/?online=1'],
+    'kept-next-to-event' => ['<div class="keep" onfoo="alert(1)" title="t">x</div>', 'div', 'title', 't'],
 ];
+
+// seeded random markup (also with more than 10000 event handlers, for the conservative fallback)
+$tokens = [
+    '<a ', '<b', '<svg ', '<img ', '<textarea>', '</textarea>', '<!--', '-->', '<x:y ', '"', "'", '>', '/', ' ',
+    "\t", "\n", '=', 'onfoo', 'ONBAR', 'onclick', 'ongesturestart', 'on', 'x', 'title=', 'href=', 'data-',
+    'window.__xssExecuted=1', '`', '&quot;', '%3C', '<![CDATA[', ']]>', '&lt;', '<', 'b=', '1', '<math ', '<table ',
+];
+\mt_srand(20261121);
+$corpus = [];
+for ($i = 0; $i < 1500; ++$i) {
+    $html = '';
+    for ($j = \mt_rand(1, 24); $j > 0; --$j) {
+        $html .= $tokens[\mt_rand(0, \count($tokens) - 1)];
+    }
+    $corpus['random-markup-' . $i] = $html;
+}
+$corpus['fallback-many-handlers'] = \str_repeat('<b onfoo=1>', 10001) . '<img src=x onerror=window.__xssExecuted=1>';
+$corpus['fallback-budget'] = '<a x=' . \str_repeat('<b/y=', 5000) . ' onfoo=window.__xssExecuted=1>';
 
 /** @var array<string, string> $autofire payloads that run without user interaction */
 $autofire = [
@@ -89,10 +114,17 @@ foreach ($attacks as $name => $html) {
     $parseCases[] = ['name' => $name, 'html' => $clean($html), 'benign' => null];
 }
 foreach ($benign as $name => $case) {
-    $parseCases[] = ['name' => 'benign-' . $name, 'html' => $clean($case[0]), 'benign' => [$case[1], $case[2]]];
+    $parseCases[] = ['name' => 'benign-' . $name, 'html' => $clean($case[0]), 'benign' => [$case[1], $case[2], $case[3]]];
 }
 
-$json = \json_encode($parseCases, \JSON_HEX_TAG | \JSON_HEX_AMP | \JSON_HEX_APOS | \JSON_HEX_QUOT | \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+$corpusCases = [];
+foreach ($corpus as $name => $html) {
+    $corpusCases[] = ['name' => $name, 'html' => $clean($html)];
+}
+
+$jsonFlags = \JSON_HEX_TAG | \JSON_HEX_AMP | \JSON_HEX_APOS | \JSON_HEX_QUOT | \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE;
+$json = \json_encode($parseCases, $jsonFlags);
+$corpusJson = \json_encode($corpusCases, $jsonFlags);
 
 // INFO: the flags are initialized before any payload is rendered, so that a payload that runs while the page is
 //       parsed can not be hidden by a later reset
@@ -113,6 +145,8 @@ echo '<button id="raw-control" onclick="window.__controlExecuted = true" type="b
 'use strict';
 
 const parseCases = <?php echo $json; ?>;
+const corpusCases = <?php echo $corpusJson; ?>;
+const parserContexts = ['', '<svg>', '<math>', '<table>', '<select>', '<noscript>', '<template>'];
 const autofireCount = <?php echo \count($autofire); ?>;
 
 function elementsOf(root) {
@@ -147,11 +181,29 @@ window.addEventListener('load', function () {
 
             if (testCase.benign !== null) {
                 const element = parsed.body.querySelector(testCase.benign[0]);
-                if (element === null || !element.hasAttribute(testCase.benign[1])) {
+                if (element === null || element.getAttribute(testCase.benign[1]) !== testCase.benign[2]) {
                     errors.push('benign-changed:' + testCase.name);
                 }
             }
         }
+
+        // independent of the PHP tokenizer: the browser parses each output in several parser contexts
+        let corpusChecks = 0;
+        for (const testCase of corpusCases) {
+            for (const context of parserContexts) {
+                ++corpusChecks;
+                const parsed = parser.parseFromString(context + testCase.html, 'text/html');
+                for (const element of elementsOf(parsed)) {
+                    for (const attribute of Array.from(element.attributes)) {
+                        // INFO: without a value, an event handler does nothing
+                        if (/^on[a-z]+$/i.test(attribute.name) && attribute.value.trim() !== '') {
+                            errors.push('corpus-event-attribute:' + testCase.name + ':' + (context || 'body') + ':' + attribute.name);
+                        }
+                    }
+                }
+            }
+        }
+        document.body.dataset.eventsCorpusChecks = String(corpusChecks);
 
         const sections = document.querySelectorAll('section.sanitized');
         if (sections.length !== autofireCount) {

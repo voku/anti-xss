@@ -15,3 +15,8 @@ build/logs/
 
 # phpcs fixer
 .php_cs.cache
+
+# browser tests (Playwright, CI only)
+tests/browser/node_modules/
+tests/browser/package.json
+tests/browser/package-lock.json
