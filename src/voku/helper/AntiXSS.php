@@ -2602,6 +2602,10 @@ final class AntiXSS
             $budget -= $i - $pos;
 
             while ($i < $length) {
+                if ($budget < 0 || \count($ranges) > 10000) {
+                    return $this->_remove_event_handler_attributes_fail_closed($str);
+                }
+
                 // "before attribute name", "self-closing start tag" and "after attribute value (quoted)" state
                 $i += \strspn($str, $whitespace . '/', $i);
                 if ($i >= $length || $str[$i] === '>') {
@@ -2661,16 +2665,10 @@ final class AntiXSS
                 ) {
                     $ranges[] = [$nameStart, $valueEnd];
                 }
-
-                if ($budget < 0 || \count($ranges) > 10000) {
-                    return $this->_remove_event_handler_attributes_fail_closed($str);
-                }
-            }
-
-            if ($budget < 0) {
-                return $this->_remove_event_handler_attributes_fail_closed($str);
             }
         }
+
+        // INFO: if the budget was exceeded in the last scan, the scan is already done and the result is exact
 
         if ($ranges === []) {
             return $str;

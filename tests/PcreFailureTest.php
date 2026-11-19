@@ -172,6 +172,44 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * The same check in this process: the patterns here are already compiled (with the JIT, if enabled), but a tiny
+     * "pcre.backtrack_limit" also lets the JIT fail. So this does not depend on the separate processes above (e.g.
+     * for the code coverage).
+     *
+     * @return void
+     */
+    public function testXssCleanFailsClosedIfPcreFailsInThisProcess()
+    {
+        $payloads = self::payloads();
+
+        $failures = [];
+        foreach ([1, 2, 3, 6, 16] as $backtrackLimit) {
+            $originalBacktrackLimit = \ini_get('pcre.backtrack_limit');
+            \ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
+
+            $results = [];
+            try {
+                foreach ($payloads as $payload) {
+                    $antiXss = new AntiXSS();
+                    $results[] = [$antiXss->xss_clean($payload), $antiXss->isXssFound()];
+                }
+            } finally {
+                \ini_set('pcre.backtrack_limit', (string) $originalBacktrackLimit);
+            }
+
+            foreach ($results as $i => $result) {
+                $dangers = self::dangers($result[0]);
+                if ($dangers !== [] || $result[1] !== true) {
+                    $failures[] = 'pcre.backtrack_limit=' . $backtrackLimit . ': ' . $payloads[$i] . ' => ' . $result[0]
+                        . ' (' . ($dangers !== [] ? \implode(', ', $dangers) : 'not reported as XSS') . ')';
+                }
+            }
+        }
+
+        static::assertSame([], $failures);
+    }
+
+    /**
      * @param string $name
      *
      * @return \ReflectionMethod
@@ -182,6 +220,97 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
         $method->setAccessible(true);
 
         return $method;
+    }
+
+    /**
+     * Call a private method with a tiny "pcre.backtrack_limit" (also the JIT respects it).
+     *
+     * @param AntiXSS $antiXss
+     * @param string  $name
+     * @param mixed[] $args
+     *
+     * @return mixed
+     */
+    private static function invokeWithFailingPcre(AntiXSS $antiXss, $name, array $args)
+    {
+        $originalBacktrackLimit = \ini_get('pcre.backtrack_limit');
+        \ini_set('pcre.backtrack_limit', '1');
+        try {
+            return self::method($name)->invokeArgs($antiXss, $args);
+        } finally {
+            \ini_set('pcre.backtrack_limit', (string) $originalBacktrackLimit);
+        }
+    }
+
+    /**
+     * The fail-closed branch of every step, called directly (the end-to-end tests above can not reach all of them,
+     * because an earlier step already fails closed).
+     *
+     * @return void
+     */
+    public function testFailClosedBranchesOfTheSteps()
+    {
+        // "_remove_disallowed_javascript()": the regex-based removal and its simpler fallback regex fail -> tag removal
+        foreach (['<audio src="javascript:alert(1)"></audio>', '<video src="javascript:alert(1)"></video>', '<a href="javascript:alert(1)">x</a>'] as $payload) {
+            $output = (string) self::invokeWithFailingPcre(new AntiXSS(), '_remove_disallowed_javascript', [$payload]);
+            static::assertFalse(\stripos($output, 'javascript:') !== false, $payload . ' => ' . $output);
+        }
+
+        // "_do_never_allowed_afterwards()": no event handler is left
+        $output = (string) self::invokeWithFailingPcre(new AntiXSS(), '_do_never_allowed_afterwards', ['<div onclick=alert(1)>x</div>']);
+        static::assertSame([], self::dangers($output), $output);
+
+        // "_remove_never_allowed_on_events_afterwards()": the event names can not be marked -> neutralized
+        //
+        // INFO: a new pattern (unique, empty group), compiled without the JIT, so that the tiny limit lets it fail
+        $antiXss = new AntiXSS();
+        $originalJit = \ini_get('pcre.jit');
+        \ini_set('pcre.jit', '0');
+        try {
+            $output = (string) self::invokeWithFailingPcre($antiXss, '_remove_never_allowed_on_events_afterwards', [
+                '<div onclick=alert(1)>x</div>',
+                '(?<before>[^\p{L}@.!?>-]|^)(?<name>onclick)(?:x' . \mt_rand() . '){0}',
+            ]);
+        } finally {
+            \ini_set('pcre.jit', (string) $originalJit);
+        }
+        static::assertSame('&lt;div onclick=alert(1)&gt;x&lt;/div&gt;', $output);
+        static::assertTrue($antiXss->isXssFound());
+
+    }
+
+    /**
+     * "_events_tail_summary_compose()" treats the name as followed by "=" (remove it), and "_entity_decode()"
+     * neutralizes the string, if PCRE fails.
+     *
+     * INFO: their patterns are fixed and already compiled with the JIT in this process, so this needs a fresh process
+     *
+     * @runInSeparateProcess
+     *
+     * @preserveGlobalState disabled
+     *
+     * @return void
+     */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
+    public function testEventsTailSummaryFailsClosed()
+    {
+        $originalJit = \ini_get('pcre.jit');
+        \ini_set('pcre.jit', '0');
+
+        $antiXss = new AntiXSS();
+        $empty = self::method('_events_tail_summary_empty')->invoke($antiXss);
+        $antiXssDecode = new AntiXSS();
+        try {
+            $tail = self::invokeWithFailingPcre($antiXss, '_events_tail_summary_compose', ['abc', $empty]);
+            $decoded = (string) self::invokeWithFailingPcre($antiXssDecode, '_entity_decode', ['&lt;script&gt;alert(1)&lt;/script&gt; <b>']);
+        } finally {
+            \ini_set('pcre.jit', (string) $originalJit);
+        }
+
+        static::assertTrue($tail['a']);
+        static::assertFalse(\strpos($decoded, '<') !== false, $decoded);
+        static::assertTrue($antiXssDecode->isXssFound());
     }
 
     public function testNeutralizeFallback()
