@@ -2,6 +2,7 @@
 
 ### master (unreleased)
 
+- security: remove WebKit-only event handlers that were not on the list yet and stayed usable after "xss_clean()" in Safari: "ongesturestart", "ongesturechange", "ongestureend", "onwebkitmouseforcedown", "onwebkitmouseforceup", "onwebkitmouseforcechanged", "onwebkitmouseforcewillbegin", plus "onbeforeload", "onoverscroll" and the WebKit media / EME handlers ("onwebkitbeginfullscreen", "onwebkitendfullscreen", "onwebkitpresentationmodechanged", "onwebkitplaybacktargetavailabilitychanged", "onwebkitcurrentplaybacktargetiswirelesschanged", "onwebkitneedkey", "onwebkitkeyadded", "onwebkitkeyerror", "onwebkitkeymessage")
 - fix regression from 4.1.47: harmless HTML from Microsoft Word / Excel (e.g. "<o:Title>", "<x:Selected/>", "<x:Header>", "<x:FormulaHidden/>") was encoded and reported as XSS; a tag with an XML namespace prefix is now only treated as an evil tag, if its local name is exactly the (lowercase) evil tag name (e.g. "<x:script>")
 - fix regression from 4.1.47: ANSI color codes (e.g. "ESC [ 32 m") were removed and reported as XSS; only the ISO-2022-JP escape sequences ("ESC (" and "ESC $") are treated as XSS now
 - tests: add a regression test for harmless real-world content (unchanged + not reported as XSS, like in 4.1.46)

@@ -2815,6 +2815,52 @@ nodeValue+outerHTML>/*click me', $str);
         }
     }
 
+    public function testWebKitGestureAndForceTouchEventHandlers()
+    {
+        // Reported PoCs: WebKit-only event handlers on standard tags
+        $payloads = [
+            '<div ongesturestart="alert(1)">x</div>'          => '<div >x</div>',
+            '<a ongesturechange="location=name">x</a>'        => '<a >x</a>',
+            '<p ongestureend=alert(1)>x</p>'                  => '<p >x</p>',
+            '<div onwebkitmouseforcedown="alert(1)">x</div>'  => '<div >x</div>',
+            '<div onwebkitmouseforceup="alert(1)">x</div>'    => '<div >x</div>',
+            '<div onwebkitmouseforcechanged="alert(1)">x</div>' => '<div >x</div>',
+            '<div onwebkitmouseforcewillbegin="alert(1)">x</div>' => '<div >x</div>',
+            '<div onoverscroll="alert(1)">x</div>'            => '<div >x</div>',
+            '<img onbeforeload="alert(1)">'                   => '<img >',
+            '<a ONGESTURESTART = "location=name" href="#">x</a>' => '<a  href="#">x</a>',
+        ];
+
+        foreach ($payloads as $payload => $expected) {
+            $antiXss = new AntiXSS();
+            static::assertSame($expected, $antiXss->xss_clean($payload), $payload);
+            static::assertTrue($antiXss->isXssFound(), $payload);
+        }
+
+        // Other WebKit media / EME handlers
+        foreach ([
+            'onwebkitbeginfullscreen',
+            'onwebkitendfullscreen',
+            'onwebkitpresentationmodechanged',
+            'onwebkitplaybacktargetavailabilitychanged',
+            'onwebkitcurrentplaybacktargetiswirelesschanged',
+            'onwebkitneedkey',
+            'onwebkitkeyadded',
+            'onwebkitkeyerror',
+            'onwebkitkeymessage',
+        ] as $event) {
+            $antiXss = new AntiXSS();
+            $cleaned = $antiXss->xss_clean('<div ' . $event . '="alert(1)">x</div>');
+            static::assertSame('<div >x</div>', $cleaned, $event);
+            static::assertTrue($antiXss->isXssFound(), $event);
+        }
+
+        // Harmless text that only mentions the names is unchanged
+        $antiXss = new AntiXSS();
+        static::assertSame('Safari fires ongesturestart events', $antiXss->xss_clean('Safari fires ongesturestart events'));
+        static::assertFalse($antiXss->isXssFound());
+    }
+
     public function testGhsa28pp7fjp8v32GeolocationValidationStatusChange()
     {
         $antiXss = new AntiXSS();
