@@ -71,6 +71,21 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
             }
         }
 
+        // URL schemes in tags, as the browser sees them: character references decoded (e.g. "java&#x09;script:"),
+        // and tabs, newlines and other control chars / spaces removed (the URL parser ignores them)
+        //
+        // INFO: only real tags ("<" + letter) are checked, so escaped text ("&lt;a href=...") is not a danger
+        if (\preg_match_all('#<[a-zA-Z][^>]*+>?#', $output, $tags) > 0) {
+            foreach ($tags[0] as $tag) {
+                $normalized = \strtolower((string) \preg_replace('#[\x00-\x20]++#', '', \html_entity_decode($tag, \ENT_QUOTES | \ENT_HTML5, 'UTF-8')));
+                foreach (['javascript:', 'vbscript:', 'data:text/html'] as $needle) {
+                    if (\strpos($normalized, $needle) !== false) {
+                        $dangers[] = 'decoded ' . $needle;
+                    }
+                }
+            }
+        }
+
         // attribute and CSS keywords are only dangerous inside of a tag
         if (\strpos($output, '<') !== false) {
             foreach (['srcdoc', 'expression(', 'formaction', 'shadowrootmode', 'xlink:href'] as $needle) {
@@ -88,6 +103,22 @@ final class PcreFailureTest extends \PHPUnit\Framework\TestCase
         }
 
         return $dangers;
+    }
+
+    /**
+     * The oracle itself: obfuscated URL schemes in tags are found, escaped text and normal links are not.
+     *
+     * @return void
+     */
+    public function testDangersOracleFindsObfuscatedUrls()
+    {
+        foreach (['<a href="java&#x09;script:alert(1)">x</a>', '<a href="java&Tab;script&colon;alert(1)">x</a>', "<a href=\"java\tscript:alert(1)\">x</a>", '<a href=" &#106;avascript:alert(1)">x</a>'] as $dangerous) {
+            static::assertNotSame([], self::dangers($dangerous), $dangerous);
+        }
+
+        foreach (['&lt;a href=&quot;java&amp;#x09;script:alert(1)&quot;&gt;', '<a href="https://example.com/?a=1&amp;b=2">x</a>', '<p>javascript is fun</p>'] as $harmless) {
+            static::assertSame([], self::dangers($harmless), $harmless);
+        }
     }
 
     public function testPayloadsAreNotDangerousWithDefaultSettings()
