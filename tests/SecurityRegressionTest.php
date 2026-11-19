@@ -60,6 +60,40 @@ final class SecurityRegressionTest extends \PHPUnit\Framework\TestCase
         static::assertFalse(\stripos($haystack, $needle) !== false, $message . ' | "' . $needle . '" found in: ' . $haystack);
     }
 
+    /**
+     * Every event handler name that a spec or a browser engine knows (see the header of the fixture file for the
+     * sources) must be removed, on HTML and SVG tags, quoted and unquoted, also with a paren-free payload.
+     */
+    public function testAllKnownBrowserEventHandlersAreRemoved()
+    {
+        $names = [];
+        foreach (\file(__DIR__ . '/fixtures/browser-event-handlers.txt', \FILE_IGNORE_NEW_LINES | \FILE_SKIP_EMPTY_LINES) as $line) {
+            if ($line[0] !== '#') {
+                $names[] = \explode(' ', $line, 2)[0];
+            }
+        }
+        static::assertGreaterThan(500, \count($names));
+
+        $templates = [
+            '<div %s="location=name">x</div>',
+            '<a href="#" %s=location=name>x</a>',
+            '<svg><rect %s="alert(1)"/></svg>',
+        ];
+
+        $survived = [];
+        foreach ($names as $name) {
+            foreach ($templates as $template) {
+                $antiXss = new AntiXSS();
+                $cleaned = $antiXss->xss_clean(\sprintf($template, $name));
+                if (\preg_match('/' . \preg_quote($name, '/') . '\s*=/i', $cleaned) || !$antiXss->isXssFound()) {
+                    $survived[] = \sprintf($template, $name) . ' -> ' . $cleaned;
+                }
+            }
+        }
+
+        static::assertSame([], $survived);
+    }
+
     public function testSemicolonLessNumericCharacterReferenceBeforeRemovedCharsIsDetected()
     {
         // ANT-2026-I95BDWMG
